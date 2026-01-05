@@ -1,0 +1,156 @@
+amphp/amp                           3.1.1  A non-blocking concurrency framework for PHP applications.
+amphp/byte-stream                   2.1.2  A stream abstraction to make working with non-blocking I/O simple.
+amphp/cache                         2.0.1  A fiber-aware cache API based on Amp and Revolt.
+amphp/dns                           2.4.0  Async DNS resolution for Amp.
+amphp/hpack                         3.2.1  HTTP/2 HPack implementation.
+amphp/http                          2.1.2  Basic HTTP primitives which can be shared by servers and clients.
+amphp/http-client                   5.0.0  An advanced async HTTP client library for PHP, enabling efficient, non-blockin...
+amphp/parser                        1.1.1  A generator parser to make streaming parsers simple.
+amphp/pipeline                      1.2.3  Asynchronous iterators and operators.
+amphp/process                       2.0.3  A fiber-aware process manager based on Amp and Revolt.
+amphp/serialization                 1.0.0  Serialization tools for IPC and data storage in PHP.
+amphp/socket                        2.3.1  Non-blocking socket connection / server implementations based on Amp and Revolt.
+amphp/sync                          2.3.0  Non-blocking synchronization primitives for PHP based on Amp and Revolt.
+composer/semver                     3.4.4  Semver library that offers utilities, version constraint parsing and validation.
+daverandom/libdns                   2.1.0  DNS protocol implementation written in pure PHP
+doctrine/collections                2.4.0  PHP Doctrine Collections library that adds additional functionality on top of ...
+doctrine/dbal                       3.10.4 Powerful PHP database abstraction layer (DBAL) with many features for database...
+doctrine/deprecations               1.1.5  A small layer on top of trigger_error(E_USER_DEPRECATED) or PSR-3 logging with...
+doctrine/doctrine-bundle            2.18.2 Symfony DoctrineBundle
+doctrine/doctrine-migrations-bundle 3.7.0  Symfony DoctrineMigrationsBundle
+doctrine/event-manager              2.0.1  The Doctrine Event Manager is a simple PHP event system that was built to be u...
+doctrine/inflector                  2.1.0  PHP Doctrine Inflector is a small library that can perform string manipulation...
+doctrine/instantiator               2.0.0  A small, lightweight utility to instantiate objects in PHP without invoking th...
+doctrine/lexer                      3.0.1  PHP Doctrine Lexer parser library that can be used in Top-Down, Recursive Desc...
+doctrine/migrations                 3.9.5  PHP Doctrine Migrations project offer additional functionality on top of the d...
+doctrine/orm                        3.6.0  Object-Relational-Mapper for PHP
+doctrine/persistence                4.1.1  The Doctrine Persistence project is a set of shared interfaces and functionali...
+doctrine/sql-formatter              1.5.3  a PHP SQL highlighting library
+dompdf/dompdf                       3.1.4  DOMPDF is a CSS 2.1 compliant HTML to PDF converter
+dompdf/php-font-lib                 1.0.1  A library to read, parse, export and make subsets of different types of font f...
+dompdf/php-svg-lib                  1.0.2  A library to read, parse and export to PDF SVG files.
+egulias/email-validator             4.0.4  A library for validating emails against several RFCs
+kelunik/certificate                 1.1.3  Access certificate details and transform between different formats.
+league/uri                          7.7.0  URI manipulation library
+league/uri-components               7.7.0  URI components manipulation library
+league/uri-interfaces               7.7.0  Common tools for parsing and resolving RFC3987/RFC3986 URI
+masterminds/html5                   2.10.0 An HTML5 parser and serializer.
+monolog/monolog                     3.10.0 Sends your logs to files, sockets, inboxes, databases and various web services
+myclabs/deep-copy                   1.13.4 Create deep copies (clones) of your objects
+nikic/php-parser                    5.7.0  A PHP parser written in PHP
+phar-io/manifest                    2.0.4  Component for reading phar.io manifest information from a PHP Archive (PHAR)
+phar-io/version                     3.2.1  Library for handling version information and constraints
+phpdocumentor/reflection-common     2.2.0  Common reflection classes used by phpdocumentor to reflect the code structure
+phpdocumentor/reflection-docblock   5.6.6  With this component, a library can provide support for annotations via DocBloc...
+phpdocumentor/type-resolver         1.12.0 A PSR-5 based resolver of Class names, Types and Structural Element Names
+phpstan/phpdoc-parser               2.3.0  PHPDoc parser with support for nullable, intersection and generic types
+phpunit/php-code-coverage           12.5.2 Library that provides collection, processing, and rendering functionality for ...
+phpunit/php-file-iterator           6.0.0  FilterIterator implementation that filters files based on a list of suffixes.
+phpunit/php-invoker                 6.0.0  Invoke callables with a timeout
+phpunit/php-text-template           5.0.0  Simple template engine.
+phpunit/php-timer                   8.0.0  Utility class for timing
+phpunit/phpunit                     12.5.4 The PHP Unit Testing framework.
+psr/cache                           3.0.0  Common interface for caching libraries
+psr/clock                           1.0.0  Common interface for reading the clock.
+psr/container                       2.0.2  Common Container Interface (PHP FIG PSR-11)
+psr/event-dispatcher                1.0.0  Standard interfaces for event handling.
+psr/http-factory                    1.1.0  PSR-17: Common interfaces for PSR-7 HTTP message factories
+psr/http-message                    2.0    Common interface for HTTP messages
+psr/link                            2.0.1  Common interfaces for HTTP links
+psr/log                             3.0.2  Common interface for logging libraries
+revolt/event-loop                   1.0.8  Rock-solid event loop for concurrent PHP applications.
+sabberworm/php-css-parser           9.1.0  Parser for CSS Files written in PHP
+sebastian/cli-parser                4.2.0  Library for parsing CLI options
+sebastian/comparator                7.1.3  Provides the functionality to compare PHP values for equality
+sebastian/complexity                5.0.0  Library for calculating the complexity of PHP code units
+sebastian/diff                      7.0.0  Diff implementation
+sebastian/environment               8.0.3  Provides functionality to handle HHVM/PHP environments
+sebastian/exporter                  7.0.2  Provides the functionality to export PHP variables for visualization
+sebastian/global-state              8.0.2  Snapshotting of global state
+sebastian/lines-of-code             4.0.0  Library for counting the lines of code in PHP source code
+sebastian/object-enumerator         7.0.0  Traverses array structures and object graphs to enumerate all referenced objects
+sebastian/object-reflector          5.0.0  Allows reflection of object attributes, including inherited and non-public ones
+sebastian/recursion-context         7.0.1  Provides functionality to recursively process PHP variables
+sebastian/type                      6.0.3  Collection of value objects that represent the types of the PHP type system
+sebastian/version                   6.0.0  Library that helps with managing the version number of Git-hosted PHP projects
+staabm/side-effects-detector        1.0.5  A static analysis tool to detect side effects in PHP code
+symfony/apache-pack                 1.0.1  A pack for Apache support in Symfony
+symfony/asset                       7.4.0  Manages URL generation and versioning of web assets such as CSS stylesheets, J...
+symfony/asset-mapper                7.4.3  Maps directories of assets & makes them available in a public directory with v...
+symfony/browser-kit                 7.4.3  Simulates the behavior of a web browser, allowing you to make requests, click ...
+symfony/cache                       7.4.3  Provides extended PSR-6, PSR-16 (and tags) implementations
+symfony/cache-contracts             3.6.0  Generic abstractions related to caching
+symfony/clock                       7.4.0  Decouples applications from the system clock
+symfony/config                      7.4.3  Helps you find, load, combine, autofill and validate configuration values of a...
+symfony/console                     7.4.3  Eases the creation of beautiful and testable command line interfaces
+symfony/css-selector                7.4.0  Converts CSS selectors to XPath expressions
+symfony/debug-bundle                7.4.0  Provides a tight integration of the Symfony VarDumper component and the Server...
+symfony/dependency-injection        7.4.3  Allows you to standardize and centralize the way objects are constructed in yo...
+symfony/deprecation-contracts       3.6.0  A generic function and convention to trigger deprecation notices
+symfony/doctrine-bridge             7.4.3  Provides integration for Doctrine with various Symfony components
+symfony/doctrine-messenger          7.4.3  Symfony Doctrine Messenger Bridge
+symfony/dom-crawler                 7.4.1  Eases DOM navigation for HTML and XML documents
+symfony/dotenv                      7.4.0  Registers environment variables from a .env file
+symfony/error-handler               7.4.0  Provides tools to manage errors and ease debugging PHP code
+symfony/event-dispatcher            7.4.0  Provides tools that allow your application components to communicate with each...
+symfony/event-dispatcher-contracts  3.6.0  Generic abstractions related to dispatching event
+symfony/expression-language         7.4.0  Provides an engine that can compile and evaluate expressions
+symfony/filesystem                  7.4.0  Provides basic utilities for the filesystem
+symfony/finder                      7.4.3  Finds files and directories via an intuitive fluent interface
+symfony/flex                        2.10.0 Composer plugin for Symfony
+symfony/form                        7.4.3  Allows to easily create, process and reuse HTML forms
+symfony/framework-bundle            7.4.3  Provides a tight integration between Symfony components and the Symfony full-s...
+symfony/http-client                 7.4.3  Provides powerful methods to fetch HTTP resources synchronously or asynchronously
+symfony/http-client-contracts       3.6.0  Generic abstractions related to HTTP clients
+symfony/http-foundation             7.4.3  Defines an object-oriented layer for the HTTP specification
+symfony/http-kernel                 7.4.3  Provides a structured process for converting a Request into a Response
+symfony/intl                        7.4.0  Provides access to the localization data of the ICU library
+symfony/mailer                      7.4.3  Helps sending emails
+symfony/maker-bundle                1.65.1 Symfony Maker helps you create empty commands, controllers, form classes, test...
+symfony/messenger                   7.4.3  Helps applications send and receive messages to/from other applications or via...
+symfony/mime                        7.4.0  Allows manipulating MIME messages
+symfony/monolog-bridge              7.4.0  Provides integration for Monolog with various Symfony components
+symfony/monolog-bundle              3.11.1 Symfony MonologBundle
+symfony/notifier                    7.4.0  Sends notifications via one or more channels (email, SMS, ...)
+symfony/options-resolver            7.4.0  Provides an improved replacement for the array_replace PHP function
+symfony/password-hasher             7.4.0  Provides password hashing utilities
+symfony/polyfill-intl-grapheme      1.33.0 Symfony polyfill for intl's grapheme_* functions
+symfony/polyfill-intl-icu           1.33.0 Symfony polyfill for intl's ICU-related data and classes
+symfony/polyfill-intl-idn           1.33.0 Symfony polyfill for intl's idn_to_ascii and idn_to_utf8 functions
+symfony/polyfill-intl-normalizer    1.33.0 Symfony polyfill for intl's Normalizer class and related functions
+symfony/polyfill-mbstring           1.33.0 Symfony polyfill for the Mbstring extension
+symfony/polyfill-php83              1.33.0 Symfony polyfill backporting some PHP 8.3+ features to lower PHP versions
+symfony/polyfill-php84              1.33.0 Symfony polyfill backporting some PHP 8.4+ features to lower PHP versions
+symfony/polyfill-php85              1.33.0 Symfony polyfill backporting some PHP 8.5+ features to lower PHP versions
+symfony/process                     7.4.3  Executes commands in sub-processes
+symfony/property-access             7.4.3  Provides functions to read and write from/to an object or array using a simple...
+symfony/property-info               7.4.3  Extracts information about PHP class' properties using metadata of popular sou...
+symfony/routing                     7.4.3  Maps an HTTP request to a set of configuration variables
+symfony/runtime                     7.4.1  Enables decoupling PHP applications from global state
+symfony/security-bundle             7.4.0  Provides a tight integration of the Security component into the Symfony full-s...
+symfony/security-core               7.4.3  Symfony Security Component - Core Library
+symfony/security-csrf               7.4.3  Symfony Security Component - CSRF Library
+symfony/security-http               7.4.3  Symfony Security Component - HTTP Integration
+symfony/serializer                  7.4.3  Handles serializing and deserializing data structures, including object graphs...
+symfony/service-contracts           3.6.1  Generic abstractions related to writing services
+symfony/stimulus-bundle             2.32.0 Integration with your Symfony app & Stimulus!
+symfony/stopwatch                   7.4.0  Provides a way to profile code
+symfony/string                      7.4.0  Provides an object-oriented API to strings and deals with bytes, UTF-8 code po...
+symfony/translation                 7.4.3  Provides tools to internationalize your application
+symfony/translation-contracts       3.6.1  Generic abstractions related to translation
+symfony/twig-bridge                 7.4.3  Provides integration for Twig with various Symfony components
+symfony/twig-bundle                 7.4.3  Provides a tight integration of Twig into the Symfony full-stack framework
+symfony/type-info                   7.4.1  Extracts PHP types information.
+symfony/ux-icons                    2.32.0 Renders local and remote SVG icons in your Twig templates.
+symfony/ux-turbo                    2.32.0 Hotwire Turbo integration for Symfony
+symfony/validator                   7.4.3  Provides tools to validate values
+symfony/var-dumper                  7.4.3  Provides mechanisms for walking through any arbitrary PHP variable
+symfony/var-exporter                7.4.0  Allows exporting any serializable PHP data structure to plain PHP code
+symfony/web-link                    7.4.0  Manages links between resources
+symfony/web-profiler-bundle         7.4.3  Provides a development tool that gives detailed information about the executio...
+symfony/yaml                        7.4.1  Loads and dumps YAML files
+thecodingmachine/safe               3.3.0  PHP core functions that throw exceptions instead of returning FALSE on error
+theseer/tokenizer                   2.0.1  A small library for converting tokenized PHP source code into XML and potentia...
+twig/extra-bundle                   3.22.2 A Symfony bundle for extra Twig extensions
+twig/twig                           3.22.2 Twig, the flexible, fast, and secure template language for PHP
+webmozart/assert                    2.0.0  Assertions to validate method input/output with nice error messages.
