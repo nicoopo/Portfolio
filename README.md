@@ -7,7 +7,7 @@ Ce projet est un portfolio personnel développé avec Symfony 7.4, mettant en av
 ## 📁 Structure du Projet
 
 ```
-my_project_directory/
+Portfolio/
 ├── assets/              # Fichiers statiques (JS, CSS, images)
 │   ├── controllers/     # Contrôleurs Stimulus
 │   ├── styles/          # Styles CSS
