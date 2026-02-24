@@ -22,7 +22,7 @@
 
 
 ###< ide ###
-/idea/
+/.idea/
 /.vscode/
 ###< ide ###
 .env
