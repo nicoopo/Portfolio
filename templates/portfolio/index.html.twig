@@ -12,7 +12,7 @@
         <h2 class="harbor-theme-title">{{ categorie }}</h2>
         <div class="harbor-projects">
           {% for projet in projets %}
-          <div class="harbor-project-card">
+          <div class="harbor-project-card" id="{{ projet.slug }}">
             <div class="harbor-project-image-container">
               <img src="{{ asset('images/projets/' ~ projet.image) }}" alt="{{ projet.titre }}" class="harbor-project-img">
             </div>

@@ -3,12 +3,48 @@
 {% block title %}Mon Cerveau · Univers de Nico{% endblock %}
 
 {% block body %}
-<section class="brain-stage" data-controller="brain"
-         role="img" aria-label="Cerveau holographique en 3D, que l'on peut faire tourner et zoomer">
+<section class="brain-stage"
+         data-controller="brain"
+         data-brain-neurons-value="{{ neurones|json_encode }}"
+         data-action="keydown.esc@window->brain#close">
+
+    <div class="brain-canvas" data-brain-target="canvas"
+         role="img" aria-label="Cerveau holographique en 3D : chaque point lumineux est une compétence"></div>
+
     <p class="brain-fallback" data-brain-target="fallback">
         Ton navigateur ne supporte pas la 3D (WebGL).
         <a href="{{ path('app_competences') }}">Voir mes compétences</a>
     </p>
-    <p class="brain-hint">Glisse pour tourner · Molette ou pincement pour zoomer</p>
+
+    {# Légende des lobes ; les boutons servent aussi au clavier et aux lecteurs d'écran #}
+    <nav class="brain-legend" aria-label="Compétences">
+        {% for nom, categorie in categories %}
+        <details class="brain-legend-group">
+            <summary>
+                <span class="brain-legend-dot" style="--dot: {{ categorie.couleur }}"></span>{{ nom }}
+            </summary>
+            <ul>
+                {% for competence in categorie.competences %}
+                <li>
+                    <button type="button" data-action="brain#selectByName" data-brain-name-param="{{ competence }}">
+                        {{ competence }}
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+        </details>
+        {% endfor %}
+    </nav>
+
+    <p class="brain-tooltip" data-brain-target="tooltip" hidden></p>
+
+    <aside class="brain-panel" data-brain-target="panel" tabindex="-1" aria-live="polite" hidden>
+        <button type="button" class="brain-panel-close" data-action="brain#close" aria-label="Fermer">×</button>
+        <p class="brain-panel-category" data-brain-target="panelCategory"></p>
+        <h2 class="brain-panel-title" data-brain-target="panelTitle"></h2>
+        <div data-brain-target="panelProjects"></div>
+    </aside>
+
+    <p class="brain-hint">Glisse pour tourner · Molette ou pincement pour zoomer · Clique sur un neurone</p>
 </section>
 {% endblock %}
