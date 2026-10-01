@@ -6,10 +6,11 @@
 <section class="brain-stage"
          data-controller="brain"
          data-brain-neurons-value="{{ neurones|json_encode }}"
+         data-brain-passions-value="{{ passions|json_encode }}"
          data-action="keydown.esc@window->brain#close">
 
     <div class="brain-canvas" data-brain-target="canvas"
-         role="img" aria-label="Cerveau holographique en 3D : chaque point lumineux est une compétence"></div>
+         role="img" aria-label="Cerveau holographique en 3D : chaque point lumineux est une compétence, reliée aux autres par des synapses ; autour, des nébuleuses représentent mes passions"></div>
 
     <p class="brain-fallback" data-brain-target="fallback">
         Ton navigateur ne supporte pas la 3D (WebGL).
@@ -34,6 +35,20 @@
             </ul>
         </details>
         {% endfor %}
+        <details class="brain-legend-group">
+            <summary>
+                <span class="brain-legend-dot brain-legend-dot--nebula"></span>Passions
+            </summary>
+            <ul>
+                {% for passion in passions %}
+                <li>
+                    <button type="button" data-action="brain#selectByName" data-brain-name-param="{{ passion.nom }}">
+                        {{ passion.nom }}
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+        </details>
     </nav>
 
     <p class="brain-tooltip" data-brain-target="tooltip" hidden></p>
@@ -42,9 +57,9 @@
         <button type="button" class="brain-panel-close" data-action="brain#close" aria-label="Fermer">×</button>
         <p class="brain-panel-category" data-brain-target="panelCategory"></p>
         <h2 class="brain-panel-title" data-brain-target="panelTitle"></h2>
-        <div data-brain-target="panelProjects"></div>
+        <div data-brain-target="panelBody"></div>
     </aside>
 
-    <p class="brain-hint">Glisse pour tourner · Molette ou pincement pour zoomer · Clique sur un neurone</p>
+    <p class="brain-hint">Glisse pour tourner · Clique sur un neurone · Dézoome pour voir mes passions</p>
 </section>
 {% endblock %}

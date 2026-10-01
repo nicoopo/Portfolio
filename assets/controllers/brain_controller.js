@@ -2,31 +2,24 @@
 import { Controller } from '@hotwired/stimulus';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-/**
- * Lobes du cerveau où sont placés les neurones (champ `zone` de src/Data/Competences.php).
- * center : centre de la zone ; radius : étalement des neurones autour.
- */
-const ZONES = {
-    frontal:   { center: [0, 0.35, 0.7],  radius: 0.25 },
-    parietal:  { center: [0, 0.55, -0.2], radius: 0.25 },
-    temporal:  { center: [0.4, -0.1, 0.2], radius: 0.18, mirror: true }, // réparti sur les deux côtés
-    occipital: { center: [0, 0.2, -0.8],  radius: 0.2 },
-    limbique:  { center: [0, 0.05, 0],    radius: 0.15 },
-};
+import { dotTexture } from '../cerveau/textures.js';
+import { createBrain } from '../cerveau/brain.js';
+import { createNeurons } from '../cerveau/neurons.js';
+import { Synapses } from '../cerveau/synapses.js';
+import { createNebulae } from '../cerveau/nebulae.js';
 
 const HOME_TARGET = new THREE.Vector3(0, 0, 0);
 const CLICK_TOLERANCE_PX = 5;
-const FOCUS_DISTANCE = 1.8; // distance caméra ↔ neurone sélectionné
+const FOCUS_DISTANCE = { neuron: 1.8, nebula: 5 }; // distance caméra ↔ élément sélectionné
 
 /**
- * Cerveau holographique en nuage de points (Three.js) ; chaque compétence est un
- * neurone cliquable qui ouvre un panneau avec les projets liés.
+ * Scène du cerveau : interaction (caméra, survol, clic, panneau).
+ * La 3D elle-même est dans assets/cerveau/ (cerveau, neurones, synapses, nébuleuses).
  * Chargé uniquement sur les pages qui l'utilisent (lazy).
  */
 export default class extends Controller {
-    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelProjects'];
-    static values = { neurons: Array };
+    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody'];
+    static values = { neurons: Array, passions: Array };
 
     connect() {
         try {
@@ -51,27 +44,22 @@ export default class extends Controller {
         this.controls.enableDamping = true;
         this.controls.enablePan = false;
         this.controls.minDistance = 0.6; // assez près pour frôler l'intérieur
-        this.controls.maxDistance = 8;
+        this.controls.maxDistance = 14;  // assez loin pour voir toutes les nébuleuses
         this.controls.autoRotate = !this.reducedMotion;
         this.controls.autoRotateSpeed = 0.6;
         // L'utilisateur reprend la main : on arrête le déplacement automatique de la caméra
         this.controls.addEventListener('start', () => { this.flight = null; });
 
         this.texture = dotTexture();
-        this.brain = new THREE.Points(
-            brainGeometry(),
-            new THREE.PointsMaterial({
-                size: 0.035,
-                map: this.texture,
-                vertexColors: true,
-                transparent: true,
-                depthWrite: false,
-                blending: THREE.AdditiveBlending,
-            }),
-        );
-        this.scene.add(this.brain);
+        this.brain = createBrain(this.texture);
 
-        this.neurons = this.createNeurons();
+        this.neurons = createNeurons(this.neuronsValue, this.texture);
+        this.synapses = new Synapses(this.neurons, this.texture);
+        this.nebulae = createNebulae(this.passionsValue, this.texture);
+        // Tout ce qui se clique : neurones et nébuleuses
+        this.clickables = [...this.neurons, ...this.nebulae.targets];
+
+        this.scene.add(this.brain, this.synapses.object, this.nebulae.object, ...this.neurons.map((h) => h.userData.anchor));
 
         this.raycaster = new THREE.Raycaster();
         this.pointer = new THREE.Vector2();
@@ -87,7 +75,7 @@ export default class extends Controller {
         const clock = new THREE.Clock();
         const loop = () => {
             this.frame = requestAnimationFrame(loop);
-            this.animate(clock.getElapsedTime());
+            this.animate(this.reducedMotion ? 0 : clock.getElapsedTime());
             this.controls.update();
             this.renderer.render(this.scene, this.camera);
         };
@@ -124,55 +112,33 @@ export default class extends Controller {
     }
 
     // ------------------------------------------------
-    // Neurones
+    // Animation
     // ------------------------------------------------
-
-    createNeurons() {
-        const core = new THREE.IcosahedronGeometry(0.03, 2);
-        // Une seule lecture : chaque accès à neuronsValue reparse le JSON (nouveaux objets)
-        const neurons = this.neuronsValue;
-        const byZone = Object.groupBy(neurons, (n) => n.zone);
-
-        return neurons.map((data, i) => {
-            const siblings = byZone[data.zone];
-            const position = neuronPosition(ZONES[data.zone], siblings.indexOf(data), siblings.length);
-            const color = new THREE.Color(data.couleur);
-
-            const neuron = new THREE.Mesh(core, new THREE.MeshBasicMaterial({ color }));
-            neuron.position.copy(position);
-
-            // Halo lumineux : c'est aussi lui qu'on vise à la souris (plus large que le noyau)
-            const halo = new THREE.Sprite(new THREE.SpriteMaterial({
-                map: this.texture,
-                color,
-                transparent: true,
-                depthWrite: false,
-                blending: THREE.AdditiveBlending,
-            }));
-            halo.scale.setScalar(0.22);
-            neuron.add(halo);
-
-            halo.userData = { data, neuron, phase: i * 1.7 };
-            this.scene.add(neuron);
-            return halo;
-        });
-    }
 
     animate(time) {
         const selected = this.selected;
-        const t = this.reducedMotion ? 0 : time;
+        const neighbors = selected?.userData.kind === 'neuron' ? this.synapses.neighborsOf(selected) : new Set();
 
-        // Respiration lente de l'hologramme, atténué quand un neurone est sélectionné
-        this.brain.material.opacity = (selected ? 0.35 : 0.75) + 0.25 * Math.sin(t * 1.5);
+        // Respiration lente de l'hologramme, atténué quand quelque chose est sélectionné
+        this.brain.material.opacity = (selected ? 0.35 : 0.75) + 0.25 * Math.sin(time * 1.5);
 
         for (const halo of this.neurons) {
             const active = halo === selected || halo === this.hovered;
-            const pulse = 1 + 0.2 * Math.sin(t * 2.5 + halo.userData.phase);
+            const pulse = 1 + 0.2 * Math.sin(time * 2.5 + halo.userData.phase);
             halo.scale.setScalar((active ? 0.38 : 0.22) * pulse);
-            halo.material.opacity = selected && !active ? 0.35 : 1;
+            // Les neurones reliés au neurone sélectionné restent allumés
+            halo.material.opacity = !selected || active || neighbors.has(halo) ? 1 : 0.25;
         }
 
-        // Vol de caméra vers un neurone (ou retour à la vue d'ensemble)
+        for (const core of this.nebulae.targets) {
+            const active = core === selected || core === this.hovered;
+            core.scale.setScalar((active ? 2.2 : 1.6) * (1 + 0.1 * Math.sin(time + core.userData.phase)));
+        }
+
+        this.synapses.update(time);
+        this.nebulae.update(time);
+
+        // Vol de caméra vers l'élément sélectionné (ou retour à la vue d'ensemble)
         if (this.flight) {
             const k = this.reducedMotion ? 1 : 0.07;
             this.controls.target.lerp(this.flight.target, k);
@@ -181,6 +147,10 @@ export default class extends Controller {
         }
     }
 
+    // ------------------------------------------------
+    // Souris
+    // ------------------------------------------------
+
     pick(event) {
         const rect = this.renderer.domElement.getBoundingClientRect();
         this.pointer.set(
@@ -188,24 +158,24 @@ export default class extends Controller {
             -((event.clientY - rect.top) / rect.height) * 2 + 1,
         );
         this.raycaster.setFromCamera(this.pointer, this.camera);
-        return this.raycaster.intersectObjects(this.neurons, false)[0]?.object ?? null;
+        return this.raycaster.intersectObjects(this.clickables, false)[0]?.object ?? null;
     }
 
     onPointerMove(event) {
-        const halo = this.pick(event);
-        this.hover(halo);
-        if (halo) {
+        const target = this.pick(event);
+        this.hover(target);
+        if (target) {
             const rect = this.element.getBoundingClientRect();
             this.tooltipTarget.style.left = `${event.clientX - rect.left}px`;
             this.tooltipTarget.style.top = `${event.clientY - rect.top}px`;
         }
     }
 
-    hover(halo) {
-        this.hovered = halo;
-        this.renderer.domElement.style.cursor = halo ? 'pointer' : '';
-        this.tooltipTarget.hidden = !halo;
-        if (halo) this.tooltipTarget.textContent = halo.userData.data.nom;
+    hover(target) {
+        this.hovered = target;
+        this.renderer.domElement.style.cursor = target ? 'pointer' : '';
+        this.tooltipTarget.hidden = !target;
+        if (target) this.tooltipTarget.textContent = target.userData.data.nom;
     }
 
     onPointerUp(event) {
@@ -215,34 +185,43 @@ export default class extends Controller {
         this.downAt = null;
         if (moved > CLICK_TOLERANCE_PX) return;
 
-        const halo = this.pick(event);
-        if (halo) this.select(halo);
+        const target = this.pick(event);
+        if (target) this.select(target);
     }
 
     // ------------------------------------------------
     // Sélection + panneau
     // ------------------------------------------------
 
-    /** Depuis la légende (clavier, lecteur d'écran) : data-brain-name-param */
+    /** Depuis la légende ou le panneau (clavier, lecteur d'écran) : data-brain-name-param */
     selectByName({ params: { name }, target }) {
-        const halo = this.neurons?.find((h) => h.userData.data.nom === name);
-        if (!halo) return;
-        this.select(halo);
+        const found = this.clickables?.find((t) => t.userData.data.nom === name);
+        if (!found) return;
+        this.select(found);
         this.panelTarget.focus();
         // Mobile : la légende ouverte masquerait le cerveau
-        if (window.matchMedia('(max-width: 576px)').matches) target.closest('details').open = false;
+        if (window.matchMedia('(max-width: 576px)').matches) {
+            const details = target.closest('details');
+            if (details) details.open = false;
+        }
     }
 
-    select(halo) {
-        this.selected = halo;
+    select(target) {
+        this.selected = target;
         this.controls.autoRotate = false;
+        this.synapses.highlight(target.userData.kind === 'neuron' ? target : null);
 
-        // La caméra vient se placer devant le neurone, dans l'axe de la vue actuelle
-        const target = halo.userData.neuron.position.clone();
+        // La caméra vient se placer devant l'élément, dans l'axe de la vue actuelle
+        const position = target.userData.anchor.getWorldPosition(new THREE.Vector3());
         const direction = this.camera.position.clone().sub(this.controls.target).normalize();
-        this.flight = { target, camera: target.clone().addScaledVector(direction, FOCUS_DISTANCE) };
+        this.flight = {
+            target: position,
+            camera: position.clone().addScaledVector(direction, FOCUS_DISTANCE[target.userData.kind]),
+        };
 
-        this.fillPanel(halo.userData.data);
+        if (target.userData.kind === 'neuron') this.fillNeuronPanel(target);
+        else this.fillNebulaPanel(target.userData.data);
+        this.panelTarget.hidden = false;
     }
 
     close() {
@@ -250,128 +229,58 @@ export default class extends Controller {
         this.selected = null;
         this.panelTarget.hidden = true;
         this.controls.autoRotate = !this.reducedMotion;
+        this.synapses.highlight(null);
 
         const direction = this.camera.position.clone().sub(this.controls.target).normalize();
         this.flight = { target: HOME_TARGET.clone(), camera: direction.multiplyScalar(this.homeDistance) };
     }
 
-    fillPanel({ nom, categorie, couleur, projets }) {
-        this.panelTarget.style.setProperty('--neuron', couleur);
-        this.panelCategoryTarget.textContent = categorie;
-        this.panelTitleTarget.textContent = nom;
+    fillNeuronPanel(halo) {
+        const { nom, categorie, couleur, projets } = halo.userData.data;
+        this.fillPanelHeader(categorie, nom, couleur);
+        const body = this.panelBodyTarget;
 
-        const container = this.panelProjectsTarget;
-        container.replaceChildren();
         if (projets.length === 0) {
-            const empty = document.createElement('p');
-            empty.className = 'brain-panel-empty';
-            empty.textContent = 'Pas encore de projet relié à ce neurone.';
-            container.append(empty);
+            body.append(element('p', { className: 'brain-panel-empty', textContent: 'Pas encore de projet relié à ce neurone.' }));
         } else {
-            const heading = document.createElement('h3');
-            heading.textContent = projets.length > 1 ? 'Projets liés' : 'Projet lié';
-            const list = document.createElement('ul');
+            const list = element('ul');
             for (const { titre, url } of projets) {
-                const item = document.createElement('li');
-                item.append(Object.assign(document.createElement('a'), { href: url, textContent: titre }));
-                list.append(item);
+                list.append(element('li', {}, element('a', { href: url, textContent: titre })));
             }
-            container.append(heading, list);
+            body.append(element('h3', { textContent: projets.length > 1 ? 'Projets liés' : 'Projet lié' }), list);
         }
-        this.panelTarget.hidden = false;
-    }
-}
 
-/**
- * Position du i-ème neurone d'une zone : spirale de Fibonacci sur une petite sphère,
- * pour des neurones bien répartis sans tirage aléatoire (même place à chaque visite).
- */
-function neuronPosition(zone, i, count) {
-    const [cx, cy, cz] = zone.center;
-    let side = 1;
-    if (zone.mirror) {
-        side = i % 2 === 0 ? 1 : -1;
-        i = Math.floor(i / 2);
-        count = Math.ceil(count / 2);
-    }
-    const y = count === 1 ? 0 : 1 - (2 * i) / (count - 1);
-    const r = Math.sqrt(1 - y * y);
-    const theta = i * Math.PI * (3 - Math.sqrt(5));
-    return new THREE.Vector3(
-        side * cx + Math.cos(theta) * r * zone.radius,
-        cy + y * zone.radius,
-        cz + Math.sin(theta) * r * zone.radius,
-    );
-}
-
-/**
- * Forme de cerveau procédurale : deux hémisphères plissés + cervelet + tronc.
- * Surtout des points en surface (effet hologramme), quelques-uns à l'intérieur.
- */
-function brainGeometry(count = 14000) {
-    const positions = [];
-    const colors = [];
-    const cyan = new THREE.Color('#00d4ff');
-    const violet = new THREE.Color('#7f5af0');
-    const c = new THREE.Color();
-
-    const push = (x, y, z) => {
-        positions.push(x, y, z);
-        // Dégradé avant (cyan) → arrière (violet)
-        c.copy(cyan).lerp(violet, THREE.MathUtils.clamp((z + 1.3) / 2.6, 0, 1));
-        colors.push(c.r, c.g, c.b);
-    };
-
-    for (let i = 0; i < count; i++) {
-        // Direction aléatoire uniforme
-        const u = Math.random() * 2 - 1;
-        const phi = Math.random() * Math.PI * 2;
-        const s = Math.sqrt(1 - u * u);
-        const dx = s * Math.cos(phi), dy = u, dz = s * Math.sin(phi);
-
-        // 85 % en surface, 15 % dans le volume
-        const depth = Math.random() < 0.85 ? 1 : Math.cbrt(Math.random()) * 0.9;
-        const roll = Math.random();
-
-        if (roll < 0.86) {
-            // Hémisphères : ellipsoïde plissé (sillons), aplati côté médian
-            const side = Math.random() < 0.5 ? -1 : 1;
-            const gyri = 1 + 0.05 * Math.sin(dx * 11 + dy * 7) * Math.cos(dz * 9 - dy * 5)
-                           + 0.03 * Math.sin(dz * 23 + dx * 17);
-            let x = Math.abs(dx) * 0.62 * gyri * depth;
-            const y = dy * (dy < 0 ? 0.55 : 0.8) * gyri * depth;
-            const z = dz * 1.2 * gyri * depth;
-            x = side * (x + 0.06); // fissure inter-hémisphérique
-            push(x, y + 0.1, z);
-        } else if (roll < 0.96) {
-            // Cervelet : petit ellipsoïde strié, en bas à l'arrière
-            const stripes = 1 + 0.04 * Math.sin(dy * 40);
-            push(dx * 0.55 * stripes * depth, dy * 0.28 * depth - 0.5, dz * 0.35 * depth - 0.85);
-        } else {
-            // Tronc cérébral : cylindre qui descend
-            const a = Math.random() * Math.PI * 2;
-            const r = 0.13 * (depth === 1 ? 1 : Math.random());
-            push(Math.cos(a) * r, -0.4 - Math.random() * 0.75, Math.sin(a) * r - 0.4);
+        // Synapses : on peut sauter de neurone en neurone
+        const neighbors = [...this.synapses.neighborsOf(halo)];
+        if (neighbors.length > 0) {
+            const links = element('ul', { className: 'brain-panel-synapses' });
+            for (const neighbor of neighbors) {
+                const button = element('button', { type: 'button', textContent: neighbor.userData.data.nom });
+                button.dataset.action = 'brain#selectByName';
+                button.dataset.brainNameParam = neighbor.userData.data.nom;
+                button.style.setProperty('--dot', neighbor.userData.data.couleur);
+                links.append(element('li', {}, button));
+            }
+            body.append(element('h3', { textContent: 'Connecté à' }), links);
         }
     }
 
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-    return geometry;
+    fillNebulaPanel({ nom, couleur, description }) {
+        this.fillPanelHeader('Passion', nom, couleur);
+        this.panelBodyTarget.append(element('p', { textContent: description }));
+    }
+
+    fillPanelHeader(category, title, color) {
+        this.panelTarget.style.setProperty('--neuron', color);
+        this.panelCategoryTarget.textContent = category;
+        this.panelTitleTarget.textContent = title;
+        this.panelBodyTarget.replaceChildren();
+    }
 }
 
-/** Point lumineux rond et flou, dessiné une fois dans un canvas. */
-function dotTexture() {
-    const size = 64;
-    const canvas = document.createElement('canvas');
-    canvas.width = canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-    g.addColorStop(0, 'rgba(255,255,255,1)');
-    g.addColorStop(0.3, 'rgba(255,255,255,0.6)');
-    g.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, size, size);
-    return new THREE.CanvasTexture(canvas);
+/** Petit utilitaire DOM : element('a', { href, textContent }, ...enfants). */
+function element(tag, properties = {}, ...children) {
+    const el = Object.assign(document.createElement(tag), properties);
+    el.append(...children);
+    return el;
 }

@@ -50,6 +50,8 @@ Portfolio/
 - `assets/controllers/xxx_controller.js` : contrôleur Stimulus, branché sur un élément avec `data-controller="xxx"`.
   C'est le choix par défaut pour tout comportement de page (ex. `typing`, `cv`, `brain`).
 - `assets/scripts/` : scripts globaux importés par `app.js` (fond étoilé, menu, transition de page).
+- `assets/cerveau/` : modules Three.js du cerveau 3D (forme, neurones, synapses, nébuleuses), sans logique
+  d'interface ; importés uniquement par `controllers/brain_controller.js`.
 - Pas de `<script>` ni de `<style>` dans les templates Twig (exceptions : le template PDF, car Dompdf exige le CSS inline, et la ligne qui applique le thème du CV avant l'affichage).
 
 ## ✨ Fonctionnalités
