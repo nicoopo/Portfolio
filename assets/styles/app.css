@@ -1067,6 +1067,10 @@ h2.gradient {
 
 .cta-container {
   margin-bottom: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
 }
 
 /* Hero Cards */
@@ -1258,4 +1262,47 @@ h2.gradient {
         transform: scale(20, 20);
         opacity: 0;
     }
+}
+
+/* ========================================
+     13. CERVEAU 3D (brain_controller.js)
+     ======================================== */
+/* Pas de position: fixed : <main> reçoit un transform dans base.html.twig */
+.brain-stage {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  touch-action: none; /* le glisser tourne le cerveau au lieu de scroller */
+}
+
+.brain-stage canvas {
+  display: block;
+  cursor: grab;
+}
+
+.brain-stage canvas:active {
+  cursor: grabbing;
+}
+
+.brain-fallback,
+.brain-hint {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: var(--color-text-light);
+  text-align: center;
+}
+
+.brain-fallback {
+  top: 45%;
+}
+
+.brain-hint {
+  bottom: 1.5rem;
+  font-size: 0.85rem;
+  opacity: 0.6;
+  pointer-events: none;
 }

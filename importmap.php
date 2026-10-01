@@ -35,4 +35,10 @@ return [
         'version' => '5.3.8',
         'type' => 'css',
     ],
+    'three' => [
+        'version' => '0.186.1',
+    ],
+    'three/addons/controls/OrbitControls.js' => [
+        'version' => '0.186.1',
+    ],
 ];
