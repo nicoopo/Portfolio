@@ -1,0 +1,40 @@
+/* Cerveau 3D (home/cerveau.html.twig, controllers/brain_controller.js) */
+
+.brain-stage {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  touch-action: none; /* le glisser tourne le cerveau au lieu de scroller */
+}
+
+.brain-stage canvas {
+  display: block;
+  cursor: grab;
+}
+
+.brain-stage canvas:active {
+  cursor: grabbing;
+}
+
+.brain-fallback,
+.brain-hint {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: var(--color-text-light);
+  text-align: center;
+}
+
+.brain-fallback {
+  top: 45%;
+}
+
+.brain-hint {
+  bottom: 1.5rem;
+  font-size: 0.85rem;
+  opacity: 0.6;
+  pointer-events: none;
+}

@@ -28,36 +28,4 @@
     {% endfor %}
   </div>
 </section>
-<script>
-  document.addEventListen// Script simplifié - juste l'animation au scroll
-  document.addEventListener("DOMContentLoaded", () => {
-    const projectRows = document.querySelectorAll(".project-row");
-    
-    // Fonction de révélation simple
-    const reveal = () => {
-      const windowHeight = window.innerHeight;
-      
-      projectRows.forEach(row => {
-        const rect = row.getBoundingClientRect();
-        
-        // Si l'élément est dans la zone visible
-        if (rect.top < windowHeight - 100) {
-          row.classList.add("visible");
-        }
-      });
-    };
-    
-    // Vérifier au chargement
-    reveal();
-    
-    // Vérifier au scroll (optimisé)
-    let scrollTimeout;
-    window.addEventListener("scroll", () => {
-      if (scrollTimeout) {
-        window.cancelAnimationFrame(scrollTimeout);
-      }
-      scrollTimeout = window.requestAnimationFrame(reveal);
-    });
-  });
-</script>
 {% endblock %}
