@@ -11,70 +11,16 @@
   </section>
 
   <section class="skills-grid">
-
-    <!-- Front-End -->
+    {% for nom, categorie in categories %}
     <div class="skills-category">
-      <h2>Front-End</h2>
+      <h2>{{ nom }}</h2>
       <div class="skills-cards">
-        <div class="skill-card"><span>HTML5</span></div>
-        <div class="skill-card"><span>CSS3 / SCSS</span></div>
-        <div class="skill-card"><span>JavaScript / TypeScript</span></div>
-        <div class="skill-card"><span>Vue.js</span></div>
-        <div class="skill-card"><span>React</span></div>
-        <div class="skill-card"><span>Twig</span></div>
+        {% for competence in categorie.competences %}
+        <div class="skill-card"><span>{{ competence }}</span></div>
+        {% endfor %}
       </div>
     </div>
-
-    <!-- Back-End -->
-    <div class="skills-category">
-      <h2>Back-End</h2>
-      <div class="skills-cards">
-        <div class="skill-card"><span>PHP / Symfony</span></div>
-        <div class="skill-card"><span>Java / Spring</span></div>
-        <div class="skill-card"><span>Python</span></div>
-        <div class="skill-card"><span>API REST</span></div>
-        <div class="skill-card"><span>MySQL / PostgreSQL</span></div>
-      </div>
-    </div>
-
-    <!-- Réseaux/Infra -->
-    <div class="skills-category">
-      <h2>Réseaux / Infra</h2>
-      <div class="skills-cards">
-        <div class="skill-card"><span>Linux / Windows</span></div>
-        <div class="skill-card"><span>Cisco</span></div>
-        <div class="skill-card"><span>Packet tracer</span></div>
-        <div class="skill-card"><span>Bash / Terminal</span></div>
-        <div class="skill-card"><span>Virtualisation</span></div>
-      </div>
-    </div>
-
-    <!-- Outils -->
-    <div class="skills-category">
-      <h2>Outils</h2>
-      <div class="skills-cards">
-        <div class="skill-card"><span>Git / GitHub</span></div>
-        <div class="skill-card"><span>VS Code / JetBrains / Cursor</span></div>
-        <div class="skill-card"><span>Docker</span></div>
-        <div class="skill-card"><span>Figma</span></div>
-        <div class="skill-card"><span>VirtualBox</span></div>
-      </div>
-    </div>
-
-
-    <!-- Soft Skills -->
-    <div class="skills-category">
-      <h2>Soft Skills</h2>
-      <div class="skills-cards">
-        <div class="skill-card"><span>Travail en équipe</span></div>
-        <div class="skill-card"><span>Autonomie</span></div>
-        <div class="skill-card"><span>Rigueur</span></div>
-        <div class="skill-card"><span>Curiosité</span></div>
-        <div class="skill-card"><span>Bonne humeur 😄</span></div>
-      </div>
-    </div>
-
-
+    {% endfor %}
   </section>
 </div>
 {% endblock %}
