@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Data\Competences;
+use App\Data\Passions;
 use App\Data\Projets;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -47,6 +48,7 @@ final class HomeController extends AbstractController
         return $this->render('home/cerveau.html.twig', [
             'categories' => Competences::CATEGORIES,
             'neurones' => $neurones,
+            'passions' => Passions::LISTE,
         ]);
     }
 }

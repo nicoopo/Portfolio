@@ -81,6 +81,12 @@
   box-shadow: 0 0 8px var(--dot);
 }
 
+/* Passions : pastille en dégradé, comme une nébuleuse */
+.brain-legend-dot--nebula {
+  --dot: #a06cff;
+  background: conic-gradient(#5b8cff, #2cb67d, #e4c35b, #f25f8c, #a06cff, #5b8cff);
+}
+
 .brain-legend ul {
   list-style: none;
   margin: 0 0 0.25rem;
@@ -169,6 +175,42 @@
   color: var(--color-secondary);
 }
 
+.brain-panel p {
+  margin: 0;
+}
+
+/* Neurones connectés : boutons pour sauter de neurone en neurone */
+.brain-panel-synapses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  padding: 0 !important;
+}
+
+.brain-panel-synapses button {
+  padding: 0.15rem 0.6rem;
+  color: inherit;
+  font-size: 0.85rem;
+  background: color-mix(in srgb, var(--dot) 20%, transparent);
+  border: 1px solid var(--dot);
+  border-radius: 999px;
+}
+
+.brain-panel-synapses button:hover,
+.brain-panel-synapses button:focus-visible {
+  background: color-mix(in srgb, var(--dot) 45%, transparent);
+}
+
+.brain-panel h3 + ul,
+.brain-panel ul + h3 {
+  margin-top: 0.5rem;
+}
+
+.brain-panel ul + h3 {
+  margin-top: 1rem;
+}
+
 .brain-panel-empty {
   margin: 0;
   opacity: 0.7;
@@ -186,6 +228,8 @@
     bottom: 1rem;
     left: 1rem;
     width: auto;
+    max-height: 45%;
+    overflow-y: auto;
   }
 
   .brain-hint {
