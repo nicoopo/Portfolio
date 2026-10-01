@@ -5,7 +5,8 @@
 
 DC         = docker compose
 DC_PREPROD = docker compose -f compose.yaml -f compose.preprod.yaml
-CONSOLE    = $(DC) exec php php bin/console
+PHP        = $(DC) exec -u www-data php
+CONSOLE    = $(PHP) php bin/console
 
 .DEFAULT_GOAL := help
 
@@ -16,7 +17,8 @@ help: ## Affiche cette aide
 # --- DEV ---
 up: ## Démarre le conteneur (dev) → http://localhost:8081
 	$(DC) up -d
-	$(DC) exec php composer install
+	$(PHP) composer install
+	$(PHP) php bin/console importmap:install
 
 down: ## Arrête le conteneur (dev)
 	$(DC) down
@@ -25,7 +27,7 @@ logs: ## Logs en temps réel (dev)
 	$(DC) logs -f
 
 bash: ## Shell dans le conteneur (dev)
-	$(DC) exec php bash
+	$(PHP) bash
 
 cc: ## Vide le cache (dev)
 	$(CONSOLE) cache:clear
@@ -34,7 +36,7 @@ routes: ## Liste les routes
 	$(CONSOLE) debug:router
 
 test: ## Lance les tests PHPUnit
-	$(DC) exec php vendor/bin/phpunit
+	$(DC) exec -u www-data -e APP_ENV=test php vendor/bin/phpunit
 
 # --- PREPROD ---
 preprod-deploy: ## Build + relance (preprod)

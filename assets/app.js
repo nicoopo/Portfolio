@@ -3,8 +3,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap';
 import './styles/app.css';
-import './controllers/animation_controller.js';
-import './controllers/hello_controller.js';
-import './controllers/csrf_protection_controller.js';
-import './controllers/pdf_viewer_controller.js';
+import './scripts/stars.js';
+import './scripts/pdf_viewer.js';
+import './bootstrap.js'; // démarre Stimulus (assets/controllers/)
 

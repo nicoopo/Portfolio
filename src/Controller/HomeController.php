@@ -13,4 +13,10 @@ final class HomeController extends AbstractController
     {
         return $this->render('home/index.html.twig');
     }
+
+    #[Route('/cerveau', name: 'app_cerveau')]
+    public function cerveau(): Response
+    {
+        return $this->render('home/cerveau.html.twig');
+    }
 }

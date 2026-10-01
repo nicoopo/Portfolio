@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Cerveau · Univers de Nico{% endblock %}
+
+{% block body %}
+<section class="brain-stage" data-controller="brain"
+         role="img" aria-label="Cerveau holographique en 3D, que l'on peut faire tourner et zoomer">
+    <p class="brain-fallback" data-brain-target="fallback">
+        Ton navigateur ne supporte pas la 3D (WebGL).
+        <a href="{{ path('app_competences') }}">Voir mes compétences</a>
+    </p>
+    <p class="brain-hint">Glisse pour tourner · Molette ou pincement pour zoomer</p>
+</section>
+{% endblock %}

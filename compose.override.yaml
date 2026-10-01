@@ -12,6 +12,8 @@ services:
       - assets_vendor:/var/www/symfony/assets/vendor
     ports:
       - "8081:80" # 8080 est pris par Cabin Access
+    environment:
+      APP_ENV: dev # en dur : `.env` contient APP_ENV=prod, que Compose lirait via ${APP_ENV}
 
 volumes:
   php_cache:
