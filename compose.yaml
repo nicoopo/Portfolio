@@ -9,5 +9,3 @@ services:
       dockerfile: docker/php/Dockerfile
     container_name: portfolio_php
     restart: unless-stopped
-    environment:
-      APP_ENV: ${APP_ENV:-dev}

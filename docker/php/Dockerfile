@@ -32,3 +32,11 @@ WORKDIR /var/www/symfony
 
 # Copie du vhost Apache
 COPY docker/apache/vhost.conf /etc/apache2/sites-available/000-default.conf
+
+# www-data = uid 1000 (l'utilisateur du serveur) : Apache, la console et le code
+# monté en volume ont le même propriétaire → plus de fichiers root dans var/
+# Les dossiers sont créés ici pour que les volumes nommés héritent de ce propriétaire.
+RUN usermod -u 1000 www-data && groupmod -g 1000 www-data \
+    && mkdir -p var/cache var/log vendor assets/vendor \
+    && chown -R www-data:www-data /var/www/symfony
+ENV COMPOSER_HOME=/tmp/composer
