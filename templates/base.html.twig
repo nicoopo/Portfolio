@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Univers de Nico{% endblock %}</title>
     <link rel="icon" href="{{ asset('images/nico-symbol.svg') }}">
-    {% block stylesheets %}
-        <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
-    {% endblock %}
     {% block javascripts %}
+        {# Charge aussi app.js → bootstrap.css + styles/app.css #}
         {% block importmap %}{{ importmap('app') }}{% endblock %}
     {% endblock %}
+    {# CSS propre à une page : après app.css pour pouvoir le surcharger #}
+    {% block stylesheets %}{% endblock %}
 </head>
 
 <body>
@@ -43,36 +43,5 @@
         {% block body %}
         {% endblock %}
     </main>
-
-    <script>
-        // Gestion ouverture/fermeture du menu galactique
-        const menuToggle = document.getElementById('menuToggle');
-        const menuDropdown = document.getElementById('menuDropdown');
-
-        menuToggle.addEventListener('click', () => {
-            menuDropdown.classList.toggle('show');
-        });
-
-        // Ferme le menu quand on clique ailleurs
-        document.addEventListener('click', (e) => {
-            if (!menuToggle.contains(e.target) && !menuDropdown.contains(e.target)) {
-                menuDropdown.classList.remove('show');
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const main = document.querySelector('main');
-            if (main) {
-                main.style.opacity = 0;
-                main.style.transform = 'translateY(30px)';
-                main.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                requestAnimationFrame(() => {
-                main.style.opacity = 1;
-                main.style.transform = 'translateY(0)';
-            });
-            }
-        });
-
-    </script>
 </body>
 </html>
