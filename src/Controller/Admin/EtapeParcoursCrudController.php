@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\EtapeParcours;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
@@ -34,5 +35,12 @@ final class EtapeParcoursCrudController extends AbstractCrudController
         yield TextField::new('lieu')->hideOnIndex();
         yield TextField::new('resultat', 'Résultat');
         yield IntegerField::new('position');
+
+        // Version anglaise du site : vide = le français s'affiche
+        yield FormField::addFieldset('Anglais (facultatif)')->collapsible()->renderCollapsed();
+        yield TextField::new('nomEn', 'Nom')->hideOnIndex();
+        yield TextField::new('intituleEn', 'Intitulé')->hideOnIndex();
+        yield TextField::new('specialiteEn', 'Option')->hideOnIndex();
+        yield TextField::new('resultatEn', 'Résultat')->hideOnIndex();
     }
 }

@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Passion;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ColorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
@@ -32,5 +33,10 @@ final class PassionCrudController extends AbstractCrudController
         yield ColorField::new('couleur')->setHelp('Couleur de la coquille de la nébuleuse');
         yield TextareaField::new('description');
         yield IntegerField::new('position')->setHelp('Ordre d\'affichage (croissant)');
+
+        // Version anglaise du site : vide = le français s'affiche
+        yield FormField::addFieldset('Anglais (facultatif)')->collapsible()->renderCollapsed();
+        yield TextField::new('nomEn', 'Nom')->hideOnIndex();
+        yield TextareaField::new('descriptionEn', 'Description')->hideOnIndex();
     }
 }

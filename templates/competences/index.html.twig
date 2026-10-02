@@ -1,24 +1,24 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Compétences – Nicolas Cataluna{% endblock %}
+{% block title %}{{ 'Compétences – Nicolas Cataluna'|trans }}{% endblock %}
 
-{% block description %}Mes compétences techniques et humaines : front-end, back-end, réseaux, outils et soft skills.{% endblock %}
+{% block description %}{{ 'Mes compétences techniques et humaines : front-end, back-end, réseaux, outils et soft skills.'|trans }}{% endblock %}
 
 {% block body %}
 <div class="skills-page">
 
   <section class="skills-header">
-    <h1>Mes Compétences</h1>
-    <p>Un aperçu de mes connaissances techniques et humaines</p>
+    <h1>{{ 'Mes Compétences'|trans }}</h1>
+    <p>{{ 'Un aperçu de mes connaissances techniques et humaines'|trans }}</p>
   </section>
 
   <section class="skills-grid">
     {% for categorie in categories %}
     <div class="skills-category">
-      <h2>{{ categorie.nom }}</h2>
+      <h2>{{ categorie|loc('nom') }}</h2>
       <div class="skills-cards">
         {% for competence in categorie.competences %}
-        <a class="skill-card" href="{{ path('app_cerveau') }}#{{ competence.nom|url_encode }}" title="Voir ce neurone dans mon cerveau"><span>{{ competence.nom }}</span></a>
+        <a class="skill-card" href="{{ path('app_cerveau') }}#{{ competence|loc('nom')|url_encode }}" title="{{ 'Voir ce neurone dans mon cerveau'|trans }}"><span>{{ competence|loc('nom') }}</span></a>
         {% endfor %}
       </div>
     </div>

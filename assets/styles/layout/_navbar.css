@@ -46,6 +46,30 @@
   height: auto;
 }
 
+/* Bascule de langue + menu, à droite */
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lang-switch {
+  padding: 0.45rem 0.7rem;
+  color: #cfe9ff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  background: rgba(20, 20, 40, 0.45);
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.lang-switch:hover {
+  color: #fff;
+  background: rgba(107, 225, 255, 0.2);
+}
+
 .menu-button {
   appearance: none;
   -webkit-appearance: none;

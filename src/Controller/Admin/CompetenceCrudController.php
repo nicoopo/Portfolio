@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Competence;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -32,5 +33,9 @@ final class CompetenceCrudController extends AbstractCrudController
         yield IntegerField::new('position')->setHelp('Ordre d\'affichage (croissant)');
         // Les projets se relient depuis l'écran Projets (côté propriétaire de la relation)
         yield AssociationField::new('projets')->onlyOnIndex();
+
+        // Version anglaise du site : vide = le français s'affiche
+        yield FormField::addFieldset('Anglais (facultatif)')->collapsible()->renderCollapsed();
+        yield TextField::new('nomEn', 'Nom')->hideOnIndex();
     }
 }

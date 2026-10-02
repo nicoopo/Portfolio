@@ -6,6 +6,7 @@ use App\Entity\CategorieCompetence;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ColorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
@@ -51,5 +52,9 @@ final class CategorieCompetenceCrudController extends AbstractCrudController
         ]);
         yield ColorField::new('couleur')->setHelp('Couleur des neurones de la catégorie');
         yield IntegerField::new('position')->setHelp('Ordre d\'affichage (croissant)');
+
+        // Version anglaise du site : vide = le français s'affiche
+        yield FormField::addFieldset('Anglais (facultatif)')->collapsible()->renderCollapsed();
+        yield TextField::new('nomEn', 'Nom')->hideOnIndex();
     }
 }

@@ -1,16 +1,16 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mon Univers - Portfolio{% endblock %}
+{% block title %}{{ 'Mon Univers - Portfolio'|trans }}{% endblock %}
 
-{% block description %}Mon CV, ma lettre de motivation et mon parcours scolaire, du brevet au BTS SIO.{% endblock %}
+{% block description %}{{ 'Mon CV, ma lettre de motivation et mon parcours scolaire, du brevet au BTS SIO.'|trans }}{% endblock %}
 
 {% block body %}
 <section class="univers-section container py-5" data-controller="pdf">
 
-    <h1 class="text-center mb-5 gradient fw-bold display-5">Mon Univers</h1>
+    <h1 class="text-center mb-5 gradient fw-bold display-5">{{ 'Mon Univers'|trans }}</h1>
 
     <section class="cv-section text-center py-5">
-    <h2 class="gradient mb-4">Mon CV</h2>
+    <h2 class="gradient mb-4">{{ 'Mon CV'|trans }}</h2>
 
     <div class="d-flex justify-content-center gap-3 flex-wrap mb-5">
         <!-- Voir le CV - Ouvre dans un iframe sur la même page -->
@@ -18,19 +18,19 @@
             class="btn btn-galactic btn-galactic-outline-light"
             data-action="pdf#show"
             data-pdf-url-param="{{ asset('docs/CV-nicolascataluna.pdf') }}"
-            data-pdf-title-param="Mon CV">
-            <i class="bi bi-eye"></i> Voir le CV
+            data-pdf-title-param="{{ 'Mon CV'|trans }}">
+            <i class="bi bi-eye"></i> {{ 'Voir le CV'|trans }}
         </button>
 
         <!-- Télécharger le CV -->
         <a href="{{ asset('docs/CV-nicolascataluna.pdf') }}"
            download="CV_Nicolas_Cataluna.pdf"
            class="btn btn-galactic btn-galactic-primary">
-            <i class="bi bi-download"></i> Télécharger
+            <i class="bi bi-download"></i> {{ 'Télécharger'|trans }}
         </a>
     </div>
 
-    <h2 class="gradient mb-4">Ma lettre de motivation</h2>
+    <h2 class="gradient mb-4">{{ 'Ma lettre de motivation'|trans }}</h2>
 
     <div class="d-flex justify-content-center gap-3 flex-wrap">
         <!-- Voir la lettre - Ouvre dans un iframe sur la même page -->
@@ -38,15 +38,15 @@
             class="btn btn-galactic btn-galactic-outline-light"
             data-action="pdf#show"
             data-pdf-url-param="{{ asset('docs/lettre de motivation.pdf') }}"
-            data-pdf-title-param="Ma Lettre de Motivation">
-            <i class="bi bi-eye"></i> Voir la lettre
+            data-pdf-title-param="{{ 'Ma lettre de motivation'|trans }}">
+            <i class="bi bi-eye"></i> {{ 'Voir la lettre'|trans }}
         </button>
 
         <!-- Télécharger la lettre -->
         <a href="{{ asset('docs/lettre de motivation.pdf') }}"
            download="Lettre_Motivation_Nicolas_Cataluna.pdf"
            class="btn btn-galactic btn-galactic-primary">
-            <i class="bi bi-download"></i> Télécharger
+            <i class="bi bi-download"></i> {{ 'Télécharger'|trans }}
         </a>
     </div>
     </section>
@@ -55,14 +55,14 @@
     <div class="pdf-viewer-container mt-4" data-pdf-target="viewer" hidden>
         <div class="pdf-header d-flex justify-content-between align-items-center mb-3">
             <h3 class="mb-0 gradient" data-pdf-target="title">Document</h3>
-            <button class="btn btn-close btn-close-white" data-action="pdf#close" aria-label="Fermer"></button>
+            <button class="btn btn-close btn-close-white" data-action="pdf#close" aria-label="{{ 'Fermer'|trans }}"></button>
         </div>
         <div class="pdf-content">
-            <iframe data-pdf-target="frame" title="Document PDF" src="" frameborder="0" width="100%" height="600px" class="rounded shadow"></iframe>
+            <iframe data-pdf-target="frame" title="{{ 'Document PDF'|trans }}" src="" frameborder="0" width="100%" height="600px" class="rounded shadow"></iframe>
         </div>
     </div>
 
-    <h2 class="text-center mb-5 gradient fw-bold display-6">Mon parcours</h2>
+    <h2 class="text-center mb-5 gradient fw-bold display-6">{{ 'Mon parcours'|trans }}</h2>
 
     <div class="timeline-container">
 
@@ -70,15 +70,15 @@
         <div class="timeline-item">
             <div class="timeline-content shadow-lg rounded-4 p-4">
             <span class="date gradient fw-bold">{{ etape.dates }}</span>
-            <h4 class="fw-bold">{{ etape.intitule }}
-                {% if etape.specialite %}<br>{{ etape.specialite }}{% endif %}
+            <h4 class="fw-bold">{{ etape|loc('intitule') }}
+                {% if etape.specialite %}<br>{{ etape|loc('specialite') }}{% endif %}
             </h4>
             <p class="mb-0 opacity-75">
                 {{ etape.ecole }}<br>
                 {{ etape.lieu }}
             </p>
-            <p class="mt-2 fw-semibold">{{ etape.resultat }}</p>
-            <a class="timeline-brain-link" href="{{ path('app_cerveau') }}#{{ etape.nom|url_encode }}">Voir ce souvenir dans mon cerveau</a>
+            <p class="mt-2 fw-semibold">{{ etape|loc('resultat') }}</p>
+            <a class="timeline-brain-link" href="{{ path('app_cerveau') }}#{{ etape|loc('nom')|url_encode }}">{{ 'Voir ce souvenir dans mon cerveau'|trans }}</a>
             </div>
         </div>
         {% endfor %}

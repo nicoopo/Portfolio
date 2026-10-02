@@ -28,7 +28,8 @@ const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
  */
 export default class extends Controller {
     static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search', 'shareButton', 'soundButton'];
-    static values = { neurons: Array, passions: Array, souvenirs: Array };
+    // texts : libellés traduits par le template (home/cerveau.html.twig)
+    static values = { neurons: Array, passions: Array, souvenirs: Array, texts: Object };
 
     connect() {
         try {
@@ -96,7 +97,7 @@ export default class extends Controller {
         // Échap fait aussi sortir du plein écran : le bouton suit l'état réel
         this.listen(document, 'fullscreenchange', () => {
             const on = document.fullscreenElement === this.element;
-            this.fullscreenButtonTarget.textContent = on ? 'Quitter le plein écran' : 'Plein écran';
+            this.fullscreenButtonTarget.textContent = on ? this.textsValue.quitFullscreen : this.textsValue.fullscreen;
             this.fullscreenButtonTarget.setAttribute('aria-pressed', String(on));
         });
 
@@ -151,14 +152,14 @@ export default class extends Controller {
         // (Chrome sur Windows a aussi navigator.share, mais on y attend une simple copie)
         const shared = navigator.share && window.matchMedia('(pointer: coarse)').matches
             ? navigator.share({ title: document.title, url })
-            : navigator.clipboard.writeText(url).then(() => this.flashShareButton('Lien copié !'));
+            : navigator.clipboard.writeText(url).then(() => this.flashShareButton(this.textsValue.linkCopied));
         shared.catch(() => {}); // partage annulé ou presse-papiers refusé : rien à faire
     }
 
     flashShareButton(text) {
         this.shareButtonTarget.textContent = text;
         clearTimeout(this.shareTimeout);
-        this.shareTimeout = setTimeout(() => { this.shareButtonTarget.textContent = 'Partager'; }, 2000);
+        this.shareTimeout = setTimeout(() => { this.shareButtonTarget.textContent = this.textsValue.share; }, 2000);
     }
 
     /** « x,y,z;x,y,z » : position de la caméra ; point visé */
@@ -297,7 +298,7 @@ export default class extends Controller {
     toggleSound() {
         this.ambiance ??= new Ambiance();
         const on = this.ambiance.toggle();
-        this.soundButtonTarget.textContent = on ? 'Couper le son' : 'Son';
+        this.soundButtonTarget.textContent = on ? this.textsValue.mute : this.textsValue.sound;
         this.soundButtonTarget.setAttribute('aria-pressed', String(on));
     }
 
@@ -319,7 +320,7 @@ export default class extends Controller {
         const stops = [...this.neurons]
             .sort((a, b) => b.userData.data.projets.length - a.userData.data.projets.length)
             .slice(0, TOUR_STOPS);
-        this.tourButtonTarget.textContent = 'Arrêter la visite';
+        this.tourButtonTarget.textContent = this.textsValue.stopTour;
         this.tourButtonTarget.setAttribute('aria-pressed', 'true');
 
         const next = (i) => {
@@ -339,7 +340,7 @@ export default class extends Controller {
         if (!this.tourTimeout) return;
         clearTimeout(this.tourTimeout);
         this.tourTimeout = null;
-        this.tourButtonTarget.textContent = 'Visite guidée';
+        this.tourButtonTarget.textContent = this.textsValue.tour;
         this.tourButtonTarget.setAttribute('aria-pressed', 'false');
     }
 
@@ -422,13 +423,13 @@ export default class extends Controller {
         const body = this.panelBodyTarget;
 
         if (projets.length === 0) {
-            body.append(element('p', { className: 'brain-panel-empty', textContent: 'Pas encore de projet relié à ce neurone.' }));
+            body.append(element('p', { className: 'brain-panel-empty', textContent: this.textsValue.noProject }));
         } else {
             const list = element('ul');
             for (const { titre, url } of projets) {
                 list.append(element('li', {}, element('a', { href: url, textContent: titre })));
             }
-            body.append(element('h3', { textContent: projets.length > 1 ? 'Projets liés' : 'Projet lié' }), list);
+            body.append(element('h3', { textContent: projets.length > 1 ? this.textsValue.linkedProjects : this.textsValue.linkedProject }), list);
         }
 
         // Synapses : on peut sauter de neurone en neurone
@@ -442,17 +443,17 @@ export default class extends Controller {
                 button.style.setProperty('--dot', neighbor.userData.data.couleur);
                 links.append(element('li', {}, button));
             }
-            body.append(element('h3', { textContent: 'Connecté à' }), links);
+            body.append(element('h3', { textContent: this.textsValue.connectedTo }), links);
         }
     }
 
     fillNebulaPanel({ nom, couleur, description }) {
-        this.fillPanelHeader('Passion', nom, couleur);
+        this.fillPanelHeader(this.textsValue.passion, nom, couleur);
         this.panelBodyTarget.append(element('p', { textContent: description }));
     }
 
     fillSouvenirPanel({ nom, dates, intitule, option, ecole, lieu, resultat }) {
-        this.fillPanelHeader(`Parcours · ${dates}`, nom, '#ffe8a3');
+        this.fillPanelHeader(`${this.textsValue.parcours} · ${dates}`, nom, '#ffe8a3');
         this.panelBodyTarget.append(
             element('p', { textContent: intitule }),
             ...(option ? [element('p', { className: 'brain-panel-empty', textContent: option })] : []),

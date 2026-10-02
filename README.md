@@ -65,6 +65,9 @@ Portfolio/
 - **CV en ligne** : CV interactif avec téléchargement en PDF.
 - **Contact** : formulaire (anti-spam par champ piège), e-mail, GitHub, LinkedIn et CV numérique.
 - **Responsive** : Optimisé pour tous les appareils.
+- **Français / anglais** : version anglaise sous `/en` (bouton FR/EN dans la navigation). Textes des pages :
+  `translations/messages.en.yaml` (la clé est le texte français) ; contenu de la base : champs « … (anglais) »
+  de l'administration (vide = le français s'affiche). Le CV et la lettre de motivation restent en français.
 
 ## 🛠 Technologies
 

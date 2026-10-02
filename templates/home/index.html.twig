@@ -6,47 +6,47 @@
     <div class="hero-content fade-in-up">
 
         <h1 class="title">
-            BIENVENUE DANS<br>
-            <span class="gradient">L'UNIVERS</span><br>
-            DE NICOLAS
+            {{ 'BIENVENUE DANS'|trans }}<br>
+            <span class="gradient">{{ "L'UNIVERS"|trans }}</span><br>
+            {{ 'DE NICOLAS'|trans }}
         </h1>
 
         <p class="subtitle">
-            Ici, code, curiosité et créativité gravitent ensemble.
+            {{ 'Ici, code, curiosité et créativité gravitent ensemble.'|trans }}
         </p>
 
         <div class="typing-container">
-            <span class="static-text">Je suis </span>
+            <span class="static-text">{{ 'Je suis'|trans }} </span>
             <span class="typing-text" id="typing-text"
                   data-controller="typing"
-                  data-typing-words-value="{{ ['Développeur Web', 'Passionné de Tech', 'Créateur Digital']|json_encode }}"></span><span class="cursor"></span>
+                  data-typing-words-value="{{ ['Développeur Web'|trans, 'Passionné de Tech'|trans, 'Créateur Digital'|trans]|json_encode }}"></span><span class="cursor"></span>
         </div>
 
         <div class="cta-container">
             <a href="{{ path('app_projects') }}" class="btn btn-galactic btn-galactic-outline-light">
-                Explorer mon travail
+                {{ 'Explorer mon travail'|trans }}
             </a>
             <a href="{{ path('app_cerveau') }}" class="btn btn-galactic btn-galactic-primary">
-                Entrer dans mon cerveau
+                {{ 'Entrer dans mon cerveau'|trans }}
             </a>
         </div>
 
         <div class="hero-cards">
             <a href="{{ path('app_projects') }}" class="hero-card">
                 <div class="card-icon">{{ ux_icon('bi:code-slash', {height: '32px', width: '32px'}) }}</div>
-                <span>Projets</span>
+                <span>{{ 'Projets'|trans }}</span>
             </a>
             <a href="{{ path('app_competences') }}" class="hero-card">
                 <div class="card-icon">{{ ux_icon('bi:cpu', {height: '32px', width: '32px'}) }}</div>
-                <span>Compétences</span>
+                <span>{{ 'Compétences'|trans }}</span>
             </a>
             <a href="{{ path('app_univers') }}" class="hero-card">
                 <div class="card-icon">{{ ux_icon('bi:stars', {height: '32px', width: '32px'}) }}</div>
-                <span>Mon Univers</span>
+                <span>{{ 'Mon Univers'|trans }}</span>
             </a>
             <a href="{{ path('app_contact') }}" class="hero-card">
                 <div class="card-icon">{{ ux_icon('streamline-pixel:interface-essential-call-center-contact-help', {height: '32px', width: '32px'}) }}</div>
-                <span>Contact</span>
+                <span>{{ 'Contact'|trans }}</span>
             </a>
         </div>
     </div>
