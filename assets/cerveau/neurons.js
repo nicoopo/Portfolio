@@ -25,7 +25,8 @@ export function createNeurons(neurons, texture) {
         const siblings = byZone[data.zone];
         const color = new THREE.Color(data.couleur);
 
-        const anchor = new THREE.Mesh(core, new THREE.MeshBasicMaterial({ color }));
+        // transparent : dessiné avec les objets transparents, donc après le corps du cerveau (renderOrder)
+        const anchor = new THREE.Mesh(core, new THREE.MeshBasicMaterial({ color, transparent: true }));
         anchor.position.copy(neuronPosition(ZONES[data.zone], siblings.indexOf(data), siblings.length));
 
         const halo = glowSprite(texture, color, 0.22);

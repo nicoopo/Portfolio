@@ -116,7 +116,9 @@ function createCloud(color, seed, texture) {
         dust.colors.push(c.r, c.g, c.b);
     }
     const dustPoints = new THREE.Points(pointsGeometry(dust), fadingPointsMaterial(texture, 0.2, { opacity: 0.55, blending: THREE.NormalBlending }));
-    dustPoints.renderOrder = 1; // après le gaz, pour l'assombrir
+    // Pas de renderOrder : il s'appliquerait à toute la scène (poussière dessinée par-dessus les
+    // neurones). Three.js trie déjà de l'arrière vers l'avant, puis par ordre de création :
+    // gaz, puis poussière, puis étoiles.
     cloud.add(dustPoints);
 
     // Étoiles : un amas jeune et brillant dans la cavité, d'autres éparpillées
@@ -131,7 +133,6 @@ function createCloud(color, seed, texture) {
         layer.colors.push(c.r, c.g, c.b);
     }
     const brightStars = new THREE.Points(pointsGeometry(bright), fadingPointsMaterial(texture, 0.18));
-    brightStars.renderOrder = 2; // devant la poussière
     cloud.add(new THREE.Points(pointsGeometry(faint), fadingPointsMaterial(texture, 0.06)), brightStars);
 
     return cloud;

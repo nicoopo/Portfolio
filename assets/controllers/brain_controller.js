@@ -72,6 +72,10 @@ export default class extends Controller {
         this.clickables = [...this.neurons, ...this.nebulae.targets, ...this.souvenirs.targets];
 
         this.scene.add(this.brain, this.synapses.object, this.nebulae.object, this.souvenirs.object, ...this.neurons.map((h) => h.userData.anchor));
+        // Neurones, synapses et souvenirs toujours dessinés après le corps sombre du cerveau
+        for (const object of [this.synapses.object, this.souvenirs.object, ...this.neurons.map((h) => h.userData.anchor)]) {
+            object.traverse((child) => { child.renderOrder = 1; });
+        }
 
         this.raycaster = new THREE.Raycaster();
         this.pointer = new THREE.Vector2();
@@ -159,7 +163,7 @@ export default class extends Controller {
         for (const halo of this.neurons) {
             const active = halo === selected || halo === this.hovered;
             const pulse = 1 + 0.2 * Math.sin(time * 2.5 + halo.userData.phase);
-            halo.scale.setScalar((active ? 0.38 : 0.22) * pulse);
+            halo.scale.setScalar((active ? 0.3 : 0.16) * pulse); // assez petits pour laisser voir les plis
             // Les neurones reliés au neurone sélectionné restent allumés
             halo.material.opacity = !selected || active || neighbors.has(halo) ? 1 : 0.25;
         }

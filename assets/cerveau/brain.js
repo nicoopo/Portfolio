@@ -9,11 +9,42 @@ const perlin = new ImprovedNoise();
  * éclairé, avec quelques points à l'intérieur et une aura bleue derrière.
  */
 export function createBrain(texture) {
-    const brain = new THREE.Points(brainGeometry(), frontFacingMaterial(glowPointsMaterial(texture, 0.028)));
+    // Créé avant les points : à position égale, Three.js dessine d'abord l'objet créé en premier
+    const body = createBody();
+    const brain = new THREE.Points(brainGeometry(), frontFacingMaterial(glowPointsMaterial(texture, 0.034)));
     const aura = glowSprite(texture, new THREE.Color('#3b4cff'), 3.2);
     aura.material.opacity = 0.07;
-    brain.add(aura);
+    brain.add(body, aura);
     return brain;
+}
+
+/**
+ * Corps sombre et semi-transparent sous les points : il masque en partie ce qui est derrière
+ * le cerveau (nébuleuses), qui sinon se voit à travers et casse l'impression de volume.
+ * Les neurones, synapses et souvenirs sont dessinés après lui (renderOrder, brain_controller).
+ */
+function createBody() {
+    const material = new THREE.MeshBasicMaterial({ color: '#03040d', transparent: true, opacity: 0.55, depthWrite: false });
+    const body = new THREE.Group();
+    const ellipsoid = (mapVertex) => {
+        const geometry = new THREE.SphereGeometry(1, 64, 40);
+        const position = geometry.attributes.position;
+        for (let i = 0; i < position.count; i++) {
+            position.setXYZ(i, ...mapVertex(position.getX(i), position.getY(i), position.getZ(i)));
+        }
+        geometry.computeBoundingSphere();
+        body.add(new THREE.Mesh(geometry, material));
+    };
+    // Seulement les hémisphères : là où deux corps se chevauchent (lobe temporal, cervelet),
+    // la double couche sombre dessine un contour visible
+    for (const side of [1, -1]) {
+        // Dôme : la moitié intérieure de la sphère se replie sur l'extérieure
+        ellipsoid((dx, dy, dz) => {
+            const r = 0.93 * hemisphereRadius(Math.abs(dx), dy, dz);
+            return [side * (Math.abs(dx) * r + GAP), dy * r + 0.1, dz * r];
+        });
+    }
+    return body;
 }
 
 /**
@@ -43,7 +74,8 @@ const GAP = 0.05;    // demi-largeur de la scissure inter-hémisphérique
 const LENGTH = 1.05; // demi-longueur avant-arrière d'un hémisphère
 const TEMPORAL = { center: [0.4, -0.22, 0.1], radius: [0.24, 0.2, 0.45] }; // lobe temporal (côté +x)
 
-const SURFACE_POINTS = 45000;
+const HEMISPHERE_DIRECTIONS = 70000; // moitié utilisée par hémisphère
+const TEMPORAL_DIRECTIONS = 9000;
 const INSIDE_POINTS = 4000;
 const SULCUS_DEPTH = 0.07; // profondeur des sillons, en fraction du rayon
 const LIGHT = new THREE.Vector3(0.3, 0.8, 0.5).normalize(); // lumière venant d'en haut, à l'avant
@@ -88,21 +120,49 @@ function randomDirection() {
 }
 
 /**
- * Point au hasard sur la surface (hémisphère ou lobe temporal), avec le centre de son lobe
- * (pour creuser les sillons vers l'intérieur), ou null si le point est recouvert.
+ * Directions réparties régulièrement sur la sphère (spirale de Fibonacci), un peu perturbées :
+ * pas d'amas ni de trous comme avec un tirage au hasard, le relief se lit mieux.
  */
-function surfacePoint() {
-    const [dx, dy, dz] = randomDirection();
-    const side = Math.random() < 0.5 ? -1 : 1;
+function evenDirections(count) {
+    const golden = Math.PI * (3 - Math.sqrt(5));
+    const jitter = 0.8 * Math.sqrt(4 * Math.PI / count); // assez pour casser la trame de la spirale
+    const directions = [];
+    for (let i = 0; i < count; i++) {
+        const y = 1 - (2 * (i + 0.5)) / count;
+        const s = Math.sqrt(1 - y * y);
+        const v = new THREE.Vector3(Math.cos(i * golden) * s, y, Math.sin(i * golden) * s);
+        v.x += (Math.random() - 0.5) * jitter;
+        v.y += (Math.random() - 0.5) * jitter;
+        v.z += (Math.random() - 0.5) * jitter;
+        directions.push(v.normalize());
+    }
+    return directions;
+}
 
-    if (Math.random() < 0.85) {
-        const r = hemisphereRadius(Math.abs(dx), dy, dz);
-        const x = side * (Math.abs(dx) * r + GAP), y = dy * r + 0.1, z = dz * r;
-        return insideTemporal(x, y, z) ? null : { x, y, z, side, center: [side * GAP, 0.1, 0] };
+/** Points de la surface du cortex (hémisphères + lobes temporaux), avec le centre de leur lobe. */
+function cortexPoints() {
+    const points = [];
+    for (const d of evenDirections(HEMISPHERE_DIRECTIONS)) {
+        if (d.x < 0) continue; // chaque hémisphère utilise la moitié extérieure, puis on la reflète
+        const r = hemisphereRadius(d.x, d.y, d.z);
+        for (const side of [1, -1]) {
+            const x = side * (d.x * r + GAP), y = d.y * r + 0.1, z = d.z * r;
+            if (!insideTemporal(x, y, z)) points.push({ x, y, z, side, center: [side * GAP, 0.1, 0] });
+        }
     }
     const [cx, cy, cz] = TEMPORAL.center, [rx, ry, rz] = TEMPORAL.radius;
-    const x = side * (cx + dx * rx), y = cy + dy * ry, z = cz + dz * rz;
-    return insideHemisphere(x, y, z) ? null : { x, y, z, side, center: [side * cx, cy, cz] };
+    for (const d of evenDirections(TEMPORAL_DIRECTIONS)) {
+        for (const side of [1, -1]) {
+            const x = side * (cx + d.x * rx), y = cy + d.y * ry, z = cz + d.z * rz;
+            if (!insideHemisphere(x, y, z)) points.push({ x, y, z, side, center: [side * cx, cy, cz] });
+        }
+    }
+    return points;
+}
+
+/** Hauteur du relief en (x, y, z) : 0 au fond d'un sillon, 1 au sommet d'un gyrus. */
+function relief(x, y, z, side) {
+    return THREE.MathUtils.smoothstep(sulcus(x + (side > 0 ? 0 : 7), y, z), 0, 0.3); // plis propres à chaque hémisphère
 }
 
 function brainGeometry() {
@@ -123,26 +183,26 @@ function brainGeometry() {
     };
 
     // Cortex : des points partout, en relief. Les sillons (là où le bruit passe par zéro)
-    // sont des creux étroits ; les gyri entre eux, des bourrelets arrondis plus clairs.
+    // sont des creux étroits ; les gyri entre eux, des bourrelets arrondis éclairés comme des
+    // tubes : flanc tourné vers la lumière plus clair, flanc opposé dans l'ombre.
     const normal = new THREE.Vector3();
-    for (let i = 0; i < SURFACE_POINTS;) {
-        const p = surfacePoint();
-        if (!p) continue;
-        const n = sulcus(p.x + (p.side > 0 ? 0 : 7), p.y, p.z); // chaque hémisphère a ses propres plis
-        const h = THREE.MathUtils.smoothstep(n, 0, 0.3);           // 0 au fond du sillon, 1 au sommet du gyrus
-        if (Math.random() > 0.1 + 0.9 * h) continue;                // le fond des sillons est presque vide
+    for (const p of cortexPoints()) {
+        const h = relief(p.x, p.y, p.z, p.side);
+        if (h < 0.03) continue; // fond des sillons : invisible de toute façon
 
         // On enfonce le point vers le centre du lobe selon la profondeur du sillon
         const [cx, cy, cz] = p.center;
         const k = 1 - SULCUS_DEPTH * (1 - h);
         const x = cx + (p.x - cx) * k, y = cy + (p.y - cy) * k, z = cz + (p.z - cz) * k;
 
-        // Éclairage : face tournée vers la lumière plus claire, crête du gyrus plus claire,
-        // et un liseré lumineux au bord des sillons
-        const lambert = 0.45 + 0.55 * Math.max(normal.set(p.x - cx, p.y - cy, p.z - cz).normalize().dot(LIGHT), 0);
-        const lip = n > 0.02 && n < 0.05 ? 0.25 : 0;
-        push(x, y, z, c2.copy(deep).lerp(light, 0.15 + 0.75 * h), lambert * (0.06 + 0.94 * h ** 1.5) + lip, normal);
-        i++;
+        normal.set(p.x - cx, p.y - cy, p.z - cz).normalize();
+        const lambert = 0.45 + 0.55 * Math.max(normal.dot(LIGHT), 0);
+        // Pente du gyrus vers la lumière : le relief monte-t-il quand on avance vers elle ?
+        const ahead = relief(p.x + LIGHT.x * 0.02, p.y + LIGHT.y * 0.02, p.z + LIGHT.z * 0.02, p.side);
+        const slope = THREE.MathUtils.clamp((ahead - h) * 6, -1, 1);
+        const lip = h > 0.1 && h < 0.3 ? 0.2 : 0; // liseré au bord des sillons
+        const brightness = lambert * (0.08 + 1.4 * h ** 1.5 - 0.55 * slope * h) + lip;
+        push(x, y, z, c2.copy(deep).lerp(light, 0.15 + 0.75 * h), Math.max(brightness, 0.02), normal);
     }
 
     // Intérieur : quelques points diffus
