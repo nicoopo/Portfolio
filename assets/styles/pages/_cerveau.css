@@ -104,6 +104,30 @@
   font-size: 0.9rem;
 }
 
+/* Recherche, en tête de la légende */
+.brain-search {
+  margin-bottom: 0.4rem;
+}
+
+.brain-search-input {
+  width: 100%;
+  padding: 0.3rem 0.6rem;
+  color: var(--color-text);
+  font: inherit;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: 8px;
+}
+
+.brain-search-input:focus {
+  outline: none;
+  border-color: rgba(0, 212, 255, 0.7);
+}
+
+.brain-search-input[aria-invalid="true"] {
+  border-color: #f25f8c;
+}
+
 .brain-legend summary {
   cursor: pointer;
   padding: 0.25rem 0;
