@@ -35,20 +35,27 @@ class Passion
     #[ORM\Column]
     private int $position;
 
+    // Traductions anglaises (facultatives : vides, le français s'affiche ; voir App\Twig\Traduction)
+    #[Assert\Length(max: 50)]
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $nomEn = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $descriptionEn = null;
+
     public function getId(): ?int { return $this->id; }
     public function getNom(): string { return $this->nom; }
     public function getCouleur(): string { return $this->couleur; }
     public function getDescription(): string { return $this->description; }
     public function getPosition(): int { return $this->position; }
 
-    /** Données du cerveau 3D (data-brain-passions-value) */
-    public function toArray(): array
-    {
-        return ['nom' => $this->nom, 'couleur' => $this->couleur, 'description' => $this->description];
-    }
-
     public function setNom(?string $nom): static { $this->nom = $nom ?? ''; return $this; }
     public function setCouleur(?string $couleur): static { $this->couleur = $couleur ?? ''; return $this; }
     public function setDescription(?string $description): static { $this->description = $description ?? ''; return $this; }
     public function setPosition(?int $position): static { $this->position = $position ?? 0; return $this; }
+
+    public function getNomEn(): ?string { return $this->nomEn; }
+    public function setNomEn(?string $nomEn): static { $this->nomEn = $nomEn ?: null; return $this; }
+    public function getDescriptionEn(): ?string { return $this->descriptionEn; }
+    public function setDescriptionEn(?string $descriptionEn): static { $this->descriptionEn = $descriptionEn ?: null; return $this; }
 }

@@ -13,6 +13,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class ContactController extends AbstractController
 {
@@ -21,6 +22,7 @@ final class ContactController extends AbstractController
         Request $request,
         MailerInterface $mailer,
         LoggerInterface $logger,
+        TranslatorInterface $translator,
         #[Autowire('%app.contact_email%')] string $contactEmail,
     ): Response {
         $form = $this->createForm(ContactType::class);
@@ -41,13 +43,13 @@ final class ContactController extends AbstractController
                 } catch (TransportExceptionInterface $e) {
                     $logger->error('Formulaire de contact : envoi impossible', ['exception' => $e]);
                     // Pas de redirection : le formulaire reste rempli, le message n'est pas perdu
-                    $this->addFlash('error', 'L\'envoi a échoué. Réessayez plus tard, ou écrivez-moi directement à '.$contactEmail.'.');
+                    $this->addFlash('error', $translator->trans('L\'envoi a échoué. Réessayez plus tard, ou écrivez-moi directement à %email%.', ['%email%' => $contactEmail]));
 
                     return $this->render('contact/index.html.twig', ['form' => $form], new Response(status: Response::HTTP_SERVICE_UNAVAILABLE));
                 }
             }
 
-            $this->addFlash('success', 'Merci, votre message est bien parti ! Je vous réponds au plus vite.');
+            $this->addFlash('success', $translator->trans('Merci, votre message est bien parti ! Je vous réponds au plus vite.'));
 
             // Redirection : recharger la page ne renvoie pas le message
             return $this->redirectToRoute('app_contact', ['_fragment' => 'formulaire']);

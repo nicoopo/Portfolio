@@ -11,7 +11,20 @@ final class SmokeTest extends WebTestCase
     {
         foreach (['/', '/projects', '/competences', '/CV', '/contact', '/univers', '/cerveau'] as $url) {
             yield $url => [$url];
+            yield '/en'.$url => ['/en'.$url];
         }
+    }
+
+    /** Page anglaise : lang="en", texte traduit, et lien vers la même page en français */
+    public function testLaVersionAnglaiseEstTraduite(): void
+    {
+        $crawler = static::createClient()->request('GET', '/en/competences');
+
+        self::assertSelectorExists('html[lang="en"]');
+        self::assertSelectorTextContains('h1', 'My Skills');
+        self::assertAnySelectorTextContains('.skills-category h2', 'Networks / Infra'); // contenu de la base
+        self::assertSame('http://localhost/competences', $crawler->filter('link[hreflang="fr"]')->attr('href'));
+        self::assertSame('http://localhost/competences', $crawler->filter('a.lang-switch')->attr('href'));
     }
 
     #[DataProvider('pages')]

@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Projet;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
@@ -36,5 +37,11 @@ final class ProjetCrudController extends AbstractCrudController
         yield AssociationField::new('competences', 'Compétences utilisées')
             ->setFormTypeOption('by_reference', false); // passe par addCompetence / removeCompetence
         yield IntegerField::new('position')->setHelp('Ordre d\'affichage (croissant)');
+
+        // Version anglaise du site : vide = le français s'affiche
+        yield FormField::addFieldset('Anglais (facultatif)')->collapsible()->renderCollapsed();
+        yield TextField::new('titreEn', 'Titre')->hideOnIndex();
+        yield TextareaField::new('descriptionEn', 'Description')->hideOnIndex();
+        yield TextField::new('categorieEn', 'Groupe')->hideOnIndex();
     }
 }

@@ -37,6 +37,11 @@ class CategorieCompetence
     #[ORM\Column]
     private int $position;
 
+    // Traductions anglaises (facultatives : vides, le français s'affiche ; voir App\Twig\Traduction)
+    #[Assert\Length(max: 50)]
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $nomEn = null;
+
     /** @var Collection<int, Competence> */
     #[ORM\OneToMany(targetEntity: Competence::class, mappedBy: 'categorie')]
     #[ORM\OrderBy(['position' => 'ASC'])]
@@ -62,4 +67,7 @@ class CategorieCompetence
     public function setPosition(?int $position): static { $this->position = $position ?? 0; return $this; }
 
     public function __toString(): string { return $this->nom; }
+
+    public function getNomEn(): ?string { return $this->nomEn; }
+    public function setNomEn(?string $nomEn): static { $this->nomEn = $nomEn ?: null; return $this; }
 }

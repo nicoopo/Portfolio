@@ -58,6 +58,18 @@ class Projet
     #[ORM\Column]
     private int $position;
 
+    // Traductions anglaises (facultatives : vides, le français s'affiche ; voir App\Twig\Traduction)
+    #[Assert\Length(max: 100)]
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $titreEn = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $descriptionEn = null;
+
+    #[Assert\Length(max: 50)]
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $categorieEn = null;
+
     /** @var Collection<int, Competence> */
     #[ORM\ManyToMany(targetEntity: Competence::class, inversedBy: 'projets')]
     #[ORM\OrderBy(['position' => 'ASC'])]
@@ -103,4 +115,11 @@ class Projet
 
         return $this;
     }
+
+    public function getTitreEn(): ?string { return $this->titreEn; }
+    public function setTitreEn(?string $titreEn): static { $this->titreEn = $titreEn ?: null; return $this; }
+    public function getDescriptionEn(): ?string { return $this->descriptionEn; }
+    public function setDescriptionEn(?string $descriptionEn): static { $this->descriptionEn = $descriptionEn ?: null; return $this; }
+    public function getCategorieEn(): ?string { return $this->categorieEn; }
+    public function setCategorieEn(?string $categorieEn): static { $this->categorieEn = $categorieEn ?: null; return $this; }
 }

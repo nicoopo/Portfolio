@@ -3,3 +3,8 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+    # Français sans préfixe (les liens existants ne changent pas), anglais sous /en.
+    # path('app_home') donne la version de la langue courante ; _locale: 'en' force l'autre.
+    prefix:
+        fr: ''
+        en: '/en'
