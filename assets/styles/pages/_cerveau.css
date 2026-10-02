@@ -5,6 +5,7 @@
   z-index: 1;
   height: 100vh;
   height: 100dvh;
+  margin-top: calc(-1 * var(--navbar-height)); /* plein écran, sous la navbar fixe (annule le padding de main) */
   overflow: hidden;
   touch-action: none; /* le glisser tourne le cerveau au lieu de scroller */
 }
