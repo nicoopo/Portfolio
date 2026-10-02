@@ -65,7 +65,7 @@ final class Projets
             [
                 'slug' => 'portfolio',
                 'titre' => 'Portfolio',
-                'description' => 'Application web de mon parcour',
+                'description' => 'Application web de mon parcours',
                 'tech' => 'Symfony/PHP, Twig/Html/CSS, MySQL',
                 'image' => 'symfony/Portfolio.png',
                 'competences' => ['PHP / Symfony', 'Twig', 'HTML5', 'CSS3 / SCSS', 'JavaScript / TypeScript', 'Docker', 'Git / GitHub'],
