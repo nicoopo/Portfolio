@@ -36,6 +36,7 @@ final class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(DemandeContactCrudController::class, 'Demandes de contact', 'fa fa-envelope');
         yield MenuItem::section('Administration');
         yield MenuItem::linkTo(UtilisateurCrudController::class, 'Comptes', 'fa fa-user-shield');
+        yield MenuItem::linkTo(JournalCrudController::class, 'Journal', 'fa fa-list-check');
         yield MenuItem::section();
         yield MenuItem::linkToLogout('Se déconnecter', 'fa fa-right-from-bracket');
     }

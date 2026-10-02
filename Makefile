@@ -27,6 +27,9 @@ migrate: ## Applique les migrations (dev)
 admin-create: ## Crée le compte « admin » de /admin, ou change son mot de passe (dev)
 	$(CONSOLE) app:admin:create
 
+journal-purge: ## Supprime les entrées du journal de plus de 12 mois (dev)
+	$(CONSOLE) app:journal:purge
+
 down: ## Arrête le conteneur (dev)
 	$(DC) down
 
@@ -59,6 +62,9 @@ preprod-logs: ## Logs en temps réel (preprod)
 
 preprod-admin-create: ## Crée le compte « admin » de /admin, ou change son mot de passe (preprod)
 	$(DC_PREPROD) exec php php bin/console app:admin:create
+
+preprod-journal-purge: ## Supprime les entrées du journal de plus de 12 mois (preprod ; à planifier, ex. cron mensuel)
+	$(DC_PREPROD) exec -T php php bin/console app:journal:purge
 
 preprod-bash: ## Shell dans le conteneur (preprod)
 	$(DC_PREPROD) exec php bash

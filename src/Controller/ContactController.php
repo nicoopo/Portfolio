@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\DemandeContact;
+use App\Entity\Journal;
 use App\Form\ContactType;
+use App\Service\Journaliste;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,6 +28,7 @@ final class ContactController extends AbstractController
         EntityManagerInterface $entityManager,
         LoggerInterface $logger,
         TranslatorInterface $translator,
+        Journaliste $journaliste,
         #[Autowire('%app.contact_email%')] string $contactEmail,
     ): Response {
         $form = $this->createForm(ContactType::class);
@@ -49,11 +52,15 @@ final class ContactController extends AbstractController
                         ->subject('Contact portfolio : '.$data['nom'])
                         ->text($data['message']."\n\n— ".$data['nom'].' <'.$data['email'].'>'));
                     $demande->marquerEnvoye();
+                    $journaliste->noter(Journal::CONTACT_ENVOYE, 'Message de contact reçu et envoyé par e-mail — '.$data['nom']);
                 } catch (TransportExceptionInterface $e) {
                     $logger->error('Formulaire de contact : e-mail non envoyé (message conservé en base)', ['exception' => $e, 'demande' => $demande->getId()]);
                     $demande->marquerEchec();
+                    $journaliste->noter(Journal::CONTACT_ECHEC, 'Message de contact reçu, e-mail en échec (voir « Demandes de contact ») — '.$data['nom']);
                 }
                 $entityManager->flush();
+            } else {
+                $journaliste->noter(Journal::SPAM_BLOQUE, 'Robot bloqué par le champ piège du formulaire de contact');
             }
 
             $this->addFlash('success', $translator->trans('Merci, votre message est bien parti ! Je vous réponds au plus vite.'));

@@ -58,4 +58,6 @@ class Passion
     public function setNomEn(?string $nomEn): static { $this->nomEn = $nomEn ?: null; return $this; }
     public function getDescriptionEn(): ?string { return $this->descriptionEn; }
     public function setDescriptionEn(?string $descriptionEn): static { $this->descriptionEn = $descriptionEn ?: null; return $this; }
+
+    public function __toString(): string { return $this->nom; }
 }
