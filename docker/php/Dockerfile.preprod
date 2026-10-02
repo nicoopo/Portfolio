@@ -6,9 +6,10 @@
 FROM php:8.5-apache
 
 # ------------------------------------------------
-# Apache
+# Apache (+ cache d'un an pour /assets, SVG compressé)
 # ------------------------------------------------
-RUN a2enmod rewrite
+COPY docker/php/apache-performance.conf /etc/apache2/conf-available/performance.conf
+RUN a2enmod rewrite headers && a2enconf performance
 
 # ------------------------------------------------
 # Dépendances système + extensions PHP
