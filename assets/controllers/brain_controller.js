@@ -2,6 +2,10 @@
 import { Controller } from '@hotwired/stimulus';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { dotTexture } from '../cerveau/textures.js';
 import { createBrain } from '../cerveau/brain.js';
 import { createNeurons } from '../cerveau/neurons.js';
@@ -76,6 +80,15 @@ export default class extends Controller {
         this.listen(this.renderer.domElement, 'pointerup', (e) => this.onPointerUp(e));
         this.listen(this.renderer.domElement, 'pointerleave', () => this.hover(null));
 
+        // Lueur (bloom) autour des points lumineux.
+        // ponytail: coupée sur petit écran comme approximation des GPU faibles ; à affiner si besoin (mesure du FPS)
+        if (!window.matchMedia('(max-width: 576px)').matches) {
+            this.composer = new EffectComposer(this.renderer);
+            this.composer.addPass(new RenderPass(this.scene, this.camera));
+            this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(1, 1), 0.35, 0.3, 0.4) /* force, rayon, seuil */);
+            this.composer.addPass(new OutputPass());
+        }
+
         this.resizeObserver = new ResizeObserver(() => this.resize());
         this.resizeObserver.observe(this.canvasTarget);
         this.resize();
@@ -87,7 +100,8 @@ export default class extends Controller {
             this.timer.update(); // sans l'horodatage de rAF : il peut précéder la création du timer (temps négatif)
             this.animate(this.reducedMotion ? 0 : this.timer.getElapsed());
             this.controls.update();
-            this.renderer.render(this.scene, this.camera);
+            if (this.composer) this.composer.render();
+            else this.renderer.render(this.scene, this.camera);
         };
         loop();
 
@@ -110,6 +124,8 @@ export default class extends Controller {
             object.material?.dispose();
         });
         this.texture.dispose();
+        this.composer?.passes.forEach((pass) => pass.dispose());
+        this.composer?.dispose();
         this.renderer.dispose();
         this.renderer.domElement.remove();
         this.renderer = null;
@@ -123,6 +139,7 @@ export default class extends Controller {
     resize() {
         const { clientWidth: w, clientHeight: h } = this.canvasTarget;
         this.renderer.setSize(w, h);
+        this.composer?.setSize(w, h);
         this.camera.aspect = w / h;
         this.camera.fov = w < h ? 75 : 50; // écran vertical (mobile) : on élargit le champ pour garder le cerveau entier
         this.camera.updateProjectionMatrix();
