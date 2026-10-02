@@ -122,4 +122,6 @@ class Projet
     public function setDescriptionEn(?string $descriptionEn): static { $this->descriptionEn = $descriptionEn ?: null; return $this; }
     public function getCategorieEn(): ?string { return $this->categorieEn; }
     public function setCategorieEn(?string $categorieEn): static { $this->categorieEn = $categorieEn ?: null; return $this; }
+
+    public function __toString(): string { return $this->titre; }
 }

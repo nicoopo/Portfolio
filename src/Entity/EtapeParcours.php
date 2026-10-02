@@ -102,4 +102,6 @@ class EtapeParcours
     public function setSpecialiteEn(?string $specialiteEn): static { $this->specialiteEn = $specialiteEn ?: null; return $this; }
     public function getResultatEn(): ?string { return $this->resultatEn; }
     public function setResultatEn(?string $resultatEn): static { $this->resultatEn = $resultatEn ?: null; return $this; }
+
+    public function __toString(): string { return $this->nom; }
 }
