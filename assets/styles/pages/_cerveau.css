@@ -292,6 +292,11 @@
 }
 
 @media (max-width: 576px) {
+  /* Mobile : boutons de droite sur une ligne au-dessus de « Visite guidée » (pas la place côte à côte) */
+  .brain-actions {
+    bottom: 4rem;
+  }
+
   /* Mobile : légende repliée en haut, panneau en bas de l'écran */
   .brain-legend {
     right: 1rem;
