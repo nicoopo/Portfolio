@@ -15,4 +15,14 @@ class DemandeContactRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, DemandeContact::class);
     }
+
+    public function compterDepuis(\DateTimeImmutable $date): int
+    {
+        return (int) $this->createQueryBuilder('demande')
+            ->select('COUNT(demande.id)')
+            ->where('demande.recuLe >= :date')
+            ->setParameter('date', $date)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

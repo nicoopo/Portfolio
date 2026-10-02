@@ -2,6 +2,13 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Competence;
+use App\Entity\DemandeContact;
+use App\Entity\Journal;
+use App\Repository\DemandeContactRepository;
+use App\Repository\JournalRepository;
+use App\Repository\ProjetRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -12,10 +19,29 @@ use Symfony\Component\HttpFoundation\Response;
 #[AdminDashboard(routePath: '/admin', routeName: 'admin')]
 final class DashboardController extends AbstractDashboardController
 {
+    public function __construct(
+        private readonly DemandeContactRepository $demandes,
+        private readonly JournalRepository $journal,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly ProjetRepository $projets,
+    ) {
+    }
+
+    /** Tableau de bord : contact, sécurité, contenu, raccourcis */
     public function index(): Response
     {
-        // Pas de page d'accueil à maintenir : on ouvre directement la liste des compétences
-        return $this->redirectToRoute('admin_competence_index');
+        $debutDuMois = new \DateTimeImmutable('first day of this month midnight');
+
+        return $this->render('admin/tableau_de_bord.html.twig', [
+            'demandes_total' => $this->demandes->count([]),
+            'demandes_mois' => $this->demandes->compterDepuis($debutDuMois),
+            'demandes_echec' => $this->demandes->count(['statut' => DemandeContact::STATUT_ECHEC]),
+            'connexions_refusees' => $this->journal->compterDepuis(Journal::CONNEXION_REFUSEE, new \DateTimeImmutable('-7 days')),
+            'nb_competences' => $this->entityManager->getRepository(Competence::class)->count([]),
+            'nb_projets' => $this->projets->count([]),
+            'dernieres_demandes' => $this->demandes->findBy([], ['recuLe' => 'DESC'], 5),
+            'dernier_journal' => $this->journal->findBy([], ['date' => 'DESC'], 8),
+        ]);
     }
 
     public function configureDashboard(): Dashboard
@@ -25,6 +51,7 @@ final class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
+        yield MenuItem::linkToDashboard('Tableau de bord', 'fa fa-gauge');
         yield MenuItem::linkToUrl('Voir le site', 'fa fa-arrow-left', '/cerveau');
         yield MenuItem::section('Cerveau');
         yield MenuItem::linkTo(CategorieCompetenceCrudController::class, 'Catégories', 'fa fa-layer-group');
