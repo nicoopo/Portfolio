@@ -25,7 +25,7 @@ const TOUR_PAUSE_MS = 6000; // temps passé sur chaque neurone
  * Chargé uniquement sur les pages qui l'utilisent (lazy).
  */
 export default class extends Controller {
-    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton'];
+    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search'];
     static values = { neurons: Array, passions: Array, souvenirs: Array };
 
     connect() {
@@ -292,6 +292,27 @@ export default class extends Controller {
     // ------------------------------------------------
 
     /** Depuis la légende ou le panneau (clavier, lecteur d'écran) : data-brain-name-param */
+    /** Champ de recherche : nom exact, sinon premier nom qui le contient (sans tenir compte des accents ni de la casse) */
+    search(event) {
+        event.preventDefault();
+        const query = normalize(this.searchTarget.value.trim());
+        if (!query || !this.clickables) return;
+
+        const found = this.clickables.find((t) => normalize(t.userData.data.nom) === query)
+            ?? this.clickables.find((t) => normalize(t.userData.data.nom).includes(query));
+        this.searchTarget.setAttribute('aria-invalid', String(!found));
+        if (!found) return;
+
+        this.stopTour();
+        this.select(found);
+        this.searchTarget.value = found.userData.data.nom;
+    }
+
+    /** À chaque touche dans le champ (propagation arrêtée : les flèches ne déplacent pas la caméra) */
+    clearSearchError() {
+        this.searchTarget.removeAttribute('aria-invalid');
+    }
+
     selectByName({ params: { name }, target }) {
         const found = this.clickables?.find((t) => t.userData.data.nom === name);
         if (!found) return;
@@ -389,6 +410,11 @@ export default class extends Controller {
         this.panelTitleTarget.textContent = title;
         this.panelBodyTarget.replaceChildren();
     }
+}
+
+/** Texte comparable : sans accents ni majuscules (« Médecine » → « medecine »). */
+function normalize(text) {
+    return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 }
 
 /** Petit utilitaire DOM : element('a', { href, textContent }, ...enfants). */

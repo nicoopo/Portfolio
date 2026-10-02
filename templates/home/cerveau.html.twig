@@ -24,6 +24,17 @@
 
     {# Légende des lobes ; les boutons servent aussi au clavier et aux lecteurs d'écran #}
     <nav class="brain-legend" aria-label="Compétences">
+        {# Recherche : suggestions natives (datalist), Entrée ou choix d'une suggestion = vol vers l'élément #}
+        <form class="brain-search" role="search" data-action="brain#search">
+            <input type="search" list="brain-names" class="brain-search-input" data-brain-target="search"
+                   data-action="change->brain#search keydown->brain#clearSearchError:stop"
+                   placeholder="Chercher…" aria-label="Chercher une compétence, une passion ou une étape du parcours">
+            <datalist id="brain-names">
+                {% for categorie in categories %}{% for competence in categorie.competences %}<option value="{{ competence.nom }}">{% endfor %}{% endfor %}
+                {% for passion in passions %}<option value="{{ passion.nom }}">{% endfor %}
+                {% for etape in parcours %}<option value="{{ etape.nom }}">{% endfor %}
+            </datalist>
+        </form>
         {% for categorie in categories %}
         <details class="brain-legend-group">
             <summary>
