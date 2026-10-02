@@ -12,7 +12,7 @@
         <h2 class="harbor-theme-title">{{ categorie }}</h2>
         <div class="harbor-projects">
           {% for projet in projets %}
-          <div class="harbor-project-card">
+          <div class="harbor-project-card" id="{{ projet.slug }}">
             <div class="harbor-project-image-container">
               <img src="{{ asset('images/projets/' ~ projet.image) }}" alt="{{ projet.titre }}" class="harbor-project-img">
             </div>
@@ -28,36 +28,4 @@
     {% endfor %}
   </div>
 </section>
-<script>
-  document.addEventListen// Script simplifié - juste l'animation au scroll
-  document.addEventListener("DOMContentLoaded", () => {
-    const projectRows = document.querySelectorAll(".project-row");
-    
-    // Fonction de révélation simple
-    const reveal = () => {
-      const windowHeight = window.innerHeight;
-      
-      projectRows.forEach(row => {
-        const rect = row.getBoundingClientRect();
-        
-        // Si l'élément est dans la zone visible
-        if (rect.top < windowHeight - 100) {
-          row.classList.add("visible");
-        }
-      });
-    };
-    
-    // Vérifier au chargement
-    reveal();
-    
-    // Vérifier au scroll (optimisé)
-    let scrollTimeout;
-    window.addEventListener("scroll", () => {
-      if (scrollTimeout) {
-        window.cancelAnimationFrame(scrollTimeout);
-      }
-      scrollTimeout = window.requestAnimationFrame(reveal);
-    });
-  });
-</script>
 {% endblock %}

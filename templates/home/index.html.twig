@@ -17,12 +17,17 @@
 
         <div class="typing-container">
             <span class="static-text">Je suis </span>
-            <span class="typing-text" id="typing-text"></span><span class="cursor"></span>
+            <span class="typing-text" id="typing-text"
+                  data-controller="typing"
+                  data-typing-words-value="{{ ['Développeur Web', 'Passionné de Tech', 'Créateur Digital']|json_encode }}"></span><span class="cursor"></span>
         </div>
 
         <div class="cta-container">
             <a href="{{ path('app_projects') }}" class="btn btn-galactic btn-galactic-outline-light">
                 Explorer mon travail
+            </a>
+            <a href="{{ path('app_cerveau') }}" class="btn btn-galactic btn-galactic-primary">
+                Entrer dans mon cerveau
             </a>
         </div>
 
@@ -46,44 +51,4 @@
         </div>
     </div>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const textElement = document.getElementById('typing-text');
-        const words = ["Développeur Web", "Passionné de Tech", "Créateur Digital"];
-        let wordIndex = 0;
-        let charIndex = 0;
-        let isDeleting = false;
-        const typeSpeed = 100;
-        const deleteSpeed = 50;
-        const pauseTime = 2000;
-
-        function type() {
-            const currentWord = words[wordIndex];
-
-            if (isDeleting) {
-                textElement.textContent = currentWord.substring(0, charIndex - 1);
-                charIndex--;
-            } else {
-                textElement.textContent = currentWord.substring(0, charIndex + 1);
-                charIndex++;
-            }
-
-            let typeDelay = isDeleting ? deleteSpeed : typeSpeed;
-
-            if (!isDeleting && charIndex === currentWord.length) {
-                typeDelay = pauseTime;
-                isDeleting = true;
-            } else if (isDeleting && charIndex === 0) {
-                isDeleting = false;
-                wordIndex = (wordIndex + 1) % words.length;
-                typeDelay = 500;
-            }
-
-            setTimeout(type, typeDelay);
-        }
-
-        type();
-    });
-</script>
 {% endblock %}

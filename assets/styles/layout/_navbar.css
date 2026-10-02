@@ -1,0 +1,191 @@
+/* Navbar + menu déroulant (base.html.twig) */
+
+.navbar-galactic {
+  height: var(--navbar-height);
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  background: rgba(10, 10, 20, 0.55);
+  backdrop-filter: blur(14px) saturate(180%);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+  box-shadow: 0 0 25px rgba(127, 90, 240, 0.25), 0 0 40px rgba(0, 212, 255, 0.15);
+  transition: all 0.4s ease;
+  animation: float-nav 6s ease-in-out infinite alternate;
+}
+
+.navbar-galactic:hover {
+  box-shadow: 0 0 30px rgba(127, 90, 240, 0.45), 0 0 60px rgba(0, 212, 255, 0.35);
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.1rem 4rem;
+}
+
+.logo {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-decoration: none;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: text-shadow 0.4s ease;
+}
+
+.logo:hover {
+  text-shadow: 0 0 8px var(--color-primary), 0 0 18px var(--color-secondary);
+}
+
+.logo-sm {
+  max-width: 40px;
+  height: auto;
+}
+
+.menu-button {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: rgba(20, 20, 40, 0.45);
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1;
+  outline: none;
+}
+
+.menu-button svg,
+.menu-button .ux-icon,
+.menu-button .icon {
+  display: inline-block !important;
+  width: 1.6em !important;
+  height: 1.6em !important;
+  min-width: 24px;
+  min-height: 24px;
+  fill: currentColor !important;
+  color: var(--color-text-light) !important;
+  vertical-align: middle;
+}
+
+.menu-button svg path {
+  fill: currentColor !important;
+}
+
+.menu-button * {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.menu-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 18px rgba(127, 90, 240, 0.45), 0 0 36px rgba(0, 212, 255, 0.25);
+}
+
+.dropdown-menu-galactic {
+  display: none;
+  position: absolute;
+  right: 2rem;
+  top: 80px;
+  background: rgba(15, 15, 30, 0.8);
+  border: 1px solid rgba(127, 90, 240, 0.4);
+  border-radius: 16px;
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: 0 0 25px rgba(127, 90, 240, 0.4);
+  list-style: none;
+  padding: 1rem 0;
+  margin: 0;
+  width: 220px;
+  z-index: 999;
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(-15px);
+}
+
+.dropdown-menu-galactic.show {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dropdown-menu-galactic li {
+  text-align: center;
+  margin: 0.5rem 0;
+}
+
+.dropdown-menu-galactic a {
+  display: block;
+  color: var(--color-text-light);
+  text-decoration: none;
+  padding: 0.6rem 0;
+  transition: all 0.3s ease;
+}
+
+.dropdown-menu-galactic a:hover {
+  color: #fff;
+  text-shadow: 0 0 8px var(--color-primary), 0 0 16px var(--color-secondary);
+  background: rgba(127, 90, 240, 0.15);
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .navbar-container {
+    flex-direction: row;
+    gap: 0.8rem;
+    padding: 0.8rem 1.2rem;
+  }
+
+  .dropdown-menu-galactic {
+    background: rgba(15, 15, 30, 0.92);
+    border-color: rgba(127, 90, 240, 0.6);
+    backdrop-filter: blur(12px) saturate(160%);
+    right: 1rem;
+    left: auto;
+    transform: none;
+    width: max-content;
+    max-width: 90vw;
+    padding: 0.25rem;
+    box-sizing: border-box;
+  }
+
+  .dropdown-menu-galactic li {
+    margin: 0;
+  }
+
+  .dropdown-menu-galactic a {
+    display: inline-block;
+    box-sizing: border-box;
+    text-align: left;
+    white-space: nowrap;
+    font-size: 1.05rem;
+    padding: 0.35rem 0.45rem;
+    color: #ffffff;
+    text-shadow: none;
+  }
+
+  .dropdown-menu-galactic a:hover {
+    background: rgba(127, 90, 240, 0.2);
+  }
+}
+
+@media (max-width: 576px) {
+  .navbar-container {
+    padding: 0.8rem 1.2rem;
+  }
+
+  .dropdown-menu-galactic {
+    top: calc(var(--navbar-height) + 10px);
+    right: 1rem;
+    left: auto;
+    transform: none;
+    width: max-content;
+    max-width: 90vw;
+  }
+}

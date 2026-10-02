@@ -1,0 +1,238 @@
+/* Cerveau 3D (home/cerveau.html.twig, controllers/brain_controller.js) */
+
+.brain-stage {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  touch-action: none; /* le glisser tourne le cerveau au lieu de scroller */
+}
+
+.brain-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.brain-stage canvas {
+  display: block;
+  cursor: grab;
+}
+
+.brain-stage canvas:active {
+  cursor: grabbing;
+}
+
+.brain-fallback,
+.brain-hint {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: var(--color-text-light);
+  text-align: center;
+}
+
+.brain-fallback {
+  top: 45%;
+}
+
+.brain-hint {
+  bottom: 1.5rem;
+  font-size: 0.85rem;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Panneaux en verre posés sur la scène */
+.brain-legend,
+.brain-panel {
+  position: absolute;
+  z-index: 2;
+  color: var(--color-text-light);
+  background: rgba(10, 10, 25, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 12px;
+}
+
+/* Légende des lobes */
+.brain-legend {
+  top: calc(var(--navbar-height) + 1rem);
+  left: 1rem;
+  max-height: calc(100% - var(--navbar-height) - 5rem);
+  overflow-y: auto;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.brain-legend summary {
+  cursor: pointer;
+  padding: 0.25rem 0;
+}
+
+.brain-legend-dot {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  background: var(--dot);
+  box-shadow: 0 0 8px var(--dot);
+}
+
+/* Passions : pastille en dégradé, comme une nébuleuse */
+.brain-legend-dot--nebula {
+  --dot: #a06cff;
+  background: conic-gradient(#5b8cff, #2cb67d, #e4c35b, #f25f8c, #a06cff, #5b8cff);
+}
+
+.brain-legend ul {
+  list-style: none;
+  margin: 0 0 0.25rem;
+  padding-left: 1.2rem;
+}
+
+.brain-legend button {
+  background: none;
+  border: 0;
+  padding: 0.15rem 0;
+  color: inherit;
+  text-align: left;
+  opacity: 0.8;
+}
+
+.brain-legend button:hover,
+.brain-legend button:focus-visible {
+  opacity: 1;
+  color: var(--color-secondary);
+}
+
+/* Nom du neurone survolé */
+.brain-tooltip {
+  position: absolute;
+  z-index: 2;
+  margin: 0;
+  padding: 0.2rem 0.6rem;
+  transform: translate(-50%, calc(-100% - 12px));
+  color: #fff;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  background: rgba(10, 10, 25, 0.8);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+/* Panneau du neurone sélectionné */
+.brain-panel {
+  top: calc(var(--navbar-height) + 1rem);
+  right: 1rem;
+  width: min(320px, calc(100% - 2rem));
+  padding: 1.25rem 1.5rem;
+  border-color: var(--neuron);
+  box-shadow: 0 0 25px color-mix(in srgb, var(--neuron) 35%, transparent);
+}
+
+.brain-panel:focus {
+  outline: none;
+}
+
+.brain-panel-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  background: none;
+  border: 0;
+  color: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.brain-panel-category {
+  margin: 0;
+  color: var(--neuron);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.brain-panel-title {
+  margin: 0.25rem 0 1rem;
+  font-size: 1.4rem;
+}
+
+.brain-panel h3 {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.brain-panel ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.brain-panel a {
+  color: var(--color-secondary);
+}
+
+.brain-panel p {
+  margin: 0;
+}
+
+/* Neurones connectés : boutons pour sauter de neurone en neurone */
+.brain-panel-synapses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  padding: 0 !important;
+}
+
+.brain-panel-synapses button {
+  padding: 0.15rem 0.6rem;
+  color: inherit;
+  font-size: 0.85rem;
+  background: color-mix(in srgb, var(--dot) 20%, transparent);
+  border: 1px solid var(--dot);
+  border-radius: 999px;
+}
+
+.brain-panel-synapses button:hover,
+.brain-panel-synapses button:focus-visible {
+  background: color-mix(in srgb, var(--dot) 45%, transparent);
+}
+
+.brain-panel h3 + ul,
+.brain-panel ul + h3 {
+  margin-top: 0.5rem;
+}
+
+.brain-panel ul + h3 {
+  margin-top: 1rem;
+}
+
+.brain-panel-empty {
+  margin: 0;
+  opacity: 0.7;
+}
+
+@media (max-width: 576px) {
+  /* Mobile : légende repliée en haut, panneau en bas de l'écran */
+  .brain-legend {
+    right: 1rem;
+    max-height: 40%;
+  }
+
+  .brain-panel {
+    top: auto;
+    bottom: 1rem;
+    left: 1rem;
+    width: auto;
+    max-height: 45%;
+    overflow-y: auto;
+  }
+
+  .brain-hint {
+    display: none;
+  }
+}

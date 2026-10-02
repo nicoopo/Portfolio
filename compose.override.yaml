@@ -1,18 +1,22 @@
-
+# ------------------------------------------------
+# Override DEV uniquement
+# ------------------------------------------------
 services:
-###> doctrine/doctrine-bundle ###
-  database:
-    ports:
-      - "5432"
-###< doctrine/doctrine-bundle ###
 
-###> symfony/mailer ###
-  mailer:
-    image: axllent/mailpit
+  php:
+    volumes:
+      - .:/var/www/symfony
+      - php_cache:/var/www/symfony/var/cache
+      - php_log:/var/www/symfony/var/log
+      - symfony_vendor:/var/www/symfony/vendor
+      - assets_vendor:/var/www/symfony/assets/vendor
     ports:
-      - "1025"
-      - "8025"
+      - "8081:80" # 8080 est pris par Cabin Access
     environment:
-      MP_SMTP_AUTH_ACCEPT_ANY: 1
-      MP_SMTP_AUTH_ALLOW_INSECURE: 1
-###< symfony/mailer ###
+      APP_ENV: dev # en dur : `.env` contient APP_ENV=prod, que Compose lirait via ${APP_ENV}
+
+volumes:
+  php_cache:
+  php_log:
+  symfony_vendor:
+  assets_vendor:

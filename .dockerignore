@@ -1,0 +1,13 @@
+vendor/
+node_modules/
+var/
+public/assets/
+public/bundles/
+assets/vendor/
+.git/
+.idea/
+
+# Secrets : injectés au runtime par env_file (compose.preprod.yaml), jamais copiés dans l'image
+.env.local
+.env.local.php
+.env.*.local

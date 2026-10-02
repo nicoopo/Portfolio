@@ -9,28 +9,57 @@ Ce projet est un portfolio personnel développé avec Symfony 7.4, mettant en av
 ```
 Portfolio/
 ├── assets/              # Fichiers statiques (JS, CSS, images)
-│   ├── controllers/     # Contrôleurs Stimulus
-│   ├── styles/          # Styles CSS
-│   └── vendor/          # Bibliothèques tierces
+│   ├── cerveau/         # Modules Three.js du cerveau 3D
+│   ├── controllers/     # Contrôleurs Stimulus (comportement lié à un élément)
+│   ├── scripts/         # Scripts globaux chargés sur toutes les pages
+│   ├── styles/          # CSS découpé (voir « Organisation des assets »)
+│   └── vendor/          # Bibliothèques tierces (importmap, non versionné)
 ├── config/              # Configuration Symfony
 ├── src/                 # Code source
 │   ├── Controller/      # Contrôleurs Symfony
-│   ├── Entity/          # Entités Doctrine
-│   ├── Form/            # Formulaires Symfony
-│   └── Repository/      # Repositories Doctrine
+│   ├── Data/            # Données en dur (compétences, projets, passions)
+│   ├── Entity/          # Entités Doctrine (vide pour l'instant)
+│   └── Repository/      # Repositories Doctrine (vide pour l'instant)
 ├── templates/           # Vues Twig
 │   ├── competences/     # Page des compétences
 │   ├── contact/         # Page de contact
 │   ├── cv/              # CV en ligne et PDF
-│   ├── home/            # Page d'accueil
+│   ├── home/            # Page d'accueil et cerveau 3D
 │   ├── portfolio/       # Page des projets
 │   └── univers/         # Page des centres d'intérêt
 ├── public/              # Point d'entrée public
 └── var/                 # Cache et logs
 ```
 
+## 🗂 Organisation des assets
+
+**CSS** — `assets/styles/app.css` ne contient que des `@import`, dans l'ordre de la cascade :
+
+| Dossier | Contenu | Exemple |
+|---|---|---|
+| `base/` | Variables, styles globaux, keyframes partagées | `_variables.css` |
+| `layout/` | Structure commune à toutes les pages | `_navbar.css` |
+| `components/` | Blocs réutilisables sur plusieurs pages | `_buttons.css` |
+| `pages/` | Un fichier par page | `_contact.css` |
+
+- Les fichiers importés par `app.css` commencent par `_`.
+- Un CSS qui ne doit pas s'appliquer partout (ex. `pages/cv.css`, qui redéfinit `body`) n'a pas de `_`
+  et est chargé seulement par sa page via `{% block stylesheets %}`.
+- Les media queries sont dans le fichier du composant qu'elles modifient, pas dans un fichier « responsive ».
+
+**JS**
+- `assets/controllers/xxx_controller.js` : contrôleur Stimulus, branché sur un élément avec `data-controller="xxx"`.
+  C'est le choix par défaut pour tout comportement de page (ex. `typing`, `cv`, `brain`).
+- `assets/scripts/` : scripts globaux importés par `app.js` (fond étoilé, menu, transition de page).
+- `assets/cerveau/` : modules Three.js du cerveau 3D (forme, neurones, synapses, nébuleuses), sans logique
+  d'interface ; importés uniquement par `controllers/brain_controller.js`.
+- Pas de `<script>` ni de `<style>` dans les templates Twig (exceptions : le template PDF, car Dompdf exige le CSS inline, et la ligne qui applique le thème du CV avant l'affichage).
+
 ## ✨ Fonctionnalités
 
+- **Mon Cerveau** : Cerveau holographique 3D (Three.js) : chaque neurone est une compétence, cliquable,
+  relié par des synapses animées aux compétences utilisées dans les mêmes projets ; des nébuleuses en orbite
+  représentent mes passions.
 - **Compétences** : Présentation de mes compétences techniques et professionnelles.
 - **Portfolio** : Galerie de projets avec descriptions et captures d'écran.
 - **CV en ligne** : CV interactif avec téléchargement en PDF.
@@ -40,6 +69,7 @@ Portfolio/
 ## 🛠 Technologies
 
 - Symfony 7.4
+- Three.js
 - PHP
 - Node.js
 - Doctrine
