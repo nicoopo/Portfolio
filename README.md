@@ -107,13 +107,14 @@ Portfolio/
 **Base de dev** (client SQL, PhpStorm…) : `localhost:5433`, base `app`, utilisateur `app`, sans mot de passe
 (port ouvert sur 127.0.0.1 uniquement). En ligne de commande : `docker compose exec database psql -U app app`.
 
-**Administration** : [http://localhost:8081/admin](http://localhost:8081/admin) (identifiant `admin`) pour modifier
-compétences, projets, passions et parcours. Mot de passe : `make admin-password`, puis copier l'empreinte affichée dans
-`.env.local` : `ADMIN_PASSWORD_HASH='...'` (entre apostrophes : elle contient des `$`). Sans elle, connexion impossible.
+**Administration** : [http://localhost:8081/admin](http://localhost:8081/admin) pour modifier compétences, projets,
+passions et parcours. Premier compte : `make admin-create` (identifiant et mot de passe demandés) ; ensuite, les comptes
+et les mots de passe se gèrent dans l'administration (menu « Comptes »).
 
-**Preprod** : définir dans `.env.local` sur le serveur `POSTGRES_PASSWORD=...`, `ADMIN_PASSWORD_HASH='...'` et
-`MAILER_DSN=...` (SMTP qui envoie le formulaire de contact ; en dev les e-mails ne partent pas, ils sont visibles dans la
-barre de debug), puis `make preprod-deploy` (build, redémarrage, migrations). La preprod a sa propre base (volume `db_data_preprod`).
+**Preprod** : définir dans `.env.local` sur le serveur `POSTGRES_PASSWORD=...` et `MAILER_DSN=...` (SMTP qui envoie le
+formulaire de contact ; en dev les e-mails ne partent pas, ils sont visibles dans la barre de debug), puis
+`make preprod-deploy` (build, redémarrage, migrations), et une seule fois `make preprod-admin-create`.
+La preprod a sa propre base (volume `db_data_preprod`).
 
 ## 📝 Commandes Utiles
 

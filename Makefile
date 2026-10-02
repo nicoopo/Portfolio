@@ -24,8 +24,8 @@ up: ## Démarre les conteneurs (dev) → http://localhost:8081
 migrate: ## Applique les migrations (dev)
 	$(CONSOLE) doctrine:migrations:migrate --no-interaction
 
-admin-password: ## Génère l'empreinte du mot de passe de /admin (à copier dans .env.local, entre apostrophes)
-	$(DC) exec -u www-data php php bin/console security:hash-password --empty-salt
+admin-create: ## Crée le compte « admin » de /admin, ou change son mot de passe (dev)
+	$(CONSOLE) app:admin:create
 
 down: ## Arrête le conteneur (dev)
 	$(DC) down
@@ -56,6 +56,9 @@ preprod-down: ## Arrête le conteneur (preprod)
 
 preprod-logs: ## Logs en temps réel (preprod)
 	$(DC_PREPROD) logs -f
+
+preprod-admin-create: ## Crée le compte « admin » de /admin, ou change son mot de passe (preprod)
+	$(DC_PREPROD) exec php php bin/console app:admin:create
 
 preprod-bash: ## Shell dans le conteneur (preprod)
 	$(DC_PREPROD) exec php bash
