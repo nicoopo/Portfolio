@@ -53,6 +53,22 @@
             </a>
 
             </div>
+
+            <h2 class="contact-form-title" id="formulaire">Ou écrivez-moi ici</h2>
+
+            {% for type, messages in app.flashes(['success', 'error']) %}
+                {% for message in messages %}
+                <p class="contact-flash contact-flash--{{ type }}" role="{{ type == 'error' ? 'alert' : 'status' }}">{{ message }}</p>
+                {% endfor %}
+            {% endfor %}
+
+            {{ form_start(form, {attr: {class: 'contact-form', novalidate: 'novalidate'}}) }}
+                {{ form_row(form.nom) }}
+                {{ form_row(form.email) }}
+                {{ form_row(form.message) }}
+                {{ form_row(form.website) }}
+                <button type="submit" class="btn btn-galactic btn-galactic-primary">Envoyer</button>
+            {{ form_end(form) }}
         </div>
     </section>
 {% endblock %}

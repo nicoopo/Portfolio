@@ -63,7 +63,7 @@ Portfolio/
 - **Compétences** : Présentation de mes compétences techniques et professionnelles.
 - **Portfolio** : Galerie de projets avec descriptions et captures d'écran.
 - **CV en ligne** : CV interactif avec téléchargement en PDF.
-- **Contact** : E-mail, GitHub, LinkedIn et CV numérique.
+- **Contact** : formulaire (anti-spam par champ piège), e-mail, GitHub, LinkedIn et CV numérique.
 - **Responsive** : Optimisé pour tous les appareils.
 
 ## 🛠 Technologies
@@ -104,7 +104,8 @@ Portfolio/
 **Base de dev** (client SQL, PhpStorm…) : `localhost:5433`, base `app`, utilisateur `app`, sans mot de passe
 (port ouvert sur 127.0.0.1 uniquement). En ligne de commande : `docker compose exec database psql -U app app`.
 
-**Preprod** : définir `POSTGRES_PASSWORD=...` dans `.env.local` sur le serveur, puis `make preprod-deploy`
+**Preprod** : définir dans `.env.local` sur le serveur `POSTGRES_PASSWORD=...` et `MAILER_DSN=...` (SMTP qui envoie le
+formulaire de contact ; en dev les e-mails ne partent pas, ils sont visibles dans la barre de debug), puis `make preprod-deploy`
 (build, redémarrage, migrations). La preprod a sa propre base (volume `db_data_preprod`).
 
 ## 📝 Commandes Utiles
