@@ -21,8 +21,8 @@
     <!-- Toggle Theme Button -->
     <button class="theme-toggle" id="themeToggle" data-action="cv#toggleTheme" aria-label="Changer le thème">
         <span class="theme-toggle-icon" id="themeIcon">
-            <span id="iconSun" data-cv-target="iconSun" style="display: none;">{{ ux_icon('bi:sun-fill', {'height': '20px', 'width': '20px'}) }}</span>
-            <span id="iconMoon" data-cv-target="iconMoon">{{ ux_icon('bi:moon-fill', {'height': '20px', 'width': '20px'}) }}</span>
+            <span data-cv-target="iconSun" hidden>{{ ux_icon('bi:sun-fill', {'height': '20px', 'width': '20px'}) }}</span>
+            <span data-cv-target="iconMoon">{{ ux_icon('bi:moon-fill', {'height': '20px', 'width': '20px'}) }}</span>
         </span>
         <span class="theme-toggle-text" id="themeText" data-cv-target="themeText">Mode Clair</span>
     </button>
@@ -74,10 +74,10 @@
                 <span class="section-icon">{{ ux_icon('bi:person-fill', {'height': '24px', 'width': '24px'}) }}</span>
                 Profil
             </h2>
-            <p style="line-height: 1.8;">
+            <p class="profile-text">
                 Développeur full-stack junior spécialisé Symfony, motivé par la conception de solutions web performantes et les environnements connectés (domotique). Curieux, rigoureux et passionné par les nouvelles technologies, je cherche à contribuer à des projets concrets en lien avec l'innovation digitale.
             </p>
-            <p style="margin-top: 15px; color: var(--accent-secondary); font-weight: bold;">
+            <p class="profile-highlight">
                 🎓 En recherche d'alternance : Bachelor IA, Développement Fullstack DevOps chez IPSSI<br>
                 📅 Rythme : 3 semaines en entreprise / 1 semaine en formation (12 mois)
             </p>

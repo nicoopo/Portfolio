@@ -54,8 +54,8 @@ export default class extends Controller {
 
     updateThemeButton(theme) {
         const dark = theme === 'dark';
-        this.iconSunTarget.style.display = dark ? 'none' : 'inline';
-        this.iconMoonTarget.style.display = dark ? 'inline' : 'none';
+        this.iconSunTarget.hidden = dark;
+        this.iconMoonTarget.hidden = !dark;
         this.themeTextTarget.textContent = dark ? 'Mode Clair' : 'Mode Sombre';
     }
 
