@@ -32,6 +32,8 @@ final class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(ProjetCrudController::class, 'Projets', 'fa fa-diagram-project');
         yield MenuItem::linkTo(PassionCrudController::class, 'Passions', 'fa fa-star');
         yield MenuItem::linkTo(EtapeParcoursCrudController::class, 'Parcours', 'fa fa-graduation-cap');
+        yield MenuItem::section('Visiteurs');
+        yield MenuItem::linkTo(DemandeContactCrudController::class, 'Demandes de contact', 'fa fa-envelope');
         yield MenuItem::section('Administration');
         yield MenuItem::linkTo(UtilisateurCrudController::class, 'Comptes', 'fa fa-user-shield');
         yield MenuItem::section();
