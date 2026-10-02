@@ -59,7 +59,7 @@ final class Projets
                 'titre' => 'Plateforme de QCM',
                 'description' => 'Application web de QCM pour les formations CCA, avec authentification et suivi des scores.',
                 'tech' => 'Symfony, Bootstrap, MySQL',
-                'image' => 'symfony/qcm_app.gif',
+                'image' => 'symfony/qcm_app.webp',
                 'competences' => ['PHP / Symfony', 'Twig', 'MySQL / PostgreSQL', 'Docker', 'Git / GitHub'],
             ],
             [
