@@ -26,3 +26,13 @@
 .timeline-brain-link:hover {
   color: var(--color-text);
 }
+
+/* Étape ouverte depuis un souvenir du cerveau (/univers#etape-3) */
+.timeline-item {
+  scroll-margin-top: calc(var(--navbar-height) + 1rem);
+}
+
+.timeline-item:target .timeline-content {
+  outline: 2px solid #ffe8a3;
+  box-shadow: 0 0 30px rgba(255, 232, 163, 0.35) !important;
+}

@@ -70,6 +70,7 @@ final class HomeController extends AbstractController
                 'ecole' => $etape->getEcole(),
                 'lieu' => $etape->getLieu(),
                 'resultat' => $traduction->loc($etape, 'resultat'),
+                'url' => $this->generateUrl('app_univers').'#etape-'.$etape->getId(),
             ], $parcours),
         ]);
     }

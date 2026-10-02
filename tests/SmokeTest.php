@@ -43,6 +43,20 @@ final class SmokeTest extends WebTestCase
         self::assertGreaterThan(0, $crawler->filter('a.skill-card[href^="/cerveau#"]')->count());
     }
 
+    /** Chaque souvenir du cerveau renvoie à une étape qui existe dans la frise de /univers */
+    public function testLesSouvenirsRenvoientALaFrise(): void
+    {
+        $client = static::createClient();
+        $souvenirs = json_decode($client->request('GET', '/cerveau')->filter('[data-brain-souvenirs-value]')->attr('data-brain-souvenirs-value'), true);
+        $frise = $client->request('GET', '/univers');
+
+        self::assertNotEmpty($souvenirs);
+        foreach ($souvenirs as $souvenir) {
+            self::assertStringStartsWith('/univers#', $souvenir['url']);
+            self::assertCount(1, $frise->filter('.timeline-item'.strstr($souvenir['url'], '#')), $souvenir['url']);
+        }
+    }
+
     #[DataProvider('pages')]
     public function testPageAUnApercuDePartage(string $url): void
     {

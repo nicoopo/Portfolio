@@ -33,7 +33,8 @@ export default class extends Controller {
 
     connect() {
         try {
-            this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            // Pas d'anticrénelage : la scène passe par le composer (cibles sans MSAA), il ne lisserait que le quad final
+            this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
         } catch {
             // Pas de WebGL : on laisse le message de repli visible
             return;
@@ -452,13 +453,14 @@ export default class extends Controller {
         this.panelBodyTarget.append(element('p', { textContent: description }));
     }
 
-    fillSouvenirPanel({ nom, dates, intitule, option, ecole, lieu, resultat }) {
+    fillSouvenirPanel({ nom, dates, intitule, option, ecole, lieu, resultat, url }) {
         this.fillPanelHeader(`${this.textsValue.parcours} · ${dates}`, nom, '#ffe8a3');
         this.panelBodyTarget.append(
             element('p', { textContent: intitule }),
             ...(option ? [element('p', { className: 'brain-panel-empty', textContent: option })] : []),
             element('p', { textContent: `${ecole} — ${lieu}` }),
             element('p', { textContent: resultat }),
+            element('p', {}, element('a', { href: url, textContent: this.textsValue.seeInTimeline })),
         );
     }
 
