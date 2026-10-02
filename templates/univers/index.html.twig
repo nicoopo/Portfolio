@@ -2,15 +2,8 @@
 
 {% block title %}Mon Univers - Portfolio{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    <!-- Le CSS est maintenant dans assets/styles/components/_pdf_viewer.css -->
-{% endblock %}
-
-
-
 {% block body %}
-<section class="univers-section container py-5">
+<section class="univers-section container py-5" data-controller="pdf">
 
     <h1 class="text-center mb-5 gradient fw-bold display-5">Mon Univers</h1>
 
@@ -21,7 +14,9 @@
         <!-- Voir le CV - Ouvre dans un iframe sur la même page -->
         <button
             class="btn btn-galactic btn-galactic-outline-light"
-            onclick="showPDF('{{ asset('docs/CV-nicolascataluna.pdf') }}', 'Mon CV')">
+            data-action="pdf#show"
+            data-pdf-url-param="{{ asset('docs/CV-nicolascataluna.pdf') }}"
+            data-pdf-title-param="Mon CV">
             <i class="bi bi-eye"></i> Voir le CV
         </button>
 
@@ -39,7 +34,9 @@
         <!-- Voir la lettre - Ouvre dans un iframe sur la même page -->
         <button
             class="btn btn-galactic btn-galactic-outline-light"
-            onclick="showPDF('{{ asset('docs/lettre de motivation.pdf') }}', 'Ma Lettre de Motivation')">
+            data-action="pdf#show"
+            data-pdf-url-param="{{ asset('docs/lettre de motivation.pdf') }}"
+            data-pdf-title-param="Ma Lettre de Motivation">
             <i class="bi bi-eye"></i> Voir la lettre
         </button>
 
@@ -53,13 +50,13 @@
     </section>
 
     <!-- Visualiseur PDF simple -->
-    <div id="pdf-viewer" class="pdf-viewer-container mt-4" style="display: none;">
+    <div class="pdf-viewer-container mt-4" data-pdf-target="viewer" hidden>
         <div class="pdf-header d-flex justify-content-between align-items-center mb-3">
-            <h3 id="pdf-title" class="mb-0 gradient">Document</h3>
-            <button class="btn btn-close btn-close-white" onclick="closePDF()" aria-label="Fermer"></button>
+            <h3 class="mb-0 gradient" data-pdf-target="title">Document</h3>
+            <button class="btn btn-close btn-close-white" data-action="pdf#close" aria-label="Fermer"></button>
         </div>
         <div class="pdf-content">
-            <iframe id="pdf-frame" src="" frameborder="0" width="100%" height="600px" class="rounded shadow"></iframe>
+            <iframe data-pdf-target="frame" title="Document PDF" src="" frameborder="0" width="100%" height="600px" class="rounded shadow"></iframe>
         </div>
     </div>
 
@@ -92,6 +89,7 @@
                 {{ etape.lieu }}
             </p>
             <p class="mt-2 fw-semibold">{{ etape.resultat }}</p>
+            <a class="timeline-brain-link" href="{{ path('app_cerveau') }}#{{ etape.nom|url_encode }}">Voir ce souvenir dans mon cerveau</a>
             </div>
         </div>
         {% endfor %}
