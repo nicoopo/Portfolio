@@ -20,6 +20,7 @@ final class SmokeTest extends WebTestCase
         static::createClient()->request('GET', $url);
 
         self::assertResponseIsSuccessful();
+        self::assertSelectorCount(1, 'h1'); // un seul titre principal par page (SEO, lecteurs d'écran)
     }
 
     public function testCompetencesRenvoientAuCerveau(): void
