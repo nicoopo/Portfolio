@@ -15,6 +15,12 @@ services:
     environment:
       APP_ENV: dev # en dur : `.env` contient APP_ENV=prod, que Compose lirait via ${APP_ENV}
 
+  database:
+    environment:
+      # Dev : pas de mot de passe (base joignable seulement depuis le réseau Docker, aucun port exposé).
+      # Pris en compte à la création du volume : après changement, `docker compose down -v`.
+      POSTGRES_HOST_AUTH_METHOD: trust
+
 volumes:
   php_cache:
   php_log:

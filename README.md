@@ -17,9 +17,9 @@ Portfolio/
 ├── config/              # Configuration Symfony
 ├── src/                 # Code source
 │   ├── Controller/      # Contrôleurs Symfony
-│   ├── Data/            # Données en dur (compétences, projets, passions)
-│   ├── Entity/          # Entités Doctrine (vide pour l'instant)
-│   └── Repository/      # Repositories Doctrine (vide pour l'instant)
+│   ├── Entity/          # Entités Doctrine (compétences, projets, passions, parcours)
+│   └── Repository/      # Repositories Doctrine
+├── migrations/          # Schéma PostgreSQL + contenu du portfolio
 ├── templates/           # Vues Twig
 │   ├── competences/     # Page des compétences
 │   ├── contact/         # Page de contact
@@ -72,7 +72,7 @@ Portfolio/
 - Three.js
 - PHP
 - Node.js
-- Doctrine
+- Doctrine / PostgreSQL
 - Bootstrap
 - JavaScript
 - CSS
@@ -93,29 +93,27 @@ Portfolio/
    composer install
    ```
 
-3. Configurer l'environnement :
-   - Copier `.env` en `.env.local`.
-   - Configurer la base de données dans `.env.local`.
-
-4. Créer la base de données :
+3. Lancer les conteneurs (PHP/Apache + PostgreSQL 16), installer les dépendances et créer la base :
    ```bash
-   php bin/console doctrine:database:create
-   php bin/console doctrine:migrations:migrate
+   make up
    ```
+   Le contenu du portfolio (compétences, projets, passions, parcours) est inséré par les migrations.
 
-5. Lancer le serveur :
-   ```bash
-   symfony serve
-   ```
+4. Accéder au site : [http://localhost:8081](http://localhost:8081)
 
-6. Accéder au site :
-   Ouvrir [http://localhost:8000](http://localhost:8000) dans un navigateur.
+**Preprod** : définir `POSTGRES_PASSWORD=...` dans `.env.local` sur le serveur, puis `make preprod-deploy`
+(build, redémarrage, migrations). La preprod a sa propre base (volume `db_data_preprod`).
 
 ## 📝 Commandes Utiles
 
-- Lancer les tests :
+- Lancer les tests (crée et migre la base `app_test` au besoin) :
   ```bash
-  php bin/phpunit
+  make test
+  ```
+
+- Appliquer de nouvelles migrations :
+  ```bash
+  make migrate
   ```
 
 - Générer les assets :

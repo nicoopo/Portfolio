@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Data\Projets;
+use App\Repository\ProjetRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -10,10 +10,10 @@ use Symfony\Component\Routing\Attribute\Route;
 final class PortfolioController extends AbstractController
 {
     #[Route('/projects', name: 'app_projects')]
-    public function index(): Response
+    public function index(ProjetRepository $projets): Response
     {
         return $this->render('portfolio/index.html.twig', [
-            'categories' => Projets::CATEGORIES,
+            'categories' => $projets->findAllByCategorie(),
         ]);
     }
 }

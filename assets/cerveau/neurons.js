@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { glowSprite } from './textures.js';
 
 /**
- * Lobes du cerveau où sont placés les neurones (champ `zone` de src/Data/Competences.php).
+ * Lobes du cerveau où sont placés les neurones (champ `zone` de l'entité CategorieCompetence).
  * center : centre de la zone ; radius : étalement des neurones autour.
  */
 const ZONES = {

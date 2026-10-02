@@ -2,10 +2,11 @@
 
 namespace App\Controller;
 
-use App\Data\Competences;
-use App\Data\Parcours;
-use App\Data\Passions;
-use App\Data\Projets;
+use App\Entity\EtapeParcours;
+use App\Entity\Passion;
+use App\Repository\CategorieCompetenceRepository;
+use App\Repository\EtapeParcoursRepository;
+use App\Repository\PassionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -19,38 +20,43 @@ final class HomeController extends AbstractController
     }
 
     #[Route('/cerveau', name: 'app_cerveau')]
-    public function cerveau(): Response
-    {
+    public function cerveau(
+        CategorieCompetenceRepository $categoriesRepository,
+        PassionRepository $passionsRepository,
+        EtapeParcoursRepository $parcoursRepository,
+    ): Response {
+        $categories = $categoriesRepository->findAllWithCompetences();
+        $passions = $passionsRepository->findBy([], ['position' => 'ASC']);
+        $parcours = $parcoursRepository->findBy([], ['position' => 'ASC']);
+
         // Un neurone par compétence, avec les projets qui l'utilisent
         $neurones = [];
-        foreach (Competences::CATEGORIES as $categorie => $infos) {
-            foreach ($infos['competences'] as $competence) {
+        foreach ($categories as $categorie) {
+            foreach ($categorie->getCompetences() as $competence) {
                 $projets = [];
-                foreach (Projets::CATEGORIES as $liste) {
-                    foreach ($liste as $projet) {
-                        if (\in_array($competence, $projet['competences'], true)) {
-                            $projets[] = [
-                                'titre' => $projet['titre'],
-                                'url' => $this->generateUrl('app_projects').'#'.$projet['slug'],
-                            ];
-                        }
-                    }
+                foreach ($competence->getProjets() as $projet) {
+                    $projets[] = [
+                        'titre' => $projet->getTitre(),
+                        'url' => $this->generateUrl('app_projects').'#'.$projet->getSlug(),
+                    ];
                 }
                 $neurones[] = [
-                    'nom' => $competence,
-                    'categorie' => $categorie,
-                    'zone' => $infos['zone'],
-                    'couleur' => $infos['couleur'],
+                    'nom' => $competence->getNom(),
+                    'categorie' => $categorie->getNom(),
+                    'zone' => $categorie->getZone(),
+                    'couleur' => $categorie->getCouleur(),
                     'projets' => $projets,
                 ];
             }
         }
 
         return $this->render('home/cerveau.html.twig', [
-            'categories' => Competences::CATEGORIES,
+            'categories' => $categories,
             'neurones' => $neurones,
-            'passions' => Passions::LISTE,
-            'parcours' => Parcours::LISTE,
+            'passions' => $passions,
+            'parcours' => $parcours,
+            'passions_3d' => array_map(fn (Passion $passion) => $passion->toArray(), $passions),
+            'parcours_3d' => array_map(fn (EtapeParcours $etape) => $etape->toArray(), $parcours),
         ]);
     }
 }

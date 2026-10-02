@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Data\Parcours;
+use App\Repository\EtapeParcoursRepository;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,9 +13,9 @@ use Symfony\Component\Routing\Attribute\Route;
 final class UniversController extends AbstractController
 {
     #[Route('/univers', name: 'app_univers')]
-    public function index(): Response
+    public function index(EtapeParcoursRepository $parcours): Response
     {
-        return $this->render('univers/index.html.twig', ['parcours' => Parcours::LISTE]);
+        return $this->render('univers/index.html.twig', ['parcours' => $parcours->findBy([], ['position' => 'ASC'])]);
     }
 
     #[Route('/univers/cv-preview', name: 'app_univers_cv_preview')]

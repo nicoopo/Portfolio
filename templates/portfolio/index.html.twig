@@ -24,7 +24,7 @@
               <span class="badge bg-primary">{{ projet.tech }}</span>
               <p class="harbor-project-neurons">
                 {% for competence in projet.competences %}
-                <a href="{{ path('app_cerveau') }}#{{ competence|url_encode }}" title="Voir ce neurone dans mon cerveau">{{ competence }}</a>
+                <a href="{{ path('app_cerveau') }}#{{ competence.nom|url_encode }}" title="Voir ce neurone dans mon cerveau">{{ competence.nom }}</a>
                 {% endfor %}
               </p>
             </div>

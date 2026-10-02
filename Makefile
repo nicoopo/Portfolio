@@ -15,10 +15,14 @@ help: ## Affiche cette aide
 	   awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 # --- DEV ---
-up: ## Démarre le conteneur (dev) → http://localhost:8081
+up: ## Démarre les conteneurs (dev) → http://localhost:8081
 	$(DC) up -d
 	$(PHP) composer install
 	$(PHP) php bin/console importmap:install
+	$(CONSOLE) doctrine:migrations:migrate --no-interaction
+
+migrate: ## Applique les migrations (dev)
+	$(CONSOLE) doctrine:migrations:migrate --no-interaction
 
 down: ## Arrête le conteneur (dev)
 	$(DC) down
@@ -35,7 +39,9 @@ cc: ## Vide le cache (dev)
 routes: ## Liste les routes
 	$(CONSOLE) debug:router
 
-test: ## Lance les tests PHPUnit
+test: ## Lance les tests PHPUnit (base app_test créée et migrée au besoin)
+	$(DC) exec -u www-data -e APP_ENV=test php php bin/console doctrine:database:create --if-not-exists
+	$(DC) exec -u www-data -e APP_ENV=test php php bin/console doctrine:migrations:migrate --no-interaction
 	$(DC) exec -u www-data -e APP_ENV=test php vendor/bin/phpunit
 
 # --- PREPROD ---
