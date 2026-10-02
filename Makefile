@@ -24,6 +24,9 @@ up: ## Démarre les conteneurs (dev) → http://localhost:8081
 migrate: ## Applique les migrations (dev)
 	$(CONSOLE) doctrine:migrations:migrate --no-interaction
 
+admin-password: ## Génère l'empreinte du mot de passe de /admin (à copier dans .env.local, entre apostrophes)
+	$(DC) exec -u www-data php php bin/console security:hash-password --empty-salt
+
 down: ## Arrête le conteneur (dev)
 	$(DC) down
 
