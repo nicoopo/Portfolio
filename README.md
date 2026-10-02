@@ -150,6 +150,12 @@ La preprod a sa propre base (volume `db_data_preprod`).
 
 MIT - Voir [LICENSE](LICENSE).
 
+### Crédits des icônes
+
+Icônes stockées dans `assets/icons/` (`php bin/console ux:icons:lock` pour en ajouter), via [Iconify](https://iconify.design) :
+Bootstrap Icons, Fluent, Iconoir, Pepicons, Tabler (MIT) ; **Streamline Pixel** par Streamline
+([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)) : logo LinkedIn et icône de contact.
+
 ## 👤 Auteur
 
 [Nicolas](https://github.com/nicoopo/Portfolio)
