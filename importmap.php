@@ -41,4 +41,16 @@ return [
     'three/addons/controls/OrbitControls.js' => [
         'version' => '0.186.1',
     ],
+    'three/addons/postprocessing/EffectComposer.js' => [
+        'version' => '0.186.1',
+    ],
+    'three/addons/postprocessing/RenderPass.js' => [
+        'version' => '0.186.1',
+    ],
+    'three/addons/postprocessing/UnrealBloomPass.js' => [
+        'version' => '0.186.1',
+    ],
+    'three/addons/postprocessing/OutputPass.js' => [
+        'version' => '0.186.1',
+    ],
 ];

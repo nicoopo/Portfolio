@@ -22,6 +22,13 @@ final class SmokeTest extends WebTestCase
         self::assertResponseIsSuccessful();
     }
 
+    public function testCompetencesRenvoientAuCerveau(): void
+    {
+        $crawler = static::createClient()->request('GET', '/competences');
+
+        self::assertGreaterThan(0, $crawler->filter('a.skill-card[href^="/cerveau#"]')->count());
+    }
+
     public function testTelechargementCvPdf(): void
     {
         $client = static::createClient();

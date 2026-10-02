@@ -2,24 +2,31 @@
 import { Controller } from '@hotwired/stimulus';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { dotTexture } from '../cerveau/textures.js';
 import { createBrain } from '../cerveau/brain.js';
 import { createNeurons } from '../cerveau/neurons.js';
 import { Synapses } from '../cerveau/synapses.js';
 import { createNebulae } from '../cerveau/nebulae.js';
+import { createSouvenirs } from '../cerveau/souvenirs.js';
 
 const HOME_TARGET = new THREE.Vector3(0, 0, 0);
 const CLICK_TOLERANCE_PX = 5;
-const FOCUS_DISTANCE = { neuron: 1.8, nebula: 5 }; // distance caméra ↔ élément sélectionné
+const FOCUS_DISTANCE = { neuron: 1.8, nebula: 5, souvenir: 1.8 }; // distance caméra ↔ élément sélectionné
+const TOUR_STOPS = 6;       // neurones visités : ceux qui ont le plus de projets
+const TOUR_PAUSE_MS = 6000; // temps passé sur chaque neurone
 
 /**
  * Scène du cerveau : interaction (caméra, survol, clic, panneau).
- * La 3D elle-même est dans assets/cerveau/ (cerveau, neurones, synapses, nébuleuses).
+ * La 3D elle-même est dans assets/cerveau/ (cerveau, neurones, synapses, nébuleuses, souvenirs).
  * Chargé uniquement sur les pages qui l'utilisent (lazy).
  */
 export default class extends Controller {
-    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody'];
-    static values = { neurons: Array, passions: Array };
+    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton'];
+    static values = { neurons: Array, passions: Array, souvenirs: Array };
 
     connect() {
         try {
@@ -29,6 +36,7 @@ export default class extends Controller {
             return;
         }
         this.fallbackTarget.hidden = true;
+        this.tourButtonTarget.hidden = false;
 
         this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -48,7 +56,10 @@ export default class extends Controller {
         this.controls.autoRotate = !this.reducedMotion;
         this.controls.autoRotateSpeed = 0.6;
         // L'utilisateur reprend la main : on arrête le déplacement automatique de la caméra
-        this.controls.addEventListener('start', () => { this.flight = null; });
+        this.controls.addEventListener('start', () => {
+            this.flight = null;
+            this.stopTour();
+        });
 
         this.texture = dotTexture();
         this.brain = createBrain(this.texture);
@@ -56,10 +67,11 @@ export default class extends Controller {
         this.neurons = createNeurons(this.neuronsValue, this.texture);
         this.synapses = new Synapses(this.neurons, this.texture);
         this.nebulae = createNebulae(this.passionsValue, this.texture);
-        // Tout ce qui se clique : neurones et nébuleuses
-        this.clickables = [...this.neurons, ...this.nebulae.targets];
+        this.souvenirs = createSouvenirs(this.souvenirsValue, this.texture);
+        // Tout ce qui se clique : neurones, nébuleuses et souvenirs
+        this.clickables = [...this.neurons, ...this.nebulae.targets, ...this.souvenirs.targets];
 
-        this.scene.add(this.brain, this.synapses.object, this.nebulae.object, ...this.neurons.map((h) => h.userData.anchor));
+        this.scene.add(this.brain, this.synapses.object, this.nebulae.object, this.souvenirs.object, ...this.neurons.map((h) => h.userData.anchor));
 
         this.raycaster = new THREE.Raycaster();
         this.pointer = new THREE.Vector2();
@@ -68,23 +80,42 @@ export default class extends Controller {
         this.listen(this.renderer.domElement, 'pointerup', (e) => this.onPointerUp(e));
         this.listen(this.renderer.domElement, 'pointerleave', () => this.hover(null));
 
+        // Lueur (bloom) autour des points lumineux.
+        // ponytail: coupée sur petit écran comme approximation des GPU faibles ; à affiner si besoin (mesure du FPS)
+        if (!window.matchMedia('(max-width: 576px)').matches) {
+            this.composer = new EffectComposer(this.renderer);
+            this.composer.addPass(new RenderPass(this.scene, this.camera));
+            this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(1, 1), 0.35, 0.3, 0.4) /* force, rayon, seuil */);
+            this.composer.addPass(new OutputPass());
+        }
+
         this.resizeObserver = new ResizeObserver(() => this.resize());
         this.resizeObserver.observe(this.canvasTarget);
         this.resize();
 
-        const clock = new THREE.Clock();
+        this.timer = new THREE.Timer();
+        this.timer.connect(document);
         const loop = () => {
             this.frame = requestAnimationFrame(loop);
-            this.animate(this.reducedMotion ? 0 : clock.getElapsedTime());
+            this.timer.update(); // sans l'horodatage de rAF : il peut précéder la création du timer (temps négatif)
+            this.animate(this.reducedMotion ? 0 : this.timer.getElapsed());
             this.controls.update();
-            this.renderer.render(this.scene, this.camera);
+            if (this.composer) this.composer.render();
+            else this.renderer.render(this.scene, this.camera);
         };
         loop();
+
+        // Lien direct vers un neurone ou une nébuleuse : /cerveau#PHP
+        const name = decodeURIComponent(location.hash.slice(1));
+        const linked = name && this.clickables.find((t) => t.userData.data.nom === name);
+        if (linked) this.select(linked);
     }
 
     disconnect() {
         if (!this.renderer) return;
         cancelAnimationFrame(this.frame);
+        this.stopTour();
+        this.timer.dispose();
         this.resizeObserver.disconnect();
         this.listeners.forEach(([el, type, fn]) => el.removeEventListener(type, fn));
         this.controls.dispose();
@@ -93,6 +124,8 @@ export default class extends Controller {
             object.material?.dispose();
         });
         this.texture.dispose();
+        this.composer?.passes.forEach((pass) => pass.dispose());
+        this.composer?.dispose();
         this.renderer.dispose();
         this.renderer.domElement.remove();
         this.renderer = null;
@@ -106,6 +139,7 @@ export default class extends Controller {
     resize() {
         const { clientWidth: w, clientHeight: h } = this.canvasTarget;
         this.renderer.setSize(w, h);
+        this.composer?.setSize(w, h);
         this.camera.aspect = w / h;
         this.camera.fov = w < h ? 75 : 50; // écran vertical (mobile) : on élargit le champ pour garder le cerveau entier
         this.camera.updateProjectionMatrix();
@@ -135,8 +169,14 @@ export default class extends Controller {
             core.scale.setScalar((active ? 2.2 : 1.6) * (1 + 0.1 * Math.sin(time + core.userData.phase)));
         }
 
+        for (const halo of this.souvenirs.targets) {
+            const active = halo === selected || halo === this.hovered;
+            halo.scale.setScalar((active ? 0.32 : 0.2) * (1 + 0.15 * Math.sin(time * 1.5 + halo.userData.phase)));
+        }
+
         this.synapses.update(time);
         this.nebulae.update(time);
+        this.souvenirs.update(time);
 
         // Vol de caméra vers l'élément sélectionné (ou retour à la vue d'ensemble)
         if (this.flight) {
@@ -186,7 +226,47 @@ export default class extends Controller {
         if (moved > CLICK_TOLERANCE_PX) return;
 
         const target = this.pick(event);
-        if (target) this.select(target);
+        if (target) {
+            this.stopTour();
+            this.select(target);
+        }
+    }
+
+    // ------------------------------------------------
+    // Visite guidée
+    // ------------------------------------------------
+
+    /** Bouton « Visite guidée » : lance ou arrête la visite */
+    toggleTour() {
+        if (this.tourTimeout) {
+            this.stopTour();
+            return;
+        }
+        const stops = [...this.neurons]
+            .sort((a, b) => b.userData.data.projets.length - a.userData.data.projets.length)
+            .slice(0, TOUR_STOPS);
+        this.tourButtonTarget.textContent = 'Arrêter la visite';
+        this.tourButtonTarget.setAttribute('aria-pressed', 'true');
+
+        const next = (i) => {
+            if (i === stops.length) {
+                this.stopTour();
+                this.close();
+                return;
+            }
+            this.select(stops[i]);
+            this.tourTimeout = setTimeout(() => next(i + 1), TOUR_PAUSE_MS);
+        };
+        next(0);
+    }
+
+    /** Toute action de l'utilisateur sur le cerveau arrête la visite */
+    stopTour() {
+        if (!this.tourTimeout) return;
+        clearTimeout(this.tourTimeout);
+        this.tourTimeout = null;
+        this.tourButtonTarget.textContent = 'Visite guidée';
+        this.tourButtonTarget.setAttribute('aria-pressed', 'false');
     }
 
     // ------------------------------------------------
@@ -197,6 +277,7 @@ export default class extends Controller {
     selectByName({ params: { name }, target }) {
         const found = this.clickables?.find((t) => t.userData.data.nom === name);
         if (!found) return;
+        this.stopTour();
         this.select(found);
         this.panelTarget.focus();
         // Mobile : la légende ouverte masquerait le cerveau
@@ -220,16 +301,20 @@ export default class extends Controller {
         };
 
         if (target.userData.kind === 'neuron') this.fillNeuronPanel(target);
+        else if (target.userData.kind === 'souvenir') this.fillSouvenirPanel(target.userData.data);
         else this.fillNebulaPanel(target.userData.data);
         this.panelTarget.hidden = false;
+        history.replaceState(null, '', `#${encodeURIComponent(target.userData.data.nom)}`);
     }
 
     close() {
+        this.stopTour();
         if (!this.selected) return;
         this.selected = null;
         this.panelTarget.hidden = true;
         this.controls.autoRotate = !this.reducedMotion;
         this.synapses.highlight(null);
+        history.replaceState(null, '', location.pathname);
 
         const direction = this.camera.position.clone().sub(this.controls.target).normalize();
         this.flight = { target: HOME_TARGET.clone(), camera: direction.multiplyScalar(this.homeDistance) };
@@ -268,6 +353,16 @@ export default class extends Controller {
     fillNebulaPanel({ nom, couleur, description }) {
         this.fillPanelHeader('Passion', nom, couleur);
         this.panelBodyTarget.append(element('p', { textContent: description }));
+    }
+
+    fillSouvenirPanel({ nom, dates, intitule, option, ecole, lieu, resultat }) {
+        this.fillPanelHeader(`Parcours · ${dates}`, nom, '#ffe8a3');
+        this.panelBodyTarget.append(
+            element('p', { textContent: intitule }),
+            ...(option ? [element('p', { className: 'brain-panel-empty', textContent: option })] : []),
+            element('p', { textContent: `${ecole} — ${lieu}` }),
+            element('p', { textContent: resultat }),
+        );
     }
 
     fillPanelHeader(category, title, color) {

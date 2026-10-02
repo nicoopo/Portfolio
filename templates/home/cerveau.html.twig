@@ -7,10 +7,11 @@
          data-controller="brain"
          data-brain-neurons-value="{{ neurones|json_encode }}"
          data-brain-passions-value="{{ passions|json_encode }}"
+         data-brain-souvenirs-value="{{ parcours|json_encode }}"
          data-action="keydown.esc@window->brain#close">
 
     <div class="brain-canvas" data-brain-target="canvas"
-         role="img" aria-label="Cerveau holographique en 3D : chaque point lumineux est une compétence, reliée aux autres par des synapses ; autour, des nébuleuses représentent mes passions"></div>
+         role="img" aria-label="Cerveau holographique en 3D : chaque point lumineux est une compétence, reliée aux autres par des synapses ; au centre, un fil de souvenirs retrace mon parcours ; autour, des nébuleuses représentent mes passions"></div>
 
     <p class="brain-fallback" data-brain-target="fallback">
         Ton navigateur ne supporte pas la 3D (WebGL).
@@ -49,6 +50,20 @@
                 {% endfor %}
             </ul>
         </details>
+        <details class="brain-legend-group">
+            <summary>
+                <span class="brain-legend-dot brain-legend-dot--souvenir"></span>Parcours
+            </summary>
+            <ul>
+                {% for etape in parcours %}
+                <li>
+                    <button type="button" data-action="brain#selectByName" data-brain-name-param="{{ etape.nom }}">
+                        {{ etape.nom }}
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+        </details>
     </nav>
 
     <p class="brain-tooltip" data-brain-target="tooltip" hidden></p>
@@ -59,6 +74,9 @@
         <h2 class="brain-panel-title" data-brain-target="panelTitle"></h2>
         <div data-brain-target="panelBody"></div>
     </aside>
+
+    {# Caché tant que la 3D n'a pas démarré (sans WebGL, pas de visite) #}
+    <button type="button" class="brain-tour" data-brain-target="tourButton" data-action="brain#toggleTour" aria-pressed="false" hidden>Visite guidée</button>
 
     <p class="brain-hint">Glisse pour tourner · Clique sur un neurone · Dézoome pour voir mes passions</p>
 </section>

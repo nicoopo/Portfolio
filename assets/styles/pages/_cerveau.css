@@ -5,6 +5,7 @@
   z-index: 1;
   height: 100vh;
   height: 100dvh;
+  margin-top: calc(-1 * var(--navbar-height)); /* plein écran, sous la navbar fixe (annule le padding de main) */
   overflow: hidden;
   touch-action: none; /* le glisser tourne le cerveau au lieu de scroller */
 }
@@ -46,7 +47,8 @@
 
 /* Panneaux en verre posés sur la scène */
 .brain-legend,
-.brain-panel {
+.brain-panel,
+.brain-tour {
   position: absolute;
   z-index: 2;
   color: var(--color-text-light);
@@ -54,6 +56,22 @@
   backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 212, 255, 0.2);
   border-radius: 12px;
+}
+
+/* Bouton de la visite guidée */
+.brain-tour {
+  bottom: 1rem;
+  left: 1rem;
+  padding: 0.5rem 1rem;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.brain-tour:hover,
+.brain-tour[aria-pressed="true"] {
+  color: var(--color-text);
+  border-color: rgba(0, 212, 255, 0.6);
 }
 
 /* Légende des lobes */
@@ -85,6 +103,10 @@
 .brain-legend-dot--nebula {
   --dot: #a06cff;
   background: conic-gradient(#5b8cff, #2cb67d, #e4c35b, #f25f8c, #a06cff, #5b8cff);
+}
+
+.brain-legend-dot--souvenir {
+  --dot: #ffe8a3;
 }
 
 .brain-legend ul {
