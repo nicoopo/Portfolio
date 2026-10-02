@@ -68,9 +68,18 @@
   cursor: pointer;
 }
 
-.brain-tour--fullscreen {
-  left: auto;
+/* Boutons en bas à droite : Partager, Plein écran */
+.brain-actions {
+  position: absolute;
+  z-index: 2;
   right: 1rem;
+  bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.brain-actions .brain-tour {
+  position: static;
 }
 
 /* Plein écran : pas de navbar au-dessus, et le fond du site n'est plus derrière */

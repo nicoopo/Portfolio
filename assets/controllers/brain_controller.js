@@ -18,6 +18,7 @@ const CLICK_TOLERANCE_PX = 5;
 const FOCUS_DISTANCE = { neuron: 1.8, nebula: 5, souvenir: 1.8 }; // distance caméra ↔ élément sélectionné
 const TOUR_STOPS = 6;       // neurones visités : ceux qui ont le plus de projets
 const TOUR_PAUSE_MS = 6000; // temps passé sur chaque neurone
+const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
 
 /**
  * Scène du cerveau : interaction (caméra, survol, clic, panneau).
@@ -25,7 +26,7 @@ const TOUR_PAUSE_MS = 6000; // temps passé sur chaque neurone
  * Chargé uniquement sur les pages qui l'utilisent (lazy).
  */
 export default class extends Controller {
-    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search'];
+    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search', 'shareButton'];
     static values = { neurons: Array, passions: Array, souvenirs: Array };
 
     connect() {
@@ -39,6 +40,7 @@ export default class extends Controller {
         this.tourButtonTarget.hidden = false;
         // Pas de plein écran possible (ex. Safari sur iPhone) : pas de bouton
         this.fullscreenButtonTarget.hidden = !document.fullscreenEnabled;
+        this.shareButtonTarget.hidden = false;
 
         this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -61,6 +63,8 @@ export default class extends Controller {
         this.controls.addEventListener('start', () => {
             this.flight = null;
             this.stopTour();
+            // La vue partagée n'est plus celle qu'on regarde
+            if (location.hash.startsWith(`#${VIEW_PREFIX}`)) history.replaceState(null, '', location.pathname);
         });
 
         this.texture = dotTexture();
@@ -118,16 +122,55 @@ export default class extends Controller {
         };
         loop();
 
-        // Lien direct vers un neurone ou une nébuleuse : /cerveau#PHP
-        const name = decodeURIComponent(location.hash.slice(1));
-        const linked = name && this.clickables.find((t) => t.userData.data.nom === name);
-        if (linked) this.select(linked);
+        // Lien direct : vers un élément (/cerveau#PHP) ou vers une vue partagée (/cerveau#vue=…)
+        const hash = decodeURIComponent(location.hash.slice(1));
+        if (hash.startsWith(VIEW_PREFIX)) {
+            this.restoreView(hash.slice(VIEW_PREFIX.length));
+        } else {
+            const linked = hash && this.clickables.find((t) => t.userData.data.nom === hash);
+            if (linked) this.select(linked);
+        }
+    }
+
+    // ------------------------------------------------
+    // Partage
+    // ------------------------------------------------
+
+    /** Lien vers ce qu'on voit : l'élément sélectionné, sinon la position exacte de la caméra */
+    share() {
+        if (!this.selected) {
+            const round = (v) => v.toArray().map((n) => +n.toFixed(2)).join(',');
+            history.replaceState(null, '', `#${VIEW_PREFIX}${round(this.camera.position)};${round(this.controls.target)}`);
+        }
+        const url = location.href;
+        // Écran tactile : menu de partage du système ; ailleurs : copie dans le presse-papiers
+        // (Chrome sur Windows a aussi navigator.share, mais on y attend une simple copie)
+        const shared = navigator.share && window.matchMedia('(pointer: coarse)').matches
+            ? navigator.share({ title: document.title, url })
+            : navigator.clipboard.writeText(url).then(() => this.flashShareButton('Lien copié !'));
+        shared.catch(() => {}); // partage annulé ou presse-papiers refusé : rien à faire
+    }
+
+    flashShareButton(text) {
+        this.shareButtonTarget.textContent = text;
+        clearTimeout(this.shareTimeout);
+        this.shareTimeout = setTimeout(() => { this.shareButtonTarget.textContent = 'Partager'; }, 2000);
+    }
+
+    /** « x,y,z;x,y,z » : position de la caméra ; point visé */
+    restoreView(view) {
+        const [camera, target] = view.split(';').map((part) => part.split(',').map(Number));
+        if (camera?.length !== 3 || target?.length !== 3 || [...camera, ...target].some((n) => !Number.isFinite(n))) return;
+        this.camera.position.fromArray(camera);
+        this.controls.target.fromArray(target);
+        this.controls.autoRotate = false; // sinon la vue partagée dérive aussitôt
     }
 
     disconnect() {
         if (!this.renderer) return;
         cancelAnimationFrame(this.frame);
         this.stopTour();
+        clearTimeout(this.shareTimeout);
         this.timer.dispose();
         this.resizeObserver.disconnect();
         this.listeners.forEach(([el, type, fn]) => el.removeEventListener(type, fn));
