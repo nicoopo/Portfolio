@@ -80,45 +80,21 @@
             </div>
         </div> #}
 
+        {% for etape in parcours %}
         <div class="timeline-item">
             <div class="timeline-content shadow-lg rounded-4 p-4">
-            <span class="date gradient fw-bold">2022 - 2024</span>
-            <h4 class="fw-bold">SIO : Services informatiques aux organisations
-                <br>
-                Option B S.L.A.M : Solutions logicielles et Applications Métiers
-                </h4>
+            <span class="date gradient fw-bold">{{ etape.dates }}</span>
+            <h4 class="fw-bold">{{ etape.intitule }}
+                {% if etape.option %}<br>{{ etape.option }}{% endif %}
+            </h4>
             <p class="mb-0 opacity-75">
-                Lycée UFA Robert Schuman<br>
-                Dugny, Seine-Saint-Denis
+                {{ etape.ecole }}<br>
+                {{ etape.lieu }}
             </p>
-            <p class="mt-2 fw-semibold">Obtention du BTS</p>
+            <p class="mt-2 fw-semibold">{{ etape.resultat }}</p>
             </div>
         </div>
-
-        <div class="timeline-item">
-            <div class="timeline-content shadow-lg rounded-4 p-4">
-            <span class="date gradient fw-bold">2019 - 2022</span>
-            <h4 class="fw-bold">Baccalauréat Professionnel Systèmes Numériques
-                <br>
-                Option Réseaux Informatiques et Systèmes Communicants (RISC)</h4>
-            <p class="mb-0 opacity-75">
-                Lycée La Salle<br>
-                Saint-Denis, Seine-Saint-Denis
-            </p>
-            <p class="mt-2 fw-semibold">Obtention du BAC</p>
-            </div>
-        </div>
-        <div class="timeline-item">
-            <div class="timeline-content shadow-lg rounded-4 p-4">
-            <span class="date gradient fw-bold">2010 - 2019</span>
-            <h4 class="fw-bold">Brevet des college</h4>
-            <p class="mb-0 opacity-75">
-                Lycée La Salle<br>
-                Saint-Denis, Seine-Saint-Denis
-            </p>
-            <p class="mt-2 fw-semibold">Obtention mon brevet</p>
-            </div>
-        </div>
+        {% endfor %}
 
     </div>
 </section>
