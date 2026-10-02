@@ -12,6 +12,15 @@ final class Parcours
 {
     public const LISTE = [
         [
+            'nom' => 'Bachelor IPSSI',
+            'dates' => '2025 - 2026',
+            'intitule' => 'Bachelor IA, Développement Fullstack DevOps',
+            'option' => null,
+            'ecole' => 'IPSSI',
+            'lieu' => 'Paris',
+            'resultat' => 'En cours',
+        ],
+        [
             'nom' => 'BTS SIO',
             'dates' => '2022 - 2024',
             'intitule' => 'SIO : Services informatiques aux organisations',
