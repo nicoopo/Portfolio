@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use App\Entity\Competence;
+use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -10,10 +11,44 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class AdminTest extends WebTestCase
 {
-    /** L'administrateur tel que défini dans security.yaml (un utilisateur fabriqué à la main serait déconnecté au rechargement) */
+    /** Compte de test enregistré en base (créé au premier besoin), connecté sans passer par le formulaire */
     private static function loginAdmin(KernelBrowser $client): void
     {
-        $client->loginUser(self::getContainer()->get('security.user.provider.concrete.admin')->loadUserByIdentifier('admin'));
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $admin = $entityManager->getRepository(Utilisateur::class)->findOneBy(['identifiant' => 'admin-test']);
+        if (!$admin) {
+            $admin = (new Utilisateur())->setIdentifiant('admin-test')->setMotDePasse('aucun-mot-de-passe');
+            $entityManager->persist($admin);
+            $entityManager->flush();
+        }
+        $client->loginUser($admin);
+    }
+
+    public function testUnCompteCreeDansLAdminPeutSeConnecter(): void
+    {
+        $client = static::createClient();
+        self::loginAdmin($client);
+        $client->request('GET', '/admin/utilisateur/new');
+        $client->submitForm('Créer', [
+            'Utilisateur[identifiant]' => 'redacteur',
+            'Utilisateur[nouveauMotDePasse][first]' => 'un-mot-de-passe-solide',
+            'Utilisateur[nouveauMotDePasse][second]' => 'un-mot-de-passe-solide',
+        ]);
+        self::assertResponseRedirects();
+
+        // Enregistré sous forme d'empreinte, jamais en clair
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $compte = $entityManager->getRepository(Utilisateur::class)->findOneBy(['identifiant' => 'redacteur']);
+        self::assertNotSame('un-mot-de-passe-solide', $compte->getPassword());
+
+        // Connexion par le vrai formulaire avec ce mot de passe
+        $client->request('GET', '/logout');
+        $client->request('GET', '/login');
+        $client->submitForm('Se connecter', ['_username' => 'redacteur', '_password' => 'un-mot-de-passe-solide']);
+        self::assertResponseRedirects('/admin');
+
+        $entityManager->remove($entityManager->getRepository(Utilisateur::class)->findOneBy(['identifiant' => 'redacteur']));
+        $entityManager->flush();
     }
 
     public function testLAdministrationEstFermeeAuxVisiteurs(): void
@@ -34,7 +69,7 @@ final class AdminTest extends WebTestCase
 
     public static function listes(): iterable
     {
-        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours'] as $liste) {
+        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours', 'utilisateur'] as $liste) {
             yield $liste => [$liste];
         }
     }
