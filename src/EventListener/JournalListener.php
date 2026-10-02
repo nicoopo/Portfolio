@@ -26,6 +26,11 @@ final class JournalListener
         'EtapeParcours' => 'Étape du parcours',
         'Utilisateur' => 'Compte',
         'DemandeContact' => 'Demande de contact',
+        'CvProfil' => 'Profil du CV',
+        'Experience' => 'Expérience',
+        'CvCompetence' => 'Compétences du CV',
+        'Langue' => 'Langue',
+        'CentreInteret' => "Centre d'intérêt",
     ];
 
     public function __construct(private readonly Journaliste $journaliste)

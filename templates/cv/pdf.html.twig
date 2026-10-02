@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ app.request.locale }}">
 <head>
     <meta charset="UTF-8">
-    <title>Nicolas Cataluna - Développeur Fullstack</title>
+    <title>Nicolas Cataluna - {{ profil|loc('titre') }}</title>
     <style>
         {% if theme == 'dark' %}
         :root {
@@ -139,6 +139,25 @@
             border-radius: 4px;
             border-left: 3px solid var(--accent-primary);
             page-break-inside: avoid;
+        }
+
+        /* Anciens styles en ligne, devenus des classes (contenu partagé avec la page : cv/_contenu) */
+        .profile-text {
+            line-height: 1.4;
+            margin-bottom: 2mm;
+            font-size: 7pt;
+        }
+
+        .profile-highlight {
+            color: var(--accent-secondary);
+            font-weight: bold;
+            font-size: 7pt;
+        }
+
+        .experience-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2mm;
         }
 
         .experience-title {
@@ -295,208 +314,7 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>NICOLAS CATALUNA</h1>
-            <div class="subtitle">Développeur Fullstack</div>
-            
-            <div class="tags">
-                <span class="tag">Curieux</span>
-                <span class="tag">Rigoureux</span>
-                <span class="tag">Autonome</span>
-            </div>
-
-            <div class="contact-info">
-                <span class="contact-item">+33 7 67 80 74 69</span>
-                <span class="contact-item">nicolas.cataluna@proton.me</span>
-                <span class="contact-item">GitHub: nicoopo</span>
-                <span class="contact-item">Portfolio: nicolascataluna.fr</span>
-                <span class="contact-item">LinkedIn</span>
-            </div>
-        </div>
-
-        <!-- Profil -->
-        <div class="section">
-            <h2 class="section-title">Profil</h2>
-            <p style="line-height: 1.4; margin-bottom: 2mm; font-size: 7pt;">
-                Développeur full-stack junior spécialisé Symfony, motivé par la conception de solutions web performantes et les environnements connectés (domotique). Curieux, rigoureux et passionné par les nouvelles technologies, je cherche à contribuer à des projets concrets en lien avec l'innovation digitale.
-            </p>
-            <p style="color: var(--accent-secondary); font-weight: bold; font-size: 7pt;">
-                🎓 En recherche d'alternance : Bachelor IA, Développement Fullstack DevOps chez IPSSI<br>
-                📅 Rythme : 3 semaines en entreprise / 1 semaine en formation (12 mois)
-            </p>
-        </div>
-
-        <!-- Expériences -->
-        <div class="section">
-            <h2 class="section-title">Expériences Professionnelles</h2>
-
-            <div class="experience-item">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 2mm;">
-                    <div>
-                        <div class="experience-title">Développeur</div>
-                        <div class="experience-company">TESSI ENCAISSEMENTS | NANTERRE</div>
-                    </div>
-                    <div class="experience-period">2023 - 2024 | Contrat d'apprentissage</div>
-                </div>
-                <ul class="experience-description">
-                    <li>Migration de sites web d'un noyau PHP vers Symfony (domaine de l'encaissement)</li>
-                    <li>Mise en place de composants dans Symfony : export de données, création de graphiques dynamiques, tableau de données dynamique</li>
-                    <li>Projet évolution d'un nouveau noyau web - collaboration au développement</li>
-                </ul>
-            </div>
-
-            <div class="experience-item">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 2mm;">
-                    <div>
-                        <div class="experience-title">Stagiaire Technicien Informatique</div>
-                        <div class="experience-company">TESSI ENCAISSEMENTS | NANTERRE</div>
-                    </div>
-                    <div class="experience-period">Mai - Juin 2022 | Stage</div>
-                </div>
-                <ul class="experience-description">
-                    <li>Création d'un support Excel répertoriant l'ensemble des serveurs (vérification obsolescence et état matériel)</li>
-                    <li>Mise en place de flux de transfert et traitement de données</li>
-                    <li>Paramétrage de l'application domotique DOMOTICZ</li>
-                    <li>Implémentation de protocoles Wifi et Bluetooth (IPV6, domotique)</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Compétences -->
-        <div class="section">
-            <h2 class="section-title">Compétences</h2>
-            <div class="skills-grid">
-                <div class="skill-category">
-                    <div class="skill-category-title">Développement Fullstack & Mobile</div>
-                    <div class="skill-list">
-                        <span class="skill-item">PHP (OOP)</span>
-                        <span class="skill-item">Symfony</span>
-                        <span class="skill-item">MVC</span>
-                        <span class="skill-item">HTML/CSS/JS</span>
-                        <span class="skill-item">JavaScript</span>
-                        <span class="skill-item">Java</span>
-                    </div>
-                </div>
-
-                <div class="skill-category">
-                    <div class="skill-category-title">BDD & Hébergement</div>
-                    <div class="skill-list">
-                        <span class="skill-item">MySQL</span>
-                        <span class="skill-item">MariaDB</span>
-                        <span class="skill-item">PostgreSQL</span>
-                        <span class="skill-item">SQL Server</span>
-                        <span class="skill-item">VMWare</span>
-                    </div>
-                </div>
-
-                <div class="skill-category">
-                    <div class="skill-category-title">Sécurité, Réseaux & Télécom</div>
-                    <div class="skill-list">
-                        <span class="skill-item">Cisco</span>
-                        <span class="skill-item">802.1x</span>
-                        <span class="skill-item">Switch/Router</span>
-                        <span class="skill-item">Protocoles domotiques</span>
-                        <span class="skill-item">DOMOTICZ</span>
-                    </div>
-                </div>
-
-                <div class="skill-category">
-                    <div class="skill-category-title">Outils & DevOps</div>
-                    <div class="skill-list">
-                        <span class="skill-item">Git / GitHub</span>
-                        <span class="skill-item">GitLab CI/CD</span>
-                        <span class="skill-item">Windows/Linux</span>
-                        <span class="skill-item">Ubuntu</span>
-                        <span class="skill-item">Debian</span>
-                        <span class="skill-item">Bash/PowerShell</span>
-                    </div>
-                </div>
-
-                <div class="skill-category">
-                    <div class="skill-category-title">Informatique Générale</div>
-                    <div class="skill-list">
-                        <span class="skill-item">Pack Office</span>
-                        <span class="skill-item">SST/PRAP</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Formations -->
-        <div class="section">
-            <h2 class="section-title">Formations</h2>
-
-            <div class="formation-item">
-                <div class="formation-title">Bachelor IA, Développement Fullstack DevOps</div>
-                <div class="formation-school">IPSSI</div>
-                <div class="formation-period">2025 - 2026</div>
-                <span class="formation-status">En cours</span>
-            </div>
-
-            <div class="formation-item">
-                <div class="formation-title">BTS Services Informatiques aux Organisations - SLAM</div>
-                <div class="formation-school">ROBERT SCHUMAN | DUGNY</div>
-                <div class="formation-period">2023 - 2024</div>
-                <span class="formation-status">Obtenu</span>
-            </div>
-
-            <div class="formation-item">
-                <div class="formation-title">Baccalauréat Professionnel Systèmes Numériques - RISC</div>
-                <div class="formation-school">LA SALLE | SAINT-DENIS (93)</div>
-                <div class="formation-period">2021 - 2022</div>
-                <span class="formation-status">Obtenu avec mention Assez Bien</span>
-            </div>
-
-            <div class="formation-item">
-                <div class="formation-title">Brevet des Collèges</div>
-                <div class="formation-school">LA SALLE | SAINT-DENIS (93)</div>
-                <div class="formation-period">2018 - 2019</div>
-                <span class="formation-status">Obtenu</span>
-            </div>
-        </div>
-
-        <!-- Langues -->
-        <div class="section">
-            <h2 class="section-title">Langues</h2>
-            <div class="languages-grid">
-                <div class="language-item">
-                    <div class="language-name">Français</div>
-                    <div class="language-level">Langue maternelle</div>
-                </div>
-                <div class="language-item">
-                    <div class="language-name">Portugais</div>
-                    <div class="language-level">Courant</div>
-                </div>
-                <div class="language-item">
-                    <div class="language-name">Anglais</div>
-                    <div class="language-level">B1</div>
-                </div>
-                <div class="language-item">
-                    <div class="language-name">Espagnol</div>
-                    <div class="language-level">A2</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Centres d'intérêt -->
-        <div class="section">
-            <h2 class="section-title">Centres d'Intérêt</h2>
-            <div class="interests-grid">
-                <div class="interest-item">
-                    🎵 Musique Latino, R&B, Création musicale assistée par ordinateur (MAO)
-                </div>
-                <div class="interest-item">
-                    ✈️ Voyages : Portugal, Espagne, France et découverte de cultures
-                </div>
-                <div class="interest-item">
-                    💪 Sport : Musculation, Basketball
-                </div>
-                <div class="interest-item">
-                    🔭 Physique, Astronomie
-                </div>
-            </div>
-        </div>
+        {{ include('cv/_contenu.html.twig', {pdf: true}) }}
     </div>
 </body>
 </html>
