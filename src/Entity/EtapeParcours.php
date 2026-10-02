@@ -4,40 +4,57 @@ namespace App\Entity;
 
 use App\Repository\EtapeParcoursRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Étape du parcours scolaire : la frise de la page Univers, un souvenir dans le cerveau 3D.
  */
 #[ORM\Entity(repositoryClass: EtapeParcoursRepository::class)]
+#[UniqueEntity('nom')]
 class EtapeParcours
 {
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
     private ?int $id = null;
 
     /** Nom court, unique parmi les noms du cerveau (sélection par nom) */
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 50)]
     #[ORM\Column(length: 50, unique: true)]
     private string $nom;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 20)]
     #[ORM\Column(length: 20)]
     private string $dates;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 150)]
     #[ORM\Column(length: 150)]
     private string $intitule;
 
     /** Option du diplôme (BTS SIO option SLAM…) */
+    #[Assert\Length(max: 150)]
     #[ORM\Column(length: 150, nullable: true)]
     private ?string $specialite;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     #[ORM\Column(length: 100)]
     private string $ecole;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     #[ORM\Column(length: 100)]
     private string $lieu;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     #[ORM\Column(length: 100)]
     private string $resultat;
 
     /** 1 = le plus récent */
+    #[Assert\PositiveOrZero]
     #[ORM\Column]
     private int $position;
 
@@ -64,4 +81,13 @@ class EtapeParcours
             'resultat' => $this->resultat,
         ];
     }
+
+    public function setNom(?string $nom): static { $this->nom = $nom ?? ''; return $this; }
+    public function setDates(?string $dates): static { $this->dates = $dates ?? ''; return $this; }
+    public function setIntitule(?string $intitule): static { $this->intitule = $intitule ?? ''; return $this; }
+    public function setSpecialite(?string $specialite): static { $this->specialite = $specialite; return $this; }
+    public function setEcole(?string $ecole): static { $this->ecole = $ecole ?? ''; return $this; }
+    public function setLieu(?string $lieu): static { $this->lieu = $lieu ?? ''; return $this; }
+    public function setResultat(?string $resultat): static { $this->resultat = $resultat ?? ''; return $this; }
+    public function setPosition(?int $position): static { $this->position = $position ?? 0; return $this; }
 }

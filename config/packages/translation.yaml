@@ -1,5 +1,5 @@
 framework:
-    default_locale: en
+    default_locale: fr # le site est en français (validation, administration…)
     translator:
         default_path: '%kernel.project_dir%/translations'
         providers:

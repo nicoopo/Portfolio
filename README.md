@@ -104,8 +104,12 @@ Portfolio/
 **Base de dev** (client SQL, PhpStorm…) : `localhost:5433`, base `app`, utilisateur `app`, sans mot de passe
 (port ouvert sur 127.0.0.1 uniquement). En ligne de commande : `docker compose exec database psql -U app app`.
 
-**Preprod** : définir `POSTGRES_PASSWORD=...` dans `.env.local` sur le serveur, puis `make preprod-deploy`
-(build, redémarrage, migrations). La preprod a sa propre base (volume `db_data_preprod`).
+**Administration** : [http://localhost:8081/admin](http://localhost:8081/admin) (identifiant `admin`) pour modifier
+compétences, projets, passions et parcours. Mot de passe : `make admin-password`, puis copier l'empreinte affichée dans
+`.env.local` : `ADMIN_PASSWORD_HASH='...'` (entre apostrophes : elle contient des `$`). Sans elle, connexion impossible.
+
+**Preprod** : définir `POSTGRES_PASSWORD=...` et `ADMIN_PASSWORD_HASH='...'` dans `.env.local` sur le serveur, puis
+`make preprod-deploy` (build, redémarrage, migrations). La preprod a sa propre base (volume `db_data_preprod`).
 
 ## 📝 Commandes Utiles
 
