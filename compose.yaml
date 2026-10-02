@@ -9,3 +9,32 @@ services:
       dockerfile: docker/php/Dockerfile
     container_name: portfolio_php
     restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://app:${POSTGRES_PASSWORD:-}@database:5432/app?serverVersion=16&charset=utf8
+    depends_on:
+      database:
+        condition: service_healthy
+
+  # ------------------------------------------------
+  # PostgreSQL : compétences, projets, passions, parcours
+  # ------------------------------------------------
+  database:
+    image: postgres:16-alpine
+    container_name: portfolio_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      # Aucun mot de passe par défaut : preprod → POSTGRES_PASSWORD dans .env.local (deploy-preprod.sh) ;
+      # dev → connexion sans mot de passe (compose.override.yaml)
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "app", "-U", "app"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db_data:

@@ -3,15 +3,17 @@ FROM php:8.5-apache
 # Activation mod_rewrite Apache (indispensable pour Symfony)
 RUN a2enmod rewrite
 
-# Dépendances système + extensions PHP (pas de pgsql : le portfolio n'a pas de base de données)
+# Dépendances système + extensions PHP (pdo_pgsql : base PostgreSQL du service `database`)
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libicu-dev \
+        libpq-dev \
         libzip-dev \
         zip \
         unzip \
         git \
     && docker-php-ext-install \
         intl \
+        pdo_pgsql \
         zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 

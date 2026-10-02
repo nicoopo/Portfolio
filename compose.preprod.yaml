@@ -15,3 +15,12 @@ services:
       APP_DEBUG: "0"
     env_file:
       - .env.local                   # ← APP_SECRET depuis le VPS
+
+  # Base à part : un volume déjà initialisé garde son mot de passe d'origine (celui du dev)
+  database:
+    container_name: portfolio_db_preprod
+    volumes: !override
+      - db_data_preprod:/var/lib/postgresql/data
+
+volumes:
+  db_data_preprod:

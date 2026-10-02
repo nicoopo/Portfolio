@@ -15,7 +15,7 @@ const PATH = new THREE.CatmullRomCurve3([
 ]);
 
 /**
- * Un souvenir par étape du parcours (src/Data/Parcours.php, du plus récent au plus ancien).
+ * Un souvenir par étape du parcours (entité EtapeParcours, du plus récent au plus ancien).
  * Retourne { object, targets, update } ; targets = souvenirs qu'on vise à la souris.
  */
 export function createSouvenirs(parcours, texture) {
