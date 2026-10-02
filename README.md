@@ -63,7 +63,7 @@ Portfolio/
 - **Compétences** : Présentation de mes compétences techniques et professionnelles.
 - **Portfolio** : Galerie de projets avec descriptions et captures d'écran.
 - **CV en ligne** : CV interactif avec téléchargement en PDF.
-- **Contact** : Formulaire pour me contacter.
+- **Contact** : E-mail, GitHub, LinkedIn et CV numérique.
 - **Responsive** : Optimisé pour tous les appareils.
 
 ## 🛠 Technologies
