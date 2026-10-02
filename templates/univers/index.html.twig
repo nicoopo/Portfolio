@@ -63,9 +63,9 @@
         <div class="timeline-item">
             <div class="timeline-content shadow-lg rounded-4 p-4">
             <span class="date gradient fw-bold">{{ etape.dates }}</span>
-            <h4 class="fw-bold">{{ etape|loc('intitule') }}
+            <h3 class="h4 fw-bold">{{ etape|loc('intitule') }}
                 {% if etape.specialite %}<br>{{ etape|loc('specialite') }}{% endif %}
-            </h4>
+            </h3>
             <p class="mb-0 opacity-75">
                 {{ etape.ecole }}<br>
                 {{ etape.lieu }}
