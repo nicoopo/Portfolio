@@ -63,7 +63,7 @@ Portfolio/
 - **Compétences** : Présentation de mes compétences techniques et professionnelles.
 - **Portfolio** : Galerie de projets avec descriptions et captures d'écran.
 - **CV en ligne** : CV interactif avec téléchargement en PDF.
-- **Contact** : E-mail, GitHub, LinkedIn et CV numérique.
+- **Contact** : formulaire (anti-spam par champ piège), e-mail, GitHub, LinkedIn et CV numérique.
 - **Responsive** : Optimisé pour tous les appareils.
 
 ## 🛠 Technologies
@@ -108,8 +108,9 @@ Portfolio/
 compétences, projets, passions et parcours. Mot de passe : `make admin-password`, puis copier l'empreinte affichée dans
 `.env.local` : `ADMIN_PASSWORD_HASH='...'` (entre apostrophes : elle contient des `$`). Sans elle, connexion impossible.
 
-**Preprod** : définir `POSTGRES_PASSWORD=...` et `ADMIN_PASSWORD_HASH='...'` dans `.env.local` sur le serveur, puis
-`make preprod-deploy` (build, redémarrage, migrations). La preprod a sa propre base (volume `db_data_preprod`).
+**Preprod** : définir dans `.env.local` sur le serveur `POSTGRES_PASSWORD=...`, `ADMIN_PASSWORD_HASH='...'` et
+`MAILER_DSN=...` (SMTP qui envoie le formulaire de contact ; en dev les e-mails ne partent pas, ils sont visibles dans la
+barre de debug), puis `make preprod-deploy` (build, redémarrage, migrations). La preprod a sa propre base (volume `db_data_preprod`).
 
 ## 📝 Commandes Utiles
 
