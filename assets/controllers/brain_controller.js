@@ -11,6 +11,8 @@ import { createNebulae } from '../cerveau/nebulae.js';
 const HOME_TARGET = new THREE.Vector3(0, 0, 0);
 const CLICK_TOLERANCE_PX = 5;
 const FOCUS_DISTANCE = { neuron: 1.8, nebula: 5 }; // distance caméra ↔ élément sélectionné
+const TOUR_STOPS = 6;       // neurones visités : ceux qui ont le plus de projets
+const TOUR_PAUSE_MS = 6000; // temps passé sur chaque neurone
 
 /**
  * Scène du cerveau : interaction (caméra, survol, clic, panneau).
@@ -18,7 +20,7 @@ const FOCUS_DISTANCE = { neuron: 1.8, nebula: 5 }; // distance caméra ↔ élé
  * Chargé uniquement sur les pages qui l'utilisent (lazy).
  */
 export default class extends Controller {
-    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody'];
+    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton'];
     static values = { neurons: Array, passions: Array };
 
     connect() {
@@ -29,6 +31,7 @@ export default class extends Controller {
             return;
         }
         this.fallbackTarget.hidden = true;
+        this.tourButtonTarget.hidden = false;
 
         this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -48,7 +51,10 @@ export default class extends Controller {
         this.controls.autoRotate = !this.reducedMotion;
         this.controls.autoRotateSpeed = 0.6;
         // L'utilisateur reprend la main : on arrête le déplacement automatique de la caméra
-        this.controls.addEventListener('start', () => { this.flight = null; });
+        this.controls.addEventListener('start', () => {
+            this.flight = null;
+            this.stopTour();
+        });
 
         this.texture = dotTexture();
         this.brain = createBrain(this.texture);
@@ -72,10 +78,12 @@ export default class extends Controller {
         this.resizeObserver.observe(this.canvasTarget);
         this.resize();
 
-        const clock = new THREE.Clock();
-        const loop = () => {
+        this.timer = new THREE.Timer();
+        this.timer.connect(document);
+        const loop = (timestamp) => {
             this.frame = requestAnimationFrame(loop);
-            this.animate(this.reducedMotion ? 0 : clock.getElapsedTime());
+            this.timer.update(timestamp);
+            this.animate(this.reducedMotion ? 0 : this.timer.getElapsed());
             this.controls.update();
             this.renderer.render(this.scene, this.camera);
         };
@@ -90,6 +98,8 @@ export default class extends Controller {
     disconnect() {
         if (!this.renderer) return;
         cancelAnimationFrame(this.frame);
+        this.stopTour();
+        this.timer.dispose();
         this.resizeObserver.disconnect();
         this.listeners.forEach(([el, type, fn]) => el.removeEventListener(type, fn));
         this.controls.dispose();
@@ -191,7 +201,47 @@ export default class extends Controller {
         if (moved > CLICK_TOLERANCE_PX) return;
 
         const target = this.pick(event);
-        if (target) this.select(target);
+        if (target) {
+            this.stopTour();
+            this.select(target);
+        }
+    }
+
+    // ------------------------------------------------
+    // Visite guidée
+    // ------------------------------------------------
+
+    /** Bouton « Visite guidée » : lance ou arrête la visite */
+    toggleTour() {
+        if (this.tourTimeout) {
+            this.stopTour();
+            return;
+        }
+        const stops = [...this.neurons]
+            .sort((a, b) => b.userData.data.projets.length - a.userData.data.projets.length)
+            .slice(0, TOUR_STOPS);
+        this.tourButtonTarget.textContent = 'Arrêter la visite';
+        this.tourButtonTarget.setAttribute('aria-pressed', 'true');
+
+        const next = (i) => {
+            if (i === stops.length) {
+                this.stopTour();
+                this.close();
+                return;
+            }
+            this.select(stops[i]);
+            this.tourTimeout = setTimeout(() => next(i + 1), TOUR_PAUSE_MS);
+        };
+        next(0);
+    }
+
+    /** Toute action de l'utilisateur sur le cerveau arrête la visite */
+    stopTour() {
+        if (!this.tourTimeout) return;
+        clearTimeout(this.tourTimeout);
+        this.tourTimeout = null;
+        this.tourButtonTarget.textContent = 'Visite guidée';
+        this.tourButtonTarget.setAttribute('aria-pressed', 'false');
     }
 
     // ------------------------------------------------
@@ -202,6 +252,7 @@ export default class extends Controller {
     selectByName({ params: { name }, target }) {
         const found = this.clickables?.find((t) => t.userData.data.nom === name);
         if (!found) return;
+        this.stopTour();
         this.select(found);
         this.panelTarget.focus();
         // Mobile : la légende ouverte masquerait le cerveau
@@ -231,6 +282,7 @@ export default class extends Controller {
     }
 
     close() {
+        this.stopTour();
         if (!this.selected) return;
         this.selected = null;
         this.panelTarget.hidden = true;
