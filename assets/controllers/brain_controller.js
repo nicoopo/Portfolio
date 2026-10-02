@@ -25,7 +25,7 @@ const TOUR_PAUSE_MS = 6000; // temps passé sur chaque neurone
  * Chargé uniquement sur les pages qui l'utilisent (lazy).
  */
 export default class extends Controller {
-    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton'];
+    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton'];
     static values = { neurons: Array, passions: Array, souvenirs: Array };
 
     connect() {
@@ -37,6 +37,8 @@ export default class extends Controller {
         }
         this.fallbackTarget.hidden = true;
         this.tourButtonTarget.hidden = false;
+        // Pas de plein écran possible (ex. Safari sur iPhone) : pas de bouton
+        this.fullscreenButtonTarget.hidden = !document.fullscreenEnabled;
 
         this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -83,6 +85,12 @@ export default class extends Controller {
         this.listen(this.renderer.domElement, 'pointerdown', (e) => { this.downAt = [e.clientX, e.clientY]; });
         this.listen(this.renderer.domElement, 'pointerup', (e) => this.onPointerUp(e));
         this.listen(this.renderer.domElement, 'pointerleave', () => this.hover(null));
+        // Échap fait aussi sortir du plein écran : le bouton suit l'état réel
+        this.listen(document, 'fullscreenchange', () => {
+            const on = document.fullscreenElement === this.element;
+            this.fullscreenButtonTarget.textContent = on ? 'Quitter le plein écran' : 'Plein écran';
+            this.fullscreenButtonTarget.setAttribute('aria-pressed', String(on));
+        });
 
         // Rendu en deux temps (scène, puis conversion des couleurs) sur tous les écrans : rendus
         // directement sur le canvas, les points additifs saturent en blanc (couleurs mélangées en sRGB).
@@ -235,6 +243,11 @@ export default class extends Controller {
             this.stopTour();
             this.select(target);
         }
+    }
+
+    toggleFullscreen() {
+        if (document.fullscreenElement) document.exitFullscreen();
+        else this.element.requestFullscreen();
     }
 
     // ------------------------------------------------

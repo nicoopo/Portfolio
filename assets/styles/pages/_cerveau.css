@@ -68,6 +68,26 @@
   cursor: pointer;
 }
 
+.brain-tour--fullscreen {
+  left: auto;
+  right: 1rem;
+}
+
+/* Plein écran : pas de navbar au-dessus, et le fond du site n'est plus derrière */
+.brain-stage:fullscreen {
+  background: radial-gradient(ellipse at bottom, #0a0a12 0%, #000 100%);
+}
+
+.brain-stage:fullscreen .brain-legend {
+  top: 1rem;
+}
+
+@media (min-width: 577px) { /* sur mobile, le panneau est en bas */
+  .brain-stage:fullscreen .brain-panel {
+    top: 1rem;
+  }
+}
+
 .brain-tour:hover,
 .brain-tour[aria-pressed="true"] {
   color: var(--color-text);
