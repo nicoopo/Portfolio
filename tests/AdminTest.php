@@ -51,6 +51,17 @@ final class AdminTest extends WebTestCase
         $entityManager->flush();
     }
 
+    public function testLeTableauDeBordResumeLActivite(): void
+    {
+        $client = static::createClient();
+        self::loginAdmin($client);
+        $client->request('GET', '/admin');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Tableau de bord');
+        self::assertSelectorTextContains('.card', 'demande(s) de contact ce mois-ci');
+    }
+
     public function testLAdministrationEstFermeeAuxVisiteurs(): void
     {
         $client = static::createClient();
