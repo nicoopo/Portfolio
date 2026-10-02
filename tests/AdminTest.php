@@ -69,7 +69,7 @@ final class AdminTest extends WebTestCase
 
     public static function listes(): iterable
     {
-        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours', 'utilisateur', 'demande-contact', 'journal'] as $liste) {
+        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours', 'utilisateur', 'demande-contact', 'journal', 'cv-profil', 'experience', 'cv-competence', 'langue', 'centre-interet'] as $liste) {
             yield $liste => [$liste];
         }
     }

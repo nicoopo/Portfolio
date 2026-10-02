@@ -13,19 +13,12 @@
     <h2 class="gradient mb-4">{{ 'Mon CV'|trans }}</h2>
 
     <div class="d-flex justify-content-center gap-3 flex-wrap mb-5">
-        <!-- Voir le CV - Ouvre dans un iframe sur la même page -->
-        <button
-            class="btn btn-galactic btn-galactic-outline-light"
-            data-action="pdf#show"
-            data-pdf-url-param="{{ asset('docs/CV-nicolascataluna.pdf') }}"
-            data-pdf-title-param="{{ 'Mon CV'|trans }}">
+        {# CV généré depuis la base, dans la langue de la page (page /CV et PDF) #}
+        <a href="{{ path('app_cv') }}" class="btn btn-galactic btn-galactic-outline-light">
             <i class="bi bi-eye"></i> {{ 'Voir le CV'|trans }}
-        </button>
+        </a>
 
-        <!-- Télécharger le CV -->
-        <a href="{{ asset('docs/CV-nicolascataluna.pdf') }}"
-           download="CV_Nicolas_Cataluna.pdf"
-           class="btn btn-galactic btn-galactic-primary">
+        <a href="{{ path('app_cv_download', {theme: 'light'}) }}" class="btn btn-galactic btn-galactic-primary">
             <i class="bi bi-download"></i> {{ 'Télécharger'|trans }}
         </a>
     </div>
