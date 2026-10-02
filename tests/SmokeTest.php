@@ -29,6 +29,15 @@ final class SmokeTest extends WebTestCase
         self::assertGreaterThan(0, $crawler->filter('a.skill-card[href^="/cerveau#"]')->count());
     }
 
+    #[DataProvider('pages')]
+    public function testPageAUnApercuDePartage(string $url): void
+    {
+        $crawler = static::createClient()->request('GET', $url);
+
+        self::assertNotEmpty($crawler->filter('meta[name="description"]')->attr('content'));
+        self::assertStringStartsWith('http', $crawler->filter('meta[property="og:image"]')->attr('content'));
+    }
+
     public function testTelechargementCvPdf(): void
     {
         $client = static::createClient();

@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Univers de Nico{% endblock %}</title>
+    <meta name="description" content="{% block description %}Portfolio de Nicolas Cataluna, développeur fullstack PHP / Symfony : compétences, projets, parcours, et un cerveau 3D interactif pour tout explorer.{% endblock %}">
+    {# Aperçu des liens partagés (LinkedIn, Discord, Slack…) #}
+    {% set page_url = app.request.schemeAndHttpHost ~ app.request.pathInfo %}
+    <link rel="canonical" href="{{ page_url }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Univers de Nico">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:title" content="{{ block('title')|trim }}">
+    <meta property="og:description" content="{{ block('description')|trim }}">
+    <meta property="og:url" content="{{ page_url }}">
+    <meta property="og:image" content="{{ absolute_url(asset('images/og-cerveau.jpg')) }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" href="{{ asset('images/nico-symbol.svg') }}">
     {% block javascripts %}
         {# Charge aussi app.js → bootstrap.css + styles/app.css #}
