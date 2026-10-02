@@ -12,6 +12,7 @@ import { createNeurons } from '../cerveau/neurons.js';
 import { Synapses } from '../cerveau/synapses.js';
 import { createNebulae } from '../cerveau/nebulae.js';
 import { createSouvenirs } from '../cerveau/souvenirs.js';
+import { Ambiance } from '../cerveau/ambiance.js';
 
 const HOME_TARGET = new THREE.Vector3(0, 0, 0);
 const CLICK_TOLERANCE_PX = 5;
@@ -26,7 +27,7 @@ const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
  * Chargé uniquement sur les pages qui l'utilisent (lazy).
  */
 export default class extends Controller {
-    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search', 'shareButton'];
+    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search', 'shareButton', 'soundButton'];
     static values = { neurons: Array, passions: Array, souvenirs: Array };
 
     connect() {
@@ -41,6 +42,7 @@ export default class extends Controller {
         // Pas de plein écran possible (ex. Safari sur iPhone) : pas de bouton
         this.fullscreenButtonTarget.hidden = !document.fullscreenEnabled;
         this.shareButtonTarget.hidden = false;
+        this.soundButtonTarget.hidden = !window.AudioContext;
 
         this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -89,6 +91,8 @@ export default class extends Controller {
         this.listen(this.renderer.domElement, 'pointerdown', (e) => { this.downAt = [e.clientX, e.clientY]; });
         this.listen(this.renderer.domElement, 'pointerup', (e) => this.onPointerUp(e));
         this.listen(this.renderer.domElement, 'pointerleave', () => this.hover(null));
+        // Onglet caché : plus de son ni de calcul audio
+        this.listen(document, 'visibilitychange', () => this.ambiance?.setVisible(!document.hidden));
         // Échap fait aussi sortir du plein écran : le bouton suit l'état réel
         this.listen(document, 'fullscreenchange', () => {
             const on = document.fullscreenElement === this.element;
@@ -171,6 +175,7 @@ export default class extends Controller {
         cancelAnimationFrame(this.frame);
         this.stopTour();
         clearTimeout(this.shareTimeout);
+        this.ambiance?.close();
         this.timer.dispose();
         this.resizeObserver.disconnect();
         this.listeners.forEach(([el, type, fn]) => el.removeEventListener(type, fn));
@@ -288,6 +293,14 @@ export default class extends Controller {
         }
     }
 
+    /** Bouton « Son » : l'audio n'est créé qu'au premier clic (les navigateurs l'exigent) */
+    toggleSound() {
+        this.ambiance ??= new Ambiance();
+        const on = this.ambiance.toggle();
+        this.soundButtonTarget.textContent = on ? 'Couper le son' : 'Son';
+        this.soundButtonTarget.setAttribute('aria-pressed', String(on));
+    }
+
     toggleFullscreen() {
         if (document.fullscreenElement) document.exitFullscreen();
         else this.element.requestFullscreen();
@@ -371,6 +384,7 @@ export default class extends Controller {
 
     select(target) {
         this.selected = target;
+        this.ambiance?.ping(target.userData.kind);
         this.controls.autoRotate = false;
         this.synapses.highlight(target.userData.kind === 'neuron' ? target : null);
 
