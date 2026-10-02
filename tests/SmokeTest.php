@@ -53,7 +53,7 @@ final class SmokeTest extends WebTestCase
         self::assertNotEmpty($souvenirs);
         foreach ($souvenirs as $souvenir) {
             self::assertStringStartsWith('/univers#', $souvenir['url']);
-            self::assertCount(1, $frise->filter('.timeline-item'.strstr($souvenir['url'], '#')), $souvenir['url']);
+            self::assertCount(1, $frise->filter('.frise-etape'.strstr($souvenir['url'], '#')), $souvenir['url']);
         }
     }
 

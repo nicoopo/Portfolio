@@ -57,25 +57,21 @@
 
     <h2 class="text-center mb-5 gradient fw-bold display-6">{{ 'Mon parcours'|trans }}</h2>
 
-    <div class="timeline-container">
-
-        {% for etape in parcours %}
-        <div class="timeline-item" id="etape-{{ etape.id }}">
-            <div class="timeline-content shadow-lg rounded-4 p-4">
-            <span class="date gradient fw-bold">{{ etape.dates }}</span>
-            <h3 class="h4 fw-bold">{{ etape|loc('intitule') }}
-                {% if etape.specialite %}<br>{{ etape|loc('specialite') }}{% endif %}
-            </h3>
-            <p class="mb-0 opacity-75">
-                {{ etape.ecole }}<br>
-                {{ etape.lieu }}
-            </p>
-            <p class="mt-2 fw-semibold">{{ etape|loc('resultat') }}</p>
-            <a class="timeline-brain-link" href="{{ path('app_cerveau') }}#{{ etape|loc('nom')|url_encode }}">{{ 'Voir ce souvenir dans mon cerveau'|trans }}</a>
-            </div>
-        </div>
+    {# Frise chronologique : de la plus ancienne étape à la plus récente (position 1 = la plus récente) #}
+    <ol class="frise">
+        {% for etape in parcours|reverse %}
+        {% set en_cours = (etape.dates|split('-')|last|trim) >= 'now'|date('Y') %}
+        <li class="frise-etape{{ en_cours ? ' frise-etape--en-cours' }}" id="etape-{{ etape.id }}">
+            <span class="frise-dates">{{ etape.dates }}{% if en_cours %} <span class="frise-badge">{{ 'En cours'|trans }}</span>{% endif %}</span>
+            <article class="frise-carte">
+                <h3 class="frise-titre">{{ etape|loc('intitule') }}</h3>
+                {% if etape.specialite %}<p class="frise-specialite">{{ etape|loc('specialite') }}</p>{% endif %}
+                <p class="frise-ecole">{{ etape.ecole }} · {{ etape.lieu }}</p>
+                <p class="frise-resultat">{{ etape|loc('resultat') }}</p>
+                <a class="frise-lien" href="{{ path('app_cerveau') }}#{{ etape|loc('nom')|url_encode }}">{{ 'Voir ce souvenir dans mon cerveau'|trans }}</a>
+            </article>
+        </li>
         {% endfor %}
-
-    </div>
+    </ol>
 </section>
 {% endblock %}
