@@ -16,3 +16,13 @@
     padding-bottom: 40px;
   }
 }
+
+/* Lien vers le souvenir correspondant dans /cerveau */
+.timeline-brain-link {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+}
+
+.timeline-brain-link:hover {
+  color: var(--color-text);
+}

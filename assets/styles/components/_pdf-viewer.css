@@ -1,4 +1,4 @@
-/* Visionneuse PDF (scripts/pdf_viewer.js) */
+/* Visionneuse PDF (controllers/pdf_controller.js) */
 
 .pdf-viewer-container {
     background: rgba(20, 20, 20, 0.95);
@@ -8,16 +8,16 @@
     border: 2px solid rgba(100, 149, 237, 0.3);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(5px);
-    display: none;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    scroll-margin-top: calc(var(--navbar-height) + 1rem); /* titre visible sous la navbar fixe */
 }
 
-.pdf-viewer-container.active {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
+/* Apparition en fondu à l'ouverture */
+@starting-style {
+    .pdf-viewer-container {
+        opacity: 0;
+        transform: translateY(20px);
+    }
 }
 
 .pdf-header {
