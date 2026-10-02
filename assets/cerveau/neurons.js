@@ -6,10 +6,10 @@ import { glowSprite } from './textures.js';
  * center : centre de la zone ; radius : étalement des neurones autour.
  */
 const ZONES = {
-    frontal:   { center: [0, 0.35, 0.7],  radius: 0.25 },
-    parietal:  { center: [0, 0.55, -0.2], radius: 0.25 },
-    temporal:  { center: [0.4, -0.1, 0.2], radius: 0.18, mirror: true }, // réparti sur les deux côtés
-    occipital: { center: [0, 0.2, -0.8],  radius: 0.2 },
+    frontal:   { center: [0, 0.35, 0.58],  radius: 0.24 },
+    parietal:  { center: [0, 0.52, -0.18], radius: 0.24 },
+    temporal:  { center: [0.38, -0.16, 0.12], radius: 0.15, mirror: true }, // réparti sur les deux côtés
+    occipital: { center: [0, 0.2, -0.66],  radius: 0.2 },
     limbique:  { center: [0, 0.05, 0],    radius: 0.15 },
 };
 
@@ -25,7 +25,8 @@ export function createNeurons(neurons, texture) {
         const siblings = byZone[data.zone];
         const color = new THREE.Color(data.couleur);
 
-        const anchor = new THREE.Mesh(core, new THREE.MeshBasicMaterial({ color }));
+        // transparent : dessiné avec les objets transparents, donc après le corps du cerveau (renderOrder)
+        const anchor = new THREE.Mesh(core, new THREE.MeshBasicMaterial({ color, transparent: true }));
         anchor.position.copy(neuronPosition(ZONES[data.zone], siblings.indexOf(data), siblings.length));
 
         const halo = glowSprite(texture, color, 0.22);

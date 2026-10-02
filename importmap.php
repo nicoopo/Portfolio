@@ -53,4 +53,7 @@ return [
     'three/addons/postprocessing/OutputPass.js' => [
         'version' => '0.186.1',
     ],
+    'three/addons/math/ImprovedNoise.js' => [
+        'version' => '0.186.1',
+    ],
 ];
