@@ -7,10 +7,11 @@
          data-controller="brain"
          data-brain-neurons-value="{{ neurones|json_encode }}"
          data-brain-passions-value="{{ passions|json_encode }}"
+         data-brain-souvenirs-value="{{ parcours|json_encode }}"
          data-action="keydown.esc@window->brain#close">
 
     <div class="brain-canvas" data-brain-target="canvas"
-         role="img" aria-label="Cerveau holographique en 3D : chaque point lumineux est une compétence, reliée aux autres par des synapses ; autour, des nébuleuses représentent mes passions"></div>
+         role="img" aria-label="Cerveau holographique en 3D : chaque point lumineux est une compétence, reliée aux autres par des synapses ; au centre, un fil de souvenirs retrace mon parcours ; autour, des nébuleuses représentent mes passions"></div>
 
     <p class="brain-fallback" data-brain-target="fallback">
         Ton navigateur ne supporte pas la 3D (WebGL).
@@ -44,6 +45,20 @@
                 <li>
                     <button type="button" data-action="brain#selectByName" data-brain-name-param="{{ passion.nom }}">
                         {{ passion.nom }}
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+        </details>
+        <details class="brain-legend-group">
+            <summary>
+                <span class="brain-legend-dot brain-legend-dot--souvenir"></span>Parcours
+            </summary>
+            <ul>
+                {% for etape in parcours %}
+                <li>
+                    <button type="button" data-action="brain#selectByName" data-brain-name-param="{{ etape.nom }}">
+                        {{ etape.nom }}
                     </button>
                 </li>
                 {% endfor %}

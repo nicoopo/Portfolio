@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use App\Data\Competences;
+use App\Data\Parcours;
 use App\Data\Passions;
 use App\Data\Projets;
 use PHPUnit\Framework\TestCase;
@@ -31,10 +32,11 @@ final class DataTest extends TestCase
 
     public function testLesNomsDuCerveauSontUniques(): void
     {
-        // La légende du cerveau sélectionne neurones et nébuleuses par leur nom
+        // La légende du cerveau sélectionne neurones, nébuleuses et souvenirs par leur nom
         $noms = [
             ...array_merge(...array_column(Competences::CATEGORIES, 'competences')),
             ...array_column(Passions::LISTE, 'nom'),
+            ...array_column(Parcours::LISTE, 'nom'),
         ];
 
         self::assertSame($noms, array_unique($noms));

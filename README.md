@@ -51,7 +51,7 @@ Portfolio/
 - `assets/controllers/xxx_controller.js` : contrôleur Stimulus, branché sur un élément avec `data-controller="xxx"`.
   C'est le choix par défaut pour tout comportement de page (ex. `typing`, `cv`, `brain`).
 - `assets/scripts/` : scripts globaux importés par `app.js` (fond étoilé, menu, transition de page).
-- `assets/cerveau/` : modules Three.js du cerveau 3D (forme, neurones, synapses, nébuleuses), sans logique
+- `assets/cerveau/` : modules Three.js du cerveau 3D (forme, neurones, synapses, nébuleuses, souvenirs), sans logique
   d'interface ; importés uniquement par `controllers/brain_controller.js`.
 - Pas de `<script>` ni de `<style>` dans les templates Twig (exceptions : le template PDF, car Dompdf exige le CSS inline, et la ligne qui applique le thème du CV avant l'affichage).
 
@@ -59,7 +59,7 @@ Portfolio/
 
 - **Mon Cerveau** : Cerveau holographique 3D (Three.js) : chaque neurone est une compétence, cliquable,
   relié par des synapses animées aux compétences utilisées dans les mêmes projets ; des nébuleuses en orbite
-  représentent mes passions.
+  représentent mes passions ; un fil de souvenirs retrace mon parcours.
 - **Compétences** : Présentation de mes compétences techniques et professionnelles.
 - **Portfolio** : Galerie de projets avec descriptions et captures d'écran.
 - **CV en ligne** : CV interactif avec téléchargement en PDF.

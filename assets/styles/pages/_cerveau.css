@@ -105,6 +105,10 @@
   background: conic-gradient(#5b8cff, #2cb67d, #e4c35b, #f25f8c, #a06cff, #5b8cff);
 }
 
+.brain-legend-dot--souvenir {
+  --dot: #ffe8a3;
+}
+
 .brain-legend ul {
   list-style: none;
   margin: 0 0 0.25rem;

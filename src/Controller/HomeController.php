@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Data\Competences;
+use App\Data\Parcours;
 use App\Data\Passions;
 use App\Data\Projets;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -49,6 +50,7 @@ final class HomeController extends AbstractController
             'categories' => Competences::CATEGORIES,
             'neurones' => $neurones,
             'passions' => Passions::LISTE,
+            'parcours' => Parcours::LISTE,
         ]);
     }
 }

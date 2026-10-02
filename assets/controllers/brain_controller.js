@@ -7,21 +7,22 @@ import { createBrain } from '../cerveau/brain.js';
 import { createNeurons } from '../cerveau/neurons.js';
 import { Synapses } from '../cerveau/synapses.js';
 import { createNebulae } from '../cerveau/nebulae.js';
+import { createSouvenirs } from '../cerveau/souvenirs.js';
 
 const HOME_TARGET = new THREE.Vector3(0, 0, 0);
 const CLICK_TOLERANCE_PX = 5;
-const FOCUS_DISTANCE = { neuron: 1.8, nebula: 5 }; // distance caméra ↔ élément sélectionné
+const FOCUS_DISTANCE = { neuron: 1.8, nebula: 5, souvenir: 1.8 }; // distance caméra ↔ élément sélectionné
 const TOUR_STOPS = 6;       // neurones visités : ceux qui ont le plus de projets
 const TOUR_PAUSE_MS = 6000; // temps passé sur chaque neurone
 
 /**
  * Scène du cerveau : interaction (caméra, survol, clic, panneau).
- * La 3D elle-même est dans assets/cerveau/ (cerveau, neurones, synapses, nébuleuses).
+ * La 3D elle-même est dans assets/cerveau/ (cerveau, neurones, synapses, nébuleuses, souvenirs).
  * Chargé uniquement sur les pages qui l'utilisent (lazy).
  */
 export default class extends Controller {
     static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton'];
-    static values = { neurons: Array, passions: Array };
+    static values = { neurons: Array, passions: Array, souvenirs: Array };
 
     connect() {
         try {
@@ -62,10 +63,11 @@ export default class extends Controller {
         this.neurons = createNeurons(this.neuronsValue, this.texture);
         this.synapses = new Synapses(this.neurons, this.texture);
         this.nebulae = createNebulae(this.passionsValue, this.texture);
-        // Tout ce qui se clique : neurones et nébuleuses
-        this.clickables = [...this.neurons, ...this.nebulae.targets];
+        this.souvenirs = createSouvenirs(this.souvenirsValue, this.texture);
+        // Tout ce qui se clique : neurones, nébuleuses et souvenirs
+        this.clickables = [...this.neurons, ...this.nebulae.targets, ...this.souvenirs.targets];
 
-        this.scene.add(this.brain, this.synapses.object, this.nebulae.object, ...this.neurons.map((h) => h.userData.anchor));
+        this.scene.add(this.brain, this.synapses.object, this.nebulae.object, this.souvenirs.object, ...this.neurons.map((h) => h.userData.anchor));
 
         this.raycaster = new THREE.Raycaster();
         this.pointer = new THREE.Vector2();
@@ -80,9 +82,9 @@ export default class extends Controller {
 
         this.timer = new THREE.Timer();
         this.timer.connect(document);
-        const loop = (timestamp) => {
+        const loop = () => {
             this.frame = requestAnimationFrame(loop);
-            this.timer.update(timestamp);
+            this.timer.update(); // sans l'horodatage de rAF : il peut précéder la création du timer (temps négatif)
             this.animate(this.reducedMotion ? 0 : this.timer.getElapsed());
             this.controls.update();
             this.renderer.render(this.scene, this.camera);
@@ -150,8 +152,14 @@ export default class extends Controller {
             core.scale.setScalar((active ? 2.2 : 1.6) * (1 + 0.1 * Math.sin(time + core.userData.phase)));
         }
 
+        for (const halo of this.souvenirs.targets) {
+            const active = halo === selected || halo === this.hovered;
+            halo.scale.setScalar((active ? 0.32 : 0.2) * (1 + 0.15 * Math.sin(time * 1.5 + halo.userData.phase)));
+        }
+
         this.synapses.update(time);
         this.nebulae.update(time);
+        this.souvenirs.update(time);
 
         // Vol de caméra vers l'élément sélectionné (ou retour à la vue d'ensemble)
         if (this.flight) {
@@ -276,6 +284,7 @@ export default class extends Controller {
         };
 
         if (target.userData.kind === 'neuron') this.fillNeuronPanel(target);
+        else if (target.userData.kind === 'souvenir') this.fillSouvenirPanel(target.userData.data);
         else this.fillNebulaPanel(target.userData.data);
         this.panelTarget.hidden = false;
         history.replaceState(null, '', `#${encodeURIComponent(target.userData.data.nom)}`);
@@ -327,6 +336,16 @@ export default class extends Controller {
     fillNebulaPanel({ nom, couleur, description }) {
         this.fillPanelHeader('Passion', nom, couleur);
         this.panelBodyTarget.append(element('p', { textContent: description }));
+    }
+
+    fillSouvenirPanel({ nom, dates, intitule, option, ecole, lieu, resultat }) {
+        this.fillPanelHeader(`Parcours · ${dates}`, nom, '#ffe8a3');
+        this.panelBodyTarget.append(
+            element('p', { textContent: intitule }),
+            ...(option ? [element('p', { className: 'brain-panel-empty', textContent: option })] : []),
+            element('p', { textContent: `${ecole} — ${lieu}` }),
+            element('p', { textContent: resultat }),
+        );
     }
 
     fillPanelHeader(category, title, color) {
