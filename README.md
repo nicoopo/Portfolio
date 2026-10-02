@@ -9,6 +9,7 @@ Ce projet est un portfolio personnel développé avec Symfony 7.4, mettant en av
 ```
 Portfolio/
 ├── assets/              # Fichiers statiques (JS, CSS, images)
+│   ├── cerveau/         # Modules Three.js du cerveau 3D
 │   ├── controllers/     # Contrôleurs Stimulus (comportement lié à un élément)
 │   ├── scripts/         # Scripts globaux chargés sur toutes les pages
 │   ├── styles/          # CSS découpé (voir « Organisation des assets »)
@@ -16,14 +17,14 @@ Portfolio/
 ├── config/              # Configuration Symfony
 ├── src/                 # Code source
 │   ├── Controller/      # Contrôleurs Symfony
-│   ├── Entity/          # Entités Doctrine
-│   ├── Form/            # Formulaires Symfony
-│   └── Repository/      # Repositories Doctrine
+│   ├── Data/            # Données en dur (compétences, projets, passions)
+│   ├── Entity/          # Entités Doctrine (vide pour l'instant)
+│   └── Repository/      # Repositories Doctrine (vide pour l'instant)
 ├── templates/           # Vues Twig
 │   ├── competences/     # Page des compétences
 │   ├── contact/         # Page de contact
 │   ├── cv/              # CV en ligne et PDF
-│   ├── home/            # Page d'accueil
+│   ├── home/            # Page d'accueil et cerveau 3D
 │   ├── portfolio/       # Page des projets
 │   └── univers/         # Page des centres d'intérêt
 ├── public/              # Point d'entrée public
@@ -56,6 +57,9 @@ Portfolio/
 
 ## ✨ Fonctionnalités
 
+- **Mon Cerveau** : Cerveau holographique 3D (Three.js) : chaque neurone est une compétence, cliquable,
+  relié par des synapses animées aux compétences utilisées dans les mêmes projets ; des nébuleuses en orbite
+  représentent mes passions.
 - **Compétences** : Présentation de mes compétences techniques et professionnelles.
 - **Portfolio** : Galerie de projets avec descriptions et captures d'écran.
 - **CV en ligne** : CV interactif avec téléchargement en PDF.
@@ -65,6 +69,7 @@ Portfolio/
 ## 🛠 Technologies
 
 - Symfony 7.4
+- Three.js
 - PHP
 - Node.js
 - Doctrine
