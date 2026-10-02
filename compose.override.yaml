@@ -17,9 +17,11 @@ services:
 
   database:
     environment:
-      # Dev : pas de mot de passe (base joignable seulement depuis le réseau Docker, aucun port exposé).
+      # Dev : pas de mot de passe (base joignable seulement depuis Docker et depuis cette machine).
       # Pris en compte à la création du volume : après changement, `docker compose down -v`.
       POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "127.0.0.1:5433:5432" # client SQL (PhpStorm…) : localhost:5433, base app, utilisateur app ; 127.0.0.1 = jamais exposé au réseau
 
 volumes:
   php_cache:

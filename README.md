@@ -101,6 +101,9 @@ Portfolio/
 
 4. Accéder au site : [http://localhost:8081](http://localhost:8081)
 
+**Base de dev** (client SQL, PhpStorm…) : `localhost:5433`, base `app`, utilisateur `app`, sans mot de passe
+(port ouvert sur 127.0.0.1 uniquement). En ligne de commande : `docker compose exec database psql -U app app`.
+
 **Preprod** : définir `POSTGRES_PASSWORD=...` dans `.env.local` sur le serveur, puis `make preprod-deploy`
 (build, redémarrage, migrations). La preprod a sa propre base (volume `db_data_preprod`).
 
