@@ -52,7 +52,7 @@ export default class extends Controller {
         this.controls.enableDamping = true;
         this.controls.enablePan = false;
         this.controls.minDistance = 0.6; // assez près pour frôler l'intérieur
-        this.controls.maxDistance = 14;  // assez loin pour voir toutes les nébuleuses
+        this.controls.maxDistance = 6;   // reste à l'intérieur de l'anneau des nébuleuses (cerveau/nebulae.js)
         this.controls.autoRotate = !this.reducedMotion;
         this.controls.autoRotateSpeed = 0.6;
         // L'utilisateur reprend la main : on arrête le déplacement automatique de la caméra

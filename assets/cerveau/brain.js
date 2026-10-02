@@ -1,32 +1,42 @@
 import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
-import { glowPointsMaterial } from './textures.js';
+import { glowPointsMaterial, glowSprite } from './textures.js';
 
 const perlin = new ImprovedNoise();
 
-/** Hologramme du cerveau : nuage de points cyan → violet. */
-export function createBrain(texture, count = 22000) {
-    return new THREE.Points(brainGeometry(count), glowPointsMaterial(texture, 0.035));
+/**
+ * Hologramme du cerveau : contours lumineux des circonvolutions sur une peau de points
+ * discrète, avec une aura bleue derrière.
+ */
+export function createBrain(texture) {
+    const brain = new THREE.Points(brainGeometry(), glowPointsMaterial(texture, 0.026));
+    const aura = glowSprite(texture, new THREE.Color('#3b4cff'), 3.2);
+    aura.material.opacity = 0.07;
+    brain.add(aura);
+    return brain;
 }
 
 // ------------------------------------------------
 // Forme
 // ------------------------------------------------
 
-const GAP = 0.06; // demi-largeur de la scissure inter-hémisphérique
-const TEMPORAL = { center: [0.4, -0.22, 0.12], radius: [0.24, 0.2, 0.5] }; // lobe temporal (côté +x)
+const GAP = 0.05;    // demi-largeur de la scissure inter-hémisphérique
+const LENGTH = 1.05; // demi-longueur avant-arrière d'un hémisphère
+const TEMPORAL = { center: [0.4, -0.22, 0.1], radius: [0.24, 0.2, 0.45] }; // lobe temporal (côté +x)
 
-/** Rayon d'un hémisphère dans la direction (dx, dy, dz), sans les plis. */
+const LINE_POINTS = 34000; // contours des gyri
+const SKIN_POINTS = 7000;  // peau holographique entre les contours
+
+/** Rayon d'un hémisphère dans la direction (dx, dy, dz). */
 function hemisphereRadius(dx, dy, dz) {
     // Plus étroit à l'avant, pôle occipital un peu pincé
     const width = 0.62 * (1 - 0.15 * Math.max(dz, 0) ** 2 - 0.1 * Math.max(-dz - 0.6, 0));
     // Dessous du lobe frontal aplati (il repose sur les orbites)
     const down = 0.55 * (dz > 0 ? 1 - 0.35 * dz : 1);
-    const rx = width, ry = dy < 0 ? down : 0.8, rz = 1.2;
+    const rx = width, ry = dy < 0 ? down : 0.78, rz = LENGTH;
     return 1 / Math.sqrt((dx / rx) ** 2 + (dy / ry) ** 2 + (dz / rz) ** 2);
 }
 
-/** Le point (x, y, z) est-il à l'intérieur d'un hémisphère (plis compris en moyenne) ? */
 function insideHemisphere(x, y, z) {
     const hx = Math.abs(x) - GAP, hy = y - 0.1;
     const len = Math.hypot(hx, hy, z);
@@ -39,78 +49,88 @@ function insideTemporal(x, y, z) {
 }
 
 /**
- * Circonvolutions : bruit de Perlin « en crêtes » (1 - |bruit|), légèrement déformé
- * pour que les plis serpentent. 1 = sommet d'un gyrus, 0 = fond d'un sillon.
+ * Sillons : les lignes où le bruit de Perlin (légèrement déformé) passe par zéro forment
+ * des courbes sinueuses et fermées, comme les contours des gyri. Renvoie |bruit|.
  */
-function gyrus(x, y, z) {
-    const warp = 0.5 * perlin.noise(x * 2, y * 2, z * 2);
-    return 1 - Math.abs(perlin.noise(x * 4.5 + warp, y * 4.5 + warp, z * 4.5 + warp));
+function sulcus(x, y, z) {
+    const warp = 0.45 * perlin.noise(x * 1.8, y * 1.8, z * 1.8);
+    return Math.abs(perlin.noise(x * 4.8 + warp, y * 4.8 + warp, z * 4.8 + warp));
 }
 
-/**
- * Forme de cerveau procédurale : hémisphères plissés, lobes temporaux séparés par la
- * scissure latérale, cervelet strié, tronc cérébral.
- * Les points se concentrent sur les crêtes des gyri : les sillons apparaissent en creux.
- */
-function brainGeometry(count) {
+/** Direction aléatoire uniforme. */
+function randomDirection() {
+    const u = Math.random() * 2 - 1;
+    const phi = Math.random() * Math.PI * 2;
+    const s = Math.sqrt(1 - u * u);
+    return [s * Math.cos(phi), u, s * Math.sin(phi)];
+}
+
+/** Point au hasard sur la surface (hémisphère ou lobe temporal), ou null si recouvert. */
+function surfacePoint() {
+    const [dx, dy, dz] = randomDirection();
+    const side = Math.random() < 0.5 ? -1 : 1;
+
+    if (Math.random() < 0.85) {
+        const r = hemisphereRadius(Math.abs(dx), dy, dz);
+        const x = side * (Math.abs(dx) * r + GAP), y = dy * r + 0.1, z = dz * r;
+        return insideTemporal(x, y, z) ? null : [x, y, z, side];
+    }
+    const [cx, cy, cz] = TEMPORAL.center, [rx, ry, rz] = TEMPORAL.radius;
+    const x = side * (cx + dx * rx), y = cy + dy * ry, z = cz + dz * rz;
+    return insideHemisphere(x, y, z) ? null : [x, y, z, side];
+}
+
+function brainGeometry() {
     const positions = [];
     const colors = [];
-    const cyan = new THREE.Color('#00d4ff');
+    const deep = new THREE.Color('#2a3cff');  // bleu électrique
+    const light = new THREE.Color('#5fb4ff'); // contours bleu clair
     const violet = new THREE.Color('#7f5af0');
     const c = new THREE.Color();
 
-    const push = (x, y, z, light) => {
+    // Couleur de base, légèrement violette vers l'avant (comme le reste de la scène), × luminosité
+    const push = (x, y, z, base, light) => {
         positions.push(x, y, z);
-        // Dégradé arrière (cyan) → avant (violet), plus lumineux sur les crêtes
-        c.copy(cyan).lerp(violet, THREE.MathUtils.clamp((z + 1.3) / 2.6, 0, 1)).multiplyScalar(light);
+        c.copy(base).lerp(violet, THREE.MathUtils.clamp((z + 0.2) / 2.4, 0, 0.45)).multiplyScalar(light);
         colors.push(c.r, c.g, c.b);
     };
 
-    while (positions.length < count * 3) {
-        // Direction aléatoire uniforme
-        const u = Math.random() * 2 - 1;
-        const phi = Math.random() * Math.PI * 2;
-        const s = Math.sqrt(1 - u * u);
-        const dx = s * Math.cos(phi), dy = u, dz = s * Math.sin(phi);
-        const side = Math.random() < 0.5 ? -1 : 1;
-        const roll = Math.random();
+    // Contours des gyri : on garde les points de surface proches d'un sillon
+    for (let lines = 0; lines < LINE_POINTS;) {
+        const p = surfacePoint();
+        if (!p) continue;
+        const [x, y, z, side] = p;
+        const n = sulcus(x + (side > 0 ? 0 : 7), y, z); // chaque hémisphère a ses propres plis
+        if (n > 0.05) continue;
+        // Les sillons sont des creux : on enfonce un peu la ligne ; son centre est plus lumineux
+        push(x * 0.985, (y - 0.1) * 0.985 + 0.1, z * 0.985, light, 0.25 + 0.4 * (1 - n / 0.05));
+        lines++;
+    }
 
-        if (roll < 0.06) {
-            // Volume intérieur : quelques points diffus
-            const r = Math.cbrt(Math.random()) * 0.85 * hemisphereRadius(Math.abs(dx), dy, dz);
-            push(side * (Math.abs(dx) * r + GAP), dy * r + 0.1, dz * r, 0.35);
-        } else if (roll < 0.8) {
-            // Hémisphères
-            let r = hemisphereRadius(Math.abs(dx), dy, dz);
-            const x0 = Math.abs(dx) * r, y0 = dy * r, z0 = dz * r;
-            const g = gyrus(x0 + (side > 0 ? 0 : 7), y0, z0); // l'autre hémisphère a ses propres plis
-            if (Math.random() > 0.08 + 0.92 * g ** 4) continue;
-            r *= 1 + 0.05 * (g - 0.6);
-            const x = side * (Math.abs(dx) * r + GAP), y = dy * r + 0.1, z = dz * r;
-            if (insideTemporal(x, y, z)) continue; // recouvert par le lobe temporal
-            push(x, y, z, 0.3 + 0.7 * g);
-        } else if (roll < 0.9) {
-            // Lobes temporaux : bombés sur les côtés, sous la scissure latérale
-            const [cx, cy, cz] = TEMPORAL.center, [rx, ry, rz] = TEMPORAL.radius;
-            const g = gyrus(dx * rx + 3, dy * ry, dz * rz);
-            if (Math.random() > 0.08 + 0.92 * g ** 4) continue;
-            const k = 1 + 0.06 * (g - 0.6);
-            const x = side * (cx + dx * rx * k), y = cy + dy * ry * k, z = cz + dz * rz * k;
-            if (insideHemisphere(x, y, z)) continue;
-            push(x, y, z, 0.3 + 0.7 * g);
-        } else if (roll < 0.97) {
-            // Cervelet : petit ellipsoïde strié de lamelles horizontales, en bas à l'arrière
-            const folia = 0.5 + 0.5 * Math.sin(dy * 45 + perlin.noise(dx * 3, dy * 3, dz * 3) * 3);
-            if (Math.random() > 0.3 + 0.7 * folia) continue;
-            const k = 1 + 0.03 * folia;
-            push(dx * 0.55 * k, dy * 0.28 * k - 0.5, dz * 0.35 * k - 0.85, 0.4 + 0.5 * folia);
-        } else {
-            // Tronc cérébral : cylindre qui descend en s'affinant
-            const t = Math.random();
-            const a = Math.random() * Math.PI * 2;
-            const r = 0.14 - 0.04 * t;
-            push(Math.cos(a) * r, -0.4 - t * 0.75, Math.sin(a) * r - 0.4 - 0.1 * t, 0.6);
-        }
+    // Peau : points épars et sombres entre les contours
+    for (let skin = 0; skin < SKIN_POINTS;) {
+        const p = surfacePoint();
+        if (!p) continue;
+        push(p[0], p[1], p[2], deep, 0.35 + 0.25 * Math.random());
+        skin++;
+    }
+
+    // Cervelet : lamelles horizontales fines et serrées, en bas à l'arrière
+    for (let i = 0; i < 6000;) {
+        const [dx, dy, dz] = randomDirection();
+        const folia = Math.abs(Math.sin(dy * 22 + perlin.noise(dx * 3, dy * 3, dz * 3) * 2));
+        const onLine = folia < 0.25;
+        if (!onLine && Math.random() > 0.08) continue;
+        push(dx * 0.48, dy * 0.22 - 0.4, dz * 0.3 - 0.64, onLine ? light : deep, onLine ? 0.45 : 0.25);
+        i++;
+    }
+
+    // Tronc cérébral : cylindre qui s'affine vers le bas
+    for (let i = 0; i < 1500; i++) {
+        const t = Math.random();
+        const a = Math.random() * Math.PI * 2;
+        const r = 0.13 - 0.04 * t;
+        push(Math.cos(a) * r, -0.38 - t * 0.75, Math.sin(a) * r - 0.33 - 0.1 * t, light, 0.25);
     }
 
     const geometry = new THREE.BufferGeometry();

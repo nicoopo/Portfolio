@@ -8,10 +8,10 @@ const COLOR = new THREE.Color('#ffe8a3');
  * de l'arrière (souvenir le plus ancien) vers l'avant (le plus récent).
  */
 const PATH = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0, -0.15, -0.6),
-    new THREE.Vector3(0, -0.3, -0.2),
-    new THREE.Vector3(0, -0.3, 0.2),
-    new THREE.Vector3(0, -0.15, 0.6),
+    new THREE.Vector3(0, -0.15, -0.5),
+    new THREE.Vector3(0, -0.28, -0.17),
+    new THREE.Vector3(0, -0.28, 0.17),
+    new THREE.Vector3(0, -0.15, 0.5),
 ]);
 
 /**
