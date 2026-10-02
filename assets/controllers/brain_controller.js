@@ -80,6 +80,11 @@ export default class extends Controller {
             this.renderer.render(this.scene, this.camera);
         };
         loop();
+
+        // Lien direct vers un neurone ou une nébuleuse : /cerveau#PHP
+        const name = decodeURIComponent(location.hash.slice(1));
+        const linked = name && this.clickables.find((t) => t.userData.data.nom === name);
+        if (linked) this.select(linked);
     }
 
     disconnect() {
@@ -222,6 +227,7 @@ export default class extends Controller {
         if (target.userData.kind === 'neuron') this.fillNeuronPanel(target);
         else this.fillNebulaPanel(target.userData.data);
         this.panelTarget.hidden = false;
+        history.replaceState(null, '', `#${encodeURIComponent(target.userData.data.nom)}`);
     }
 
     close() {
@@ -230,6 +236,7 @@ export default class extends Controller {
         this.panelTarget.hidden = true;
         this.controls.autoRotate = !this.reducedMotion;
         this.synapses.highlight(null);
+        history.replaceState(null, '', location.pathname);
 
         const direction = this.camera.position.clone().sub(this.controls.target).normalize();
         this.flight = { target: HOME_TARGET.clone(), camera: direction.multiplyScalar(this.homeDistance) };

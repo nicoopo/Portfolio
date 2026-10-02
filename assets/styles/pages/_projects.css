@@ -142,6 +142,25 @@
   margin-top: auto; /* Aligne le badge en bas */
 }
 
+/* Compétences du projet : liens vers leur neurone dans /cerveau */
+.harbor-project-content .harbor-project-neurons {
+  flex-grow: 0;
+  margin: 0.6rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+.harbor-project-neurons a {
+  color: var(--color-text-light);
+}
+
+.harbor-project-neurons a:hover {
+  color: var(--color-text);
+}
+
 .harbor-project-card::before {
     content: '';
     position: absolute;

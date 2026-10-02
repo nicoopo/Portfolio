@@ -16,7 +16,7 @@
       <h2>{{ nom }}</h2>
       <div class="skills-cards">
         {% for competence in categorie.competences %}
-        <div class="skill-card"><span>{{ competence }}</span></div>
+        <a class="skill-card" href="{{ path('app_cerveau') }}#{{ competence|url_encode }}" title="Voir ce neurone dans mon cerveau"><span>{{ competence }}</span></a>
         {% endfor %}
       </div>
     </div>
