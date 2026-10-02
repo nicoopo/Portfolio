@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
-import { fadingPointsMaterial, glowSprite } from './textures.js';
+import { fadeNearCamera, fadingPointsMaterial, glowSprite } from './textures.js';
 
-const ORBIT_RADIUS = 9.5; // au-delà du dézoom maximal (brain_controller) : la caméra ne traverse jamais une nébuleuse
+const ORBIT_RADIUS = 9.5; // assez loin pour qu'il faille dézoomer pour les découvrir
 const SHELL_RADIUS = 1.2;  // rayon moyen de la coquille de gaz
 const GAS_POINTS = 6000;    // grain fin du gaz
 const SMOOTH_POINTS = 2500; // gaz lisse
@@ -39,6 +39,7 @@ export function createNebulae(passions, texture) {
         // Lueur de l'amas central : c'est elle qu'on vise à la souris
         const core = glowSprite(texture, new THREE.Color(data.couleur).lerp(WHITE, 0.5), 1.6);
         core.material.opacity = 0.2;
+        fadeNearCamera(core.material);
         core.userData = { kind: 'nebula', data, anchor, phase: i * 1.1 };
 
         anchor.add(cloud, core);
