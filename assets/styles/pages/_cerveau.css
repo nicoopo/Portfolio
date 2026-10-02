@@ -310,6 +310,7 @@
     width: auto;
     max-height: 45%;
     overflow-y: auto;
+    z-index: 3; /* ouvert, il passe devant les boutons du bas (qui reviennent à sa fermeture) */
   }
 
   .brain-hint {
