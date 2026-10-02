@@ -65,9 +65,9 @@ final class Projets
             [
                 'slug' => 'portfolio',
                 'titre' => 'Portfolio',
-                'description' => 'Application web de mon parcours',
-                'tech' => 'Symfony/PHP, Twig/Html/CSS, MySQL',
-                'image' => 'symfony/Portfolio.png',
+                'description' => 'Ce site : compétences, projets et parcours, à explorer dans un cerveau 3D interactif.',
+                'tech' => 'Symfony, Twig, Stimulus, Three.js, Docker',
+                'image' => 'symfony/portfolio-cerveau.jpg',
                 'competences' => ['PHP / Symfony', 'Twig', 'HTML5', 'CSS3 / SCSS', 'JavaScript / TypeScript', 'Docker', 'Git / GitHub'],
             ],
         ],
