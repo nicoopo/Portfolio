@@ -25,6 +25,15 @@ export function createBrain(texture) {
  */
 function createBody() {
     const material = new THREE.MeshBasicMaterial({ color: '#03040d', transparent: true, opacity: 0.55, depthWrite: false });
+    // S'estompe vers sa silhouette (surface vue en biais) : sinon son bord se dessine en trait sombre
+    material.onBeforeCompile = (shader) => {
+        shader.vertexShader = shader.vertexShader
+            .replace('#include <common>', '#include <common>\nvarying float vFacing;')
+            .replace('#include <fog_vertex>', '#include <fog_vertex>\nvFacing = abs(dot(normalize(normalMatrix * normal), normalize(-mvPosition.xyz)));');
+        shader.fragmentShader = shader.fragmentShader
+            .replace('#include <common>', '#include <common>\nvarying float vFacing;')
+            .replace('#include <opaque_fragment>', 'diffuseColor.a *= smoothstep(0.05, 0.5, vFacing);\n#include <opaque_fragment>');
+    };
     const body = new THREE.Group();
     const ellipsoid = (mapVertex) => {
         const geometry = new THREE.SphereGeometry(1, 64, 40);
@@ -32,6 +41,7 @@ function createBody() {
         for (let i = 0; i < position.count; i++) {
             position.setXYZ(i, ...mapVertex(position.getX(i), position.getY(i), position.getZ(i)));
         }
+        geometry.computeVertexNormals();
         geometry.computeBoundingSphere();
         body.add(new THREE.Mesh(geometry, material));
     };
