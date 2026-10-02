@@ -68,7 +68,7 @@ final class Projets
                 'description' => 'Ce site : compétences, projets et parcours, à explorer dans un cerveau 3D interactif.',
                 'tech' => 'Symfony, Twig, Stimulus, Three.js, Docker',
                 'image' => 'symfony/portfolio-cerveau.jpg',
-                'competences' => ['PHP / Symfony', 'Twig', 'HTML5', 'CSS3 / SCSS', 'JavaScript / TypeScript', 'Docker', 'Git / GitHub'],
+                'competences' => ['PHP / Symfony', 'Twig', 'HTML5', 'CSS3 / SCSS', 'JavaScript / TypeScript', 'Three.js', 'Docker', 'Git / GitHub'],
             ],
         ],
         'Réseau / Infra' => [

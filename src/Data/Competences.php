@@ -14,7 +14,7 @@ final class Competences
         'Front-End' => [
             'zone' => 'frontal',
             'couleur' => '#00d4ff',
-            'competences' => ['HTML5', 'CSS3 / SCSS', 'JavaScript / TypeScript', 'Vue.js', 'React', 'Twig'],
+            'competences' => ['HTML5', 'CSS3 / SCSS', 'JavaScript / TypeScript', 'Vue.js', 'React', 'Twig', 'Three.js'],
         ],
         'Back-End' => [
             'zone' => 'parietal',
