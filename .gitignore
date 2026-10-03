@@ -29,3 +29,6 @@
 
 # Images de référence (design), à ne pas publier
 /assets/images/exemple/
+
+# Export de debug du conteneur de services (debug:container --format=json), jamais à versionner
+/container.json

@@ -11,3 +11,6 @@ assets/vendor/
 .env.local
 .env.local.php
 .env.*.local
+
+# Export de debug du conteneur de services
+container.json
