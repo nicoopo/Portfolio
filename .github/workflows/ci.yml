@@ -33,6 +33,8 @@ jobs:
 
       - name: Audit des paquets JS de l'importmap (failles connues)
         run: php bin/console importmap:audit
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # requêtes authentifiées : pas de limite partagée (voir framework.yaml)
 
       - name: Lint YAML config
         run: php bin/console lint:yaml config --parse-tags
