@@ -66,6 +66,20 @@ final class SmokeTest extends WebTestCase
         self::assertStringStartsWith('http', $crawler->filter('meta[property="og:image"]')->attr('content'));
     }
 
+    /** Le sitemap liste toutes les pages publiques, dans les deux langues */
+    public function testLeSitemapListeToutesLesPages(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/sitemap.xml');
+
+        self::assertResponseHeaderSame('Content-Type', 'application/xml; charset=UTF-8');
+        $sitemap = simplexml_load_string($client->getResponse()->getContent());
+        $urls = array_map('strval', $sitemap->xpath('//*[local-name()="loc"]'));
+        foreach (self::pages() as [$url]) {
+            self::assertContains('http://localhost'.$url, $urls);
+        }
+    }
+
     public function testTelechargementCvPdf(): void
     {
         $client = static::createClient();

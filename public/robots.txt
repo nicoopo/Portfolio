@@ -1,0 +1,9 @@
+# Moteurs de recherche : tout le site public, sauf l'administration et la connexion
+User-agent: *
+Disallow: /admin
+Disallow: /login
+Disallow: /en/login
+Disallow: /logout
+Disallow: /en/logout
+
+Sitemap: https://nicolascataluna.fr/sitemap.xml
