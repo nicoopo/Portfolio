@@ -25,7 +25,7 @@ class CategorieCompetence
     private string $nom;
 
     /** Lobe où vivent ses neurones (voir ZONES dans assets/cerveau/neurons.js) */
-    #[Assert\Choice(['frontal', 'parietal', 'temporal', 'occipital', 'limbique'])]
+    #[Assert\Choice(choices: ['frontal', 'parietal', 'temporal', 'occipital', 'limbique'])]
     #[ORM\Column(length: 20)]
     private string $zone;
 
@@ -44,7 +44,7 @@ class CategorieCompetence
 
     /** @var Collection<int, Competence> */
     #[ORM\OneToMany(targetEntity: Competence::class, mappedBy: 'categorie')]
-    #[ORM\OrderBy(['position' => 'ASC'])]
+    #[ORM\OrderBy(['position' => \SortDirection::Ascending])]
     private Collection $competences;
 
     public function __construct()
