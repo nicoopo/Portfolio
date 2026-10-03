@@ -4,7 +4,7 @@
 # ================================================
 
 DC         = docker compose
-DC_PREPROD = docker compose -f compose.yaml -f compose.preprod.yaml
+DC_PROD = docker compose -f compose.yaml -f compose.prod.yaml
 PHP        = $(DC) exec -u www-data php
 CONSOLE    = $(PHP) php bin/console
 
@@ -50,23 +50,23 @@ test: ## Lance les tests PHPUnit (base app_test créée et migrée au besoin)
 	$(DC) exec -u www-data -e APP_ENV=test php php bin/console doctrine:migrations:migrate --no-interaction
 	$(DC) exec -u www-data -e APP_ENV=test php vendor/bin/phpunit
 
-# --- PREPROD ---
-preprod-deploy: ## Build + relance (preprod)
-	bash scripts/deploy-preprod.sh
+# --- PROD ---
+prod-deploy: ## Build + relance (prod)
+	bash scripts/deploy-prod.sh
 
-preprod-down: ## Arrête le conteneur (preprod)
-	$(DC_PREPROD) down
+prod-down: ## Arrête le conteneur (prod)
+	$(DC_PROD) down
 
-preprod-logs: ## Logs en temps réel (preprod)
-	$(DC_PREPROD) logs -f
+prod-logs: ## Logs en temps réel (prod)
+	$(DC_PROD) logs -f
 
-preprod-admin-create: ## Crée le compte « admin » de /admin, ou change son mot de passe (preprod)
-	$(DC_PREPROD) exec php php bin/console app:admin:create
+prod-admin-create: ## Crée le compte « admin » de /admin, ou change son mot de passe (prod)
+	$(DC_PROD) exec php php bin/console app:admin:create
 
-preprod-journal-purge: ## Supprime les entrées du journal de plus de 12 mois (preprod ; à planifier, ex. cron mensuel)
-	$(DC_PREPROD) exec -T php php bin/console app:journal:purge
+prod-journal-purge: ## Supprime les entrées du journal de plus de 12 mois (prod ; à planifier, ex. cron mensuel)
+	$(DC_PROD) exec -T php php bin/console app:journal:purge
 
-preprod-bash: ## Shell dans le conteneur (preprod)
-	$(DC_PREPROD) exec php bash
+prod-bash: ## Shell dans le conteneur (prod)
+	$(DC_PROD) exec php bash
 
-.PHONY: help up down logs bash cc routes test preprod-deploy preprod-down preprod-logs preprod-bash
+.PHONY: help up down logs bash cc routes test prod-deploy prod-down prod-logs prod-bash
