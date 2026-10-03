@@ -25,7 +25,6 @@
 /.idea/
 /.vscode/
 ###< ide ###
-.env
 
 # Images de référence (design), à ne pas publier
 /assets/images/exemple/
