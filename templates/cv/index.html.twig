@@ -7,7 +7,7 @@
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('styles/pages/cv.css') }}">
     {# Appliqué avant l'affichage pour éviter un flash du mauvais thème #}
-    <script>document.documentElement.dataset.theme = localStorage.getItem('theme') || 'dark';</script>
+    <script nonce="{{ csp_nonce('script') }}">document.documentElement.dataset.theme = localStorage.getItem('theme') || 'dark';</script>
 {% endblock %}
 
 {% block body %}

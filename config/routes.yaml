@@ -13,3 +13,9 @@ controllers:
 app_sitemap:
     path: /sitemap.xml
     controller: App\Controller\SitemapController
+
+# Rapports de la Content-Security-Policy envoyés par les navigateurs (ContentSecurityPolicyListener)
+app_csp_report:
+    path: /csp-report
+    controller: App\Controller\CspReportController
+    methods: [POST]
