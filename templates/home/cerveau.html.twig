@@ -22,6 +22,10 @@
     passion: 'Passion'|trans,
     parcours: 'Parcours'|trans,
     seeInTimeline: 'Voir dans mon parcours'|trans,
+    dive: 'Plonger dans mon cerveau'|trans,
+    surface: 'Ressortir'|trans,
+    hintOutside: 'Glisse pour tourner · Clic droit ou flèches pour te déplacer · Dézoome pour voir mes passions'|trans,
+    hintInside: 'Tu es dans mon cerveau · Clique sur un souvenir de mon parcours'|trans,
 } %}
 <section class="brain-stage"
          data-controller="brain"
@@ -112,11 +116,12 @@
     {# Caché tant que la 3D n'a pas démarré (sans WebGL, pas de visite) #}
     <button type="button" class="brain-tour" data-brain-target="tourButton" data-action="brain#toggleTour" aria-pressed="false" hidden>{{ textes.tour }}</button>
     <div class="brain-actions">
+        <button type="button" class="brain-tour" data-brain-target="diveButton" data-action="brain#dive" aria-pressed="false" hidden>{{ textes.dive }}</button>
         <button type="button" class="brain-tour" data-brain-target="soundButton" data-action="brain#toggleSound" aria-pressed="false" hidden>{{ textes.sound }}</button>
         <button type="button" class="brain-tour" data-brain-target="shareButton" data-action="brain#share" hidden>{{ textes.share }}</button>
         <button type="button" class="brain-tour" data-brain-target="fullscreenButton" data-action="brain#toggleFullscreen" aria-pressed="false" hidden>{{ textes.fullscreen }}</button>
     </div>
 
-    <p class="brain-hint">{{ 'Glisse pour tourner · Clic droit ou flèches pour te déplacer · Dézoome pour voir mes passions'|trans }}</p>
+    <p class="brain-hint" data-brain-target="hint" aria-live="polite">{{ textes.hintOutside }}</p>
 </section>
 {% endblock %}

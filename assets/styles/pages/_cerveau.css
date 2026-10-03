@@ -39,7 +39,7 @@
 }
 
 .brain-hint {
-  bottom: 1.5rem;
+  bottom: 4.5rem; /* au-dessus des boutons du bas */
   font-size: 0.85rem;
   opacity: 0.6;
   pointer-events: none;
@@ -295,6 +295,13 @@
   /* Mobile : boutons de droite sur une ligne au-dessus de « Visite guidée » (pas la place côte à côte) */
   .brain-actions {
     bottom: 4rem;
+    left: 1rem;
+    flex-wrap: wrap; /* 4 boutons : passent à la ligne (vers le haut) plutôt que de déborder */
+    justify-content: flex-end;
+  }
+
+  .brain-actions .brain-tour {
+    white-space: nowrap;
   }
 
   /* Mobile : légende repliée en haut, panneau en bas de l'écran */

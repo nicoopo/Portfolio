@@ -7,7 +7,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { dotTexture } from '../cerveau/textures.js';
-import { createBrain } from '../cerveau/brain.js';
+import { BODY_OPACITY, createBrain } from '../cerveau/brain.js';
 import { createNeurons } from '../cerveau/neurons.js';
 import { Synapses } from '../cerveau/synapses.js';
 import { createNebulae } from '../cerveau/nebulae.js';
@@ -16,7 +16,10 @@ import { Ambiance } from '../cerveau/ambiance.js';
 
 const HOME_TARGET = new THREE.Vector3(0, 0, 0);
 const CLICK_TOLERANCE_PX = 5;
+const FLIGHT_SPEED = 4; // vitesse des vols de caméra (plus grand = plus rapide)
 const FOCUS_DISTANCE = { neuron: 1.8, nebula: 5, souvenir: 1.8 }; // distance caméra ↔ élément sélectionné
+// Plongée : en dessous de outside la caméra commence à entrer, en dessous de inside elle est dedans
+const DIVE = { outside: 1.3, inside: 0.75, cameraDistance: 0.45, souvenirDistance: 0.7 };
 const TOUR_STOPS = 6;       // neurones visités : ceux qui ont le plus de projets
 const TOUR_PAUSE_MS = 6000; // temps passé sur chaque neurone
 const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
@@ -27,7 +30,7 @@ const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
  * Chargé uniquement sur les pages qui l'utilisent (lazy).
  */
 export default class extends Controller {
-    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search', 'shareButton', 'soundButton'];
+    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search', 'shareButton', 'soundButton', 'diveButton', 'hint'];
     // texts : libellés traduits par le template (home/cerveau.html.twig)
     static values = { neurons: Array, passions: Array, souvenirs: Array, texts: Object };
 
@@ -45,6 +48,7 @@ export default class extends Controller {
         this.fullscreenButtonTarget.hidden = !document.fullscreenEnabled;
         this.shareButtonTarget.hidden = false;
         this.soundButtonTarget.hidden = !window.AudioContext;
+        this.diveButtonTarget.hidden = false;
 
         this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -59,7 +63,7 @@ export default class extends Controller {
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.listenToKeyEvents(window); // flèches du clavier : se déplacer
-        this.controls.minDistance = 0.6; // assez près pour frôler l'intérieur
+        this.controls.minDistance = 0.25; // on peut entrer dans le cerveau
         this.controls.maxDistance = 30;  // assez loin pour voir tout le système de nébuleuses
         this.controls.autoRotate = !this.reducedMotion;
         this.controls.autoRotateSpeed = 0.6;
@@ -122,7 +126,7 @@ export default class extends Controller {
         const loop = () => {
             this.frame = requestAnimationFrame(loop);
             this.timer.update(); // sans l'horodatage de rAF : il peut précéder la création du timer (temps négatif)
-            this.animate(this.reducedMotion ? 0 : this.timer.getElapsed());
+            this.animate(this.reducedMotion ? 0 : this.timer.getElapsed(), this.timer.getDelta());
             this.controls.update();
             this.composer.render();
         };
@@ -184,6 +188,7 @@ export default class extends Controller {
         this.controls.dispose();
         this.scene.traverse((object) => {
             object.geometry?.dispose();
+            object.material?.map?.dispose();
             object.material?.dispose();
         });
         this.texture.dispose();
@@ -212,19 +217,31 @@ export default class extends Controller {
     // Animation
     // ------------------------------------------------
 
-    animate(time) {
+    animate(time, delta) {
         const selected = this.selected;
         const neighbors = selected?.userData.kind === 'neuron' ? this.synapses.neighborsOf(selected) : new Set();
 
+        // 0 = dehors, 1 = dans le cerveau (selon la distance de la caméra au centre)
+        const inside = 1 - THREE.MathUtils.smoothstep(this.camera.position.length(), DIVE.inside, DIVE.outside);
+        this.setInside(inside > 0.5);
+
         // Respiration lente de l'hologramme, atténué quand quelque chose est sélectionné
-        this.brain.material.opacity = (selected ? 0.35 : 0.75) + 0.25 * Math.sin(time * 1.5);
+        // et quand on est dedans (la paroi devient un voile autour de nous)
+        this.brain.material.opacity = ((selected ? 0.35 : 0.75) + 0.25 * Math.sin(time * 1.5)) * (1 - 0.65 * inside);
+        // Le corps sombre masquerait tout l'intérieur
+        this.brain.userData.bodyMaterial.opacity = BODY_OPACITY * (1 - inside);
 
         for (const halo of this.neurons) {
             const active = halo === selected || halo === this.hovered;
             const pulse = 1 + 0.2 * Math.sin(time * 2.5 + halo.userData.phase);
             halo.scale.setScalar((active ? 0.3 : 0.16) * pulse); // assez petits pour laisser voir les plis
-            // Les neurones reliés au neurone sélectionné restent allumés
-            halo.material.opacity = !selected || active || neighbors.has(halo) ? 1 : 0.25;
+            // Les neurones reliés au neurone sélectionné restent allumés ;
+            // de l'intérieur, on les estompe : vus de si près ils masqueraient les souvenirs
+            const lit = !selected || active || neighbors.has(halo) ? 1 : 0.25;
+            halo.material.opacity = active ? lit : lit * (1 - 0.8 * inside);
+            halo.userData.anchor.material.opacity = halo.material.opacity;
+            // Noyau plein : même transparent, il cacherait les souvenirs derrière lui (profondeur)
+            halo.userData.anchor.material.visible = active || inside < 0.5;
         }
 
         for (const core of this.nebulae.targets) {
@@ -243,7 +260,8 @@ export default class extends Controller {
 
         // Vol de caméra vers l'élément sélectionné (ou retour à la vue d'ensemble)
         if (this.flight) {
-            const k = this.reducedMotion ? 1 : 0.07;
+            // Rapprochement selon le temps écoulé, pas par image : même durée à 30 ou 144 images/s
+            const k = this.reducedMotion ? 1 : 1 - Math.exp(-FLIGHT_SPEED * delta);
             this.controls.target.lerp(this.flight.target, k);
             this.camera.position.lerp(this.flight.camera, k);
             if (this.camera.position.distanceTo(this.flight.camera) < 0.01) this.flight = null;
@@ -390,12 +408,16 @@ export default class extends Controller {
         this.controls.autoRotate = false;
         this.synapses.highlight(target.userData.kind === 'neuron' ? target : null);
 
-        // La caméra vient se placer devant l'élément, dans l'axe de la vue actuelle
+        // La caméra vient se placer devant l'élément, dans l'axe de la vue actuelle ;
+        // un souvenir visé de l'intérieur se regarde depuis le centre (on reste dedans)
         const position = target.userData.anchor.getWorldPosition(new THREE.Vector3());
-        const direction = this.camera.position.clone().sub(this.controls.target).normalize();
+        const fromInside = this.inside && target.userData.kind === 'souvenir';
+        const direction = fromInside
+            ? position.clone().negate().normalize()
+            : this.camera.position.clone().sub(this.controls.target).normalize();
         this.flight = {
             target: position,
-            camera: position.clone().addScaledVector(direction, FOCUS_DISTANCE[target.userData.kind]),
+            camera: position.clone().addScaledVector(direction, fromInside ? DIVE.souvenirDistance : FOCUS_DISTANCE[target.userData.kind]),
         };
 
         if (target.userData.kind === 'neuron') this.fillNeuronPanel(target);
@@ -408,14 +430,44 @@ export default class extends Controller {
     close() {
         this.stopTour();
         if (!this.selected) return;
+        this.deselect();
+        // De l'intérieur, on y reste
+        this.flyHome(this.inside ? DIVE.cameraDistance : this.homeDistance);
+    }
+
+    deselect() {
         this.selected = null;
         this.panelTarget.hidden = true;
         this.controls.autoRotate = !this.reducedMotion;
         this.synapses.highlight(null);
         history.replaceState(null, '', location.pathname);
+    }
 
+    /** Retour vers le centre, la caméra à `distance` dans l'axe de la vue actuelle */
+    flyHome(distance) {
         const direction = this.camera.position.clone().sub(this.controls.target).normalize();
-        this.flight = { target: HOME_TARGET.clone(), camera: direction.multiplyScalar(this.homeDistance) };
+        this.flight = { target: HOME_TARGET.clone(), camera: direction.multiplyScalar(distance) };
+    }
+
+    // ------------------------------------------------
+    // Plongée dans le cerveau
+    // ------------------------------------------------
+
+    /** Bouton « Plonger » / « Ressortir » */
+    dive() {
+        const goingIn = !this.inside;
+        this.stopTour();
+        this.deselect();
+        this.flyHome(goingIn ? DIVE.cameraDistance : this.homeDistance);
+    }
+
+    /** Met l'interface à jour seulement quand on passe la paroi */
+    setInside(inside) {
+        if (inside === this.inside) return;
+        this.inside = inside;
+        this.diveButtonTarget.textContent = inside ? this.textsValue.surface : this.textsValue.dive;
+        this.diveButtonTarget.setAttribute('aria-pressed', String(inside));
+        this.hintTarget.textContent = inside ? this.textsValue.hintInside : this.textsValue.hintOutside;
     }
 
     fillNeuronPanel(halo) {
