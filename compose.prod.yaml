@@ -17,7 +17,10 @@ services:
       APP_ENV: prod
       APP_DEBUG: "0"
     env_file:
-      - .env.local                   # ← APP_SECRET, POSTGRES_PASSWORD, MAILER_DSN
+      - .env.local                   # ← APP_SECRET, POSTGRES_PASSWORD, MAILER_DSN, SENTRY_DSN
+    networks:
+      - default                      # base de données
+      - outils                       # GlitchTip (~/outils/glitchtip), joignable sous le nom « web »
 
   database:
     container_name: portfolio_db_prod
@@ -26,3 +29,7 @@ services:
 
 volumes:
   db_data_prod:
+
+networks:
+  outils:
+    external: true                   # partagé avec GlitchTip et Cabin Access (créé une fois : docker network create outils)
