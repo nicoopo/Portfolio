@@ -132,6 +132,19 @@ Une seule fois, sur le serveur :
    (à refaire après chaque modification de `docker/caddy/Caddyfile`).
 5. Après le premier déploiement : `make prod-admin-create`.
 
+### Sauvegardes de la base
+
+`scripts/sauvegarde-base.sh`, chaque nuit à 3 h 15 (crontab de `nicolas`, log dans `~/cron-logs/portfolio-sauvegarde.log`) :
+`pg_dump` compressé, vérifié par `pg_restore --list`, gardé 14 jours dans `~/sauvegardes/portfolio`, puis copié
+sur le second disque (`/mnt/sauvegardes`, s'il est monté) et sur Proton Drive (remote rclone `proton:`, s'il est configuré).
+
+Restaurer une sauvegarde (**remplace** le contenu de la base de prod) :
+
+```bash
+docker compose -f compose.yaml -f compose.prod.yaml exec -T database \
+    pg_restore -U app -d app --clean --if-exists --no-owner < ~/sauvegardes/portfolio/portfolio-AAAA-MM-JJ_HHMM.dump
+```
+
 ## 📝 Commandes Utiles
 
 - Lancer les tests (crée et migre la base `app_test` au besoin) :
