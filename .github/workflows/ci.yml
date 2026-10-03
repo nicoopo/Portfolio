@@ -28,6 +28,12 @@ jobs:
       - name: Validate composer.json
         run: composer validate --no-check-publish
 
+      - name: Audit des dépendances PHP (failles connues)
+        run: composer audit
+
+      - name: Audit des paquets JS de l'importmap (failles connues)
+        run: php bin/console importmap:audit
+
       - name: Lint YAML config
         run: php bin/console lint:yaml config --parse-tags
 
