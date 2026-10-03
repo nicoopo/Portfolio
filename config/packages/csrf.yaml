@@ -5,7 +5,9 @@ framework:
             token_id: submit
 
     csrf_protection:
+        # « authenticate » (connexion à /admin) reste en jeton classique, stocké en session : la page de
+        # connexion d'EasyAdmin ne charge pas csrf_protection_controller.js, et un navigateur qui a déjà
+        # utilisé le double-submit (formulaire de contact) serait refusé sans lui
         stateless_token_ids:
             - submit
-            - authenticate
             - logout

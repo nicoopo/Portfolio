@@ -1,25 +1,40 @@
-
 services:
-###> doctrine/doctrine-bundle ###
-  database:
-    image: postgres:${POSTGRES_VERSION:-16}-alpine
+
+  # ------------------------------------------------
+  # PHP / Apache
+  # ------------------------------------------------
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: portfolio_php
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-app}
-      # You should definitely change the password in production
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
-      POSTGRES_USER: ${POSTGRES_USER:-app}
-    healthcheck:
-      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
-      timeout: 5s
-      retries: 5
-      start_period: 60s
+      DATABASE_URL: postgresql://app:${POSTGRES_PASSWORD:-}@database:5432/app?serverVersion=16&charset=utf8
+    depends_on:
+      database:
+        condition: service_healthy
+
+  # ------------------------------------------------
+  # PostgreSQL : compétences, projets, passions, parcours
+  # ------------------------------------------------
+  database:
+    image: postgres:16-alpine
+    container_name: portfolio_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      # Aucun mot de passe par défaut : preprod → POSTGRES_PASSWORD dans .env.local (deploy-preprod.sh) ;
+      # dev → connexion sans mot de passe (compose.override.yaml)
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
     volumes:
-      - database_data:/var/lib/postgresql/data:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
-###< doctrine/doctrine-bundle ###
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "app", "-U", "app"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
-###> doctrine/doctrine-bundle ###
-  database_data:
-###< doctrine/doctrine-bundle ###
+  db_data:

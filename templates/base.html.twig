@@ -1,39 +1,73 @@
+{# Langue de la page et version dans l'autre langue (même route, même paramètres) #}
+{% set locale = app.request.locale %}
+{% set other_locale = locale == 'en' ? 'fr' : 'en' %}
+{# _route est déjà le nom sans suffixe de langue (app_contact, pas app_contact.en) ; absent sur une page d'erreur #}
+{% set canonical_route = app.request.attributes.get('_route') %}
+{% set route_params = app.request.attributes.get('_route_params', {}) %}
+{% macro url_in(locale, canonical_route, route_params) -%}
+    {{ canonical_route ? url(canonical_route, route_params|merge({_locale: locale})) : url('app_home', {_locale: locale}) }}
+{%- endmacro %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ locale }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Univers de Nico{% endblock %}</title>
+    <title>{% block title %}{{ 'Univers de Nico'|trans }}{% endblock %}</title>
+    <meta name="description" content="{% block description %}{{ 'Portfolio de Nicolas Cataluna, développeur fullstack PHP / Symfony : compétences, projets, parcours, et un cerveau 3D interactif pour tout explorer.'|trans }}{% endblock %}">
+    {# Aperçu des liens partagés (LinkedIn, Discord, Slack…) #}
+    {% set page_url = app.request.schemeAndHttpHost ~ app.request.pathInfo %}
+    <link rel="canonical" href="{{ page_url }}">
+    {# Les deux versions de la page, pour les moteurs de recherche #}
+    <link rel="alternate" hreflang="fr" href="{{ _self.url_in('fr', canonical_route, route_params) }}">
+    <link rel="alternate" hreflang="en" href="{{ _self.url_in('en', canonical_route, route_params) }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ 'Univers de Nico'|trans }}">
+    <meta property="og:locale" content="{{ locale == 'en' ? 'en_GB' : 'fr_FR' }}">
+    <meta property="og:title" content="{{ block('title')|trim }}">
+    <meta property="og:description" content="{{ block('description')|trim }}">
+    <meta property="og:url" content="{{ page_url }}">
+    <meta property="og:image" content="{{ absolute_url(asset('images/og-cerveau.jpg')) }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" href="{{ asset('images/nico-symbol.svg') }}">
-    {% block stylesheets %}
-        <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
-    {% endblock %}
     {% block javascripts %}
+        {# Charge aussi app.js → bootstrap.css + styles/app.css #}
         {% block importmap %}{{ importmap('app') }}{% endblock %}
     {% endblock %}
+    {# CSS propre à une page : après app.css pour pouvoir le surcharger #}
+    {% block stylesheets %}{% endblock %}
 </head>
 
 <body>
     <nav class="navbar-galactic">
         <div class="navbar-container">
-            <a href="{{ path('app_home') }}" class="logo gradient">
+            <a href="{{ path('app_home') }}" class="logo gradient" aria-label="{{ 'Accueil'|trans }}">
                 <img src="{{ asset('images/nico-symbol.svg') }}" class="logo-sm" alt="">
             </a>
 
-            <!-- 🌌 Menu icon -->
-            <div class="dropdown">
-                <button type="button" class="menu-button" id="menuToggle">
-                    {{ ux_icon('bi:menu-app-fill', {'height': '32px', 'width': '32px', 'color': '#cfe9ff'}) }}
-                </button>
+            <div class="navbar-actions">
+                {# Bascule de langue : la même page dans l'autre langue #}
+                <a href="{{ _self.url_in(other_locale, canonical_route, route_params) }}" class="lang-switch"
+                   hreflang="{{ other_locale }}" lang="{{ other_locale }}"
+                   title="{{ other_locale == 'en' ? 'Read in English' : 'Lire en français' }}">{{ other_locale|upper }}</a>
 
-                <!-- Menu déroulant -->
-                <ul class="dropdown-menu-galactic" id="menuDropdown">
-                    <li><a href="{{ path('app_home') }}">Accueil</a></li>
-                    <li><a href="{{ path('app_projects') }}">Projets</a></li>
-                    <li><a href="{{ path('app_univers') }}">Mon Univers</a></li>
-                    <li><a href="{{ path('app_competences') }}">Compétences</a></li>
-                    <li><a href="{{ path('app_contact') }}">Contact</a></li>
-                </ul>
+                <!-- 🌌 Menu icon -->
+                <div class="dropdown">
+                    <button type="button" class="menu-button" id="menuToggle" aria-label="{{ 'Menu'|trans }}">
+                        {{ ux_icon('bi:menu-app-fill', {'height': '32px', 'width': '32px', 'color': '#cfe9ff'}) }}
+                    </button>
+
+                    <!-- Menu déroulant -->
+                    <ul class="dropdown-menu-galactic" id="menuDropdown">
+                        <li><a href="{{ path('app_home') }}">{{ 'Accueil'|trans }}</a></li>
+                        <li><a href="{{ path('app_cerveau') }}">{{ 'Mon Cerveau'|trans }}</a></li>
+                        <li><a href="{{ path('app_projects') }}">{{ 'Projets'|trans }}</a></li>
+                        <li><a href="{{ path('app_univers') }}">{{ 'Mon Univers'|trans }}</a></li>
+                        <li><a href="{{ path('app_competences') }}">{{ 'Compétences'|trans }}</a></li>
+                        <li><a href="{{ path('app_contact') }}">{{ 'Contact'|trans }}</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>
@@ -42,36 +76,5 @@
         {% block body %}
         {% endblock %}
     </main>
-
-    <script>
-        // Gestion ouverture/fermeture du menu galactique
-        const menuToggle = document.getElementById('menuToggle');
-        const menuDropdown = document.getElementById('menuDropdown');
-
-        menuToggle.addEventListener('click', () => {
-            menuDropdown.classList.toggle('show');
-        });
-
-        // Ferme le menu quand on clique ailleurs
-        document.addEventListener('click', (e) => {
-            if (!menuToggle.contains(e.target) && !menuDropdown.contains(e.target)) {
-                menuDropdown.classList.remove('show');
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const main = document.querySelector('main');
-            if (main) {
-                main.style.opacity = 0;
-                main.style.transform = 'translateY(30px)';
-                main.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                requestAnimationFrame(() => {
-                main.style.opacity = 1;
-                main.style.transform = 'translateY(0)';
-            });
-            }
-        });
-
-    </script>
 </body>
 </html>

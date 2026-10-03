@@ -1,10 +1,13 @@
-
-// Import du CSS de Bootstrap
+// 1. Bootstrap en premier (CSS seulement : aucun composant JS de Bootstrap n'est utilisé)
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap';
-import './styles/app.css';
-import './controllers/animation_controller.js';
-import './controllers/hello_controller.js';
-import './controllers/csrf_protection_controller.js';
-import './controllers/pdf_viewer_controller.js';
 
+// 2. Nos styles après : ils surchargent Bootstrap
+import './styles/app.css';
+
+// 3. Scripts globaux (présents sur toutes les pages)
+import './scripts/stars.js';
+import './scripts/navbar.js';
+import './scripts/page_transition.js';
+
+// 4. Stimulus : comportements attachés à un élément via data-controller (assets/controllers/)
+import './bootstrap.js';

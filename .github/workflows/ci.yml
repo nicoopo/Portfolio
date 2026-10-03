@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [master, preprod, develop]
+  pull_request:
+    branches: [master, preprod, develop]
+
+env:
+  APP_ENV: test
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: ctype, iconv, mbstring, xml, zip, intl
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Validate composer.json
+        run: composer validate --no-check-publish
+
+      - name: Lint YAML config
+        run: php bin/console lint:yaml config --parse-tags
+
+      - name: Lint Twig templates
+        run: php bin/console lint:twig templates
+
+      - name: Lint container
+        run: php bin/console lint:container
+
+  tests:
+    runs-on: ubuntu-latest
+    services:
+      database:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: app
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -d app -U app"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://app:app@127.0.0.1:5432/app?serverVersion=16&charset=utf8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: ctype, iconv, mbstring, xml, zip, intl, pdo_pgsql
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Install importmap
+        run: php bin/console importmap:install
+
+      - name: Database (app_test) + migrations
+        run: |
+          php bin/console doctrine:database:create --if-not-exists
+          php bin/console doctrine:migrations:migrate --no-interaction
+          php bin/console doctrine:schema:validate
+
+      - name: Run tests
+        run: vendor/bin/phpunit

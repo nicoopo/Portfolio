@@ -1,0 +1,225 @@
+/* Mon Univers (univers/index.html.twig) */
+
+.cv-section .btn:hover {
+  box-shadow: 0 0 25px rgba(127, 90, 240, 0.7), 0 0 50px rgba(0, 212, 255, 0.4);
+  transform: scale(1.05);
+}
+
+@media (max-width: 576px) {
+  .univers-section {
+    min-height: auto;
+    padding-top: 20px;
+    padding-bottom: 40px;
+  }
+}
+
+/* ------------------------------------------------
+   Frise chronologique (Mon parcours)
+   Mobile : ligne à gauche. Bureau : ligne au centre, étapes en alternance.
+   ------------------------------------------------ */
+.frise {
+  --frise-or: #ffe8a3; /* couleur des souvenirs dans le cerveau */
+  --frise-point: 1.1rem;
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+/* La ligne du temps : du passé (violet) au présent (cyan) */
+.frise::before {
+  content: "";
+  position: absolute;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  left: 1rem;
+  width: 3px;
+  border-radius: 3px;
+  background: linear-gradient(var(--color-primary), var(--color-secondary));
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.5);
+  transform: translateX(-50%);
+}
+
+.frise-etape {
+  position: relative;
+  padding: 0 0 2.5rem 2.75rem;
+  scroll-margin-top: calc(var(--navbar-height) + 1rem);
+}
+
+.frise-etape:last-child {
+  padding-bottom: 0;
+}
+
+/* Le point de l'étape sur la ligne */
+.frise-etape::before {
+  content: "";
+  position: absolute;
+  top: 0.35rem;
+  left: 1rem;
+  width: var(--frise-point);
+  height: var(--frise-point);
+  border-radius: 50%;
+  background: #0a0a19;
+  border: 3px solid var(--color-secondary);
+  box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.15), 0 0 14px rgba(0, 212, 255, 0.7);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.frise-dates {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  background: linear-gradient(90deg, #6d5dfc, #b66dff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.frise-badge {
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--color-secondary);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--color-secondary);
+  -webkit-text-fill-color: var(--color-secondary);
+}
+
+.frise-carte {
+  padding: 1.25rem 1.5rem;
+  color: var(--color-text-light);
+  background: rgba(10, 10, 25, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(127, 90, 240, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+
+.frise-carte:hover {
+  border-color: rgba(0, 212, 255, 0.6);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 25px rgba(0, 212, 255, 0.2);
+  transform: translateY(-3px);
+}
+
+.frise-titre {
+  margin: 0 0 0.25rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.frise-specialite {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+.frise-ecole {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.frise-resultat {
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+}
+
+/* Lien vers le souvenir correspondant dans /cerveau */
+.frise-lien {
+  font-size: 0.85rem;
+  color: var(--frise-or);
+  opacity: 0.85;
+}
+
+.frise-lien:hover {
+  opacity: 1;
+  color: var(--frise-or);
+}
+
+/* Étape en cours : point doré qui pulse */
+.frise-etape--en-cours::before {
+  border-color: var(--frise-or);
+  box-shadow: 0 0 0 4px rgba(255, 232, 163, 0.15), 0 0 16px rgba(255, 232, 163, 0.8);
+  animation: frise-pulse 2s ease-in-out infinite;
+}
+
+@keyframes frise-pulse {
+  50% { box-shadow: 0 0 0 9px rgba(255, 232, 163, 0), 0 0 24px rgba(255, 232, 163, 1); }
+}
+
+/* Étape ouverte depuis un souvenir du cerveau (/univers#etape-3) */
+.frise-etape:target .frise-carte {
+  border-color: var(--frise-or);
+  box-shadow: 0 0 30px rgba(255, 232, 163, 0.35);
+}
+
+/* Apparition au défilement (navigateurs qui gèrent animation-timeline ; ailleurs, affiché tel quel) */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .frise-etape {
+      animation: frise-apparition linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+
+@keyframes frise-apparition {
+  from { opacity: 0; translate: 0 2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frise-etape--en-cours::before {
+    animation: none;
+  }
+}
+
+/* Bureau : ligne au centre, cartes en alternance, dates de l'autre côté */
+@media (min-width: 768px) {
+  .frise::before {
+    left: 50%;
+  }
+
+  .frise-etape {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 4rem;
+    align-items: start;
+    padding: 0 0 3rem;
+  }
+
+  /* Les étapes alternent de côté : on les rapproche (pas de vide sous la date d'en face) */
+  .frise-etape + .frise-etape {
+    margin-top: -2rem; /* la date reste sous la carte précédente, du même côté */
+  }
+
+  .frise-etape::before {
+    left: 50%;
+    top: 1.5rem;
+  }
+
+  .frise-dates {
+    grid-row: 1;
+    margin: 0.9rem 0 0;
+    font-size: 2rem;
+  }
+
+  .frise-carte {
+    grid-row: 1;
+  }
+
+  /* Impaires : carte à gauche, dates à droite ; paires : l'inverse */
+  .frise-etape:nth-child(odd) .frise-carte { grid-column: 1; text-align: right; }
+  .frise-etape:nth-child(odd) .frise-dates { grid-column: 2; }
+  .frise-etape:nth-child(even) .frise-carte { grid-column: 2; }
+  .frise-etape:nth-child(even) .frise-dates { grid-column: 1; justify-self: end; flex-direction: row-reverse; }
+}

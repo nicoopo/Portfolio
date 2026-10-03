@@ -1,125 +1,77 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mon Univers - Portfolio{% endblock %}
+{% block title %}{{ 'Mon Univers - Portfolio'|trans }}{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    <!-- Le CSS est maintenant dans assets/styles/components/_pdf_viewer.css -->
-{% endblock %}
-
-
+{% block description %}{{ 'Mon CV, ma lettre de motivation et mon parcours scolaire, du brevet au BTS SIO.'|trans }}{% endblock %}
 
 {% block body %}
-<section class="univers-section container py-5">
+<section class="univers-section container py-5" data-controller="pdf">
 
-    <h1 class="text-center mb-5 gradient fw-bold display-5">Mon Univers</h1>
+    <h1 class="text-center mb-5 gradient fw-bold display-5">{{ 'Mon Univers'|trans }}</h1>
 
     <section class="cv-section text-center py-5">
-    <h1 class="gradient mb-4">Mon CV</h1>
+    <h2 class="gradient mb-4">{{ 'Mon CV'|trans }}</h2>
 
     <div class="d-flex justify-content-center gap-3 flex-wrap mb-5">
-        <!-- Voir le CV - Ouvre dans un iframe sur la même page -->
-        <button
-            class="btn btn-galactic btn-galactic-outline-light"
-            onclick="showPDF('{{ asset('docs/CV-nicolascataluna.pdf') }}', 'Mon CV')">
-            <i class="bi bi-eye"></i> Voir le CV
-        </button>
+        {# CV généré depuis la base, dans la langue de la page (page /CV et PDF) #}
+        <a href="{{ path('app_cv') }}" class="btn btn-galactic btn-galactic-outline-light">
+            <i class="bi bi-eye"></i> {{ 'Voir le CV'|trans }}
+        </a>
 
-        <!-- Télécharger le CV -->
-        <a href="{{ asset('docs/CV-nicolascataluna.pdf') }}"
-           download="CV_Nicolas_Cataluna.pdf"
-           class="btn btn-galactic btn-galactic-primary">
-            <i class="bi bi-download"></i> Télécharger
+        <a href="{{ path('app_cv_download', {theme: 'light'}) }}" class="btn btn-galactic btn-galactic-primary">
+            <i class="bi bi-download"></i> {{ 'Télécharger'|trans }}
         </a>
     </div>
 
-    <h1 class="gradient mb-4">Ma lettre de motivation</h1>
+    <h2 class="gradient mb-4">{{ 'Ma lettre de motivation'|trans }}</h2>
 
     <div class="d-flex justify-content-center gap-3 flex-wrap">
         <!-- Voir la lettre - Ouvre dans un iframe sur la même page -->
         <button
             class="btn btn-galactic btn-galactic-outline-light"
-            onclick="showPDF('{{ asset('docs/lettre de motivation.pdf') }}', 'Ma Lettre de Motivation')">
-            <i class="bi bi-eye"></i> Voir la lettre
+            data-action="pdf#show"
+            data-pdf-url-param="{{ asset('docs/lettre de motivation.pdf') }}"
+            data-pdf-title-param="{{ 'Ma lettre de motivation'|trans }}">
+            <i class="bi bi-eye"></i> {{ 'Voir la lettre'|trans }}
         </button>
 
         <!-- Télécharger la lettre -->
         <a href="{{ asset('docs/lettre de motivation.pdf') }}"
            download="Lettre_Motivation_Nicolas_Cataluna.pdf"
            class="btn btn-galactic btn-galactic-primary">
-            <i class="bi bi-download"></i> Télécharger
+            <i class="bi bi-download"></i> {{ 'Télécharger'|trans }}
         </a>
     </div>
     </section>
 
     <!-- Visualiseur PDF simple -->
-    <div id="pdf-viewer" class="pdf-viewer-container mt-4" style="display: none;">
+    <div class="pdf-viewer-container mt-4" data-pdf-target="viewer" hidden>
         <div class="pdf-header d-flex justify-content-between align-items-center mb-3">
-            <h3 id="pdf-title" class="mb-0 gradient">Document</h3>
-            <button class="btn btn-close btn-close-white" onclick="closePDF()" aria-label="Fermer"></button>
+            <h3 class="mb-0 gradient" data-pdf-target="title">Document</h3>
+            <button class="btn btn-close btn-close-white" data-action="pdf#close" aria-label="{{ 'Fermer'|trans }}"></button>
         </div>
         <div class="pdf-content">
-            <iframe id="pdf-frame" src="" frameborder="0" width="100%" height="600px" class="rounded shadow"></iframe>
+            <iframe data-pdf-target="frame" title="{{ 'Document PDF'|trans }}" src="" frameborder="0" width="100%" height="600px" class="rounded shadow"></iframe>
         </div>
     </div>
 
-    <h2 class="text-center mb-5 gradient fw-bold display-6">Mon parcours</h2>
+    <h2 class="text-center mb-5 gradient fw-bold display-6">{{ 'Mon parcours'|trans }}</h2>
 
-    <div class="timeline-container">
-
-        {# <div class="timeline-item">
-            <div class="timeline-content shadow-lg rounded-4 p-4">
-            <span class="date gradient fw-bold">2025 - 2026</span>
-            <h4 class="fw-bold">Bachelor<br>
-                IA, développement fullstack devOps</h4>
-            <p class="mb-0 opacity-75">
-                IPSSI<br>
-                Paris
-            </p>
-            <p class="mt-2 fw-semibold">En cours</p>
-            </div>
-        </div> #}
-
-        <div class="timeline-item">
-            <div class="timeline-content shadow-lg rounded-4 p-4">
-            <span class="date gradient fw-bold">2022 - 2024</span>
-            <h4 class="fw-bold">SIO : Services informatiques aux organisations
-                <br>
-                Option B S.L.A.M : Solutions logicielles et Applications Métiers
-                </h4>
-            <p class="mb-0 opacity-75">
-                Lycée UFA Robert Schuman<br>
-                Dugny, Seine-Saint-Denis
-            </p>
-            <p class="mt-2 fw-semibold">Obtention du BTS</p>
-            </div>
-        </div>
-
-        <div class="timeline-item">
-            <div class="timeline-content shadow-lg rounded-4 p-4">
-            <span class="date gradient fw-bold">2019 - 2022</span>
-            <h4 class="fw-bold">Baccalauréat Professionnel Systèmes Numériques
-                <br>
-                Option Réseaux Informatiques et Systèmes Communicants (RISC)</h4>
-            <p class="mb-0 opacity-75">
-                Lycée La Salle<br>
-                Saint-Denis, Seine-Saint-Denis
-            </p>
-            <p class="mt-2 fw-semibold">Obtention du BAC</p>
-            </div>
-        </div>
-        <div class="timeline-item">
-            <div class="timeline-content shadow-lg rounded-4 p-4">
-            <span class="date gradient fw-bold">2010 - 2019</span>
-            <h4 class="fw-bold">Brevet des college</h4>
-            <p class="mb-0 opacity-75">
-                Lycée La Salle<br>
-                Saint-Denis, Seine-Saint-Denis
-            </p>
-            <p class="mt-2 fw-semibold">Obtention mon brevet</p>
-            </div>
-        </div>
-
-    </div>
+    {# Frise chronologique : de la plus ancienne étape à la plus récente (position 1 = la plus récente) #}
+    <ol class="frise">
+        {% for etape in parcours|reverse %}
+        {% set en_cours = (etape.dates|split('-')|last|trim) >= 'now'|date('Y') %}
+        <li class="frise-etape{{ en_cours ? ' frise-etape--en-cours' }}" id="etape-{{ etape.id }}">
+            <span class="frise-dates">{{ etape.dates }}{% if en_cours %} <span class="frise-badge">{{ 'En cours'|trans }}</span>{% endif %}</span>
+            <article class="frise-carte">
+                <h3 class="frise-titre">{{ etape|loc('intitule') }}</h3>
+                {% if etape.specialite %}<p class="frise-specialite">{{ etape|loc('specialite') }}</p>{% endif %}
+                <p class="frise-ecole">{{ etape.ecole }} · {{ etape.lieu }}</p>
+                <p class="frise-resultat">{{ etape|loc('resultat') }}</p>
+                <a class="frise-lien" href="{{ path('app_cerveau') }}#{{ etape|loc('nom')|url_encode }}">{{ 'Voir ce souvenir dans mon cerveau'|trans }}</a>
+            </article>
+        </li>
+        {% endfor %}
+    </ol>
 </section>
 {% endblock %}

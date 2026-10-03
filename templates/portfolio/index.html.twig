@@ -1,25 +1,32 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mes Projets - Portfolio{% endblock %}
+{% block title %}{{ 'Mes Projets - Portfolio'|trans }}{% endblock %}
+
+{% block description %}{{ 'Mes projets en Java, PHP / Symfony et réseau : descriptions, captures et compétences utilisées.'|trans }}{% endblock %}
 
 {% block body %}
 <section class="harbor-section container py-5">
-  <h1 class="text-center mb-5 gradient fw-bold display-5">Mes Projets</h1>
+  <h1 class="text-center mb-5 gradient fw-bold display-5">{{ 'Mes Projets'|trans }}</h1>
 
   <div class="harbor-dock">
     {% for categorie, projets in categories %}
       <div class="harbor-theme">
-        <h2 class="harbor-theme-title">{{ categorie }}</h2>
+        <h2 class="harbor-theme-title">{{ projets|first|loc('categorie') }}</h2>
         <div class="harbor-projects">
           {% for projet in projets %}
-          <div class="harbor-project-card">
+          <div class="harbor-project-card" id="{{ projet.slug }}">
             <div class="harbor-project-image-container">
-              <img src="{{ asset('images/projets/' ~ projet.image) }}" alt="{{ projet.titre }}" class="harbor-project-img">
+              <img src="{{ asset('images/projets/' ~ projet.image) }}" alt="{{ projet|loc('titre') }}" class="harbor-project-img">
             </div>
             <div class="harbor-project-content">
-              <h3>{{ projet.titre }}</h3>
-              <p>{{ projet.description }}</p>
+              <h3>{{ projet|loc('titre') }}</h3>
+              <p>{{ projet|loc('description') }}</p>
               <span class="badge bg-primary">{{ projet.tech }}</span>
+              <p class="harbor-project-neurons">
+                {% for competence in projet.competences %}
+                <a href="{{ path('app_cerveau') }}#{{ competence|loc('nom')|url_encode }}" title="{{ 'Voir ce neurone dans mon cerveau'|trans }}">{{ competence|loc('nom') }}</a>
+                {% endfor %}
+              </p>
             </div>
           </div>
           {% endfor %}
@@ -28,36 +35,4 @@
     {% endfor %}
   </div>
 </section>
-<script>
-  document.addEventListen// Script simplifié - juste l'animation au scroll
-  document.addEventListener("DOMContentLoaded", () => {
-    const projectRows = document.querySelectorAll(".project-row");
-    
-    // Fonction de révélation simple
-    const reveal = () => {
-      const windowHeight = window.innerHeight;
-      
-      projectRows.forEach(row => {
-        const rect = row.getBoundingClientRect();
-        
-        // Si l'élément est dans la zone visible
-        if (rect.top < windowHeight - 100) {
-          row.classList.add("visible");
-        }
-      });
-    };
-    
-    // Vérifier au chargement
-    reveal();
-    
-    // Vérifier au scroll (optimisé)
-    let scrollTimeout;
-    window.addEventListener("scroll", () => {
-      if (scrollTimeout) {
-        window.cancelAnimationFrame(scrollTimeout);
-      }
-      scrollTimeout = window.requestAnimationFrame(reveal);
-    });
-  });
-</script>
 {% endblock %}
