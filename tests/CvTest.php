@@ -31,6 +31,16 @@ final class CvTest extends WebTestCase
         self::assertStringContainsString('CV_Nicolas_Cataluna_en_light.pdf', $client->getResponse()->headers->get('Content-Disposition'));
     }
 
+    public function testLApercuAfficheLePdfSansLeTelecharger(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/univers/cv-preview');
+
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame('Content-Type', 'application/pdf');
+        self::assertStringStartsWith('inline;', $client->getResponse()->headers->get('Content-Disposition'));
+    }
+
     public function testLesEmojisSontRetiresPourLePdf(): void
     {
         $filtre = new SansEmoji();

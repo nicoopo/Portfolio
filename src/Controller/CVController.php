@@ -37,6 +37,18 @@ final class CVController extends AbstractController
     #[Route('/CV/download', name: 'app_cv_download')]
     public function download(Request $request): Response
     {
+        return $this->pdf($request, 'attachment');
+    }
+
+    /** Le même PDF, affiché dans le navigateur au lieu d'être téléchargé */
+    #[Route('/univers/cv-preview', name: 'app_univers_cv_preview')]
+    public function preview(Request $request): Response
+    {
+        return $this->pdf($request, 'inline');
+    }
+
+    private function pdf(Request $request, string $disposition): Response
+    {
         $theme = 'light' === $request->query->get('theme') ? 'light' : 'dark';
 
         $options = new Options();
@@ -56,7 +68,7 @@ final class CVController extends AbstractController
 
         return new Response($dompdf->output(), Response::HTTP_OK, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'Content-Disposition' => $disposition.'; filename="'.$filename.'"',
         ]);
     }
 
