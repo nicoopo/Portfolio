@@ -13,6 +13,8 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+# cron ne fournit que /usr/bin:/bin ; rclone officiel (Proton Drive) est dans ~/.local/bin ou /usr/local/bin
+export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
 
 COMPOSE="${COMPOSE:-docker compose -f compose.yaml -f compose.prod.yaml}"
 DOSSIER="${DOSSIER:-$HOME/sauvegardes/portfolio}"
