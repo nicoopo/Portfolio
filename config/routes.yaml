@@ -8,3 +8,8 @@ controllers:
     prefix:
         fr: ''
         en: '/en'
+
+# Hors du préfixe de langue ci-dessus : un seul sitemap, qui liste les deux langues
+app_sitemap:
+    path: /sitemap.xml
+    controller: App\Controller\SitemapController
