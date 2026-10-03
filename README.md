@@ -111,10 +111,26 @@ Portfolio/
 passions et parcours. Premier compte : `make admin-create` (identifiant et mot de passe demandés) ; ensuite, les comptes
 et les mots de passe se gèrent dans l'administration (menu « Comptes »).
 
-**Preprod** : définir dans `.env.local` sur le serveur `POSTGRES_PASSWORD=...` et `MAILER_DSN=...` (SMTP qui envoie le
-formulaire de contact ; en dev les e-mails ne partent pas, ils sont visibles dans la barre de debug), puis
-`make preprod-deploy` (build, redémarrage, migrations), et une seule fois `make preprod-admin-create`.
-La preprod a sa propre base (volume `db_data_preprod`).
+## 🔒 Mise en production — https://nicolascataluna.fr
+
+```
+Internet ──IPv6:443──▶ Caddy (FrankenPHP, sur la machine) ──▶ 127.0.0.1:8081 ── container Apache/PHP ── PostgreSQL
+         (certificat Let's Encrypt automatique, HTTP → HTTPS, www → domaine nu, en-têtes de sécurité)
+```
+
+Un push sur `master` déploie (`.github/workflows/deploy-prod.yml` → `scripts/deploy-prod.sh` : build, redémarrage,
+migrations). La prod a son propre projet Docker (`portfolio_prod`) et sa propre base (volume `db_data_prod`).
+
+Une seule fois, sur le serveur :
+
+1. `.env.local` : `APP_SECRET=...`, `POSTGRES_PASSWORD=...`, `MAILER_DSN=...` (SMTP du formulaire de contact ;
+   en dev les e-mails ne partent pas, ils sont visibles dans la barre de debug).
+2. DNS (OVH) : `AAAA` de `nicolascataluna.fr` et `www.nicolascataluna.fr` vers l'IPv6 fixe de la machine.
+3. Box : pare-feu IPv6, n'ouvrir que les ports **80 et 443** vers la machine (80 sert au certificat et à la
+   redirection vers HTTPS).
+4. Caddy : `sudo install -m 644 docker/caddy/Caddyfile /etc/frankenphp/Caddyfile && sudo systemctl reload frankenphp`
+   (à refaire après chaque modification de `docker/caddy/Caddyfile`).
+5. Après le premier déploiement : `make prod-admin-create`.
 
 ## 📝 Commandes Utiles
 

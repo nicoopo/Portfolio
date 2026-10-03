@@ -25,7 +25,7 @@ services:
     environment:
       POSTGRES_DB: app
       POSTGRES_USER: app
-      # Aucun mot de passe par défaut : preprod → POSTGRES_PASSWORD dans .env.local (deploy-preprod.sh) ;
+      # Aucun mot de passe par défaut : prod → POSTGRES_PASSWORD dans .env.local (deploy-prod.sh) ;
       # dev → connexion sans mot de passe (compose.override.yaml)
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
     volumes:

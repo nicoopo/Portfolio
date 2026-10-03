@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [master, preprod, develop]
+    branches: [master, develop]
   pull_request:
-    branches: [master, preprod, develop]
+    branches: [master, develop]
 
 env:
   APP_ENV: test

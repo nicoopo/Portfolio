@@ -3,7 +3,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-COMPOSE="docker compose -f compose.yaml -f compose.preprod.yaml"
+COMPOSE="docker compose -f compose.yaml -f compose.prod.yaml"
 
 # Variables du serveur (.env.local, jamais versionné) : APP_SECRET, POSTGRES_PASSWORD…
 set -a
@@ -15,7 +15,7 @@ set +a
 echo "==> Arrêt du stack dev (libère le port 8081)"
 docker compose stop php 2>/dev/null || true
 
-echo "==> Build de l'image preprod"
+echo "==> Build de l'image prod"
 $COMPOSE build php
 
 echo "==> Recréation des containers"
@@ -24,4 +24,4 @@ $COMPOSE up -d --remove-orphans
 echo "==> Migrations de la base"
 $COMPOSE exec -T php php bin/console doctrine:migrations:migrate --no-interaction
 
-echo "==> Déploiement terminé → http://localhost:8081"
+echo "==> Déploiement terminé → https://nicolascataluna.fr"

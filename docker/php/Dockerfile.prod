@@ -1,5 +1,5 @@
 # ------------------------------------------------
-# Build PREPROD — Symfony / PHP 8.5 / Apache
+# Build PROD — Symfony / PHP 8.5 / Apache
 # Le code est copié dans l'image (pas de volume)
 # ------------------------------------------------
 
@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # ------------------------------------------------
-# Opcache PREPROD (pas de revalidation = rapide)
+# Opcache PROD (pas de revalidation = rapide)
 # ------------------------------------------------
 RUN echo "opcache.enable=1\n\
 opcache.memory_consumption=128\n\

@@ -13,3 +13,11 @@ when@test:
         test: true
         session:
             storage_factory_id: session.storage.factory.mock_file
+
+when@prod:
+    framework:
+        # Caddy (sur la machine) reçoit le HTTPS et transmet au container : on lit dans ses en-têtes
+        # l'IP du visiteur et le schéma https (liens générés, redirections, cookies « secure »).
+        # Sans risque : le container n'écoute que sur 127.0.0.1 (compose.prod.yaml), seul Caddy lui parle.
+        trusted_proxies: 'private_ranges'
+        trusted_headers: ['x-forwarded-for', 'x-forwarded-proto', 'x-forwarded-host', 'x-forwarded-port']
