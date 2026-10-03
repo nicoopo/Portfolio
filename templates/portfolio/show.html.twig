@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ projet|loc('titre') }} · {{ 'Mes Projets'|trans }}{% endblock %}
+
+{% block description %}{{ projet|loc('description') }}{% endblock %}
+
+{% block og_image %}
+    <meta property="og:image" content="{{ absolute_url(asset('images/projets/' ~ projet.image)) }}">
+{% endblock %}
+
+{% block body %}
+<article class="projet container py-5">
+  <a class="projet-retour" href="{{ path('app_projects') }}#{{ projet.slug }}">← {{ 'Tous les projets'|trans }}</a>
+
+  <header class="projet-entete">
+    <p class="projet-groupe">{{ projet|loc('categorie') }}</p>
+    <h1 class="gradient fw-bold">{{ projet|loc('titre') }}</h1>
+    <p class="projet-chapo">{{ projet|loc('description') }}</p>
+  </header>
+
+  <div class="projet-corps">
+    <div>
+      <figure class="projet-image">
+        <a href="{{ asset('images/projets/' ~ projet.image) }}" target="_blank" title="{{ 'Voir l’image en grand'|trans }}">
+          <img src="{{ asset('images/projets/' ~ projet.image) }}" alt="{{ 'Capture du projet'|trans }} {{ projet|loc('titre') }}">
+        </a>
+      </figure>
+
+      {# Texte long : un paragraphe par bloc séparé d'une ligne vide ; sans texte long, la description suffit #}
+      {% if projet|loc('details') %}
+      <div class="projet-texte">
+        {% for paragraphe in projet|loc('details')|replace({"\r\n": "\n"})|split("\n\n") %}
+          {% if paragraphe|trim %}<p>{{ paragraphe|trim|nl2br }}</p>{% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="projet-fiche">
+      <h2>{{ 'Technologies'|trans }}</h2>
+      <ul class="projet-techs">
+        {% for tech in projet.tech|split(',') %}<li>{{ tech|trim }}</li>{% endfor %}
+      </ul>
+
+      {% if projet.competences is not empty %}
+      <h2>{{ 'Compétences utilisées'|trans }}</h2>
+      <ul class="projet-competences">
+        {% for competence in projet.competences %}
+        <li>
+          <a href="{{ path('app_cerveau') }}#{{ competence|loc('nom')|url_encode }}" title="{{ 'Voir ce neurone dans mon cerveau'|trans }}" style="--dot: {{ competence.categorie.couleur }}">{{ competence|loc('nom') }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      {% if projet.depot or projet.demo %}
+      <div class="projet-liens">
+        {% if projet.demo %}<a class="btn btn-galactic btn-galactic-primary" href="{{ projet.demo }}" target="_blank" rel="noopener">{{ 'Voir en ligne'|trans }} ↗</a>{% endif %}
+        {% if projet.depot %}<a class="btn btn-galactic btn-galactic-outline-light" href="{{ projet.depot }}" target="_blank" rel="noopener">{{ 'Voir le code'|trans }} ↗</a>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <nav class="projet-voisins" aria-label="{{ 'Autres projets'|trans }}">
+    {% if precedent %}
+    <a class="projet-voisin" href="{{ path('app_project', {slug: precedent.slug}) }}" rel="prev">
+      <span>← {{ 'Projet précédent'|trans }}</span>{{ precedent|loc('titre') }}
+    </a>
+    {% endif %}
+    {% if suivant %}
+    <a class="projet-voisin projet-voisin--suivant" href="{{ path('app_project', {slug: suivant.slug}) }}" rel="next">
+      <span>{{ 'Projet suivant'|trans }} →</span>{{ suivant|loc('titre') }}
+    </a>
+    {% endif %}
+  </nav>
+</article>
+{% endblock %}

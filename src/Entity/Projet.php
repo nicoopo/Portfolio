@@ -20,7 +20,7 @@ class Projet
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
     private ?int $id = null;
 
-    /** Ancre de la carte : /projects#slug */
+    /** Adresse de la page du projet : /projects/slug (et ancre de sa carte : /projects#slug) */
     #[Assert\NotBlank]
     #[Assert\Length(max: 50)]
     #[Assert\Regex('/^[a-z0-9-]+$/', message: 'Minuscules, chiffres et tirets uniquement.')]
@@ -58,6 +58,22 @@ class Projet
     #[ORM\Column]
     private int $position;
 
+    /** Page du projet (/projects/slug) : texte long, paragraphes séparés par une ligne vide ; vide = description */
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $details = null;
+
+    /** Code source (GitHub…) */
+    #[Assert\Url(requireTld: true)]
+    #[Assert\Length(max: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $depot = null;
+
+    /** Version en ligne */
+    #[Assert\Url(requireTld: true)]
+    #[Assert\Length(max: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $demo = null;
+
     // Traductions anglaises (facultatives : vides, le français s'affiche ; voir App\Twig\Traduction)
     #[Assert\Length(max: 100)]
     #[ORM\Column(length: 100, nullable: true)]
@@ -69,6 +85,9 @@ class Projet
     #[Assert\Length(max: 50)]
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $categorieEn = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $detailsEn = null;
 
     /** @var Collection<int, Competence> */
     #[ORM\ManyToMany(targetEntity: Competence::class, inversedBy: 'projets')]
@@ -122,6 +141,15 @@ class Projet
     public function setDescriptionEn(?string $descriptionEn): static { $this->descriptionEn = $descriptionEn ?: null; return $this; }
     public function getCategorieEn(): ?string { return $this->categorieEn; }
     public function setCategorieEn(?string $categorieEn): static { $this->categorieEn = $categorieEn ?: null; return $this; }
+
+    public function getDetails(): ?string { return $this->details; }
+    public function setDetails(?string $details): static { $this->details = $details ?: null; return $this; }
+    public function getDetailsEn(): ?string { return $this->detailsEn; }
+    public function setDetailsEn(?string $detailsEn): static { $this->detailsEn = $detailsEn ?: null; return $this; }
+    public function getDepot(): ?string { return $this->depot; }
+    public function setDepot(?string $depot): static { $this->depot = $depot ?: null; return $this; }
+    public function getDemo(): ?string { return $this->demo; }
+    public function setDemo(?string $demo): static { $this->demo = $demo ?: null; return $this; }
 
     public function __toString(): string { return $this->titre; }
 }

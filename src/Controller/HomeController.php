@@ -39,7 +39,7 @@ final class HomeController extends AbstractController
                 foreach ($competence->getProjets() as $projet) {
                     $projets[] = [
                         'titre' => $traduction->loc($projet, 'titre'),
-                        'url' => $this->generateUrl('app_projects').'#'.$projet->getSlug(),
+                        'url' => $this->generateUrl('app_project', ['slug' => $projet->getSlug()]),
                     ];
                 }
                 $neurones[] = [

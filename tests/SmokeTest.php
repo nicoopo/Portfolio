@@ -9,7 +9,7 @@ final class SmokeTest extends WebTestCase
 {
     public static function pages(): iterable
     {
-        foreach (['/', '/projects', '/competences', '/CV', '/contact', '/univers', '/cerveau'] as $url) {
+        foreach (['/', '/projects', '/projects/portfolio', '/competences', '/CV', '/contact', '/univers', '/cerveau'] as $url) {
             yield $url => [$url];
             yield '/en'.$url => ['/en'.$url];
         }
@@ -41,6 +41,28 @@ final class SmokeTest extends WebTestCase
         $crawler = static::createClient()->request('GET', '/competences');
 
         self::assertGreaterThan(0, $crawler->filter('a.skill-card[href^="/cerveau#"]')->count());
+    }
+
+    /** Chaque carte de la liste mène à la page de son projet ; texte long, liens et compétences y sont */
+    public function testChaqueProjetASaPage(): void
+    {
+        $client = static::createClient();
+        $liens = $client->request('GET', '/projects')->filter('.projet-carte-titre a')->extract(['href']);
+        self::assertContains('/projects/portfolio', $liens);
+
+        foreach ($liens as $lien) {
+            $client->request('GET', $lien);
+            self::assertResponseIsSuccessful($lien);
+        }
+
+        $page = $client->request('GET', '/projects/portfolio');
+        self::assertGreaterThan(1, $page->filter('.projet-texte p')->count());
+        self::assertSelectorExists('a[href="https://github.com/nicoopo/Portfolio"]');
+        self::assertSelectorExists('.projet-competences a[href^="/cerveau#"]');
+        self::assertStringContainsString('/portfolio-cerveau', $page->filter('meta[property="og:image"]')->attr('content'));
+
+        $client->request('GET', '/projects/inconnu');
+        self::assertResponseStatusCodeSame(404);
     }
 
     /** Chaque souvenir du cerveau renvoie à une étape qui existe dans la frise de /univers */

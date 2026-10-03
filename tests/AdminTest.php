@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use App\Entity\Competence;
+use App\Entity\Projet;
 use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -108,6 +109,30 @@ final class AdminTest extends WebTestCase
         $client->followRedirect();
         self::assertSelectorTextContains('.alert-danger', 'contient encore');
         self::assertSelectorTextContains('body', 'Front-End'); // toujours là
+    }
+
+    /** Texte détaillé et liens d'un projet : modifiables, et une adresse invalide est refusée */
+    public function testLaPageDUnProjetSeRemplitDepuisLAdmin(): void
+    {
+        $client = static::createClient();
+        self::loginAdmin($client);
+        $projet = self::getContainer()->get(EntityManagerInterface::class)
+            ->getRepository(Projet::class)->findOneBy(['slug' => 'pendu']);
+        $url = '/admin/projet/'.$projet->getId().'/edit';
+
+        $client->request('GET', $url);
+        $client->submitForm('Sauvegarder les modifications', ['Projet[depot]' => 'pas une adresse']);
+        self::assertResponseStatusCodeSame(422);
+
+        $client->request('GET', $url);
+        $client->submitForm('Sauvegarder les modifications', ['Projet[details]' => "Premier paragraphe.\n\nSecond paragraphe."]);
+        self::assertResponseRedirects();
+        $page = $client->request('GET', '/projects/pendu');
+        self::assertCount(2, $page->filter('.projet-texte p'));
+
+        // Remis en état pour les autres tests
+        $client->request('GET', $url);
+        $client->submitForm('Sauvegarder les modifications', ['Projet[details]' => '']);
     }
 
     public function testUneModificationEstEnregistreeEtValidee(): void
