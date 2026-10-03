@@ -102,12 +102,12 @@ Portfolio/
    ```
    Le contenu du portfolio (compétences, projets, passions, parcours) est inséré par les migrations.
 
-4. Accéder au site : [http://localhost:8081](http://localhost:8081)
+4. Accéder au site : [http://localhost:8082](http://localhost:8082)
 
 **Base de dev** (client SQL, PhpStorm…) : `localhost:5434`, base `app`, utilisateur `app`, sans mot de passe
 (port ouvert sur 127.0.0.1 uniquement). En ligne de commande : `docker compose exec database psql -U app app`.
 
-**Administration** : [http://localhost:8081/admin](http://localhost:8081/admin) pour modifier compétences, projets,
+**Administration** : [http://localhost:8082/admin](http://localhost:8082/admin) pour modifier compétences, projets,
 passions et parcours. Premier compte : `make admin-create` (identifiant et mot de passe demandés) ; ensuite, les comptes
 et les mots de passe se gèrent dans l'administration (menu « Comptes »).
 

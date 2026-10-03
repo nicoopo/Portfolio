@@ -15,7 +15,7 @@ help: ## Affiche cette aide
 	   awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 # --- DEV ---
-up: ## Démarre les conteneurs (dev) → http://localhost:8081
+up: ## Démarre les conteneurs (dev) → http://localhost:8082
 	$(DC) up -d
 	$(PHP) composer install
 	$(PHP) php bin/console importmap:install
