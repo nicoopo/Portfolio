@@ -1,10 +1,13 @@
-// Les CSS (Bootstrap puis styles/app.css) sont chargés par des <link> dans base.html.twig, pas importés
-// ici : AssetMapper remplacerait chaque import CSS par un module « data: », que la CSP refuse.
+// 1. Bootstrap en premier (CSS seulement : aucun composant JS de Bootstrap n'est utilisé)
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-// 1. Scripts globaux (présents sur toutes les pages)
+// 2. Nos styles après : ils surchargent Bootstrap
+import './styles/app.css';
+
+// 3. Scripts globaux (présents sur toutes les pages)
 import './scripts/stars.js';
 import './scripts/navbar.js';
 import './scripts/page_transition.js';
 
-// 2. Stimulus : comportements attachés à un élément via data-controller (assets/controllers/)
+// 4. Stimulus : comportements attachés à un élément via data-controller (assets/controllers/)
 import './bootstrap.js';

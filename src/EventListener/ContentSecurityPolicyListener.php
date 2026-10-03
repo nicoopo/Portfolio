@@ -37,7 +37,11 @@ final class ContentSecurityPolicyListener implements ResetInterface
 
         $event->getResponse()->headers->set(self::EN_TETE, implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'nonce-{$this->nonce()}'",
+            // 'strict-dynamic' : ce que charge un script portant le nonce (modules de l'importmap, y compris les
+            // modules « data: » qu'AssetMapper crée pour les imports CSS, contrôleurs Stimulus chargés à la demande)
+            // hérite de sa confiance. Les navigateurs qui comprennent 'strict-dynamic' ignorent alors 'self' ;
+            // les plus anciens, qui ne le comprennent pas, s'en servent à la place.
+            "script-src 'self' 'nonce-{$this->nonce()}' 'strict-dynamic'",
             // Attributs style="" (couleurs de la légende du cerveau, EasyAdmin) : risque faible, contrairement aux scripts
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data:",
