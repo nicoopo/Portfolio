@@ -13,6 +13,15 @@ when@test:
         test: true
         session:
             storage_factory_id: session.storage.factory.mock_file
+        http_client:
+            scoped_clients:
+                # importmap:audit (CI) interroge l'API GitHub : sans jeton, la limite de 60 requêtes/heure est
+                # partagée entre toutes les machines de GitHub Actions et l'audit échoue au hasard (403).
+                # Le jeton n'est ajouté qu'aux requêtes vers api.github.com (jamais vers jsDelivr).
+                github_api.client:
+                    scope: 'https://api\.github\.com/'
+                    headers:
+                        Authorization: 'Bearer %env(default::GITHUB_TOKEN)%'
 
 when@prod:
     framework:
