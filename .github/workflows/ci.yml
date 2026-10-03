@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [master, preprod, develop]
+    branches: [master, develop]
   pull_request:
-    branches: [master, preprod, develop]
+    branches: [master, develop]
 
 env:
   APP_ENV: test
@@ -13,7 +13,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -27,6 +27,14 @@ jobs:
 
       - name: Validate composer.json
         run: composer validate --no-check-publish
+
+      - name: Audit des dépendances PHP (failles connues)
+        run: composer audit
+
+      - name: Audit des paquets JS de l'importmap (failles connues)
+        run: php bin/console importmap:audit
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # requêtes authentifiées : pas de limite partagée (voir framework.yaml)
 
       - name: Lint YAML config
         run: php bin/console lint:yaml config --parse-tags
@@ -56,7 +64,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://app:app@127.0.0.1:5432/app?serverVersion=16&charset=utf8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2

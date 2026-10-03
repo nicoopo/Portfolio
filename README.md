@@ -102,19 +102,48 @@ Portfolio/
    ```
    Le contenu du portfolio (compétences, projets, passions, parcours) est inséré par les migrations.
 
-4. Accéder au site : [http://localhost:8081](http://localhost:8081)
+4. Accéder au site : [http://localhost:8082](http://localhost:8082)
 
-**Base de dev** (client SQL, PhpStorm…) : `localhost:5433`, base `app`, utilisateur `app`, sans mot de passe
+**Base de dev** (client SQL, PhpStorm…) : `localhost:5434`, base `app`, utilisateur `app`, sans mot de passe
 (port ouvert sur 127.0.0.1 uniquement). En ligne de commande : `docker compose exec database psql -U app app`.
 
-**Administration** : [http://localhost:8081/admin](http://localhost:8081/admin) pour modifier compétences, projets,
+**Administration** : [http://localhost:8082/admin](http://localhost:8082/admin) pour modifier compétences, projets,
 passions et parcours. Premier compte : `make admin-create` (identifiant et mot de passe demandés) ; ensuite, les comptes
 et les mots de passe se gèrent dans l'administration (menu « Comptes »).
 
-**Preprod** : définir dans `.env.local` sur le serveur `POSTGRES_PASSWORD=...` et `MAILER_DSN=...` (SMTP qui envoie le
-formulaire de contact ; en dev les e-mails ne partent pas, ils sont visibles dans la barre de debug), puis
-`make preprod-deploy` (build, redémarrage, migrations), et une seule fois `make preprod-admin-create`.
-La preprod a sa propre base (volume `db_data_preprod`).
+## 🔒 Mise en production — https://nicolascataluna.fr
+
+```
+Internet ──IPv6:443──▶ Caddy (FrankenPHP, sur la machine) ──▶ 127.0.0.1:8081 ── container Apache/PHP ── PostgreSQL
+         (certificat Let's Encrypt automatique, HTTP → HTTPS, www → domaine nu, en-têtes de sécurité)
+```
+
+Un push sur `master` déploie (`.github/workflows/deploy-prod.yml` → `scripts/deploy-prod.sh` : build, redémarrage,
+migrations). La prod a son propre projet Docker (`portfolio_prod`) et sa propre base (volume `db_data_prod`).
+
+Une seule fois, sur le serveur :
+
+1. `.env.local` : `APP_SECRET=...`, `POSTGRES_PASSWORD=...`, `MAILER_DSN=...` (SMTP du formulaire de contact ;
+   en dev les e-mails ne partent pas, ils sont visibles dans la barre de debug).
+2. DNS (OVH) : `AAAA` de `nicolascataluna.fr` et `www.nicolascataluna.fr` vers l'IPv6 fixe de la machine.
+3. Box : pare-feu IPv6, n'ouvrir que les ports **80 et 443** vers la machine (80 sert au certificat et à la
+   redirection vers HTTPS).
+4. Caddy : `sudo install -m 644 docker/caddy/Caddyfile /etc/frankenphp/Caddyfile && sudo systemctl reload frankenphp`
+   (à refaire après chaque modification de `docker/caddy/Caddyfile`).
+5. Après le premier déploiement : `make prod-admin-create`.
+
+### Sauvegardes de la base
+
+`scripts/sauvegarde-base.sh`, chaque nuit à 3 h 15 (crontab de `nicolas`, log dans `~/cron-logs/portfolio-sauvegarde.log`) :
+`pg_dump` compressé, vérifié par `pg_restore --list`, gardé 14 jours dans `~/sauvegardes/portfolio`, puis copié
+sur le second disque (`/mnt/sauvegardes`, s'il est monté) et sur Proton Drive (remote rclone `proton:`, s'il est configuré).
+
+Restaurer une sauvegarde (**remplace** le contenu de la base de prod) :
+
+```bash
+docker compose -f compose.yaml -f compose.prod.yaml exec -T database \
+    pg_restore -U app -d app --clean --if-exists --no-owner < ~/sauvegardes/portfolio/portfolio-AAAA-MM-JJ_HHMM.dump
+```
 
 ## 📝 Commandes Utiles
 

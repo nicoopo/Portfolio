@@ -3,6 +3,7 @@ import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { glowPointsMaterial, glowSprite } from './textures.js';
 
 const perlin = new ImprovedNoise();
+export const BODY_OPACITY = 0.55;
 
 /**
  * Hologramme du cerveau : nuage de points en relief (gyri bombés, sillons creusés),
@@ -15,6 +16,7 @@ export function createBrain(texture) {
     const aura = glowSprite(texture, new THREE.Color('#3b4cff'), 3.2);
     aura.material.opacity = 0.07;
     brain.add(body, aura);
+    brain.userData.bodyMaterial = body.children[0].material; // estompé quand on plonge dedans (brain_controller)
     return brain;
 }
 
@@ -24,7 +26,7 @@ export function createBrain(texture) {
  * Les neurones, synapses et souvenirs sont dessinés après lui (renderOrder, brain_controller).
  */
 function createBody() {
-    const material = new THREE.MeshBasicMaterial({ color: '#03040d', transparent: true, opacity: 0.55, depthWrite: false });
+    const material = new THREE.MeshBasicMaterial({ color: '#03040d', transparent: true, opacity: BODY_OPACITY, depthWrite: false });
     // S'estompe vers sa silhouette (surface vue en biais) : sinon son bord se dessine en trait sombre
     material.onBeforeCompile = (shader) => {
         shader.vertexShader = shader.vertexShader

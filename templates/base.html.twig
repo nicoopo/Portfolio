@@ -35,7 +35,7 @@
     <link rel="icon" href="{{ asset('images/nico-symbol.svg') }}">
     {% block javascripts %}
         {# Charge aussi app.js → bootstrap.css + styles/app.css #}
-        {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% block importmap %}{{ importmap('app', {nonce: csp_nonce('script')}) }}{% endblock %}
     {% endblock %}
     {# CSS propre à une page : après app.css pour pouvoir le surcharger #}
     {% block stylesheets %}{% endblock %}

@@ -1,0 +1,35 @@
+# ------------------------------------------------
+# Override PROD — https://nicolascataluna.fr
+# Caddy (FrankenPHP, sur la machine) reçoit le HTTPS et transmet ici.
+# ------------------------------------------------
+name: portfolio_prod # projet à part : `docker compose` en dev ne touche pas aux containers de prod
+
+services:
+
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile.prod
+    container_name: portfolio_php_prod
+    ports:
+      - "127.0.0.1:8081:80" # joignable seulement par Caddy, jamais directement depuis Internet
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: "0"
+    env_file:
+      - .env.local                   # ← APP_SECRET, POSTGRES_PASSWORD, MAILER_DSN, SENTRY_DSN
+    networks:
+      - default                      # base de données
+      - outils                       # GlitchTip (~/outils/glitchtip), joignable sous le nom « web »
+
+  database:
+    container_name: portfolio_db_prod
+    volumes: !override
+      - db_data_prod:/var/lib/postgresql/data
+
+volumes:
+  db_data_prod:
+
+networks:
+  outils:
+    external: true                   # partagé avec GlitchTip et Cabin Access (créé une fois : docker network create outils)

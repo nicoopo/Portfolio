@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Controller;
+
+use App\Repository\ProjetRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+
+/**
+ * /sitemap.xml : les pages publiques, chacune en français et en anglais (hreflang).
+ * Route déclarée dans config/routes.yaml : hors du préfixe de langue (pas de /en/sitemap.xml).
+ */
+final class SitemapController extends AbstractController
+{
+    private const PAGES = ['app_home', 'app_cerveau', 'app_competences', 'app_projects', 'app_univers', 'app_cv', 'app_contact'];
+
+    public function __invoke(ProjetRepository $projets): Response
+    {
+        // [route, paramètres] : les pages fixes, puis une page par projet
+        $pages = array_map(fn (string $route) => [$route, []], self::PAGES);
+        foreach ($projets->findBy([], ['position' => 'ASC']) as $projet) {
+            $pages[] = ['app_project', ['slug' => $projet->getSlug()]];
+        }
+
+        $response = $this->render('sitemap.xml.twig', ['pages' => $pages, 'langues' => ['fr', 'en']]);
+        $response->headers->set('Content-Type', 'application/xml; charset=UTF-8');
+
+        return $response;
+    }
+}

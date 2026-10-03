@@ -15,11 +15,20 @@
     <div class="d-flex justify-content-center gap-3 flex-wrap mb-5">
         {# CV généré depuis la base, dans la langue de la page (page /CV et PDF) #}
         <a href="{{ path('app_cv') }}" class="btn btn-galactic btn-galactic-outline-light">
-            <i class="bi bi-eye"></i> {{ 'Voir le CV'|trans }}
+            {{ ux_icon('bi:eye', {height: '20px', width: '20px', 'aria-hidden': 'true'}) }} {{ 'Voir le CV'|trans }}
         </a>
 
+        {# Le PDF du CV affiché ici, dans la visionneuse, sans le télécharger #}
+        <button type="button"
+            class="btn btn-galactic btn-galactic-outline-light"
+            data-action="pdf#show"
+            data-pdf-url-param="{{ path('app_univers_cv_preview', {theme: 'light'}) }}"
+            data-pdf-title-param="{{ 'Mon CV'|trans }}">
+            {{ ux_icon('bi:file-earmark-pdf', {height: '20px', width: '20px', 'aria-hidden': 'true'}) }} {{ 'Aperçu PDF'|trans }}
+        </button>
+
         <a href="{{ path('app_cv_download', {theme: 'light'}) }}" class="btn btn-galactic btn-galactic-primary">
-            <i class="bi bi-download"></i> {{ 'Télécharger'|trans }}
+            {{ ux_icon('bi:download', {height: '20px', width: '20px', 'aria-hidden': 'true'}) }} {{ 'Télécharger'|trans }}
         </a>
     </div>
 
@@ -27,19 +36,19 @@
 
     <div class="d-flex justify-content-center gap-3 flex-wrap">
         <!-- Voir la lettre - Ouvre dans un iframe sur la même page -->
-        <button
+        <button type="button"
             class="btn btn-galactic btn-galactic-outline-light"
             data-action="pdf#show"
             data-pdf-url-param="{{ asset('docs/lettre de motivation.pdf') }}"
             data-pdf-title-param="{{ 'Ma lettre de motivation'|trans }}">
-            <i class="bi bi-eye"></i> {{ 'Voir la lettre'|trans }}
+            {{ ux_icon('bi:eye', {height: '20px', width: '20px', 'aria-hidden': 'true'}) }} {{ 'Voir la lettre'|trans }}
         </button>
 
         <!-- Télécharger la lettre -->
         <a href="{{ asset('docs/lettre de motivation.pdf') }}"
            download="Lettre_Motivation_Nicolas_Cataluna.pdf"
            class="btn btn-galactic btn-galactic-primary">
-            <i class="bi bi-download"></i> {{ 'Télécharger'|trans }}
+            {{ ux_icon('bi:download', {height: '20px', width: '20px', 'aria-hidden': 'true'}) }} {{ 'Télécharger'|trans }}
         </a>
     </div>
     </section>

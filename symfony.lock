@@ -62,6 +62,9 @@
             "./bin/phpunit"
         ]
     },
+    "sentry/sentry-symfony": {
+        "version": "5.13.0"
+    },
     "symfony/apache-pack": {
         "version": "1.0",
         "recipe": {

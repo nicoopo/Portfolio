@@ -41,7 +41,7 @@ class Competence
 
     /** @var Collection<int, Projet> */
     #[ORM\ManyToMany(targetEntity: Projet::class, mappedBy: 'competences')]
-    #[ORM\OrderBy(['position' => 'ASC'])]
+    #[ORM\OrderBy(['position' => \SortDirection::Ascending])]
     private Collection $projets;
 
     public function __construct()
