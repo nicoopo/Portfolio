@@ -21,7 +21,7 @@ services:
       # Pris en compte à la création du volume : après changement, `docker compose down -v`.
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
-      - "127.0.0.1:5433:5432" # client SQL (PhpStorm…) : localhost:5433, base app, utilisateur app ; 127.0.0.1 = jamais exposé au réseau
+      - "127.0.0.1:5434:5432" # 5433 est pris par la base de Cabin Access ; client SQL (PhpStorm…) : localhost:5434, base app, utilisateur app ; 127.0.0.1 = jamais exposé au réseau
 
 volumes:
   php_cache:
