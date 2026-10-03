@@ -12,9 +12,6 @@ set -a
 set +a
 : "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env.local}"
 
-echo "==> Arrêt du stack dev (libère le port 8081)"
-docker compose stop php 2>/dev/null || true
-
 echo "==> Build de l'image prod"
 $COMPOSE build php
 
