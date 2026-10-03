@@ -41,6 +41,14 @@ final class CvTest extends WebTestCase
         self::assertStringStartsWith('inline;', $client->getResponse()->headers->get('Content-Disposition'));
     }
 
+    public function testLaPageUniversMeneALApercu(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/en/univers');
+
+        self::assertSelectorExists('button[data-pdf-url-param="/en/univers/cv-preview?theme=light"]');
+    }
+
     public function testLesEmojisSontRetiresPourLePdf(): void
     {
         $filtre = new SansEmoji();
