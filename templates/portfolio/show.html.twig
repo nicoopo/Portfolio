@@ -5,7 +5,7 @@
 {% block description %}{{ projet|loc('description') }}{% endblock %}
 
 {% block og_image %}
-    <meta property="og:image" content="{{ absolute_url(asset('images/projets/' ~ projet.image)) }}">
+    {% if projet.imageChemin %}<meta property="og:image" content="{{ absolute_url(asset(projet.imageChemin)) }}">{% endif %}
 {% endblock %}
 
 {% block body %}
@@ -20,11 +20,13 @@
 
   <div class="projet-corps">
     <div>
+      {% if projet.imageChemin %}
       <figure class="projet-image">
-        <a href="{{ asset('images/projets/' ~ projet.image) }}" target="_blank" title="{{ 'Voir l’image en grand'|trans }}">
-          <img src="{{ asset('images/projets/' ~ projet.image) }}" alt="{{ 'Capture du projet'|trans }} {{ projet|loc('titre') }}">
+        <a href="{{ asset(projet.imageChemin) }}" target="_blank" title="{{ 'Voir l’image en grand'|trans }}">
+          <img src="{{ asset(projet.imageChemin) }}" alt="{{ 'Capture du projet'|trans }} {{ projet|loc('titre') }}">
         </a>
       </figure>
+      {% endif %}
 
       {# Texte long : un paragraphe par bloc séparé d'une ligne vide ; sans texte long, la description suffit #}
       {% if projet|loc('details') %}

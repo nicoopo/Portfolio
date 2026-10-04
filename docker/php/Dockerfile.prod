@@ -69,6 +69,7 @@ RUN composer install \
         --optimize-autoloader \
     && php bin/console asset-map:compile \
     && php bin/console cache:warmup \
-    && chown -R www-data:www-data var/
+    && mkdir -p public/uploads/projets \
+    && chown -R www-data:www-data var/ public/uploads
 
 EXPOSE 80

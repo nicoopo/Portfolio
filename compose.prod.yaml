@@ -16,6 +16,8 @@ services:
     environment:
       APP_ENV: prod
       APP_DEBUG: "0"
+    volumes:
+      - uploads_prod:/var/www/symfony/public/uploads # images envoyées depuis l'admin : survivent aux déploiements
     env_file:
       - .env.local                   # ← APP_SECRET, POSTGRES_PASSWORD, MAILER_DSN, SENTRY_DSN
     networks:
@@ -29,6 +31,7 @@ services:
 
 volumes:
   db_data_prod:
+  uploads_prod:
 
 networks:
   outils:
