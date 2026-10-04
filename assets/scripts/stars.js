@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.createElement('canvas');
     canvas.id = 'stars';
+    canvas.setAttribute('aria-hidden', 'true'); // décor : ignoré par les lecteurs d'écran
     document.body.appendChild(canvas);
     const ctx = canvas.getContext('2d');
 

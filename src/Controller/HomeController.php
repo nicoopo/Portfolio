@@ -2,10 +2,12 @@
 
 namespace App\Controller;
 
-use App\Data\Competences;
-use App\Data\Parcours;
-use App\Data\Passions;
-use App\Data\Projets;
+use App\Entity\EtapeParcours;
+use App\Entity\Passion;
+use App\Repository\CategorieCompetenceRepository;
+use App\Repository\EtapeParcoursRepository;
+use App\Repository\PassionRepository;
+use App\Twig\Traduction;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -19,38 +21,57 @@ final class HomeController extends AbstractController
     }
 
     #[Route('/cerveau', name: 'app_cerveau')]
-    public function cerveau(): Response
-    {
-        // Un neurone par compétence, avec les projets qui l'utilisent
+    public function cerveau(
+        CategorieCompetenceRepository $categoriesRepository,
+        PassionRepository $passionsRepository,
+        EtapeParcoursRepository $parcoursRepository,
+        Traduction $traduction,
+    ): Response {
+        $categories = $categoriesRepository->findAllWithCompetences();
+        $passions = $passionsRepository->findBy([], ['position' => 'ASC']);
+        $parcours = $parcoursRepository->findBy([], ['position' => 'ASC']);
+
+        // Un neurone par compétence, avec les projets qui l'utilisent (textes dans la langue de la page)
         $neurones = [];
-        foreach (Competences::CATEGORIES as $categorie => $infos) {
-            foreach ($infos['competences'] as $competence) {
+        foreach ($categories as $categorie) {
+            foreach ($categorie->getCompetences() as $competence) {
                 $projets = [];
-                foreach (Projets::CATEGORIES as $liste) {
-                    foreach ($liste as $projet) {
-                        if (\in_array($competence, $projet['competences'], true)) {
-                            $projets[] = [
-                                'titre' => $projet['titre'],
-                                'url' => $this->generateUrl('app_projects').'#'.$projet['slug'],
-                            ];
-                        }
-                    }
+                foreach ($competence->getProjets() as $projet) {
+                    $projets[] = [
+                        'titre' => $traduction->loc($projet, 'titre'),
+                        'url' => $this->generateUrl('app_project', ['slug' => $projet->getSlug()]),
+                    ];
                 }
                 $neurones[] = [
-                    'nom' => $competence,
-                    'categorie' => $categorie,
-                    'zone' => $infos['zone'],
-                    'couleur' => $infos['couleur'],
+                    'nom' => $traduction->loc($competence, 'nom'),
+                    'categorie' => $traduction->loc($categorie, 'nom'),
+                    'zone' => $categorie->getZone(),
+                    'couleur' => $categorie->getCouleur(),
                     'projets' => $projets,
                 ];
             }
         }
 
         return $this->render('home/cerveau.html.twig', [
-            'categories' => Competences::CATEGORIES,
+            'categories' => $categories,
             'neurones' => $neurones,
-            'passions' => Passions::LISTE,
-            'parcours' => Parcours::LISTE,
+            'passions' => $passions,
+            'parcours' => $parcours,
+            'passions_3d' => array_map(fn (Passion $passion) => [
+                'nom' => $traduction->loc($passion, 'nom'),
+                'couleur' => $passion->getCouleur(),
+                'description' => $traduction->loc($passion, 'description'),
+            ], $passions),
+            'parcours_3d' => array_map(fn (EtapeParcours $etape) => [
+                'nom' => $traduction->loc($etape, 'nom'),
+                'dates' => $etape->getDates(),
+                'intitule' => $traduction->loc($etape, 'intitule'),
+                'option' => $traduction->loc($etape, 'specialite'),
+                'ecole' => $etape->getEcole(),
+                'lieu' => $etape->getLieu(),
+                'resultat' => $traduction->loc($etape, 'resultat'),
+                'url' => $this->generateUrl('app_univers').'#etape-'.$etape->getId(),
+            ], $parcours),
         ]);
     }
 }

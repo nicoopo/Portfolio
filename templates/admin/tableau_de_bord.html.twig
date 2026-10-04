@@ -1,0 +1,80 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Tableau de bord{% endblock %}
+
+{% block page_actions %}
+    <a class="btn btn-secondary" href="{{ path('app_cerveau') }}" target="_blank"><i class="fa fa-arrow-up-right-from-square"></i> Voir le site</a>
+    <a class="btn btn-secondary" href="{{ path('admin_projet_new') }}"><i class="fa fa-plus"></i> Ajouter un projet</a>
+    <a class="btn btn-secondary" href="{{ path('admin_cv_profil_index') }}"><i class="fa fa-id-card"></i> Profil du CV</a>
+{% endblock %}
+
+{% block main %}
+    {# Chiffres clés ; en rouge seulement ce qui demande une action #}
+    <div class="row g-3 mb-4">
+        {% set chiffres = [
+            {valeur: demandes_mois, libelle: 'demande(s) de contact ce mois-ci', detail: demandes_total ~ ' au total', lien: path('admin_demande_contact_index'), alerte: false},
+            {valeur: demandes_echec, libelle: 'e-mail(s) de contact en échec', detail: 'message conservé, à lire dans l’admin', lien: path('admin_demande_contact_index', {filters: {statut: {comparison: '=', value: 'echec'}}}), alerte: demandes_echec > 0},
+            {valeur: connexions_refusees, libelle: 'connexion(s) refusée(s) en 7 jours', detail: 'mauvais mot de passe ou tentatives répétées', lien: path('admin_journal_index', {filters: {type: {comparison: '=', value: 'connexion_refusee'}}}), alerte: connexions_refusees > 0},
+            {valeur: nb_competences ~ ' / ' ~ nb_projets, libelle: 'compétences / projets', detail: 'contenu du cerveau', lien: path('admin_competence_index'), alerte: false},
+        ] %}
+        {% for chiffre in chiffres %}
+        <div class="col-sm-6 col-xl-3">
+            <a class="card h-100 text-decoration-none{{ chiffre.alerte ? ' border-danger' }}" href="{{ chiffre.lien }}">
+                <div class="card-body">
+                    <div class="fs-2 fw-bold{{ chiffre.alerte ? ' text-danger' }}">{{ chiffre.valeur }}</div>
+                    <div>{{ chiffre.libelle }}</div>
+                    <small class="text-muted">{{ chiffre.detail }}</small>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <h2 class="h5">Dernières demandes de contact</h2>
+            {% if dernieres_demandes is empty %}
+                <p class="text-muted">Aucune demande pour l’instant.</p>
+            {% else %}
+            <table class="table datagrid">
+                <thead class="visually-hidden">
+                    <tr><th scope="col">Reçue le</th><th scope="col">Nom</th><th scope="col">Message</th><th scope="col">Statut</th></tr>
+                </thead>
+                <tbody>
+                {% for demande in dernieres_demandes %}
+                    <tr>
+                        <td class="text-nowrap">{{ demande.recuLe|date('d/m H:i') }}</td>
+                        <td><a href="{{ path('admin_demande_contact_detail', {entityId: demande.id}) }}">{{ demande.nom }}</a></td>
+                        <td class="text-muted">{{ demande.message|length > 50 ? demande.message|slice(0, 50) ~ '…' : demande.message }}</td>
+                        <td>{% if demande.statut == 'echec' %}<span class="badge badge-danger">e-mail en échec</span>{% endif %}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-6">
+            <h2 class="h5">Journal</h2>
+            {% if dernier_journal is empty %}
+                <p class="text-muted">Journal vide.</p>
+            {% else %}
+            <table class="table datagrid">
+                <thead class="visually-hidden">
+                    <tr><th scope="col">Date</th><th scope="col">Événement</th><th scope="col">Utilisateur</th></tr>
+                </thead>
+                <tbody>
+                {% for entree in dernier_journal %}
+                    <tr{{ entree.type in ['connexion_refusee', 'contact_echec'] ? ' class="table-danger"' }}>
+                        <td class="text-nowrap">{{ entree.date|date('d/m H:i') }}</td>
+                        <td>{{ entree.message }}</td>
+                        <td class="text-muted">{{ entree.utilisateur }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <a href="{{ path('admin_journal_index') }}">Tout le journal →</a>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

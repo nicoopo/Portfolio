@@ -1,0 +1,27 @@
+# Caddy (FrankenPHP) sur la machine : reçoit tout le trafic web public.
+# Certificats Let's Encrypt obtenus et renouvelés automatiquement, HTTP → HTTPS automatique.
+# Installé par : sudo install -m 644 docker/caddy/Caddyfile /etc/frankenphp/Caddyfile && sudo systemctl reload frankenphp
+
+nicolascataluna.fr {
+	header {
+		# Le navigateur n'essaie plus jamais le HTTP pendant un an
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN" # la visionneuse PDF de /univers affiche nos propres PDF en iframe
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+		-Server
+		-X-Powered-By
+	}
+
+	reverse_proxy 127.0.0.1:8081
+}
+
+www.nicolascataluna.fr {
+	redir https://nicolascataluna.fr{uri} permanent
+}
+
+# Tout le reste (accès par l'IP, autres noms) : connexion fermée, rien à voir
+http:// {
+	abort
+}

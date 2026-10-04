@@ -1,0 +1,18 @@
+# Mises à jour automatiques des dépendances : une PR par mise à jour, vers develop (branche par défaut).
+# Les failles connues sont aussi vérifiées à chaque CI (composer audit, importmap:audit).
+version: 2
+updates:
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # Symfony se met à jour en bloc (toutes les briques à la même version)
+      symfony:
+        patterns: ["symfony/*"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

@@ -1,56 +1,74 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Contact - Nicolas Cataluna{% endblock %}
+{% block title %}{{ 'Contact - Nicolas Cataluna'|trans }}{% endblock %}
+
+{% block description %}{{ 'Me contacter : e-mail, GitHub, LinkedIn ou CV numérique.'|trans }}{% endblock %}
 
 {% block body %}
     <section class="contact-section">
         <div class="contact-container">
-            <h1>Contact</h1>
+            <h1>{{ 'Contact'|trans }}</h1>
             <p class="contact-subtitle">
-            Pour toute prise de contact, opportunité d’alternance ou échange professionnel,<br>
-            vous pouvez me joindre directement par mail ou via mes profils ci-dessous.
+            {{ 'Pour toute prise de contact, opportunité d’alternance ou échange professionnel,'|trans }}<br>
+            {{ 'vous pouvez me joindre directement par mail ou via mes profils ci-dessous.'|trans }}
             </p>
 
             <div class="contact-links">
             <!-- Mail -->
             <a href="mailto:nicolas.cataluna@proton.me?subject=Contact%20depuis%20le%20portfolio"
-                class="contact-item" title="Envoyer un mail">
+                class="contact-item" title="{{ 'Envoyer un mail'|trans }}">
                 <i class="fa-solid fa-envelope"></i>
-                <span>Mail</span>
-                <button type="button" class="menu-button"> 
+                <span>{{ 'Mail'|trans }}</span>
+                <span class="menu-button" aria-hidden="true"> 
                     {{ ux_icon('fluent:mail-add-24-filled', {'height': '32px', 'width': '32px', 'color': '#cfe9ff'}) }}
-                </button>
+                </span>
             </a>
 
             <!-- CV numérique -->
-            <a href="{{ path('app_cv') }}" target="_blank" class="contact-item" title="Voir mon CV numérique">
+            <a href="{{ path('app_cv') }}" target="_blank" class="contact-item" title="{{ 'Voir mon CV numérique'|trans }}">
                 <i class="fa-solid fa-file-lines"></i>
-                <span>Mon CV numérique</span>
-                <button type="button" class="menu-button"> 
+                <span>{{ 'Mon CV numérique'|trans }}</span>
+                <span class="menu-button" aria-hidden="true"> 
                     {{ ux_icon('pepicons-pop:cv-circle', {'height': '32px', 'width': '32px', 'color': '#cfe9ff'}) }}
-                </button>
+                </span>
             </a>
 
             <!-- GitHub -->
             <a href="https://github.com/nicoopo" target="_blank" class="contact-item" title="GitHub">
                 <i class="fa-brands fa-github"></i>
                 <span>GitHub</span>
-                <button type="button" class="menu-button"> 
+                <span class="menu-button" aria-hidden="true"> 
                     {{ ux_icon('iconoir:github', {'height': '32px', 'width': '32px', 'color': '#cfe9ff'}) }}
-                </button>
+                </span>
             </a>
 
             <!-- LinkedIn -->
             <a href="https://www.linkedin.com/in/nicolas-cataluna-737182224/" target="_blank" class="contact-item" title="LinkedIn">
                 <i class="fa-brands fa-linkedin"></i>
                 <span>LinkedIn</span>
-                <button type="button" class="menu-button"> 
+                <span class="menu-button" aria-hidden="true"> 
                     {{ ux_icon('streamline-pixel:logo-linkedin', {'height': '32px', 'width': '32px', 'color': '#cfe9ff'}) }}
-                </button>
+                </span>
                 
             </a>
 
             </div>
+
+            <h2 class="contact-form-title" id="formulaire">{{ 'Ou écrivez-moi ici'|trans }}</h2>
+
+            {% for type, messages in app.flashes(['success', 'error']) %}
+                {% for message in messages %}
+                <p class="contact-flash contact-flash--{{ type }}" role="{{ type == 'error' ? 'alert' : 'status' }}">{{ message }}</p>
+                {% endfor %}
+            {% endfor %}
+
+            {{ form_start(form, {attr: {class: 'contact-form', novalidate: 'novalidate'}}) }}
+                {{ form_row(form.nom) }}
+                {{ form_row(form.email) }}
+                {{ form_row(form.message) }}
+                {{ form_row(form.website) }}
+                <button type="submit" class="btn btn-galactic btn-galactic-primary">{{ 'Envoyer'|trans }}</button>
+            {{ form_end(form) }}
         </div>
     </section>
 {% endblock %}

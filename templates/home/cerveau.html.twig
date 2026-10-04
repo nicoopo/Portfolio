@@ -1,35 +1,73 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mon Cerveau · Univers de Nico{% endblock %}
+{% block title %}{{ 'Mon Cerveau · Univers de Nico'|trans }}{% endblock %}
+
+{% block description %}{{ "Explore mon cerveau en 3D : chaque neurone est une compétence, reliée aux projets qui l'utilisent, entourée de mes passions et de mon parcours."|trans }}{% endblock %}
 
 {% block body %}
+{# Textes écrits par le contrôleur JS (panneaux, boutons) : traduits ici, comme le reste #}
+{% set textes = {
+    fullscreen: 'Plein écran'|trans,
+    quitFullscreen: 'Quitter le plein écran'|trans,
+    share: 'Partager'|trans,
+    linkCopied: 'Lien copié !'|trans,
+    sound: 'Son'|trans,
+    mute: 'Couper le son'|trans,
+    tour: 'Visite guidée'|trans,
+    stopTour: 'Arrêter la visite'|trans,
+    noProject: 'Pas encore de projet relié à ce neurone.'|trans,
+    linkedProject: 'Projet lié'|trans,
+    linkedProjects: 'Projets liés'|trans,
+    connectedTo: 'Connecté à'|trans,
+    passion: 'Passion'|trans,
+    parcours: 'Parcours'|trans,
+    seeInTimeline: 'Voir dans mon parcours'|trans,
+    dive: 'Plonger dans mon cerveau'|trans,
+    surface: 'Ressortir'|trans,
+    hintOutside: 'Glisse pour tourner · Clic droit ou flèches pour te déplacer · Dézoome pour voir mes passions'|trans,
+    hintInside: 'Tu es dans mon cerveau · Clique sur un souvenir de mon parcours'|trans,
+} %}
 <section class="brain-stage"
          data-controller="brain"
          data-brain-neurons-value="{{ neurones|json_encode }}"
-         data-brain-passions-value="{{ passions|json_encode }}"
-         data-brain-souvenirs-value="{{ parcours|json_encode }}"
+         data-brain-passions-value="{{ passions_3d|json_encode }}"
+         data-brain-souvenirs-value="{{ parcours_3d|json_encode }}"
+         data-brain-texts-value="{{ textes|json_encode }}"
          data-action="keydown.esc@window->brain#close">
 
+    <h1 class="visually-hidden">{{ 'Mon cerveau en 3D : compétences, projets, parcours et passions'|trans }}</h1>
+
     <div class="brain-canvas" data-brain-target="canvas"
-         role="img" aria-label="Cerveau holographique en 3D : chaque point lumineux est une compétence, reliée aux autres par des synapses ; au centre, un fil de souvenirs retrace mon parcours ; autour, des nébuleuses représentent mes passions"></div>
+         role="img" aria-label="{{ 'Cerveau holographique en 3D : chaque point lumineux est une compétence, reliée aux autres par des synapses ; au centre, un fil de souvenirs retrace mon parcours ; autour, des nébuleuses représentent mes passions'|trans }}"></div>
 
     <p class="brain-fallback" data-brain-target="fallback">
-        Ton navigateur ne supporte pas la 3D (WebGL).
-        <a href="{{ path('app_competences') }}">Voir mes compétences</a>
+        {{ 'Ton navigateur ne supporte pas la 3D (WebGL).'|trans }}
+        <a href="{{ path('app_competences') }}">{{ 'Voir mes compétences'|trans }}</a>
     </p>
 
     {# Légende des lobes ; les boutons servent aussi au clavier et aux lecteurs d'écran #}
-    <nav class="brain-legend" aria-label="Compétences">
-        {% for nom, categorie in categories %}
+    <nav class="brain-legend" aria-label="{{ 'Compétences'|trans }}">
+        {# Recherche : suggestions natives (datalist), Entrée ou choix d'une suggestion = vol vers l'élément #}
+        <form class="brain-search" role="search" data-action="brain#search">
+            <input type="search" list="brain-names" class="brain-search-input" data-brain-target="search"
+                   data-action="change->brain#search keydown->brain#clearSearchError:stop"
+                   placeholder="{{ 'Chercher…'|trans }}" aria-label="{{ 'Chercher une compétence, une passion ou une étape du parcours'|trans }}">
+            <datalist id="brain-names">
+                {% for categorie in categories %}{% for competence in categorie.competences %}<option value="{{ competence|loc('nom') }}">{% endfor %}{% endfor %}
+                {% for passion in passions %}<option value="{{ passion|loc('nom') }}">{% endfor %}
+                {% for etape in parcours %}<option value="{{ etape|loc('nom') }}">{% endfor %}
+            </datalist>
+        </form>
+        {% for categorie in categories %}
         <details class="brain-legend-group">
             <summary>
-                <span class="brain-legend-dot" style="--dot: {{ categorie.couleur }}"></span>{{ nom }}
+                <span class="brain-legend-dot" style="--dot: {{ categorie.couleur }}"></span>{{ categorie|loc('nom') }}
             </summary>
             <ul>
                 {% for competence in categorie.competences %}
                 <li>
-                    <button type="button" data-action="brain#selectByName" data-brain-name-param="{{ competence }}">
-                        {{ competence }}
+                    <button type="button" data-action="brain#selectByName" data-brain-name-param="{{ competence|loc('nom') }}">
+                        {{ competence|loc('nom') }}
                     </button>
                 </li>
                 {% endfor %}
@@ -38,13 +76,13 @@
         {% endfor %}
         <details class="brain-legend-group">
             <summary>
-                <span class="brain-legend-dot brain-legend-dot--nebula"></span>Passions
+                <span class="brain-legend-dot brain-legend-dot--nebula"></span>{{ 'Passions'|trans }}
             </summary>
             <ul>
                 {% for passion in passions %}
                 <li>
-                    <button type="button" data-action="brain#selectByName" data-brain-name-param="{{ passion.nom }}">
-                        {{ passion.nom }}
+                    <button type="button" data-action="brain#selectByName" data-brain-name-param="{{ passion|loc('nom') }}">
+                        {{ passion|loc('nom') }}
                     </button>
                 </li>
                 {% endfor %}
@@ -52,13 +90,13 @@
         </details>
         <details class="brain-legend-group">
             <summary>
-                <span class="brain-legend-dot brain-legend-dot--souvenir"></span>Parcours
+                <span class="brain-legend-dot brain-legend-dot--souvenir"></span>{{ 'Parcours'|trans }}
             </summary>
             <ul>
                 {% for etape in parcours %}
                 <li>
-                    <button type="button" data-action="brain#selectByName" data-brain-name-param="{{ etape.nom }}">
-                        {{ etape.nom }}
+                    <button type="button" data-action="brain#selectByName" data-brain-name-param="{{ etape|loc('nom') }}">
+                        {{ etape|loc('nom') }}
                     </button>
                 </li>
                 {% endfor %}
@@ -69,15 +107,21 @@
     <p class="brain-tooltip" data-brain-target="tooltip" hidden></p>
 
     <aside class="brain-panel" data-brain-target="panel" tabindex="-1" aria-live="polite" hidden>
-        <button type="button" class="brain-panel-close" data-action="brain#close" aria-label="Fermer">×</button>
+        <button type="button" class="brain-panel-close" data-action="brain#close" aria-label="{{ 'Fermer'|trans }}">×</button>
         <p class="brain-panel-category" data-brain-target="panelCategory"></p>
         <h2 class="brain-panel-title" data-brain-target="panelTitle"></h2>
         <div data-brain-target="panelBody"></div>
     </aside>
 
     {# Caché tant que la 3D n'a pas démarré (sans WebGL, pas de visite) #}
-    <button type="button" class="brain-tour" data-brain-target="tourButton" data-action="brain#toggleTour" aria-pressed="false" hidden>Visite guidée</button>
+    <button type="button" class="brain-tour" data-brain-target="tourButton" data-action="brain#toggleTour" aria-pressed="false" hidden>{{ textes.tour }}</button>
+    <div class="brain-actions">
+        <button type="button" class="brain-tour" data-brain-target="diveButton" data-action="brain#dive" aria-pressed="false" hidden>{{ textes.dive }}</button>
+        <button type="button" class="brain-tour" data-brain-target="soundButton" data-action="brain#toggleSound" aria-pressed="false" hidden>{{ textes.sound }}</button>
+        <button type="button" class="brain-tour" data-brain-target="shareButton" data-action="brain#share" hidden>{{ textes.share }}</button>
+        <button type="button" class="brain-tour" data-brain-target="fullscreenButton" data-action="brain#toggleFullscreen" aria-pressed="false" hidden>{{ textes.fullscreen }}</button>
+    </div>
 
-    <p class="brain-hint">Glisse pour tourner · Clique sur un neurone · Dézoome pour voir mes passions</p>
+    <p class="brain-hint" data-brain-target="hint" aria-live="polite">{{ textes.hintOutside }}</p>
 </section>
 {% endblock %}

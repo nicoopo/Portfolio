@@ -1,271 +1,38 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Nicolas Cataluna - Développeur Fullstack{% endblock %}
+{% block title %}Nicolas Cataluna - {{ profil|loc('titre') }}{% endblock %}
+
+{% block description %}{{ 'CV en ligne de Nicolas Cataluna, développeur fullstack, téléchargeable en PDF (thème clair ou sombre).'|trans }}{% endblock %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('styles/pages/cv.css') }}">
     {# Appliqué avant l'affichage pour éviter un flash du mauvais thème #}
-    <script>document.documentElement.dataset.theme = localStorage.getItem('theme') || 'dark';</script>
+    <script nonce="{{ csp_nonce('script') }}">document.documentElement.dataset.theme = localStorage.getItem('theme') || 'dark';</script>
 {% endblock %}
 
 {% block body %}
-<div class="cv-page" data-controller="cv" data-cv-download-url-value="{{ path('app_cv_download') }}">
+<div class="cv-page" data-controller="cv" data-cv-download-url-value="{{ path('app_cv_download') }}"
+     data-cv-texts-value="{{ {light: 'Mode Clair'|trans, dark: 'Mode Sombre'|trans, generating: 'Génération…'|trans}|json_encode }}">
     <!-- Download Button -->
-    <button class="download-button" id="downloadButton" data-action="cv#download" data-cv-target="download" aria-label="Télécharger le CV">
+    <button class="download-button" id="downloadButton" data-action="cv#download" data-cv-target="download" aria-label="{{ 'Télécharger le CV'|trans }}">
         <span class="download-icon">{{ ux_icon('bi:download', {'height': '20px', 'width': '20px'}) }}</span>
-        <span>Télécharger le CV</span>
+        <span>{{ 'Télécharger le CV'|trans }}</span>
     </button>
 
     <!-- Toggle Theme Button -->
-    <button class="theme-toggle" id="themeToggle" data-action="cv#toggleTheme" aria-label="Changer le thème">
+    <button class="theme-toggle" id="themeToggle" data-action="cv#toggleTheme" aria-label="{{ 'Changer le thème'|trans }}">
         <span class="theme-toggle-icon" id="themeIcon">
-            <span id="iconSun" data-cv-target="iconSun" style="display: none;">{{ ux_icon('bi:sun-fill', {'height': '20px', 'width': '20px'}) }}</span>
-            <span id="iconMoon" data-cv-target="iconMoon">{{ ux_icon('bi:moon-fill', {'height': '20px', 'width': '20px'}) }}</span>
+            <span data-cv-target="iconSun" hidden>{{ ux_icon('bi:sun-fill', {'height': '20px', 'width': '20px'}) }}</span>
+            <span data-cv-target="iconMoon">{{ ux_icon('bi:moon-fill', {'height': '20px', 'width': '20px'}) }}</span>
         </span>
-        <span class="theme-toggle-text" id="themeText" data-cv-target="themeText">Mode Clair</span>
+        <span class="theme-toggle-text" id="themeText" data-cv-target="themeText">{{ 'Mode Clair'|trans }}</span>
     </button>
 
-    <div class="stars" id="stars" data-cv-target="stars"></div>
+    <div class="stars" data-cv-target="stars" aria-hidden="true"></div>
     <div class="planet"></div>
 
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-content">
-                <h1>NICOLAS CATALUNA</h1>
-                <div class="subtitle">Développeur Fullstack</div>
-
-                <div class="tags">
-                    <span class="tag">Curieux</span>
-                    <span class="tag">Rigoureux</span>
-                    <span class="tag">Autonome</span>
-                </div>
-
-                <div class="contact-info">
-                    <a href="tel:+33767807469" class="contact-item">
-                        <span class="contact-icon">{{ ux_icon('bi:telephone-fill', {'height': '20px', 'width': '20px'}) }}</span>
-                        +33 7 67 80 74 69
-                    </a>
-                    <a href="mailto:nicolas.cataluna@proton.me" class="contact-item">
-                        <span class="contact-icon">{{ ux_icon('bi:envelope-fill', {'height': '20px', 'width': '20px'}) }}</span>
-                        nicolas.cataluna@proton.me
-                    </a>
-                    <a href="https://github.com/nicoopo" target="_blank" class="contact-item">
-                        <span class="contact-icon">{{ ux_icon('iconoir:github', {'height': '20px', 'width': '20px'}) }}</span>
-                        GitHub
-                    </a>
-                    <a href="https://nicolascataluna.fr" target="_blank" class="contact-item">
-                        <span class="contact-icon">{{ ux_icon('bi:globe', {'height': '20px', 'width': '20px'}) }}</span>
-                        Portfolio
-                    </a>
-                    <a href="https://www.linkedin.com/in/nicolas-cataluna-737182224/" target="_blank" class="contact-item">
-                        <span class="contact-icon">{{ ux_icon('streamline-pixel:logo-linkedin', {'height': '20px', 'width': '20px'}) }}</span>
-                        LinkedIn
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Profil -->
-        <div class="section">
-            <h2 class="section-title">
-                <span class="section-icon">{{ ux_icon('bi:person-fill', {'height': '24px', 'width': '24px'}) }}</span>
-                Profil
-            </h2>
-            <p style="line-height: 1.8;">
-                Développeur full-stack junior spécialisé Symfony, motivé par la conception de solutions web performantes et les environnements connectés (domotique). Curieux, rigoureux et passionné par les nouvelles technologies, je cherche à contribuer à des projets concrets en lien avec l'innovation digitale.
-            </p>
-            <p style="margin-top: 15px; color: var(--accent-secondary); font-weight: bold;">
-                🎓 En recherche d'alternance : Bachelor IA, Développement Fullstack DevOps chez IPSSI<br>
-                📅 Rythme : 3 semaines en entreprise / 1 semaine en formation (12 mois)
-            </p>
-        </div>
-
-        <!-- Expériences -->
-        <div class="section">
-            <h2 class="section-title">
-                <span class="section-icon">{{ ux_icon('bi:briefcase-fill', {'height': '24px', 'width': '24px'}) }}</span>
-                Expériences Professionnelles
-            </h2>
-
-            <div class="experience-item">
-                <div class="experience-header">
-                    <div>
-                        <div class="experience-title">Développeur</div>
-                        <div class="experience-company">TESSI ENCAISSEMENTS | NANTERRE</div>
-                    </div>
-                    <div class="experience-period">2023 - 2024 | Contrat d'apprentissage</div>
-                </div>
-                <ul class="experience-description">
-                    <li>Migration de sites web d'un noyau PHP vers Symfony (domaine de l'encaissement)</li>
-                    <li>Mise en place de composants dans Symfony : export de données, création de graphiques dynamiques, tableau de données dynamique</li>
-                    <li>Projet évolution d'un nouveau noyau web - collaboration au développement</li>
-                </ul>
-            </div>
-
-            <div class="experience-item">
-                <div class="experience-header">
-                    <div>
-                        <div class="experience-title">Stagiaire Technicien Informatique</div>
-                        <div class="experience-company">TESSI ENCAISSEMENTS | NANTERRE</div>
-                    </div>
-                    <div class="experience-period">Mai - Juin 2022 | Stage</div>
-                </div>
-                <ul class="experience-description">
-                    <li>Création d'un support Excel répertoriant l'ensemble des serveurs (vérification obsolescence et état matériel)</li>
-                    <li>Mise en place de flux de transfert et traitement de données</li>
-                    <li>Paramétrage de l'application domotique DOMOTICZ</li>
-                    <li>Implémentation de protocoles Wifi et Bluetooth (IPV6, domotique)</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Compétences -->
-        <div class="section">
-            <h2 class="section-title">
-                <span class="section-icon">{{ ux_icon('bi:code-slash', {'height': '24px', 'width': '24px'}) }}</span>
-                Compétences
-            </h2>
-            <div class="skills-grid">
-                <div class="skill-category">
-                    <div class="skill-category-title">Développement Fullstack & Mobile</div>
-                    <div class="skill-list">
-                        <span class="skill-item">PHP (OOP)</span>
-                        <span class="skill-item">Symfony</span>
-                        <span class="skill-item">MVC</span>
-                        <span class="skill-item">HTML/CSS/JS</span>
-                        <span class="skill-item">JavaScript</span>
-                        <span class="skill-item">Java</span>
-                    </div>
-                </div>
-
-                <div class="skill-category">
-                    <div class="skill-category-title">BDD & Hébergement</div>
-                    <div class="skill-list">
-                        <span class="skill-item">MySQL</span>
-                        <span class="skill-item">MariaDB</span>
-                        <span class="skill-item">PostgreSQL</span>
-                        <span class="skill-item">SQL Server</span>
-                        <span class="skill-item">VMWare</span>
-                    </div>
-                </div>
-
-                <div class="skill-category">
-                    <div class="skill-category-title">Sécurité, Réseaux & Télécom</div>
-                    <div class="skill-list">
-                        <span class="skill-item">Cisco</span>
-                        <span class="skill-item">802.1x</span>
-                        <span class="skill-item">Switch/Router</span>
-                        <span class="skill-item">Protocoles domotiques</span>
-                        <span class="skill-item">DOMOTICZ</span>
-                    </div>
-                </div>
-
-                <div class="skill-category">
-                    <div class="skill-category-title">Outils & DevOps</div>
-                    <div class="skill-list">
-                        <span class="skill-item">Git / GitHub</span>
-                        <span class="skill-item">GitLab CI/CD</span>
-                        <span class="skill-item">Windows/Linux</span>
-                        <span class="skill-item">Ubuntu</span>
-                        <span class="skill-item">Debian</span>
-                        <span class="skill-item">Bash/PowerShell</span>
-                    </div>
-                </div>
-
-                <div class="skill-category">
-                    <div class="skill-category-title">Informatique Générale</div>
-                    <div class="skill-list">
-                        <span class="skill-item">Pack Office</span>
-                        <span class="skill-item">SST/PRAP</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Formations -->
-        <div class="section">
-            <h2 class="section-title">
-                <span class="section-icon">{{ ux_icon('bi:mortarboard-fill', {'height': '24px', 'width': '24px'}) }}</span>
-                Formations
-            </h2>
-
-            <div class="formation-item">
-                <div class="formation-title">Bachelor IA, Développement Fullstack DevOps</div>
-                <div class="formation-school">IPSSI</div>
-                <div class="formation-period">2025 - 2026</div>
-                <span class="formation-status">En cours</span>
-            </div>
-
-            <div class="formation-item">
-                <div class="formation-title">BTS Services Informatiques aux Organisations - SLAM</div>
-                <div class="formation-school">ROBERT SCHUMAN | DUGNY</div>
-                <div class="formation-period">2023 - 2024</div>
-                <span class="formation-status">Obtenu</span>
-            </div>
-
-            <div class="formation-item">
-                <div class="formation-title">Baccalauréat Professionnel Systèmes Numériques - RISC</div>
-                <div class="formation-school">LA SALLE | SAINT-DENIS (93)</div>
-                <div class="formation-period">2021 - 2022</div>
-                <span class="formation-status">Obtenu avec mention Assez Bien</span>
-            </div>
-
-            <div class="formation-item">
-                <div class="formation-title">Brevet des Collèges</div>
-                <div class="formation-school">LA SALLE | SAINT-DENIS (93)</div>
-                <div class="formation-period">2018 - 2019</div>
-                <span class="formation-status">Obtenu</span>
-            </div>
-        </div>
-
-        <!-- Langues -->
-        <div class="section">
-            <h2 class="section-title">
-                <span class="section-icon">{{ ux_icon('bi:translate', {'height': '24px', 'width': '24px'}) }}</span>
-                Langues
-            </h2>
-            <div class="languages-grid">
-                <div class="language-item">
-                    <div class="language-name">Français</div>
-                    <div class="language-level">Langue maternelle</div>
-                </div>
-                <div class="language-item">
-                    <div class="language-name">Portugais</div>
-                    <div class="language-level">Courant</div>
-                </div>
-                <div class="language-item">
-                    <div class="language-name">Anglais</div>
-                    <div class="language-level">B1</div>
-                </div>
-                <div class="language-item">
-                    <div class="language-name">Espagnol</div>
-                    <div class="language-level">A2</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Centres d'intérêt -->
-        <div class="section">
-            <h2 class="section-title">
-                <span class="section-icon">{{ ux_icon('bi:star-fill', {'height': '24px', 'width': '24px'}) }}</span>
-                Centres d'Intérêt
-            </h2>
-            <div class="interests-grid">
-                <div class="interest-item">
-                    🎵 Musique Latino, R&B, Création musicale assistée par ordinateur (MAO)
-                </div>
-                <div class="interest-item">
-                    ✈️ Voyages : Portugal, Espagne, France et découverte de cultures
-                </div>
-                <div class="interest-item">
-                    💪 Sport : Musculation, Basketball
-                </div>
-                <div class="interest-item">
-                    🔭 Physique, Astronomie
-                </div>
-            </div>
-        </div>
+        {{ include('cv/_contenu.html.twig', {pdf: false}) }}
     </div>
 </div>
 {% endblock %}

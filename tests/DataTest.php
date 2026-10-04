@@ -2,43 +2,29 @@
 
 namespace App\Tests;
 
-use App\Data\Competences;
-use App\Data\Parcours;
-use App\Data\Passions;
-use App\Data\Projets;
-use PHPUnit\Framework\TestCase;
+use Doctrine\DBAL\Connection;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-final class DataTest extends TestCase
+/**
+ * Le reste (slugs uniques, projet → compétence existante) est garanti par la base
+ * (index uniques, clés étrangères).
+ */
+final class DataTest extends KernelTestCase
 {
-    public function testLesProjetsCitentDesCompetencesExistantes(): void
+    /**
+     * La légende du cerveau sélectionne neurones, nébuleuses et souvenirs par leur nom, à travers
+     * trois tables (un index unique ne suffit pas), dans chaque langue : en anglais, le nom
+     * affiché est nom_en, ou nom s'il est vide.
+     */
+    public function testLesNomsDuCerveauSontUniquesDansChaqueLangue(): void
     {
-        $competences = array_merge(...array_column(Competences::CATEGORIES, 'competences'));
+        foreach (['nom', 'COALESCE(nom_en, nom)'] as $nom) {
+            $noms = self::getContainer()->get(Connection::class)->fetchFirstColumn(
+                "SELECT $nom FROM competence UNION ALL SELECT $nom FROM passion UNION ALL SELECT $nom FROM etape_parcours",
+            );
 
-        foreach (Projets::CATEGORIES as $projets) {
-            foreach ($projets as $projet) {
-                foreach ($projet['competences'] as $competence) {
-                    self::assertContains($competence, $competences, "« {$projet['titre']} » cite une compétence inconnue");
-                }
-            }
+            self::assertNotEmpty($noms);
+            self::assertSame($noms, array_values(array_unique($noms)), $nom);
         }
-    }
-
-    public function testLesSlugsDeProjetsSontUniques(): void
-    {
-        $slugs = array_column(array_merge(...array_values(Projets::CATEGORIES)), 'slug');
-
-        self::assertSame($slugs, array_unique($slugs));
-    }
-
-    public function testLesNomsDuCerveauSontUniques(): void
-    {
-        // La légende du cerveau sélectionne neurones, nébuleuses et souvenirs par leur nom
-        $noms = [
-            ...array_merge(...array_column(Competences::CATEGORIES, 'competences')),
-            ...array_column(Passions::LISTE, 'nom'),
-            ...array_column(Parcours::LISTE, 'nom'),
-        ];
-
-        self::assertSame($noms, array_unique($noms));
     }
 }

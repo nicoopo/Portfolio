@@ -1,36 +1,42 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mes Projets - Portfolio{% endblock %}
+{% block title %}{{ 'Mes Projets - Portfolio'|trans }}{% endblock %}
+
+{% block description %}{{ 'Mes projets en Java, PHP / Symfony et réseau : descriptions, captures et compétences utilisées.'|trans }}{% endblock %}
 
 {% block body %}
-<section class="harbor-section container py-5">
-  <h1 class="text-center mb-5 gradient fw-bold display-5">Mes Projets</h1>
+<section class="projets container py-5">
+  <h1 class="text-center gradient fw-bold display-5">{{ 'Mes Projets'|trans }}</h1>
+  <p class="projets-intro">{{ 'Clique sur un projet pour le découvrir en détail.'|trans }}</p>
 
-  <div class="harbor-dock">
-    {% for categorie, projets in categories %}
-      <div class="harbor-theme">
-        <h2 class="harbor-theme-title">{{ categorie }}</h2>
-        <div class="harbor-projects">
-          {% for projet in projets %}
-          <div class="harbor-project-card" id="{{ projet.slug }}">
-            <div class="harbor-project-image-container">
-              <img src="{{ asset('images/projets/' ~ projet.image) }}" alt="{{ projet.titre }}" class="harbor-project-img">
-            </div>
-            <div class="harbor-project-content">
-              <h3>{{ projet.titre }}</h3>
-              <p>{{ projet.description }}</p>
-              <span class="badge bg-primary">{{ projet.tech }}</span>
-              <p class="harbor-project-neurons">
-                {% for competence in projet.competences %}
-                <a href="{{ path('app_cerveau') }}#{{ competence|url_encode }}" title="Voir ce neurone dans mon cerveau">{{ competence }}</a>
-                {% endfor %}
-              </p>
-            </div>
-          </div>
-          {% endfor %}
+  {% for categorie, projets in categories %}
+  <section class="projets-groupe" aria-labelledby="groupe-{{ loop.index }}">
+    <h2 class="projets-groupe-titre" id="groupe-{{ loop.index }}">
+      {{ projets|first|loc('categorie') }}
+      <span class="projets-groupe-nombre">{{ projets|length }}</span>
+    </h2>
+
+    <div class="projets-grille">
+      {% for projet in projets %}
+      {# Toute la carte est cliquable (lien étiré sur le titre) ; id = ancre des anciens liens /projects#slug #}
+      <article class="projet-carte" id="{{ projet.slug }}">
+        <div class="projet-carte-image">
+          <img src="{{ asset('images/projets/' ~ projet.image) }}" alt="" loading="lazy">
         </div>
-      </div>
-    {% endfor %}
-  </div>
+        <div class="projet-carte-corps">
+          <h3 class="projet-carte-titre">
+            <a href="{{ path('app_project', {slug: projet.slug}) }}">{{ projet|loc('titre') }}</a>
+          </h3>
+          <p class="projet-carte-description">{{ projet|loc('description') }}</p>
+          <ul class="projet-techs" aria-label="{{ 'Technologies'|trans }}">
+            {% for tech in projet.tech|split(',') %}<li>{{ tech|trim }}</li>{% endfor %}
+          </ul>
+          <span class="projet-carte-suite" aria-hidden="true">{{ 'Voir le projet'|trans }} →</span>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
 </section>
 {% endblock %}

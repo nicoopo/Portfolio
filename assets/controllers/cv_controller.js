@@ -6,7 +6,8 @@ import { Controller } from '@hotwired/stimulus';
  */
 export default class extends Controller {
     static targets = ['stars', 'download', 'iconSun', 'iconMoon', 'themeText'];
-    static values = { downloadUrl: String };
+    // texts : libellés traduits par le template (cv/index.html.twig)
+    static values = { downloadUrl: String, texts: Object };
 
     connect() {
         this.createStars(100);
@@ -54,9 +55,9 @@ export default class extends Controller {
 
     updateThemeButton(theme) {
         const dark = theme === 'dark';
-        this.iconSunTarget.style.display = dark ? 'none' : 'inline';
-        this.iconMoonTarget.style.display = dark ? 'inline' : 'none';
-        this.themeTextTarget.textContent = dark ? 'Mode Clair' : 'Mode Sombre';
+        this.iconSunTarget.hidden = dark;
+        this.iconMoonTarget.hidden = !dark;
+        this.themeTextTarget.textContent = dark ? this.textsValue.light : this.textsValue.dark;
     }
 
     download() {
@@ -68,7 +69,7 @@ export default class extends Controller {
         button.disabled = true;
         button.style.opacity = '0.6';
         button.style.cursor = 'wait';
-        label.textContent = 'Génération...';
+        label.textContent = this.textsValue.generating;
 
         const link = document.createElement('a');
         link.href = `${this.downloadUrlValue}?theme=${this.theme}`;

@@ -1,0 +1,10 @@
+when@prod:
+    sentry:
+        # DSN vide = aucun envoi (voir .env)
+        dsn: '%env(SENTRY_DSN)%'
+        options:
+            # Pages inexistantes, mauvaise méthode HTTP, accès refusé : du bruit (robots, scanners), pas des pannes
+            ignore_exceptions:
+                - Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+                - Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException
+                - Symfony\Component\Security\Core\Exception\AccessDeniedException

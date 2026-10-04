@@ -1,6 +1,5 @@
-// 1. Bootstrap en premier
+// 1. Bootstrap en premier (CSS seulement : aucun composant JS de Bootstrap n'est utilisé)
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap';
 
 // 2. Nos styles après : ils surchargent Bootstrap
 import './styles/app.css';
@@ -9,7 +8,6 @@ import './styles/app.css';
 import './scripts/stars.js';
 import './scripts/navbar.js';
 import './scripts/page_transition.js';
-import './scripts/pdf_viewer.js';
 
 // 4. Stimulus : comportements attachés à un élément via data-controller (assets/controllers/)
 import './bootstrap.js';

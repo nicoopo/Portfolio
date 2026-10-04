@@ -28,6 +28,27 @@ export function glowPointsMaterial(texture, size, options = {}) {
     });
 }
 
+/** Comme glowPointsMaterial, mais les points s'effacent quand la caméra s'en approche. */
+export function fadingPointsMaterial(texture, size, options = {}) {
+    return fadeNearCamera(glowPointsMaterial(texture, size, options));
+}
+
+/**
+ * Efface ce que dessine le matériau (points, sprites) à l'approche de la caméra :
+ * sinon, en traversant une nébuleuse, chaque point devient une énorme tache à l'écran.
+ */
+export function fadeNearCamera(material) {
+    material.onBeforeCompile = (shader) => {
+        shader.vertexShader = shader.vertexShader
+            .replace('#include <common>', '#include <common>\nvarying float vNearFade;')
+            .replace('#include <fog_vertex>', '#include <fog_vertex>\nvNearFade = smoothstep(1.0, 4.0, -mvPosition.z);');
+        shader.fragmentShader = shader.fragmentShader
+            .replace('#include <common>', '#include <common>\nvarying float vNearFade;')
+            .replace('#include <opaque_fragment>', 'diffuseColor.a *= vNearFade;\n#include <opaque_fragment>');
+    };
+    return material;
+}
+
 /** Sprite lumineux (halo) d'une couleur donnée. */
 export function glowSprite(texture, color, scale) {
     const sprite = new THREE.Sprite(new THREE.SpriteMaterial({

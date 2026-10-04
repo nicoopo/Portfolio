@@ -274,6 +274,16 @@ h1 {
     transition: all 0.3s ease;
 }
 
+.profile-text {
+    line-height: 1.8;
+}
+
+.profile-highlight {
+    margin-top: 15px;
+    color: var(--accent-secondary);
+    font-weight: bold;
+}
+
 .section:hover {
     border-color: var(--accent-primary);
     box-shadow: 0 0 30px var(--shadow-color);

@@ -11,9 +11,17 @@ services:
       - symfony_vendor:/var/www/symfony/vendor
       - assets_vendor:/var/www/symfony/assets/vendor
     ports:
-      - "8081:80" # 8080 est pris par Cabin Access
+      - "8082:80" # 8080 = Cabin Access, 8081 = prod (compose.prod.yaml) : dev et prod tournent en même temps
     environment:
       APP_ENV: dev # en dur : `.env` contient APP_ENV=prod, que Compose lirait via ${APP_ENV}
+
+  database:
+    environment:
+      # Dev : pas de mot de passe (base joignable seulement depuis Docker et depuis cette machine).
+      # Pris en compte à la création du volume : après changement, `docker compose down -v`.
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "127.0.0.1:5434:5432" # 5433 est pris par la base de Cabin Access ; client SQL (PhpStorm…) : localhost:5434, base app, utilisateur app ; 127.0.0.1 = jamais exposé au réseau
 
 volumes:
   php_cache:

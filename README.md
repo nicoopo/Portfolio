@@ -17,9 +17,9 @@ Portfolio/
 ├── config/              # Configuration Symfony
 ├── src/                 # Code source
 │   ├── Controller/      # Contrôleurs Symfony
-│   ├── Data/            # Données en dur (compétences, projets, passions)
-│   ├── Entity/          # Entités Doctrine (vide pour l'instant)
-│   └── Repository/      # Repositories Doctrine (vide pour l'instant)
+│   ├── Entity/          # Entités Doctrine (compétences, projets, passions, parcours)
+│   └── Repository/      # Repositories Doctrine
+├── migrations/          # Schéma PostgreSQL + contenu du portfolio
 ├── templates/           # Vues Twig
 │   ├── competences/     # Page des compétences
 │   ├── contact/         # Page de contact
@@ -51,7 +51,7 @@ Portfolio/
 - `assets/controllers/xxx_controller.js` : contrôleur Stimulus, branché sur un élément avec `data-controller="xxx"`.
   C'est le choix par défaut pour tout comportement de page (ex. `typing`, `cv`, `brain`).
 - `assets/scripts/` : scripts globaux importés par `app.js` (fond étoilé, menu, transition de page).
-- `assets/cerveau/` : modules Three.js du cerveau 3D (forme, neurones, synapses, nébuleuses, souvenirs), sans logique
+- `assets/cerveau/` : modules du cerveau 3D : Three.js (forme, neurones, synapses, nébuleuses, souvenirs) et ambiance sonore (Web Audio), sans logique
   d'interface ; importés uniquement par `controllers/brain_controller.js`.
 - Pas de `<script>` ni de `<style>` dans les templates Twig (exceptions : le template PDF, car Dompdf exige le CSS inline, et la ligne qui applique le thème du CV avant l'affichage).
 
@@ -62,9 +62,12 @@ Portfolio/
   représentent mes passions ; un fil de souvenirs retrace mon parcours.
 - **Compétences** : Présentation de mes compétences techniques et professionnelles.
 - **Portfolio** : Galerie de projets avec descriptions et captures d'écran.
-- **CV en ligne** : CV interactif avec téléchargement en PDF.
-- **Contact** : Formulaire pour me contacter.
+- **CV en ligne** : page et PDF (thème clair ou sombre) générés depuis la base, en français et en anglais ; modifiables dans l’administration (section « CV »).
+- **Contact** : formulaire (anti-spam par champ piège), e-mail, GitHub, LinkedIn et CV numérique.
 - **Responsive** : Optimisé pour tous les appareils.
+- **Français / anglais** : version anglaise sous `/en` (bouton FR/EN dans la navigation). Textes des pages :
+  `translations/messages.en.yaml` (la clé est le texte français) ; contenu de la base : champs « … (anglais) »
+  de l'administration (vide = le français s'affiche). Seule la lettre de motivation (PDF) reste en français.
 
 ## 🛠 Technologies
 
@@ -72,7 +75,7 @@ Portfolio/
 - Three.js
 - PHP
 - Node.js
-- Doctrine
+- Doctrine / PostgreSQL
 - Bootstrap
 - JavaScript
 - CSS
@@ -93,29 +96,65 @@ Portfolio/
    composer install
    ```
 
-3. Configurer l'environnement :
-   - Copier `.env` en `.env.local`.
-   - Configurer la base de données dans `.env.local`.
-
-4. Créer la base de données :
+3. Lancer les conteneurs (PHP/Apache + PostgreSQL 16), installer les dépendances et créer la base :
    ```bash
-   php bin/console doctrine:database:create
-   php bin/console doctrine:migrations:migrate
+   make up
    ```
+   Le contenu du portfolio (compétences, projets, passions, parcours) est inséré par les migrations.
 
-5. Lancer le serveur :
-   ```bash
-   symfony serve
-   ```
+4. Accéder au site : [http://localhost:8082](http://localhost:8082)
 
-6. Accéder au site :
-   Ouvrir [http://localhost:8000](http://localhost:8000) dans un navigateur.
+**Base de dev** (client SQL, PhpStorm…) : `localhost:5434`, base `app`, utilisateur `app`, sans mot de passe
+(port ouvert sur 127.0.0.1 uniquement). En ligne de commande : `docker compose exec database psql -U app app`.
+
+**Administration** : [http://localhost:8082/admin](http://localhost:8082/admin) pour modifier compétences, projets,
+passions et parcours. Premier compte : `make admin-create` (identifiant et mot de passe demandés) ; ensuite, les comptes
+et les mots de passe se gèrent dans l'administration (menu « Comptes »).
+
+## 🔒 Mise en production — https://nicolascataluna.fr
+
+```
+Internet ──IPv6:443──▶ Caddy (FrankenPHP, sur la machine) ──▶ 127.0.0.1:8081 ── container Apache/PHP ── PostgreSQL
+         (certificat Let's Encrypt automatique, HTTP → HTTPS, www → domaine nu, en-têtes de sécurité)
+```
+
+Un push sur `master` déploie (`.github/workflows/deploy-prod.yml` → `scripts/deploy-prod.sh` : build, redémarrage,
+migrations). La prod a son propre projet Docker (`portfolio_prod`) et sa propre base (volume `db_data_prod`).
+
+Une seule fois, sur le serveur :
+
+1. `.env.local` : `APP_SECRET=...`, `POSTGRES_PASSWORD=...`, `MAILER_DSN=...` (SMTP du formulaire de contact ;
+   en dev les e-mails ne partent pas, ils sont visibles dans la barre de debug).
+2. DNS (OVH) : `AAAA` de `nicolascataluna.fr` et `www.nicolascataluna.fr` vers l'IPv6 fixe de la machine.
+3. Box : pare-feu IPv6, n'ouvrir que les ports **80 et 443** vers la machine (80 sert au certificat et à la
+   redirection vers HTTPS).
+4. Caddy : `sudo install -m 644 docker/caddy/Caddyfile /etc/frankenphp/Caddyfile && sudo systemctl reload frankenphp`
+   (à refaire après chaque modification de `docker/caddy/Caddyfile`).
+5. Après le premier déploiement : `make prod-admin-create`.
+
+### Sauvegardes de la base
+
+`scripts/sauvegarde-base.sh`, chaque nuit à 3 h 15 (crontab de `nicolas`, log dans `~/cron-logs/portfolio-sauvegarde.log`) :
+`pg_dump` compressé, vérifié par `pg_restore --list`, gardé 14 jours dans `~/sauvegardes/portfolio`, puis copié
+sur le second disque (`/mnt/sauvegardes`, s'il est monté) et sur Proton Drive (remote rclone `proton:`, s'il est configuré).
+
+Restaurer une sauvegarde (**remplace** le contenu de la base de prod) :
+
+```bash
+docker compose -f compose.yaml -f compose.prod.yaml exec -T database \
+    pg_restore -U app -d app --clean --if-exists --no-owner < ~/sauvegardes/portfolio/portfolio-AAAA-MM-JJ_HHMM.dump
+```
 
 ## 📝 Commandes Utiles
 
-- Lancer les tests :
+- Lancer les tests (crée et migre la base `app_test` au besoin) :
   ```bash
-  php bin/phpunit
+  make test
+  ```
+
+- Appliquer de nouvelles migrations :
+  ```bash
+  make migrate
   ```
 
 - Générer les assets :
@@ -139,6 +178,12 @@ Portfolio/
 ## 📄 Licence
 
 MIT - Voir [LICENSE](LICENSE).
+
+### Crédits des icônes
+
+Icônes stockées dans `assets/icons/` (`php bin/console ux:icons:lock` pour en ajouter), via [Iconify](https://iconify.design) :
+Bootstrap Icons, Fluent, Iconoir, Pepicons, Tabler (MIT) ; **Streamline Pixel** par Streamline
+([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)) : logo LinkedIn et icône de contact.
 
 ## 👤 Auteur
 

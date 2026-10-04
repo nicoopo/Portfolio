@@ -1,0 +1,131 @@
+{#
+    Contenu du CV, commun à la page (cv/index) et au PDF (cv/pdf), lu en base (CVController).
+    pdf = true : pas d'icônes (Dompdf), coordonnées en texte plutôt qu'en liens.
+#}
+{% macro icone(nom, pdf) %}{% if not pdf %}<span class="section-icon">{{ ux_icon(nom, {height: '24px', width: '24px'}) }}</span>{% endif %}{% endmacro %}
+{% import _self as cv %}
+
+<div class="header">
+    <div class="header-content">
+        <h1>NICOLAS CATALUNA</h1>
+        <div class="subtitle">{{ profil|loc('titre') }}</div>
+
+        <div class="tags">
+            {% for qualite in profil|loc('qualites')|split(',') %}
+            <span class="tag">{{ qualite|trim }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="contact-info">
+            {% if pdf %}
+            <span class="contact-item">{{ profil.telephone }}</span>
+            <span class="contact-item">{{ profil.email }}</span>
+            <span class="contact-item">GitHub: nicoopo</span>
+            <span class="contact-item">Portfolio: nicolascataluna.fr</span>
+            <span class="contact-item">LinkedIn</span>
+            {% else %}
+            <a href="tel:{{ profil.telephone|replace({' ': ''}) }}" class="contact-item">
+                <span class="contact-icon">{{ ux_icon('bi:telephone-fill', {height: '20px', width: '20px'}) }}</span>
+                {{ profil.telephone }}
+            </a>
+            <a href="mailto:{{ profil.email }}" class="contact-item">
+                <span class="contact-icon">{{ ux_icon('bi:envelope-fill', {height: '20px', width: '20px'}) }}</span>
+                {{ profil.email }}
+            </a>
+            <a href="https://github.com/nicoopo" target="_blank" class="contact-item">
+                <span class="contact-icon">{{ ux_icon('iconoir:github', {height: '20px', width: '20px'}) }}</span>
+                GitHub
+            </a>
+            <a href="https://nicolascataluna.fr" target="_blank" class="contact-item">
+                <span class="contact-icon">{{ ux_icon('bi:globe', {height: '20px', width: '20px'}) }}</span>
+                Portfolio
+            </a>
+            <a href="https://www.linkedin.com/in/nicolas-cataluna-737182224/" target="_blank" class="contact-item">
+                <span class="contact-icon">{{ ux_icon('streamline-pixel:logo-linkedin', {height: '20px', width: '20px'}) }}</span>
+                LinkedIn
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <h2 class="section-title">{{ cv.icone('bi:person-fill', pdf) }}{{ 'Profil'|trans }}</h2>
+    <p class="profile-text">{{ profil|loc('resume') }}</p>
+    {% set accroche = profil|loc('accroche') %}
+    {% if accroche %}
+    <p class="profile-highlight">{{ (pdf ? accroche|sans_emoji : accroche)|nl2br }}</p>
+    {% endif %}
+</div>
+
+<div class="section">
+    <h2 class="section-title">{{ cv.icone('bi:briefcase-fill', pdf) }}{{ 'Expériences Professionnelles'|trans }}</h2>
+    {% for experience in experiences %}
+    <div class="experience-item">
+        <div class="experience-header">
+            <div>
+                <div class="experience-title">{{ experience|loc('poste') }}</div>
+                <div class="experience-company">{{ experience.entreprise }} | {{ experience.lieu }}</div>
+            </div>
+            <div class="experience-period">{{ experience|loc('periode') }} | {{ experience|loc('contrat') }}</div>
+        </div>
+        <ul class="experience-description">
+            {% for mission in experience|loc('missions')|split("\n") %}
+            {% if mission|trim %}<li>{{ mission|trim }}</li>{% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="section">
+    <h2 class="section-title">{{ cv.icone('bi:code-slash', pdf) }}{{ 'Compétences'|trans }}</h2>
+    <div class="skills-grid">
+        {% for bloc in competences %}
+        <div class="skill-category">
+            <div class="skill-category-title">{{ bloc|loc('titre') }}</div>
+            <div class="skill-list">
+                {% for element in bloc|loc('elements')|split(',') %}
+                <span class="skill-item">{{ element|trim }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="section">
+    <h2 class="section-title">{{ cv.icone('bi:mortarboard-fill', pdf) }}{{ 'Formations'|trans }}</h2>
+    {# Même table que la frise de la page Univers : une seule source pour le parcours #}
+    {% for formation in formations %}
+    <div class="formation-item">
+        <div class="formation-title">{{ formation|loc('intitule') }}</div>
+        {% if formation.specialite %}<div class="formation-period">{{ formation|loc('specialite') }}</div>{% endif %}
+        <div class="formation-school">{{ formation.ecole }} | {{ formation.lieu }}</div>
+        <div class="formation-period">{{ formation.dates }}</div>
+        <span class="formation-status">{{ formation|loc('resultat') }}</span>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="section">
+    <h2 class="section-title">{{ cv.icone('bi:translate', pdf) }}{{ 'Langues'|trans }}</h2>
+    <div class="languages-grid">
+        {% for langue in langues %}
+        <div class="language-item">
+            <div class="language-name">{{ langue|loc('nom') }}</div>
+            <div class="language-level">{{ langue|loc('niveau') }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="section">
+    <h2 class="section-title">{{ cv.icone('bi:star-fill', pdf) }}{{ "Centres d'Intérêt"|trans }}</h2>
+    <div class="interests-grid">
+        {% for interet in interets %}
+        {% set texte = interet|loc('texte') %}
+        <div class="interest-item">{{ pdf ? texte|sans_emoji : texte }}</div>
+        {% endfor %}
+    </div>
+</div>

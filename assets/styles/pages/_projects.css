@@ -1,223 +1,380 @@
-/* Projets (portfolio/index.html.twig) */
+/* Projets : liste (portfolio/index.html.twig) et page d'un projet (portfolio/show.html.twig) */
 
-.harbor-section {
-    position: relative;
-    padding: 4rem 0;
-    overflow: hidden;
-}
-
-.harbor-dock {
-    display: flex;
-    flex-direction: column;
-    gap: 3rem;
-    margin-top: 2rem;
-}
-
-.harbor-theme {
-    position: relative;
-    text-align: center;
-}
-
-.harbor-theme-title {
-    font-size: 1.8rem;
-    margin-bottom: 1.5rem;
-    color: var(--color-text);
-    background: rgba(10, 10, 30, 0.8);
-    padding: 0.8rem 2rem;
-    border-radius: 30px;
-    display: inline-block;
-    box-shadow: 0 0 20px rgba(127, 90, 240, 0.4);
-    position: relative;
-    z-index: 2;
-}
-
-.harbor-theme-title::before {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--color-primary), var(--color-secondary), var(--color-primary), transparent);
-}
-
-.harbor-projects {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    padding: 1rem 0;
-    position: relative;
-}
-
-.harbor-project-image-container {
-  width: 100%;
-  height: 220px; /* Hauteur fixe pour l'image */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1rem;
-  background: linear-gradient(
-    rgba(10, 10, 30, 0.1),
-    rgba(10, 10, 30, 0.2)
-  ); /* Fond dégradé très léger */
-  border-radius: 10px;
-  overflow: hidden;
-  border: none; /* Supprime la bordure */
-  box-shadow: inset 0 0 10px rgba(127, 90, 240, 0.1); /* Ombre intérieure légère */
-}
-
-.harbor-project-card {
-  background: rgba(10, 10, 30, 0.7);
-  border-radius: 15px;
-  padding: 1rem;
-  width: 300px;
-  height: 400px; /* Hauteur fixe pour uniformiser */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start; /* Aligne le contenu en haut */
-  box-shadow: 0 0 20px rgba(127, 90, 240, 0.3);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(127, 90, 240, 0.3);
-  transition: all 0.4s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.harbor-project-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 0 30px rgba(127, 90, 240, 0.6);
-}
-
-.harbor-project-img {
-  max-width: 90%; /* Laisse un peu d'espace autour */
-  max-height: 90%; /* Laisse un peu d'espace autour */
-  object-fit: contain;
-  border-radius: 8px;
-  padding: 0;
-  box-sizing: border-box;
-  background: transparent; /* Fond transparent */
-}
-
-.harbor-project-card:hover .harbor-project-img {
-    transform: scale(1.05);
-}
-
-.harbor-project-card:hover .harbor-project-image-container {
-    box-shadow: inset 0 0 15px rgba(127, 90, 240, 0.3); /* Effet de glow léger */
-    background: linear-gradient(
-      rgba(10, 10, 30, 0.2),
-      rgba(10, 10, 30, 0.3)
-    ); /* Fond légèrement plus visible au survol */
-}
-
-.harbor-project-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  text-align: center;
-  padding: 0 0.5rem;
-}
-
-.harbor-project-content h3 {
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
-  color: var(--color-text);
-}
-
-.harbor-project-content p {
-  font-size: 0.9rem;
-  color: var(--color-text-light);
-  margin-bottom: 1rem;
-  flex-grow: 1; /* Permet au texte de pousser le badge vers le bas */
-}
-
-.harbor-project-content .badge {
-  font-size: 0.8rem;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  margin-top: auto; /* Aligne le badge en bas */
-}
-
-/* Compétences du projet : liens vers leur neurone dans /cerveau */
-.harbor-project-content .harbor-project-neurons {
-  flex-grow: 0;
-  margin: 0.6rem 0 0;
+/* ------------------------------------------------
+   Pastilles des technos (liste et page projet)
+   ------------------------------------------------ */
+.projet-techs {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.3rem 0.8rem;
-  font-size: 0.8rem;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.harbor-project-neurons a {
+.projet-techs li {
+  padding: 0.2rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 600;
   color: var(--color-text-light);
+  background: rgba(127, 90, 240, 0.15);
+  border: 1px solid rgba(127, 90, 240, 0.4);
+  border-radius: 999px;
 }
 
-.harbor-project-neurons a:hover {
+/* ------------------------------------------------
+   Liste
+   ------------------------------------------------ */
+.projets-intro {
+  margin: 0.5rem 0 3rem;
+  text-align: center;
+  color: var(--color-text-light);
+  opacity: 0.75;
+}
+
+.projets-groupe + .projets-groupe {
+  margin-top: 3.5rem;
+}
+
+.projets-groupe-titre {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: var(--color-text);
 }
 
-.harbor-project-card::before {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60%;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, var(--color-secondary), transparent);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+/* Trait qui prolonge le titre du groupe */
+.projets-groupe-titre::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(127, 90, 240, 0.6), transparent);
 }
 
-.harbor-project-card:hover::before {
-    opacity: 1;
+.projets-groupe-nombre {
+  display: grid;
+  place-items: center;
+  min-width: 1.8rem;
+  height: 1.8rem;
+  font-size: 0.85rem;
+  color: var(--color-secondary);
+  border: 1px solid rgba(0, 212, 255, 0.5);
+  border-radius: 50%;
 }
 
-.harbor-project-card:nth-child(1) { animation-delay: 0.1s;
+.projets-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: 1.5rem;
 }
 
-.harbor-project-card:nth-child(2) { animation-delay: 0.2s;
+.projet-carte {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(10, 10, 25, 0.65);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(127, 90, 240, 0.3);
+  border-radius: 16px;
+  scroll-margin-top: calc(var(--navbar-height) + 1rem);
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
-.harbor-project-card:nth-child(3) { animation-delay: 0.3s;
+.projet-carte:hover,
+.projet-carte:focus-within {
+  transform: translateY(-6px);
+  border-color: rgba(0, 212, 255, 0.6);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(0, 212, 255, 0.2);
 }
 
-.harbor-project-card:nth-child(4) { animation-delay: 0.4s;
+/* Lien arrivé depuis /projects#slug */
+.projet-carte:target {
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.35);
 }
 
-@media (max-width: 992px) {
-  .harbor-projects {
-      gap: 1rem;
+.projet-carte-image {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #05050f;
+  border-bottom: 1px solid rgba(127, 90, 240, 0.2);
+}
+
+.projet-carte-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* captures de formats très variés : on montre tout, sans recadrer */
+  transition: transform 0.5s;
+}
+
+.projet-carte:hover .projet-carte-image img {
+  transform: scale(1.05);
+}
+
+.projet-carte-corps {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem 1.4rem 1.4rem;
+}
+
+.projet-carte-titre {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.projet-carte-titre a {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+/* Lien étiré : toute la carte mène au projet */
+.projet-carte-titre a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.projet-carte-titre a:focus-visible {
+  outline: none;
+}
+
+.projet-carte:has(a:focus-visible) {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 3px;
+}
+
+.projet-carte-description {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--color-text-light);
+  opacity: 0.8;
+}
+
+.projet-carte-suite {
+  margin-top: auto;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-secondary);
+}
+
+/* ------------------------------------------------
+   Page d'un projet
+   ------------------------------------------------ */
+.projet-retour {
+  display: inline-block;
+  margin-bottom: 2rem;
+  color: var(--color-text-light);
+  opacity: 0.75;
+  text-decoration: none;
+}
+
+.projet-retour:hover {
+  opacity: 1;
+  color: var(--color-secondary);
+}
+
+.projet-entete {
+  max-width: 800px;
+  margin-bottom: 2.5rem;
+}
+
+.projet-groupe {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+}
+
+.projet-entete h1.gradient {
+  font-size: clamp(2rem, 5vw, 3rem);
+  letter-spacing: 1px;
+}
+
+.projet-chapo {
+  margin: 1rem 0 0;
+  font-size: 1.2rem;
+  color: var(--color-text-light);
+  opacity: 0.85;
+}
+
+.projet-corps {
+  display: grid;
+  gap: 2.5rem;
+}
+
+@media (min-width: 992px) {
+  .projet-corps {
+    grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+    align-items: start;
   }
 
-  .harbor-project-card {
-      width: 250px;
+  .projet-fiche {
+    position: sticky;
+    top: calc(var(--navbar-height) + 1.5rem);
   }
 }
 
-@media (max-width: 768px) {
-  .harbor-project-card {
-      width: 100%;
-      max-width: 300px;
-  }
+.projet-image {
+  margin: 0 0 2rem;
+  overflow: hidden;
+  border: 1px solid rgba(127, 90, 240, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
 
-  .harbor-theme-title {
-      font-size: 1.4rem;
-      padding: 0.6rem 1.5rem;
-  }
+.projet-image img {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  object-fit: contain;
+  background: #05050f;
+}
+
+.projet-texte p {
+  margin: 0 0 1.25rem;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--color-text-light);
+}
+
+.projet-fiche {
+  padding: 1.5rem;
+  background: rgba(10, 10, 25, 0.65);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(127, 90, 240, 0.3);
+  border-radius: 16px;
+}
+
+.projet-fiche h2 {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--color-text-light);
+  opacity: 0.7;
+}
+
+.projet-fiche h2:not(:first-child) {
+  margin-top: 1.5rem;
+}
+
+/* Compétences : un point de la couleur de leur lobe dans le cerveau */
+.projet-competences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.projet-competences a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  transition: border-color 0.2s;
+}
+
+.projet-competences a::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--dot);
+  box-shadow: 0 0 6px var(--dot);
+}
+
+.projet-competences a:hover {
+  border-color: var(--dot);
+}
+
+.projet-liens {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.projet-liens .btn-galactic {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.85rem;
+  animation: none;
+}
+
+.projet-voisins {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(127, 90, 240, 0.25);
+}
+
+.projet-voisin {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 1.25rem;
+  color: var(--color-text);
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid rgba(127, 90, 240, 0.3);
+  border-radius: 12px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.projet-voisin span {
+  font-size: 0.8rem;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.projet-voisin:hover {
+  color: var(--color-text);
+  border-color: rgba(0, 212, 255, 0.6);
+  background: rgba(0, 212, 255, 0.05);
+}
+
+.projet-voisin--suivant {
+  grid-column: 2;
+  text-align: right;
 }
 
 @media (max-width: 576px) {
-  .harbor-project-card {
-      width: 100%;
+  .projet-voisins {
+    grid-template-columns: 1fr;
   }
 
-  .harbor-theme-title {
-      font-size: 1.2rem;
+  .projet-voisin--suivant {
+    grid-column: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projet-carte,
+  .projet-carte-image img {
+    transition: none;
+  }
+
+  .projet-carte:hover,
+  .projet-carte:focus-within,
+  .projet-carte:hover .projet-carte-image img {
+    transform: none;
   }
 }
