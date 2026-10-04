@@ -33,20 +33,24 @@
     </div>
 
     <h2 class="gradient mb-4">{{ 'Ma lettre de motivation'|trans }}</h2>
+    {# Lettre dans la langue de la page #}
+    {% set lettre = app.request.locale == 'en'
+        ? {pdf: 'docs/cover-letter.pdf', nom: 'Cover_Letter_Nicolas_Cataluna.pdf'}
+        : {pdf: 'docs/lettre de motivation.pdf', nom: 'Lettre_Motivation_Nicolas_Cataluna.pdf'} %}
 
     <div class="d-flex justify-content-center gap-3 flex-wrap">
         <!-- Voir la lettre - Ouvre dans un iframe sur la même page -->
         <button type="button"
             class="btn btn-galactic btn-galactic-outline-light"
             data-action="pdf#show"
-            data-pdf-url-param="{{ asset('docs/lettre de motivation.pdf') }}"
+            data-pdf-url-param="{{ asset(lettre.pdf) }}"
             data-pdf-title-param="{{ 'Ma lettre de motivation'|trans }}">
             {{ ux_icon('bi:eye', {height: '20px', width: '20px', 'aria-hidden': 'true'}) }} {{ 'Voir la lettre'|trans }}
         </button>
 
         <!-- Télécharger la lettre -->
-        <a href="{{ asset('docs/lettre de motivation.pdf') }}"
-           download="Lettre_Motivation_Nicolas_Cataluna.pdf"
+        <a href="{{ asset(lettre.pdf) }}"
+           download="{{ lettre.nom }}"
            class="btn btn-galactic btn-galactic-primary">
             {{ ux_icon('bi:download', {height: '20px', width: '20px', 'aria-hidden': 'true'}) }} {{ 'Télécharger'|trans }}
         </a>
