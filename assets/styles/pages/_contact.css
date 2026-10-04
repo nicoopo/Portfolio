@@ -170,3 +170,16 @@
     font-size: 0.95rem;
   }
 }
+
+/* Information RGPD sous le formulaire */
+.contact-rgpd {
+  margin: 0;
+  font-size: 0.8rem;
+  text-align: center;
+  color: var(--color-text-light);
+  opacity: 0.85;
+}
+
+.contact-rgpd a {
+  color: var(--color-secondary);
+}

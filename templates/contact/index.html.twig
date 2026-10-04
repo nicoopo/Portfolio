@@ -68,6 +68,10 @@
                 {{ form_row(form.message) }}
                 {{ form_row(form.website) }}
                 <button type="submit" class="btn btn-galactic btn-galactic-primary">{{ 'Envoyer'|trans }}</button>
+                <p class="contact-rgpd">
+                    {{ 'Vos nom, e-mail et message servent uniquement à vous répondre, et sont supprimés après 12 mois.'|trans }}
+                    <a href="{{ path('app_confidentialite') }}">{{ 'En savoir plus'|trans }}</a>
+                </p>
             {{ form_end(form) }}
         </div>
     </section>
