@@ -126,4 +126,17 @@ final class SmokeTest extends WebTestCase
         self::assertSelectorTextContains('h1', 'Page not found');
         self::assertSelectorExists('html[lang="en"] .erreur-liens a[href="/en/cerveau"]');
     }
+
+    /** La lettre de motivation suit la langue de la page (visionneuse et téléchargement) */
+    public function testLaLettreDeMotivationSuitLaLangue(): void
+    {
+        $client = static::createClient();
+
+        $fr = $client->request('GET', '/univers');
+        self::assertStringContainsString('lettre de motivation', $fr->filter('a[download^="Lettre_Motivation"]')->attr('href'));
+
+        $en = $client->request('GET', '/en/univers');
+        self::assertStringContainsString('cover-letter', $en->filter('a[download="Cover_Letter_Nicolas_Cataluna.pdf"]')->attr('href'));
+        self::assertStringContainsString('cover-letter', $en->filter('button[data-pdf-title-param="My cover letter"]')->attr('data-pdf-url-param'));
+    }
 }
