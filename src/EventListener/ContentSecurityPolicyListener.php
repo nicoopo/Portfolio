@@ -16,9 +16,9 @@ use Twig\Attribute\AsTwigFunction;
 #[AsEventListener]
 final class ContentSecurityPolicyListener implements ResetInterface
 {
-    // ponytail: d'abord en « Report-Only » (rien n'est bloqué, les violations sont seulement signalées) ;
-    // passer à 'Content-Security-Policy' quand les logs « csp » de la prod restent vides (issue #55).
-    private const EN_TETE = 'Content-Security-Policy-Report-Only';
+    // Bloquante depuis l'issue #55, après une période en « Report-Only » sans violation en prod.
+    // En cas de casse, revenir temporairement à 'Content-Security-Policy-Report-Only'.
+    private const EN_TETE = 'Content-Security-Policy';
 
     private ?string $nonce = null;
 
