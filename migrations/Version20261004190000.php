@@ -8,12 +8,84 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
 /**
- * Contenu (issue #85) : pages du Pendu, de la Poupée russe et de la Plateforme de QCM.
- * Textes rédigés d'après le code des dépôts ; tout reste modifiable depuis l'admin.
+ * Contenu (issue #85) : texte détaillé de chaque projet. Pendu, Poupée russe, Plateforme de QCM, Todolist et CRUD :
+ * rédigés d'après le code des dépôts ; Encaissements, Cisco, Debian : premières versions courtes, à compléter depuis l'admin.
  */
 final class Version20261004190000 extends AbstractMigration
 {
     private const PROJETS = [
+        'todolist-javafx' => [
+            'description' => 'Gestion de listes de tâches en Java, en version terminal puis avec une interface JavaFX, sur une base MySQL.',
+            'description_en' => 'Task list manager in Java, first in the terminal and then with a JavaFX interface, backed by MySQL.',
+            'details' => <<<'TXT'
+                Un projet que j’ai repris plusieurs fois, de plusieurs façons : une gestion de listes de tâches en Java, d’abord en ligne de commande, puis avec une interface graphique JavaFX.
+
+                Les données sont dans une base MySQL : des utilisateurs qui créent un compte et se connectent, des listes (qui peuvent contenir des sous-listes) partagées entre plusieurs utilisateurs, et des tâches avec un type, une description et un état, réalisée ou non. Le code est découpé en couches : le modèle, l’accès à la base et l’affichage.
+
+                Le refaire plusieurs fois m’a permis de comparer les approches : la même logique métier, présentée dans un terminal puis dans une interface graphique.
+                TXT,
+            'details_en' => <<<'TXT'
+                A project I rebuilt several times, in several ways: a task list manager in Java, first as a command-line program, then with a JavaFX graphical interface.
+
+                The data lives in a MySQL database: users who sign up and log in, lists (which can contain sub-lists) shared between several users, and tasks with a type, a description and a done / not done state. The code is split into layers: the model, database access and display.
+
+                Building it several times let me compare approaches: the same business logic, presented in a terminal and then in a graphical interface.
+                TXT,
+        ],
+        'crud-java' => [
+            'description' => 'Application JavaFX de gestion des utilisateurs : inscription, connexion, mot de passe oublié et CRUD sur une base MySQL.',
+            'description_en' => 'JavaFX user management app: sign-up, login, password reset and CRUD on a MySQL database.',
+            'details' => <<<'TXT'
+                Une application de bureau en JavaFX qui gère des comptes utilisateurs, reliée à une base MySQL avec JDBC.
+
+                On peut s’inscrire, se connecter et réinitialiser un mot de passe oublié grâce à un e-mail envoyé par l’application. Une fois connecté, on retrouve la liste des utilisateurs, et on peut en créer, en modifier ou en supprimer : les quatre opérations de base d’un CRUD (Create, Read, Update, Delete). Les écrans sont décrits en FXML, et l’accès à la base passe par une classe dédiée qui utilise des requêtes préparées.
+
+                J’en retiens la structure d’une application avec interface : séparer les écrans, la logique et l’accès aux données.
+                TXT,
+            'details_en' => <<<'TXT'
+                A JavaFX desktop application that manages user accounts, connected to a MySQL database through JDBC.
+
+                You can sign up, log in and reset a forgotten password through an e-mail sent by the application. Once logged in, you see the list of users and can create, edit or delete them: the four basic operations of a CRUD (Create, Read, Update, Delete). Screens are described in FXML, and database access goes through a dedicated class using prepared statements.
+
+                What I take away: how an application with a user interface is structured, keeping screens, logic and data access apart.
+                TXT,
+        ],
+        'encaissements' => [
+            'details' => <<<'TXT'
+                Un projet réalisé dans le cadre de mon ancien poste : une application web interne, développée avec Symfony et Symfony UX sur une base MySQL, pour consulter et suivre les encaissements, et gérer à plusieurs des portefeuilles clients et d’investissements.
+
+                Le code appartient à l’entreprise : il n’est pas publié.
+                TXT,
+            'details_en' => <<<'TXT'
+                A project built as part of my previous job: an internal web application, developed with Symfony and Symfony UX on a MySQL database, to view and track incoming payments and to manage client and investment portfolios collaboratively.
+
+                The code belongs to the company, so it is not published.
+                TXT,
+        ],
+        'topologie-cisco' => [
+            'details' => <<<'TXT'
+                Un projet réseau réalisé dans le cadre de mes cours : concevoir et configurer un réseau complet dans Cisco Packet Tracer, le simulateur de Cisco.
+
+                Le réseau est découpé en VLAN, et les routeurs échangent leurs routes automatiquement grâce au protocole de routage dynamique OSPF. Une maquette comme celle-ci permet de valider une architecture et ses configurations avant de les appliquer sur du vrai matériel.
+                TXT,
+            'details_en' => <<<'TXT'
+                A networking project from my studies: designing and configuring a complete network in Cisco Packet Tracer, Cisco's network simulator.
+
+                The network is split into VLANs, and the routers exchange their routes automatically with the OSPF dynamic routing protocol. A model like this one makes it possible to validate an architecture and its configuration before applying them to real hardware.
+                TXT,
+        ],
+        'serveur-debian' => [
+            'details' => <<<'TXT'
+                Un projet système réalisé dans le cadre de mes cours : installer et configurer un serveur web sous Debian, de l’installation à la mise en service.
+
+                Apache2 sert des pages PHP, le serveur s’administre à distance en SSH, et le déploiement inclut sa sécurisation.
+                TXT,
+            'details_en' => <<<'TXT'
+                A systems project from my studies: installing and configuring a web server on Debian, from installation to going live.
+
+                Apache2 serves PHP pages, the server is administered remotely over SSH, and the deployment includes securing it.
+                TXT,
+        ],
         'pendu' => [
             'depot' => 'https://github.com/nicoopo/pendu',
             'description' => 'Le jeu du pendu en ligne de commande : un joueur choisit le mot, l’autre le devine lettre par lettre.',
@@ -92,7 +164,7 @@ final class Version20261004190000 extends AbstractMigration
 
     public function getDescription(): string
     {
-        return 'Contenu : pages du Pendu, de la Poupée russe et de la Plateforme de QCM (#85) ; Portfolio : Symfony 8';
+        return 'Contenu : texte détaillé des 8 projets (#85) ; Portfolio : Symfony 8';
     }
 
     public function up(Schema $schema): void
@@ -110,6 +182,8 @@ final class Version20261004190000 extends AbstractMigration
     {
         // Contenu d'avant (les textes détaillés étaient vides)
         $avant = [
+            'todolist-javafx' => ['Application JavaFX permettant la gestion de tâches avec une base mysql.', 'JavaFX application for managing tasks, backed by a MySQL database.', 'JavaFX, MYSQL, MVC'],
+            'crud-java' => ['CRUD Utilisateur', 'User management CRUD.', 'Java, POO, MYSQL'],
             'pendu' => ['Version terminal  .', 'Terminal version.', 'Java'],
             'poupee-russe' => ['Version terminal  .', 'Terminal version.', 'Java, POO'],
             'plateforme-qcm' => ['Application web de QCM pour les formations CCA, avec authentification et suivi des scores.', 'Quiz web application for CCA training courses, with authentication and score tracking.', 'Symfony, Bootstrap, MySQL'],
@@ -118,6 +192,7 @@ final class Version20261004190000 extends AbstractMigration
             $this->addSql('UPDATE projet SET details = NULL, details_en = NULL, depot = NULL, description = :d, description_en = :de, tech = :t WHERE slug = :slug',
                 ['d' => $description, 'de' => $descriptionEn, 't' => $tech, 'slug' => $slug]);
         }
+        $this->addSql("UPDATE projet SET details = NULL, details_en = NULL WHERE slug IN ('encaissements', 'topologie-cisco', 'serveur-debian')");
         $this->addSql("UPDATE projet SET details = REPLACE(details, 'Symfony 8', 'Symfony 7'), details_en = REPLACE(details_en, 'Symfony 8', 'Symfony 7') WHERE slug = 'portfolio'");
     }
 }
