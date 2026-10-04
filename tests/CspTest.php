@@ -6,7 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class CspTest extends WebTestCase
 {
-    private const EN_TETE = 'Content-Security-Policy-Report-Only';
+    private const EN_TETE = 'Content-Security-Policy';
 
     /** Les scripts de la page portent le nonce annoncé dans l'en-tête, et il change à chaque requête */
     public function testLesScriptsPortentLeNonceDeLaRequete(): void
