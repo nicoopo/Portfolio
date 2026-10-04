@@ -147,6 +147,12 @@ docker compose -f compose.yaml -f compose.prod.yaml exec -T database \
     pg_restore -U app -d app --clean --if-exists --no-owner < ~/sauvegardes/portfolio/portfolio-AAAA-MM-JJ_HHMM.dump
 ```
 
+### Purge des données personnelles
+
+`make prod-purge`, chaque nuit à 3 h 30 après la sauvegarde (crontab de `nicolas`, depuis `~/deploy/portfolio`, log dans
+`~/cron-logs/portfolio-purge.log`) : supprime le journal (`app:journal:purge`) et les demandes de contact
+(`app:contact:purge`) de plus de 12 mois, la durée annoncée dans la politique de confidentialité (`/confidentialite`).
+
 ## 📝 Commandes Utiles
 
 - Lancer les tests (crée et migre la base `app_test` au besoin) :

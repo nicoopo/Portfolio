@@ -25,4 +25,15 @@ class DemandeContactRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    /** Supprime les demandes reçues avant $limite ; renvoie leur nombre */
+    public function purgerAvant(\DateTimeImmutable $limite): int
+    {
+        return $this->createQueryBuilder('demande')
+            ->delete()
+            ->where('demande.recuLe < :limite')
+            ->setParameter('limite', $limite)
+            ->getQuery()
+            ->execute();
+    }
 }

@@ -63,8 +63,9 @@ prod-logs: ## Logs en temps réel (prod)
 prod-admin-create: ## Crée le compte « admin » de /admin, ou change son mot de passe (prod)
 	$(DC_PROD) exec php php bin/console app:admin:create
 
-prod-journal-purge: ## Supprime les entrées du journal de plus de 12 mois (prod ; à planifier, ex. cron mensuel)
+prod-purge: ## Supprime le journal et les demandes de contact de plus de 12 mois (prod ; cron quotidien, voir README)
 	$(DC_PROD) exec -T php php bin/console app:journal:purge
+	$(DC_PROD) exec -T php php bin/console app:contact:purge
 
 prod-bash: ## Shell dans le conteneur (prod)
 	$(DC_PROD) exec php bash
