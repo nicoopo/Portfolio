@@ -37,6 +37,9 @@
                 <p class="text-muted">Aucune demande pour l’instant.</p>
             {% else %}
             <table class="table datagrid">
+                <thead class="visually-hidden">
+                    <tr><th scope="col">Reçue le</th><th scope="col">Nom</th><th scope="col">Message</th><th scope="col">Statut</th></tr>
+                </thead>
                 <tbody>
                 {% for demande in dernieres_demandes %}
                     <tr>
@@ -57,6 +60,9 @@
                 <p class="text-muted">Journal vide.</p>
             {% else %}
             <table class="table datagrid">
+                <thead class="visually-hidden">
+                    <tr><th scope="col">Date</th><th scope="col">Événement</th><th scope="col">Utilisateur</th></tr>
+                </thead>
                 <tbody>
                 {% for entree in dernier_journal %}
                     <tr{{ entree.type in ['connexion_refusee', 'contact_echec'] ? ' class="table-danger"' }}>
