@@ -110,4 +110,20 @@ final class SmokeTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('Content-Type', 'application/pdf');
     }
+
+    /** Adresse inconnue : 404 aux couleurs du site, dans la langue de l'adresse */
+    public function testLaPage404EstTraduite(): void
+    {
+        $client = static::createClient(['debug' => false]);
+
+        $client->request('GET', '/nexiste-pas');
+        self::assertResponseStatusCodeSame(404);
+        self::assertSelectorTextContains('h1', 'Page introuvable');
+        self::assertSelectorExists('html[lang="fr"] .erreur-liens a[href="/cerveau"]');
+
+        $client->request('GET', '/en/does-not-exist');
+        self::assertResponseStatusCodeSame(404);
+        self::assertSelectorTextContains('h1', 'Page not found');
+        self::assertSelectorExists('html[lang="en"] .erreur-liens a[href="/en/cerveau"]');
+    }
 }
