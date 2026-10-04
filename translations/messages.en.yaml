@@ -128,3 +128,10 @@
 "Confidentialité": "Privacy"
 "Vos nom, e-mail et message servent uniquement à vous répondre, et sont supprimés après 12 mois.": "Your name, e-mail and message are only used to reply to you, and are deleted after 12 months."
 "En savoir plus": "Learn more"
+
+# Pages d'erreur (bundles/TwigBundle/Exception/error.html.twig)
+"Page introuvable": "Page not found"
+"Une erreur est survenue": "Something went wrong"
+"Cette page n’existe pas, ou plus. Elle s’est peut-être perdue quelque part dans l’univers.": "This page doesn't exist, or no longer does. It may have got lost somewhere in the universe."
+"Le serveur a rencontré un problème. Il a été signalé ; réessayez dans quelques instants.": "The server ran into a problem. It has been reported; please try again in a moment."
+"Pages principales": "Main pages"

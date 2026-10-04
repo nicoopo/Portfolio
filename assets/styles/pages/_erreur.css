@@ -1,0 +1,41 @@
+/* Pages d'erreur 404 / 500 (bundles/TwigBundle/Exception/error.html.twig) */
+
+.erreur-section {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - var(--navbar-height) - 4rem);
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.erreur-container {
+  max-width: 640px;
+}
+
+.erreur-container .erreur-code { /* plus précis que span.gradient (3rem) */
+  display: block;
+  margin: 0;
+  font-size: 6rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.erreur-container h1 {
+  margin: 1rem 0;
+  color: var(--color-primary);
+}
+
+.erreur-container p {
+  color: var(--color-text-light);
+}
+
+.erreur-liens {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
