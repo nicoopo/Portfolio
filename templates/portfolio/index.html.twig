@@ -20,9 +20,11 @@
       {% for projet in projets %}
       {# Toute la carte est cliquable (lien étiré sur le titre) ; id = ancre des anciens liens /projects#slug #}
       <article class="projet-carte" id="{{ projet.slug }}">
+        {% if projet.imageChemin %}
         <div class="projet-carte-image">
-          {% if projet.imageChemin %}<img src="{{ asset(projet.imageChemin) }}" alt="" loading="lazy">{% endif %}
+          <img src="{{ asset(projet.imageChemin) }}" alt="" loading="lazy">
         </div>
+        {% endif %}
         <div class="projet-carte-corps">
           <h3 class="projet-carte-titre">
             <a href="{{ path('app_project', {slug: projet.slug}) }}">{{ projet|loc('titre') }}</a>
