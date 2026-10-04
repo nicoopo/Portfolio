@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Legal notice - Nicolas Cataluna{% endblock %}
+
+{% block description %}Legal notice of nicolascataluna.fr: publisher, publication director and hosting.{% endblock %}
+
+{% block body %}
+<section class="legal-section">
+    <article class="legal-container">
+        <h1>Legal notice</h1>
+        <p class="legal-maj">Last updated: 4 October 2026</p>
+
+        <h2>Publisher</h2>
+        <p>
+            <strong>nicolascataluna.fr</strong> is published by <strong>Nicolas Cataluna</strong>, as a private, non-commercial individual.<br>
+            Contact: <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>
+        </p>
+
+        <h2>Publication director</h2>
+        <p>Nicolas Cataluna.</p>
+
+        <h2>Hosting</h2>
+        <p>
+            The site is <strong>self-hosted</strong> by its publisher, on a personal server located in France.<br>
+            Internet access provided by Free SAS, 16 rue de la Ville-l’Évêque, 75008 Paris, France (<a href="https://www.free.fr">www.free.fr</a>).
+        </p>
+
+        <h2>Intellectual property</h2>
+        <p>
+            The texts, images and code specific to this site belong to Nicolas Cataluna, unless stated otherwise.
+            The source code is published on <a href="https://github.com/nicoopo/Portfolio">GitHub</a>, under the licence stated in the repository.
+        </p>
+
+        <h2>Personal data</h2>
+        <p>
+            The data sent through the contact form and the site's technical records are described in the
+            <a href="{{ path('app_confidentialite') }}">privacy policy</a>.
+        </p>
+    </article>
+</section>
+{% endblock %}

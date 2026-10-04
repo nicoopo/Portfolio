@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 final class SitemapController extends AbstractController
 {
-    private const PAGES = ['app_home', 'app_cerveau', 'app_competences', 'app_projects', 'app_univers', 'app_cv', 'app_contact'];
+    private const PAGES = ['app_home', 'app_cerveau', 'app_competences', 'app_projects', 'app_univers', 'app_cv', 'app_contact', 'app_mentions_legales', 'app_confidentialite'];
 
     public function __invoke(ProjetRepository $projets): Response
     {
