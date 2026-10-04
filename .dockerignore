@@ -3,6 +3,7 @@ node_modules/
 var/
 public/assets/
 public/bundles/
+public/uploads/
 assets/vendor/
 .git/
 .idea/

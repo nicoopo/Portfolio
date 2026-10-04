@@ -21,7 +21,7 @@
       {# Toute la carte est cliquable (lien étiré sur le titre) ; id = ancre des anciens liens /projects#slug #}
       <article class="projet-carte" id="{{ projet.slug }}">
         <div class="projet-carte-image">
-          <img src="{{ asset('images/projets/' ~ projet.image) }}" alt="" loading="lazy">
+          {% if projet.imageChemin %}<img src="{{ asset(projet.imageChemin) }}" alt="" loading="lazy">{% endif %}
         </div>
         <div class="projet-carte-corps">
           <h3 class="projet-carte-titre">
