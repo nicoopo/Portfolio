@@ -11,7 +11,14 @@ body {
   background: radial-gradient(ellipse at bottom, #0a0a12 0%, #000 100%);
 }
 
+/* Pied de page en bas de l'écran, même quand la page est courte */
+body {
+  display: flex;
+  flex-direction: column;
+}
+
 main {
+  flex: 1 0 auto;
   opacity: 1;
   transform: translateY(0);
   padding-top: var(--navbar-height);
