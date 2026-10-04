@@ -113,6 +113,11 @@
   font-size: 0.9rem;
 }
 
+/* Titre de la légende : sert de bouton d'ouverture sur mobile seulement */
+.brain-legend-titre {
+  display: none;
+}
+
 /* Recherche, en tête de la légende */
 .brain-search {
   margin-bottom: 0.4rem;
@@ -293,21 +298,37 @@
 
 @media (max-width: 576px) {
   /* Mobile : boutons de droite sur une ligne au-dessus de « Visite guidée » (pas la place côte à côte) */
+  /* Mobile : boutons en grille de deux colonnes, « Visite guidée » en pleine largeur dessous */
   .brain-actions {
-    bottom: 4rem;
+    bottom: 3.6rem;
     left: 1rem;
-    flex-wrap: wrap; /* 4 boutons : passent à la ligne (vers le haut) plutôt que de déborder */
-    justify-content: flex-end;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
   }
 
-  .brain-actions .brain-tour {
-    white-space: nowrap;
+  .brain-tour {
+    padding: 0.45rem 0.6rem;
+    font-size: 0.85rem;
+    text-align: center;
   }
 
-  /* Mobile : légende repliée en haut, panneau en bas de l'écran */
-  .brain-legend {
+  .brain-stage > .brain-tour {
     right: 1rem;
-    max-height: 40%;
+  }
+
+  /* Mobile : légende repliée derrière son titre (en haut à gauche), pleine largeur une fois ouverte */
+  .brain-legend {
+    max-height: 45%;
+  }
+
+  .brain-legend:has(.brain-legend-menu[open]) {
+    right: 1rem;
+  }
+
+  .brain-legend-titre {
+    display: list-item;
+    font-weight: 600;
   }
 
   .brain-panel {
