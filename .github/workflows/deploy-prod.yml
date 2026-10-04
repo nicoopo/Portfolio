@@ -7,22 +7,29 @@ on:
 jobs:
   deploy:
     runs-on: [self-hosted, portfolio]
-    # Pas de actions/checkout : on travaille directement dans le dossier
-    # de projet existant sur le serveur, là où vit .env.local (secrets
-    # réels, ignoré par git, jamais recréé par un checkout classique).
+    # Pas de actions/checkout : le code de prod vit dans un git worktree du dépôt
+    # de travail (DEPLOY_DIR), en HEAD détachée sur origin/master. Le dossier de
+    # travail (REPO_DIR) et sa branche ne sont jamais touchés par un déploiement.
+    # .env.local (secrets réels, ignoré par git) est un lien vers celui de REPO_DIR.
     env:
-      PROJECT_DIR: /home/nicolas/PhpstormProjects/Portfolio
+      REPO_DIR: /home/nicolas/PhpstormProjects/Portfolio
+      DEPLOY_DIR: /home/nicolas/deploy/portfolio
     steps:
       - name: Mettre à jour le code
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cd "$PROJECT_DIR"
+          cd "$REPO_DIR"
           AUTH=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
           git -c http.extraheader="AUTHORIZATION: basic $AUTH" fetch origin master
-          git reset --hard origin/master
+          if [ ! -e "$DEPLOY_DIR/.git" ]; then
+            git worktree prune
+            git worktree add --detach "$DEPLOY_DIR" origin/master
+            ln -s "$REPO_DIR/.env.local" "$DEPLOY_DIR/.env.local"
+          fi
+          git -C "$DEPLOY_DIR" checkout --detach --force origin/master
 
       - name: Déployer en prod
         run: |
-          cd "$PROJECT_DIR"
+          cd "$DEPLOY_DIR"
           bash scripts/deploy-prod.sh
