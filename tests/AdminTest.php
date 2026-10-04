@@ -135,6 +135,46 @@ final class AdminTest extends WebTestCase
         $client->submitForm('Sauvegarder les modifications', ['Projet[details]' => '']);
     }
 
+    /** Image envoyée depuis l'admin : rangée dans public/uploads/projets, affichée à la place de celle du dépôt */
+    public function testUneImageDeProjetSEnvoieDepuisLAdmin(): void
+    {
+        $client = static::createClient();
+        self::loginAdmin($client);
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $url = '/admin/projet/'.$entityManager->getRepository(Projet::class)->findOneBy(['slug' => 'pendu'])->getId().'/edit';
+        $dossier = self::getContainer()->getParameter('kernel.project_dir').'/public/uploads/projets';
+
+        // Un faux PNG (du texte) est refusé
+        // (le client de test envoie le fichier sous son propre nom : on lui donne celui qu'aurait choisi l'utilisateur)
+        $temporaire = sys_get_temp_dir().'/'.uniqid('upload-', true);
+        mkdir($temporaire);
+        file_put_contents($faux = $temporaire.'/faux.png', 'pas une image');
+        $client->request('GET', $url);
+        $client->submitForm('Sauvegarder les modifications', ['Projet[imageEnvoyee][file]' => $faux]);
+        self::assertResponseStatusCodeSame(422);
+
+        // Un vrai PNG (1 × 1 pixel) est accepté, renommé d'après son contenu
+        file_put_contents($png = $temporaire.'/Ma Capture.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='));
+        $client->request('GET', $url);
+        $client->submitForm('Sauvegarder les modifications', ['Projet[imageEnvoyee][file]' => $png]);
+        self::assertResponseRedirects();
+
+        $projet = $entityManager->getRepository(Projet::class)->findOneBy(['slug' => 'pendu']);
+        $entityManager->refresh($projet);
+        self::assertMatchesRegularExpression('/^ma-capture-[0-9a-f]{40}\.png$/', $projet->getImageEnvoyee());
+        self::assertFileExists($dossier.'/'.$projet->getImageEnvoyee());
+        $client->request('GET', '/projects/pendu');
+        self::assertSelectorExists('.projet-image img[src="/uploads/projets/'.$projet->getImageEnvoyee().'"]');
+
+        // Remis en état pour les autres tests
+        unlink($dossier.'/'.$projet->getImageEnvoyee());
+        array_map('unlink', [$faux, $png]);
+        rmdir($temporaire);
+        $entityManager->refresh($projet);
+        $projet->setImageEnvoyee(null);
+        $entityManager->flush();
+    }
+
     public function testUneModificationEstEnregistreeEtValidee(): void
     {
         $client = static::createClient();

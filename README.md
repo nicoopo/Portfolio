@@ -137,7 +137,8 @@ Une seule fois, sur le serveur :
 ### Sauvegardes de la base
 
 `scripts/sauvegarde-base.sh`, chaque nuit à 3 h 15 (crontab de `nicolas`, log dans `~/cron-logs/portfolio-sauvegarde.log`) :
-`pg_dump` compressé, vérifié par `pg_restore --list`, gardé 14 jours dans `~/sauvegardes/portfolio`, puis copié
+`pg_dump` compressé, vérifié par `pg_restore --list`, et archive des images envoyées depuis l'admin
+(`portfolio-images-*.tar.gz`, volume `uploads_prod`), gardés 14 jours dans `~/sauvegardes/portfolio`, puis copiés
 sur le second disque (`/mnt/sauvegardes`, s'il est monté) et sur Proton Drive (remote rclone `proton:`, s'il est configuré).
 
 Restaurer une sauvegarde (**remplace** le contenu de la base de prod) :
@@ -146,6 +147,21 @@ Restaurer une sauvegarde (**remplace** le contenu de la base de prod) :
 docker compose -f compose.yaml -f compose.prod.yaml exec -T database \
     pg_restore -U app -d app --clean --if-exists --no-owner < ~/sauvegardes/portfolio/portfolio-AAAA-MM-JJ_HHMM.dump
 ```
+
+Restaurer les images envoyées depuis l'admin :
+
+```bash
+docker compose -f compose.yaml -f compose.prod.yaml exec -T php \
+    tar -xzf - -C public < ~/sauvegardes/portfolio/portfolio-images-AAAA-MM-JJ_HHMM.tar.gz
+```
+
+### Images des projets
+
+Envoyées depuis l'admin (`/admin`, Projets → Image) : JPG, PNG ou WebP, 3 Mo maximum, rangées dans
+`public/uploads/projets/` sous un nom tiré de leur contenu. En prod, ce dossier est le volume Docker `uploads_prod` :
+les images survivent aux déploiements et sont sauvegardées chaque nuit (ci-dessus). Apache n'y exécute aucun script.
+Les images déjà présentes dans le dépôt (`assets/images/projets/`, champ « Image du dépôt ») restent utilisées tant
+qu'aucune image n'est envoyée.
 
 ### Purge des données personnelles
 

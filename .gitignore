@@ -26,6 +26,9 @@
 /.vscode/
 ###< ide ###
 
+# Images envoyées depuis l'admin (volume Docker en prod)
+/public/uploads/
+
 # Images de référence (design), à ne pas publier
 /assets/images/exemple/
 
