@@ -30,11 +30,14 @@ const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
  * Chargé uniquement sur les pages qui l'utilisent (lazy).
  */
 export default class extends Controller {
-    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search', 'shareButton', 'soundButton', 'diveButton', 'hint'];
+    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search', 'legendMenu', 'shareButton', 'soundButton', 'diveButton', 'hint'];
     // texts : libellés traduits par le template (home/cerveau.html.twig)
     static values = { neurons: Array, passions: Array, souvenirs: Array, texts: Object };
 
     connect() {
+        // Mobile : légende repliée, le cerveau reste visible
+        if (petitEcran()) this.legendMenuTarget.open = false;
+
         try {
             // Pas d'anticrénelage : la scène passe par le composer (cibles sans MSAA), il ne lisserait que le quad final
             this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
@@ -382,6 +385,24 @@ export default class extends Controller {
         this.stopTour();
         this.select(found);
         this.searchTarget.value = found.userData.data.nom;
+        if (petitEcran()) {
+            this.searchTarget.blur(); // ferme le clavier
+            this.legendMenuTarget.open = false;
+        }
+    }
+
+    /** Recherche en direct : la légende ne montre que les noms qui contiennent la saisie, groupes concernés dépliés */
+    filter() {
+        const query = normalize(this.searchTarget.value.trim());
+        for (const groupe of this.legendMenuTarget.querySelectorAll('.brain-legend-group')) {
+            let trouves = 0;
+            for (const li of groupe.querySelectorAll('li')) {
+                li.hidden = query !== '' && !normalize(li.textContent).includes(query);
+                if (!li.hidden) trouves++;
+            }
+            groupe.hidden = query !== '' && trouves === 0;
+            groupe.open = query !== '' && trouves > 0;
+        }
     }
 
     /** À chaque touche dans le champ (propagation arrêtée : les flèches ne déplacent pas la caméra) */
@@ -389,17 +410,14 @@ export default class extends Controller {
         this.searchTarget.removeAttribute('aria-invalid');
     }
 
-    selectByName({ params: { name }, target }) {
+    selectByName({ params: { name } }) {
         const found = this.clickables?.find((t) => t.userData.data.nom === name);
         if (!found) return;
         this.stopTour();
         this.select(found);
         this.panelTarget.focus();
         // Mobile : la légende ouverte masquerait le cerveau
-        if (window.matchMedia('(max-width: 576px)').matches) {
-            const details = target.closest('details');
-            if (details) details.open = false;
-        }
+        if (petitEcran()) this.legendMenuTarget.open = false;
     }
 
     select(target) {
@@ -525,6 +543,11 @@ export default class extends Controller {
 }
 
 /** Texte comparable : sans accents ni majuscules (« Médecine » → « medecine »). */
+/** Même seuil que le CSS mobile (_cerveau.css) */
+function petitEcran() {
+    return window.matchMedia('(max-width: 576px)').matches;
+}
+
 function normalize(text) {
     return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 }
