@@ -9,7 +9,7 @@ final class SmokeTest extends WebTestCase
 {
     public static function pages(): iterable
     {
-        foreach (['/', '/projects', '/projects/portfolio', '/competences', '/CV', '/contact', '/univers', '/cerveau'] as $url) {
+        foreach (['/', '/projects', '/projects/portfolio', '/competences', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
             yield $url => [$url];
             yield '/en'.$url => ['/en'.$url];
         }

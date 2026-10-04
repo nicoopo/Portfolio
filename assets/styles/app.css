@@ -7,6 +7,7 @@
 
 /* Layout */
 @import './layout/_navbar.css';
+@import './layout/_footer.css';
 
 /* Composants réutilisables */
 @import './components/_buttons.css';
@@ -19,3 +20,4 @@
 @import './pages/_competences.css';
 @import './pages/_contact.css';
 @import './pages/_cerveau.css';
+@import './pages/_legal.css';

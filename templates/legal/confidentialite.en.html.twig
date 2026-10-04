@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Privacy policy - Nicolas Cataluna{% endblock %}
+
+{% block description %}What data nicolascataluna.fr collects, why, for how long, and how to exercise your rights.{% endblock %}
+
+{% block body %}
+<section class="legal-section">
+    <article class="legal-container">
+        <h1>Privacy policy</h1>
+        <p class="legal-maj">Last updated: 4 October 2026</p>
+
+        <p>
+            This site is a personal portfolio. It has no advertising, no audience measurement and no content loaded from third-party services:
+            fonts, scripts and images are served by the site itself.
+        </p>
+
+        <h2>Data controller</h2>
+        <p>Nicolas Cataluna — <a href="mailto:{{ contact_email }}">{{ contact_email }}</a></p>
+
+        <h2>Contact form</h2>
+        <ul>
+            <li><strong>Data</strong>: your name, your e-mail address, your message and the language of the page.</li>
+            <li><strong>Why</strong>: only to reply to you. Nothing is sold, shared or used for marketing.</li>
+            <li><strong>Legal basis</strong>: legitimate interest in answering the requests received.</li>
+            <li><strong>Where</strong>: in the site's database, on the publisher's personal server in France. A copy is sent to me by e-mail through Proton Mail (Proton AG, Switzerland, a country recognised by the European Commission as providing adequate protection).</li>
+            <li><strong>How long</strong>: 12 months after the message is received, then deleted.</li>
+        </ul>
+
+        <h2>Technical records</h2>
+        <ul>
+            <li><strong>Site log</strong>: the date and IP address of each contact form submission and each login attempt to the administration area, to detect abuse. Kept for 12 months.</li>
+            <li><strong>Errors</strong>: when a page crashes, technical information (requested page, browser, error details) is sent to an error tracking tool installed on the same server, without IP address or cookies.</li>
+            <li><strong>Backups</strong>: the database is backed up every night, on the server and in encrypted storage (Proton Drive). Each backup is deleted after 14 days.</li>
+        </ul>
+
+        <h2>Cookies</h2>
+        <p>
+            No tracking or audience measurement cookies. The site only sets technical cookies, which are essential and need no consent:
+            a security token (<code>csrf-token</code>) protecting the contact form, and a session cookie for the site's administration area.
+        </p>
+
+        <h2>Your rights</h2>
+        <p>
+            You can ask to access, correct or delete your data, object to its processing or restrict its use,
+            by writing to <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>. You will get an answer within one month at most.
+        </p>
+        <p>
+            If you believe your rights are not respected, you can lodge a complaint with the CNIL, the French data protection authority
+            (<a href="https://www.cnil.fr/en/complaints">www.cnil.fr</a>).
+        </p>
+    </article>
+</section>
+{% endblock %}

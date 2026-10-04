@@ -122,3 +122,9 @@
 "Autres projets": "Other projects"
 "Projet précédent": "Previous project"
 "Projet suivant": "Next project"
+
+# Pied de page, mentions légales et confidentialité (pages : templates/legal/*.en.html.twig)
+"Mentions légales": "Legal notice"
+"Confidentialité": "Privacy"
+"Vos nom, e-mail et message servent uniquement à vous répondre, et sont supprimés après 12 mois.": "Your name, e-mail and message are only used to reply to you, and are deleted after 12 months."
+"En savoir plus": "Learn more"

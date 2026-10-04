@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Politique de confidentialité - Nicolas Cataluna{% endblock %}
+
+{% block description %}Données collectées par nicolascataluna.fr, pourquoi, combien de temps, et comment exercer vos droits.{% endblock %}
+
+{% block body %}
+<section class="legal-section">
+    <article class="legal-container">
+        <h1>Politique de confidentialité</h1>
+        <p class="legal-maj">Dernière mise à jour : 4 octobre 2026</p>
+
+        <p>
+            Ce site est un portfolio personnel. Il ne contient ni publicité, ni outil de mesure d’audience, ni contenu chargé depuis un service tiers :
+            les polices, scripts et images sont servis par le site lui-même.
+        </p>
+
+        <h2>Responsable du traitement</h2>
+        <p>Nicolas Cataluna — <a href="mailto:{{ contact_email }}">{{ contact_email }}</a></p>
+
+        <h2>Formulaire de contact</h2>
+        <ul>
+            <li><strong>Données</strong> : votre nom, votre adresse e-mail, votre message et la langue de la page.</li>
+            <li><strong>Pourquoi</strong> : uniquement pour vous répondre. Rien n’est revendu, partagé ni utilisé pour de la prospection.</li>
+            <li><strong>Base légale</strong> : l’intérêt légitime à répondre aux demandes reçues.</li>
+            <li><strong>Où</strong> : dans la base de données du site, sur le serveur personnel de l’éditeur, en France. Une copie m’est transmise par e-mail via Proton Mail (Proton AG, Suisse, pays reconnu par la Commission européenne comme offrant une protection adéquate).</li>
+            <li><strong>Combien de temps</strong> : 12 mois après la réception du message, puis suppression.</li>
+        </ul>
+
+        <h2>Traces techniques</h2>
+        <ul>
+            <li><strong>Journal du site</strong> : la date et l’adresse IP de chaque envoi du formulaire et de chaque tentative de connexion à l’administration, pour détecter les abus. Conservé 12 mois.</li>
+            <li><strong>Erreurs</strong> : quand une page plante, des informations techniques (page demandée, navigateur, détail de l’erreur) sont envoyées à un outil de suivi des erreurs installé sur le même serveur, sans adresse IP ni cookie.</li>
+            <li><strong>Sauvegardes</strong> : la base de données est sauvegardée chaque nuit, sur le serveur et dans un espace de stockage chiffré (Proton Drive). Chaque sauvegarde est supprimée au bout de 14 jours.</li>
+        </ul>
+
+        <h2>Cookies</h2>
+        <p>
+            Aucun cookie de suivi ou de mesure d’audience. Le site dépose seulement des cookies techniques, indispensables et sans consentement requis :
+            un jeton de sécurité (<code>csrf-token</code>) qui protège le formulaire de contact, et un cookie de session pour l’administration du site.
+        </p>
+
+        <h2>Vos droits</h2>
+        <p>
+            Vous pouvez demander à accéder à vos données, les corriger, les supprimer, vous opposer à leur traitement ou en limiter l’usage,
+            en écrivant à <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>. Réponse sous un mois au plus.
+        </p>
+        <p>
+            Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL
+            (<a href="https://www.cnil.fr/fr/plaintes">www.cnil.fr</a>).
+        </p>
+    </article>
+</section>
+{% endblock %}

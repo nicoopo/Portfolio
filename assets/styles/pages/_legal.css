@@ -1,0 +1,54 @@
+/* Mentions légales et confidentialité (legal/*.html.twig) */
+
+.legal-section {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.legal-container {
+  max-width: 800px;
+  padding: 40px 60px;
+  line-height: 1.7;
+  background: rgba(20, 20, 40, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+}
+
+.legal-container h1 {
+  color: var(--color-primary);
+  font-size: 2.2rem;
+}
+
+.legal-container h2 {
+  margin-top: 2rem;
+  font-size: 1.3rem;
+  color: var(--color-secondary);
+}
+
+.legal-container a {
+  color: var(--color-secondary);
+}
+
+.legal-maj {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  opacity: 0.8;
+}
+
+@media (max-width: 576px) {
+  .legal-section {
+    padding: 20px 12px 40px;
+  }
+
+  .legal-container {
+    padding: 30px 20px;
+  }
+
+  .legal-container h1 {
+    font-size: 1.7rem;
+  }
+}
