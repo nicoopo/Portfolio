@@ -10,4 +10,4 @@ import './scripts/navbar.js';
 import './scripts/page_transition.js';
 
 // 4. Stimulus : comportements attachés à un élément via data-controller (assets/controllers/)
-import './bootstrap.js';
+import './stimulus_bootstrap.js';
