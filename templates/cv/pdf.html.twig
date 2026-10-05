@@ -118,9 +118,19 @@
         .section {
             background: var(--bg-card);
             border-radius: 6px;
-            padding: 3mm;
-            margin-bottom: 3mm;
+            padding: 2.5mm 3mm;
+            margin-bottom: 2mm;
             border: 1px solid var(--border-color);
+        }
+
+        /* Les compétences ouvrent la page 2 : sinon leur titre reste seul en bas de la page 1 */
+        .section-competences {
+            page-break-before: always;
+        }
+
+        /* Une section peut continuer sur la page suivante (sinon un bloc entier part à la page d'après
+           et laisse un grand vide) ; ses éléments, eux, ne sont jamais coupés */
+        .skill-category, .language-item {
             page-break-inside: avoid;
         }
 
@@ -133,8 +143,8 @@
         }
 
         .experience-item, .formation-item {
-            margin-bottom: 2mm;
-            padding: 2mm;
+            margin-bottom: 1.5mm;
+            padding: 1.5mm 2mm;
             background: var(--bg-card-hover);
             border-radius: 4px;
             border-left: 3px solid var(--accent-primary);
@@ -189,7 +199,6 @@
             position: relative;
             line-height: 1.3;
             color: var(--text-primary);
-            font-size: 7pt;
         }
 
         .experience-description li::before {
@@ -265,13 +274,19 @@
             font-weight: 600;
         }
 
-        .languages-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 2mm;
+        /* Dompdf ne gère pas display: grid (tout s'empilait) : colonnes en inline-block */
+        .languages-grid,
+        .interests-grid {
+            font-size: 0; /* pas d'espace entre les blocs inline-block */
         }
 
         .language-item {
+            display: inline-block;
+            width: 21%; /* Dompdf ignore box-sizing : padding et bordure s'ajoutent, d'où la marge de sécurité */
+            margin-right: 2%;
+            vertical-align: top;
+            box-sizing: border-box;
+            font-size: 7pt;
             background: var(--bg-card-hover);
             padding: 2mm;
             border-radius: 4px;
@@ -291,13 +306,17 @@
             font-size: 7pt;
         }
 
-        .interests-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1mm;
+        .language-item:last-child {
+            margin-right: 0;
         }
 
         .interest-item {
+            display: inline-block;
+            width: 45%; /* idem : padding et bordure en plus */
+            margin: 0 2% 1mm 0;
+            vertical-align: top;
+            box-sizing: border-box;
+            font-size: 7pt;
             background: var(--bg-card-hover);
             padding: 1mm 2mm;
             border-radius: 4px;
