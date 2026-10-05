@@ -12,6 +12,7 @@ env:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10 # un job bloqué (téléchargement qui ne répond plus) s'arrête au lieu de tourner 6 h
     steps:
       - uses: actions/checkout@v7
 
@@ -47,6 +48,7 @@ jobs:
 
   tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 15 # un job bloqué (téléchargement qui ne répond plus) s'arrête au lieu de tourner 6 h
     services:
       database:
         image: postgres:16-alpine
@@ -91,6 +93,7 @@ jobs:
   # Audit axe-core de chaque page publique (FR + EN) sur le site démarré en mode prod : échoue en cas de violation
   accessibilite:
     runs-on: ubuntu-latest
+    timeout-minutes: 20 # un job bloqué (téléchargement qui ne répond plus) s'arrête au lieu de tourner 6 h
     services:
       database:
         image: postgres:16-alpine
