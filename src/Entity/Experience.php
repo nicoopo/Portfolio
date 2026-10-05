@@ -52,6 +52,12 @@ class Experience
     #[ORM\Column]
     private int $position = 0;
 
+    /** Site de l'entreprise ou du produit auquel j'ai contribué (facultatif, lien sur le CV) */
+    #[Assert\Url(requireTld: true)]
+    #[Assert\Length(max: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $site = null;
+
     // Traductions anglaises (facultatives : vides, le français s'affiche ; voir App\Twig\Traduction)
     #[Assert\Length(max: 100)]
     #[ORM\Column(length: 100, nullable: true)]
@@ -83,6 +89,8 @@ class Experience
     public function setMissions(?string $missions): static { $this->missions = $missions ?? ''; return $this; }
     public function getPosition(): int { return $this->position; }
     public function setPosition(?int $position): static { $this->position = $position ?? 0; return $this; }
+    public function getSite(): ?string { return $this->site; }
+    public function setSite(?string $site): static { $this->site = $site ?: null; return $this; }
 
     public function getPosteEn(): ?string { return $this->posteEn; }
     public function setPosteEn(?string $posteEn): static { $this->posteEn = $posteEn ?: null; return $this; }

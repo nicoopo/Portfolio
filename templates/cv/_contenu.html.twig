@@ -66,6 +66,9 @@
             <div>
                 <div class="experience-title">{{ experience|loc('poste') }}</div>
                 <div class="experience-company">{{ experience.entreprise }} | {{ experience.lieu }}</div>
+                {% if experience.site %}
+                <a class="experience-site" href="{{ experience.site }}" target="_blank" rel="noopener">{{ 'Site auquel j’ai contribué :'|trans }} {{ experience.site|replace({'https://': '', 'http://': '', 'www.': ''})|trim('/') }}</a>
+                {% endif %}
             </div>
             <div class="experience-period">{{ experience|loc('periode') }} | {{ experience|loc('contrat') }}</div>
         </div>
