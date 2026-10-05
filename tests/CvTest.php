@@ -57,4 +57,16 @@ final class CvTest extends WebTestCase
         self::assertSame('Musique', $filtre->retirer('🎵 Musique'));
         self::assertSame('Café — été', $filtre->retirer('Café — été')); // accents et tirets intacts
     }
+
+    /** Lien « site auquel j'ai contribué » sous l'expérience HabitatPresto, en français et en anglais */
+    public function testLeSiteDUneExperienceEstEnLien(): void
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/CV');
+        self::assertSelectorTextContains('a.experience-site[href="https://www.habitatpresto.com/"]', 'Site auquel j’ai contribué : habitatpresto.com');
+
+        $client->request('GET', '/en/CV');
+        self::assertSelectorTextContains('a.experience-site[href="https://www.habitatpresto.com/"]', 'Website I contributed to: habitatpresto.com');
+    }
 }
