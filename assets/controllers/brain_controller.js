@@ -21,7 +21,9 @@ const FOCUS_DISTANCE = { neuron: 1.8, nebula: 5, souvenir: 1.8 }; // distance ca
 // Plongée : en dessous de outside la caméra commence à entrer, en dessous de inside elle est dedans
 const DIVE = { outside: 1.3, inside: 0.75, cameraDistance: 0.45, souvenirDistance: 0.7 };
 const TOUR_STOPS = 6;       // neurones visités : ceux qui ont le plus de projets
-const TOUR_PAUSE_MS = 6000; // temps passé sur chaque neurone
+const TOUR_PAUSE_MS = 9000; // temps passé sur chaque neurone (vol compris)
+const TOUR_FLIGHT_S = 3.5;  // durée du vol d'un neurone à l'autre
+const TOUR_LIFT = 0.6;      // la caméra prend du recul à mi-vol (part de la distance parcourue)
 const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
 
 /**
@@ -262,7 +264,16 @@ export default class extends Controller {
         this.souvenirs.update(time);
 
         // Vol de caméra vers l'élément sélectionné (ou retour à la vue d'ensemble)
-        if (this.flight) {
+        if (this.flight?.duration && !this.reducedMotion) {
+            // Vol de la visite : durée fixe, départ et arrivée en douceur, en arc par l'extérieur du cerveau
+            const f = this.flight;
+            f.t = Math.min(f.t + delta / f.duration, 1);
+            const e = f.t < 0.5 ? 4 * f.t ** 3 : 1 - (-2 * f.t + 2) ** 3 / 2; // easeInOutCubic
+            this.controls.target.lerpVectors(f.from.target, f.target, e);
+            this.camera.position.lerpVectors(f.from.camera, f.camera, e);
+            this.camera.position.setLength(this.camera.position.length() + f.lift * Math.sin(Math.PI * e));
+            if (f.t === 1) this.flight = null;
+        } else if (this.flight) {
             // Rapprochement selon le temps écoulé, pas par image : même durée à 30 ou 144 images/s
             const k = this.reducedMotion ? 1 : 1 - Math.exp(-FLIGHT_SPEED * delta);
             this.controls.target.lerp(this.flight.target, k);
@@ -351,7 +362,9 @@ export default class extends Controller {
                 this.close();
                 return;
             }
-            this.select(stops[i]);
+            this.select(stops[i], TOUR_FLIGHT_S);
+            // Pendant la pause, la caméra tourne lentement autour du neurone
+            this.controls.autoRotate = !this.reducedMotion;
             this.tourTimeout = setTimeout(() => next(i + 1), TOUR_PAUSE_MS);
         };
         next(0);
@@ -362,6 +375,7 @@ export default class extends Controller {
         if (!this.tourTimeout) return;
         clearTimeout(this.tourTimeout);
         this.tourTimeout = null;
+        this.controls.autoRotate = !this.selected && !this.reducedMotion;
         this.tourButtonTarget.textContent = this.textsValue.tour;
         this.tourButtonTarget.setAttribute('aria-pressed', 'false');
     }
@@ -420,7 +434,8 @@ export default class extends Controller {
         if (petitEcran()) this.legendMenuTarget.open = false;
     }
 
-    select(target) {
+    /** duration (secondes) : vol lent et en arc (visite guidée) ; sans : vol direct */
+    select(target, duration = 0) {
         this.selected = target;
         this.ambiance?.ping(target.userData.kind);
         this.controls.autoRotate = false;
@@ -430,18 +445,36 @@ export default class extends Controller {
         // un souvenir visé de l'intérieur se regarde depuis le centre (on reste dedans)
         const position = target.userData.anchor.getWorldPosition(new THREE.Vector3());
         const fromInside = this.inside && target.userData.kind === 'souvenir';
+        // Visite : on regarde chaque neurone depuis l'extérieur du cerveau (centre → neurone)
         const direction = fromInside
             ? position.clone().negate().normalize()
-            : this.camera.position.clone().sub(this.controls.target).normalize();
+            : duration
+                ? position.clone().normalize()
+                : this.camera.position.clone().sub(this.controls.target).normalize();
         this.flight = {
             target: position,
             camera: position.clone().addScaledVector(direction, fromInside ? DIVE.souvenirDistance : FOCUS_DISTANCE[target.userData.kind]),
         };
+        if (duration) {
+            Object.assign(this.flight, {
+                duration,
+                t: 0,
+                from: { target: this.controls.target.clone(), camera: this.camera.position.clone() },
+                lift: TOUR_LIFT * this.camera.position.distanceTo(this.flight.camera),
+            });
+        }
 
         if (target.userData.kind === 'neuron') this.fillNeuronPanel(target);
         else if (target.userData.kind === 'souvenir') this.fillSouvenirPanel(target.userData.data);
         else this.fillNebulaPanel(target.userData.data);
         this.panelTarget.hidden = false;
+        // Le nouveau contenu apparaît en fondu plutôt que de remplacer l'ancien d'un coup
+        if (!this.reducedMotion) {
+            this.panelTarget.animate(
+                [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }],
+                { duration: duration ? 900 : 350, easing: 'ease-out' },
+            );
+        }
         history.replaceState(null, '', `#${encodeURIComponent(target.userData.data.nom)}`);
     }
 
