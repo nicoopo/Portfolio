@@ -34,3 +34,6 @@
 
 # Export de debug du conteneur de services (debug:container --format=json), jamais à versionner
 /container.json
+
+# Captures et logs des tests navigateur (Playwright MCP)
+/.playwright-mcp/
