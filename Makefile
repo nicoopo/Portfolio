@@ -16,7 +16,7 @@ help: ## Affiche cette aide
 
 # --- DEV ---
 up: ## Démarre les conteneurs (dev) → http://localhost:8082
-	$(DC) up -d
+	$(DC) up -d --build
 	$(PHP) composer install
 	$(PHP) php bin/console importmap:install
 	$(CONSOLE) doctrine:migrations:migrate --no-interaction
