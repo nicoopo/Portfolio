@@ -91,9 +91,13 @@ export default class extends Controller {
         this.clickables = [...this.neurons, ...this.nebulae.targets, ...this.souvenirs.targets];
 
         this.scene.add(this.brain, this.synapses.object, this.nebulae.object, this.souvenirs.object, ...this.neurons.map((h) => h.userData.anchor));
-        // Neurones, synapses et souvenirs toujours dessinés après le corps sombre du cerveau
+        // Neurones, synapses et souvenirs toujours dessinés après le corps du cerveau, sans test
+        // de profondeur : ils sont dedans, l'écran qui cache ce qui passe derrière ne doit pas les masquer
         for (const object of [this.synapses.object, this.souvenirs.object, ...this.neurons.map((h) => h.userData.anchor)]) {
-            object.traverse((child) => { child.renderOrder = 1; });
+            object.traverse((child) => {
+                child.renderOrder = 1;
+                if (child.material) child.material.depthTest = false;
+            });
         }
 
         this.raycaster = new THREE.Raycaster();
