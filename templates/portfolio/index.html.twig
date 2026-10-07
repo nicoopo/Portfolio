@@ -9,6 +9,17 @@
   <h1 class="text-center gradient fw-bold display-5">{{ 'Mes Projets'|trans }}</h1>
   <p class="projets-intro">{{ 'Clique sur un projet pour le découvrir en détail.'|trans }}</p>
 
+  {# Les projets en orbite autour d'un trou noir. Décor : les mêmes liens sont dans la liste en dessous #}
+  <div class="projets-orbite" data-controller="orbite" aria-hidden="true">
+    <canvas data-orbite-target="canvas"></canvas>
+    {% for projets in categories %}{% for projet in projets %}
+    <a class="orbite-projet" href="{{ path('app_project', {slug: projet.slug}) }}" tabindex="-1" data-orbite-target="projet">
+      {% if projet.imageChemin %}<img src="{{ asset(projet.imageChemin) }}" alt="" loading="lazy">{% endif %}
+      <span>{{ projet|loc('titre') }}</span>
+    </a>
+    {% endfor %}{% endfor %}
+  </div>
+
   {% for categorie, projets in categories %}
   <section class="projets-groupe" aria-labelledby="groupe-{{ loop.index }}">
     <h2 class="projets-groupe-titre" id="groupe-{{ loop.index }}">
