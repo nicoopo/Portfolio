@@ -9,7 +9,14 @@
 {% block body %}
 <section class="erreur-section">
     <div class="erreur-container">
+        {% if introuvable %}
+        {# Le « 0 » est un trou noir qui aspire les morceaux de la page #}
+        <div class="erreur-code" aria-hidden="true">
+            <span class="gradient">4</span><span class="erreur-trou" data-controller="trou-noir"><canvas data-trou-noir-target="canvas"></canvas></span><span class="gradient">4</span>
+        </div>
+        {% else %}
         <span class="erreur-code gradient" aria-hidden="true">{{ status_code }}</span>
+        {% endif %}
         <h1>{{ (introuvable ? 'Page introuvable' : 'Une erreur est survenue')|trans }}</h1>
         <p>
             {% if introuvable %}

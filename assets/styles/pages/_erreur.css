@@ -39,3 +39,33 @@
   gap: 1rem;
   margin-top: 2rem;
 }
+
+/* 404 : « 4 [trou noir] 4 » */
+.erreur-code span.gradient {
+  font-size: inherit;
+}
+
+.erreur-trou {
+  position: relative;
+  display: inline-block;
+  width: 0.8em;
+  height: 1em;
+  vertical-align: top;
+}
+
+/* Le canvas déborde largement : les débris arrivent de loin */
+.erreur-trou canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  width: min(520px, 100vw);
+  height: min(520px, 100vw);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.erreur-container {
+  position: relative;
+  isolation: isolate; /* le canvas (z-index -1) reste derrière le texte, devant le fond */
+}
