@@ -1,15 +1,13 @@
 import * as THREE from 'three';
 
-/** Point lumineux rond et flou, dessiné une fois dans un canvas. */
-export function dotTexture() {
+/** Point lumineux rond et flou, dessiné une fois dans un canvas ; stops = [position, opacité]. */
+export function dotTexture(stops = [[0, 1], [0.3, 0.6], [1, 0]]) {
     const size = 64;
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = size;
     const ctx = canvas.getContext('2d');
     const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-    g.addColorStop(0, 'rgba(255,255,255,1)');
-    g.addColorStop(0.3, 'rgba(255,255,255,0.6)');
-    g.addColorStop(1, 'rgba(255,255,255,0)');
+    for (const [at, alpha] of stops) g.addColorStop(at, `rgba(255,255,255,${alpha})`);
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, size, size);
     return new THREE.CanvasTexture(canvas);
