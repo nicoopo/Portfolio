@@ -10,6 +10,7 @@ import { reducedMotion } from './black_hole.js';
 import { preferences } from './preferences.js';
 import { isEmptySpace } from './stars.js';
 import { decouvrir } from './decouvertes.js';
+import { sons } from './sons.js';
 
 const RAYON_CLIC = 20;       // tolérance autour d'une étoile (doigt compris)
 const TRACE_S = 0.35;        // durée du tracé d'un trait
@@ -90,7 +91,7 @@ function creer({ nom, largeur, hauteur, etoiles, parcours }, trouvee) {
         if (touchee !== parcours[reliees]) { recommencer(); if (touchee !== parcours[0]) return; }
         reliees++;
         traceDepuis = temps;
-        if (reliees === parcours.length) gagner();
+        if (reliees === parcours.length) { gagner(); sons.constellation(); } else sons.etoile(reliees - 1);
     };
 
     let avant = performance.now();
