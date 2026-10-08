@@ -78,6 +78,24 @@
                             <label><input type="radio" name="curseur" value="{{ valeur }}"> {{ label|trans }}</label>
                         {% endfor %}
                     </fieldset>
+                    {# Carnet des easter eggs (decouvertes.js) : un indice tant qu'ils ne sont pas trouvés #}
+                    <div class="decouvertes">
+                        <p class="decouvertes-titre">{{ 'Découvertes'|trans }} <span id="decouvertesCompte"></span></p>
+                        <ul>
+                            {% for id, decouverte in {
+                                'trou-noir': {nom: 'Le trou noir de poche', indice: 'Reste appuyé dans le vide…'},
+                                'konami': {nom: 'La pluie de météores', indice: 'Un vieux code de jeu vidéo, au clavier…'},
+                                'constellation-n': {nom: 'La constellation N', indice: 'Une initiale cachée dans le ciel…'},
+                                'constellation-lion': {nom: 'La constellation du Lion', indice: 'Un signe du zodiaque dans le ciel…'},
+                            } %}
+                                <li data-decouverte="{{ id }}">
+                                    <span class="decouverte-nom">{{ decouverte.nom|trans }}</span>
+                                    <span class="decouverte-indice">{{ decouverte.indice|trans }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <p id="decouvertesBravo" class="decouvertes-bravo" hidden>✦ {{ 'Explorateur de l’univers : tout est trouvé !'|trans }} ✦</p>
+                    </div>
                 </div>
 
                 <button type="button" class="menu-button" popovertarget="menu" aria-label="{{ 'Menu'|trans }}">
@@ -108,9 +126,10 @@
         </div>
     </nav>
 
-    {# Easter egg de constellation.js #}
-    <p id="constellationTrouvee" class="constellation-trouvee" role="status" hidden>
-        ✦ <span data-constellation="n">{{ 'Constellation cachée découverte !'|trans }}</span><span data-constellation="lion">{{ 'Constellation du Lion découverte !'|trans }}</span> ✦
+    {# Nouvelle découverte d'un easter egg (decouvertes.js) #}
+    <p id="decouverte" class="decouverte-toast" role="status" hidden>
+        ✦ {{ 'Nouvelle découverte'|trans }} : <strong data-nom></strong> (<span data-compte></span>)
+        <span data-bravo hidden>— {{ 'tout est trouvé, bravo !'|trans }}</span> ✦
     </p>
 
     {# Proposé par qualite_auto.js quand le site rame #}

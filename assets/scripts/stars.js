@@ -1,5 +1,6 @@
 import { createBlackHole } from './black_hole.js';
 import { basseQualite, preferences } from './preferences.js';
+import { decouvrir } from './decouvertes.js';
 
 /** « Le vide » pour les easter eggs : pas un lien, un champ, une image, le cerveau 3D… ni du texte */
 export const isEmptySpace = (el) => !el.closest('a, button, input, textarea, select, label, summary, img, video, canvas, iframe, svg, nav, [contenteditable]')
@@ -107,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const open = () => {
         hole.target = 1;
         document.body.classList.add('trou-noir-ouvert');
+        decouvrir('trou-noir');
         if (hole.canvas) return;
         hole.canvas = Object.assign(document.createElement('canvas'), { className: 'trou-noir-curseur' });
         hole.canvas.setAttribute('aria-hidden', 'true');

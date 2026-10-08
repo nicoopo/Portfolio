@@ -123,7 +123,8 @@ h2.gradient {
   height: 120px;
 }
 
-.constellation-trouvee {
+/* Nouvelle découverte d'un easter egg (scripts/decouvertes.js) */
+.decouverte-toast {
   position: fixed;
   left: 50%;
   bottom: 2rem;
@@ -133,25 +134,27 @@ h2.gradient {
   color: #fff;
   font-weight: 600;
   letter-spacing: 0.05em;
-  white-space: nowrap;
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  text-align: center;
   background: rgba(15, 15, 30, 0.9);
   border: 1px solid rgba(127, 90, 240, 0.6);
   border-radius: 999px;
   box-shadow: 0 0 25px rgba(127, 90, 240, 0.5);
   transform: translateX(-50%);
-  animation: constellation-trouvee 0.5s ease-out;
+  animation: decouverte-toast 0.5s ease-out;
 }
 
-.constellation-trouvee[hidden] {
+.decouverte-toast[hidden] {
   display: none;
 }
 
-@keyframes constellation-trouvee {
+@keyframes decouverte-toast {
   from { opacity: 0; transform: translate(-50%, 20px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .constellation-trouvee {
+  .decouverte-toast {
     animation: none;
   }
 }

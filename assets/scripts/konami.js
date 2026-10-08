@@ -5,6 +5,7 @@
  */
 import { fitCanvas, reducedMotion } from './black_hole.js';
 import { basseQualite, preferences } from './preferences.js';
+import { decouvrir } from './decouvertes.js';
 
 const CODE = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'].join();
 const DUREE_S = 5;            // temps pendant lequel de nouveaux météores apparaissent
@@ -22,8 +23,17 @@ document.addEventListener('keydown', (e) => {
     if (tapees.length > 10) tapees.shift();
     if (tapees.join() !== CODE) return;
     tapees.length = 0;
-    if (!enCours && preferences.transitions && !reducedMotion()) pluie();
+    if (!lancable()) return;
+    pluie();
+    decouvrir('konami');
 });
+
+// Récompense du carnet de découvertes : tout est trouvé
+document.addEventListener('decouvertes:toutes', () => { if (lancable()) pluie(); });
+
+function lancable() {
+    return !enCours && preferences.transitions && !reducedMotion();
+}
 
 function pluie() {
     enCours = true;

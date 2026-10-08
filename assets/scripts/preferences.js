@@ -5,10 +5,11 @@
  *   sans choix du visiteur, basse d'office si le navigateur n'a pas d'accélération graphique
  * - curseur : 'comete', 'orbite', 'trou-noir' ou 'systeme' (curseur.js)
  * - son : ambiance sonore du cerveau (brain_controller.js)
+ * - decouvertes : easter eggs déjà trouvés (decouvertes.js)
  * - qualiteAuto : proposer la qualité basse si le site rame (qualite_auto.js), jusqu'à ce que le visiteur choisisse
  */
 const KEY = 'preferences';
-const DEFAULTS = { transitions: true, qualite: 'haute', curseur: 'comete', son: false, qualiteAuto: true };
+const DEFAULTS = { transitions: true, qualite: 'haute', curseur: 'comete', son: false, qualiteAuto: true, decouvertes: [] };
 
 const read = () => { try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY)) }; } catch { return { ...DEFAULTS }; } };
 
