@@ -15,6 +15,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity('nom')]
 class Competence
 {
+    use Traduisible;
+
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
     private ?int $id = null;
 
@@ -27,11 +29,6 @@ class Competence
     #[Assert\PositiveOrZero]
     #[ORM\Column]
     private int $position;
-
-    // Traductions anglaises (facultatives : vides, le français s'affiche ; voir App\Twig\Traduction)
-    #[Assert\Length(max: 50)]
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $nomEn = null;
 
     /** Nullable en PHP seulement (formulaire laissé vide → message de validation), jamais en base */
     #[Assert\NotNull]
@@ -63,6 +60,4 @@ class Competence
 
     public function __toString(): string { return $this->nom; }
 
-    public function getNomEn(): ?string { return $this->nomEn; }
-    public function setNomEn(?string $nomEn): static { $this->nomEn = $nomEn ?: null; return $this; }
 }

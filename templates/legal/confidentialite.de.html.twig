@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Datenschutzerklärung - Nicolas Cataluna{% endblock %}
+
+{% block description %}Welche Daten nicolascataluna.fr erhebt, warum, wie lange, und wie Sie Ihre Rechte ausüben.{% endblock %}
+
+{% block body %}
+<section class="legal-section">
+    <article class="legal-container">
+        <h1>Datenschutzerklärung</h1>
+        <p class="legal-maj">Stand: 4. Oktober 2026 · Übersetzung: Bei Abweichungen gilt die <a href="{{ path('app_confidentialite', {_locale: 'fr'}) }}" hreflang="fr">französische Fassung</a>.</p>
+
+        <p>
+            Diese Website ist ein persönliches Portfolio. Sie enthält keine Werbung, keine Reichweitenmessung und keine Inhalte von Drittanbietern:
+            Schriften, Skripte und Bilder werden von der Website selbst ausgeliefert.
+        </p>
+
+        <h2>Verantwortlicher</h2>
+        <p>Nicolas Cataluna — <a href="mailto:{{ contact_email }}">{{ contact_email }}</a></p>
+
+        <h2>Kontaktformular</h2>
+        <ul>
+            <li><strong>Daten</strong>: Ihr Name, Ihre E-Mail-Adresse, Ihre Nachricht und die Sprache der Seite.</li>
+            <li><strong>Zweck</strong>: ausschließlich, um Ihnen zu antworten. Nichts wird verkauft, weitergegeben oder für Werbung genutzt.</li>
+            <li><strong>Rechtsgrundlage</strong>: berechtigtes Interesse an der Beantwortung eingehender Anfragen.</li>
+            <li><strong>Speicherort</strong>: in der Datenbank der Website, auf dem privaten Server des Herausgebers in Frankreich. Eine Kopie erhalte ich per E-Mail über Proton Mail (Proton AG, Schweiz, ein Land, dem die Europäische Kommission ein angemessenes Schutzniveau bescheinigt).</li>
+            <li><strong>Speicherdauer</strong>: 12 Monate nach Eingang der Nachricht, danach wird sie gelöscht.</li>
+        </ul>
+
+        <h2>Technische Aufzeichnungen</h2>
+        <ul>
+            <li><strong>Protokoll der Website</strong>: Datum und IP-Adresse jeder Übermittlung des Kontaktformulars und jedes Anmeldeversuchs im Verwaltungsbereich, um Missbrauch zu erkennen. Aufbewahrung: 12 Monate.</li>
+            <li><strong>Fehler</strong>: Stürzt eine Seite ab, werden technische Informationen (aufgerufene Seite, Browser, Fehlerdetails) an ein Fehlerverfolgungstool auf demselben Server gesendet, ohne IP-Adresse und ohne Cookies.</li>
+            <li><strong>Sicherungen</strong>: Die Datenbank wird jede Nacht gesichert, auf dem Server und in einem verschlüsselten Speicher (Proton Drive). Jede Sicherung wird nach 14 Tagen gelöscht.</li>
+        </ul>
+
+        <h2>Cookies</h2>
+        <p>
+            Keine Cookies zur Nachverfolgung oder Reichweitenmessung. Die Website setzt nur technisch notwendige Cookies, die keine Einwilligung erfordern:
+            ein Sicherheitstoken (<code>csrf-token</code>), das das Kontaktformular schützt, und ein Sitzungscookie für den Verwaltungsbereich der Website.
+        </p>
+
+        <h2>Ihre Rechte</h2>
+        <p>
+            Sie können Auskunft über Ihre Daten, deren Berichtigung oder Löschung verlangen, der Verarbeitung widersprechen oder sie einschränken lassen,
+            indem Sie an <a href="mailto:{{ contact_email }}">{{ contact_email }}</a> schreiben. Sie erhalten spätestens innerhalb eines Monats eine Antwort.
+        </p>
+        <p>
+            Wenn Sie der Meinung sind, dass Ihre Rechte nicht gewahrt werden, können Sie Beschwerde bei der CNIL, der französischen Datenschutzbehörde, einlegen
+            (<a href="https://www.cnil.fr/en/complaints">www.cnil.fr</a>).
+        </p>
+    </article>
+</section>
+{% endblock %}

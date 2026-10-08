@@ -22,7 +22,7 @@ final class SitemapController extends AbstractController
             $pages[] = ['app_project', ['slug' => $projet->getSlug()]];
         }
 
-        $response = $this->render('sitemap.xml.twig', ['pages' => $pages, 'langues' => ['fr', 'en']]);
+        $response = $this->render('sitemap.xml.twig', ['pages' => $pages]); // langues : global Twig langues_site
         $response->headers->set('Content-Type', 'application/xml; charset=UTF-8');
 
         return $response;
