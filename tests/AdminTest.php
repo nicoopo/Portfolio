@@ -153,16 +153,17 @@ final class AdminTest extends WebTestCase
         $client->submitForm('Sauvegarder les modifications', ['Projet[imageEnvoyee][file]' => $faux]);
         self::assertResponseStatusCodeSame(422);
 
-        // Un vrai PNG (1 × 1 pixel) est accepté, renommé d'après son contenu
-        file_put_contents($png = $temporaire.'/Ma Capture.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='));
+        // Un vrai PNG trop large est accepté, renommé d'après son contenu, réduit à 1000 px et converti en WebP
+        imagepng(imagecreatetruecolor(1500, 300), $png = $temporaire.'/Ma Capture.png');
         $client->request('GET', $url);
         $client->submitForm('Sauvegarder les modifications', ['Projet[imageEnvoyee][file]' => $png]);
         self::assertResponseRedirects();
 
         $projet = $entityManager->getRepository(Projet::class)->findOneBy(['slug' => 'pendu']);
         $entityManager->refresh($projet);
-        self::assertMatchesRegularExpression('/^ma-capture-[0-9a-f]{40}\.png$/', $projet->getImageEnvoyee());
-        self::assertFileExists($dossier.'/'.$projet->getImageEnvoyee());
+        self::assertMatchesRegularExpression('/^ma-capture-[0-9a-f]{40}\.webp$/', $projet->getImageEnvoyee());
+        $taille = getimagesize($dossier.'/'.$projet->getImageEnvoyee());
+        self::assertSame([1000, 200, 'image/webp'], [$taille[0], $taille[1], $taille['mime']]);
         $client->request('GET', '/projects/pendu');
         self::assertSelectorExists('.projet-image img[src="/uploads/projets/'.$projet->getImageEnvoyee().'"]');
 
