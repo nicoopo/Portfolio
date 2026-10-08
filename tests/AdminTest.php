@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use App\Entity\Competence;
+use App\Entity\Journal;
 use App\Entity\Projet;
 use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
@@ -61,6 +62,17 @@ final class AdminTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Tableau de bord');
         self::assertSelectorTextContains('.card', 'demande(s) de contact ce mois-ci');
+
+        // Graphiques : une connexion refusée aujourd'hui compte dans le dernier jour de l'activité
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $entityManager->persist(new Journal(Journal::CONNEXION_REFUSEE, 'Test du graphique', null, null));
+        $entityManager->flush();
+        $crawler = $client->request('GET', '/admin');
+        self::assertCount(2, $crawler->filter('canvas[data-graphique]'));
+        $activite = json_decode($crawler->filter('canvas[data-graphique]')->first()->attr('data-graphique'), true);
+        $refusees = array_column($activite['series'], 'data', 'label')['Connexions refusées'];
+        self::assertCount(30, $refusees);
+        self::assertGreaterThanOrEqual(1, end($refusees));
     }
 
     public function testLAdministrationEstFermeeAuxVisiteurs(): void

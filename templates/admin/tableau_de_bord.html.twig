@@ -2,6 +2,9 @@
 
 {% block content_title %}Tableau de bord{% endblock %}
 
+{# Chart.js chargé sur cette page seulement, jamais sur le site public #}
+{% block importmap %}{{ importmap('admin_graphiques', {nonce: csp_nonce('script')}) }}{% endblock %}
+
 {% block page_actions %}
     <a class="btn btn-secondary" href="{{ path('app_cerveau') }}" target="_blank"><i class="fa fa-arrow-up-right-from-square"></i> Voir le site</a>
     <a class="btn btn-secondary" href="{{ path('admin_projet_new') }}"><i class="fa fa-plus"></i> Ajouter un projet</a>
@@ -26,6 +29,39 @@
                     <small class="text-muted">{{ chiffre.detail }}</small>
                 </div>
             </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {# Graphiques (assets/admin_graphiques.js) ; les chiffres exacts dans un tableau, pour les lecteurs d'écran et les couleurs peu contrastées #}
+    <div class="row g-4 mb-4">
+        {% for graphique in [
+            {titre: 'Activité des 30 derniers jours', colonne: 'Jour', donnees: activite},
+            {titre: 'Demandes de contact sur 12 mois', colonne: 'Mois', donnees: contacts_par_mois},
+        ] %}
+        <div class="col-lg-6">
+            <h2 class="h5">{{ graphique.titre }}</h2>
+            <canvas data-graphique="{{ graphique.donnees|json_encode }}" role="img" aria-label="{{ graphique.titre }} (chiffres dans le tableau ci-dessous)"></canvas>
+            <details class="mt-2">
+                <summary class="text-muted">Voir les chiffres</summary>
+                <table class="table table-sm datagrid">
+                    <thead>
+                        <tr>
+                            <th scope="col">{{ graphique.colonne }}</th>
+                            {% for serie in graphique.donnees.series %}<th scope="col">{{ serie.label }}</th>{% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for label in graphique.donnees.labels %}
+                        {% set i = loop.index0 %}
+                        <tr>
+                            <th scope="row">{{ label }}</th>
+                            {% for serie in graphique.donnees.series %}<td>{{ serie.data[i] }}</td>{% endfor %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </details>
         </div>
         {% endfor %}
     </div>
