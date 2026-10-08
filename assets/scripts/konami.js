@@ -6,6 +6,7 @@
 import { fitCanvas, reducedMotion } from './black_hole.js';
 import { basseQualite, preferences } from './preferences.js';
 import { decouvrir } from './decouvertes.js';
+import { sons } from './sons.js';
 
 const CODE = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'].join();
 const DUREE_S = 5;            // temps pendant lequel de nouveaux météores apparaissent
@@ -71,6 +72,7 @@ function pluie() {
         }
         ondes.push({ x: m.x, y: m.y, rayon: 0, vie: 1, couleur: m.couleur });
         secousse();
+        sons.impact();
     };
 
     const image = (maintenant) => {
