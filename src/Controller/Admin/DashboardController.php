@@ -41,7 +41,57 @@ final class DashboardController extends AbstractDashboardController
             'nb_projets' => $this->projets->count([]),
             'dernieres_demandes' => $this->demandes->findBy([], ['recuLe' => 'DESC'], 5),
             'dernier_journal' => $this->journal->findBy([], ['date' => 'DESC'], 8),
+            'activite' => $this->activite(),
+            'contacts_par_mois' => $this->contactsParMois(),
         ]);
+    }
+
+    /** Types du journal regroupés en séries ; l'ordre fixe la couleur (assets/admin_graphiques.js) */
+    private const SERIES_JOURNAL = [
+        'Connexions' => [Journal::CONNEXION, Journal::DECONNEXION],
+        'Modifications' => [Journal::CREATION, Journal::MODIFICATION, Journal::SUPPRESSION],
+        'Contacts' => [Journal::CONTACT_ENVOYE, Journal::CONTACT_ECHEC],
+        'Spam bloqué' => [Journal::SPAM_BLOQUE],
+        'Connexions refusées' => [Journal::CONNEXION_REFUSEE],
+    ];
+
+    /** Graphique : entrées du journal par jour sur 30 jours, par série */
+    private function activite(): array
+    {
+        $jours = [];
+        for ($i = 29; $i >= 0; --$i) {
+            $jours[(new \DateTimeImmutable("-$i days"))->format('Y-m-d')] = 0;
+        }
+        $series = array_fill_keys(array_keys(self::SERIES_JOURNAL), $jours);
+        foreach ($this->journal->typesDepuis(new \DateTimeImmutable('-29 days midnight')) as $entree) {
+            foreach (self::SERIES_JOURNAL as $serie => $types) {
+                if (\in_array($entree['type'], $types, true)) {
+                    ++$series[$serie][$entree['date']->format('Y-m-d')];
+                }
+            }
+        }
+
+        return [
+            'labels' => array_map(static fn (string $jour) => (new \DateTimeImmutable($jour))->format('d/m'), array_keys($jours)),
+            'series' => array_map(static fn (string $serie, array $parJour) => ['label' => $serie, 'data' => array_values($parJour)], array_keys($series), $series),
+        ];
+    }
+
+    /** Graphique : demandes de contact par mois sur 12 mois */
+    private function contactsParMois(): array
+    {
+        $mois = [];
+        for ($i = 11; $i >= 0; --$i) {
+            $mois[(new \DateTimeImmutable("first day of -$i months"))->format('Y-m')] = 0;
+        }
+        foreach ($this->demandes->datesDepuis(new \DateTimeImmutable('first day of -11 months midnight')) as $date) {
+            ++$mois[$date->format('Y-m')];
+        }
+
+        return [
+            'labels' => array_map(static fn (string $m) => \IntlDateFormatter::formatObject(new \DateTimeImmutable($m.'-01'), 'MMM yy', 'fr'), array_keys($mois)),
+            'series' => [['label' => 'Demandes', 'data' => array_values($mois)]],
+        ];
     }
 
     public function configureDashboard(): Dashboard
