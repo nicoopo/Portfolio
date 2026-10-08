@@ -225,6 +225,8 @@ html:has(.menu-galactic:popover-open) {
   right: 1rem;
   margin: 0;
   width: min(300px, calc(100vw - 2rem));
+  max-height: calc(100vh - var(--navbar-height) - 20px);
+  overflow-y: auto;
   padding: 1rem;
   color: var(--color-text-light);
   background: rgba(15, 15, 30, 0.92);
@@ -427,4 +429,61 @@ html:has(.menu-galactic:popover-open) {
   .qualite-auto {
     animation: none;
   }
+}
+
+/* Carnet des easter eggs (decouvertes.js) */
+.decouvertes {
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(127, 90, 240, 0.25);
+}
+
+.decouvertes-titre {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 0.4rem;
+}
+
+#decouvertesCompte {
+  color: var(--color-secondary);
+  font-weight: 700;
+}
+
+.decouvertes ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.decouvertes li {
+  padding: 0.2rem 0;
+}
+
+.decouvertes li::before {
+  content: "✧ ";
+  opacity: 0.5;
+}
+
+.decouvertes li.trouvee::before {
+  content: "✦ ";
+  color: #ffd16a;
+  opacity: 1;
+}
+
+/* Pas encore trouvé : seulement l'indice */
+.decouvertes li:not(.trouvee) .decouverte-nom,
+.decouvertes li.trouvee .decouverte-indice {
+  display: none;
+}
+
+.decouverte-indice {
+  font-style: italic;
+  opacity: 0.6;
+}
+
+.decouvertes-bravo {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffd16a;
 }

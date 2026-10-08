@@ -9,6 +9,7 @@
 import { reducedMotion } from './black_hole.js';
 import { preferences } from './preferences.js';
 import { isEmptySpace } from './stars.js';
+import { decouvrir } from './decouvertes.js';
 
 const RAYON_CLIC = 20;       // tolérance autour d'une étoile (doigt compris)
 const TRACE_S = 0.35;        // durée du tracé d'un trait
@@ -40,14 +41,7 @@ const CONSTELLATIONS = [
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
-    const message = document.getElementById('constellationTrouvee');
-    const ciel = CONSTELLATIONS.map((def) => creer(def, (nom) => {
-        if (!message) return;
-        message.querySelectorAll('[data-constellation]').forEach((texte) => { texte.hidden = texte.dataset.constellation !== nom; });
-        message.hidden = false;
-        clearTimeout(message.timer);
-        message.timer = setTimeout(() => { message.hidden = true; }, VICTOIRE_S * 1000);
-    }));
+    const ciel = CONSTELLATIONS.map((def) => creer(def, (nom) => decouvrir(`constellation-${nom}`)));
 
     document.addEventListener('pointerdown', (e) => {
         if (!preferences.transitions || !isEmptySpace(e.target)) return;
