@@ -1,6 +1,10 @@
 import { createBlackHole } from './black_hole.js';
 import { basseQualite, preferences } from './preferences.js';
 
+/** « Le vide » pour les easter eggs : pas un lien, un champ, une image, le cerveau 3D… ni du texte */
+export const isEmptySpace = (el) => !el.closest('a, button, input, textarea, select, label, summary, img, video, canvas, iframe, svg, nav, [contenteditable]')
+    && ![...el.childNodes].some((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+
 document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.createElement('canvas');
     canvas.id = 'stars';
@@ -118,10 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
         hole.target = 0;
         document.body.classList.remove('trou-noir-maintenu', 'trou-noir-ouvert');
     };
-
-    // « Le vide » : pas un lien, un champ, une image, le cerveau 3D… ni du texte
-    const isEmptySpace = (el) => !el.closest('a, button, input, textarea, select, label, summary, img, video, canvas, iframe, svg, nav, [contenteditable]')
-        && ![...el.childNodes].some((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
 
     let start = null;
     document.addEventListener('pointerdown', (e) => {

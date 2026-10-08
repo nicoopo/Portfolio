@@ -10,6 +10,8 @@ import './scripts/navbar.js';
 import './scripts/page_transition.js';
 import './scripts/curseur.js';
 import './scripts/konami.js';
+import './scripts/constellation.js';
+import './scripts/qualite_auto.js';
 
 // 4. Stimulus : comportements attachés à un élément via data-controller (assets/controllers/)
 import './stimulus_bootstrap.js';

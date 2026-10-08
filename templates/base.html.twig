@@ -68,6 +68,10 @@
                         <span>{{ 'Haute qualité'|trans }}<small>{{ 'À couper si le site rame'|trans }}</small></span>
                         <input type="checkbox" role="switch" id="prefQualite">
                     </label>
+                    <label class="interrupteur">
+                        <span>{{ 'Son'|trans }}<small>{{ 'Ambiance sonore du cerveau 3D'|trans }}</small></span>
+                        <input type="checkbox" role="switch" id="prefSon">
+                    </label>
                     <fieldset class="choix-curseur">
                         <legend>{{ 'Curseur'|trans }}</legend>
                         {% for valeur, label in {comete: 'Comète', orbite: 'Orbite', 'trou-noir': 'Trou noir', systeme: 'Classique'} %}
@@ -103,6 +107,21 @@
             </nav>
         </div>
     </nav>
+
+    {# Easter egg de constellation.js #}
+    <p id="constellationTrouvee" class="constellation-trouvee" role="status" hidden>
+        ✦ <span data-constellation="n">{{ 'Constellation cachée découverte !'|trans }}</span><span data-constellation="lion">{{ 'Constellation du Lion découverte !'|trans }}</span> ✦
+    </p>
+
+    {# Proposé par qualite_auto.js quand le site rame #}
+    <div id="qualiteAuto" class="qualite-auto" role="status" hidden>
+        <p>{{ "Le site a l'air de ramer sur cet appareil. Passer en qualité basse ?"|trans }}</p>
+        <div class="qualite-auto-actions">
+            <button type="button" data-qualite="basse">{{ 'Passer en qualité basse'|trans }}</button>
+            <button type="button" data-qualite="garder">{{ 'Non merci'|trans }}</button>
+        </div>
+        <small>{{ 'Modifiable à tout moment dans les réglages ⚙'|trans }}</small>
+    </div>
 
     <main>
         {% block body %}
