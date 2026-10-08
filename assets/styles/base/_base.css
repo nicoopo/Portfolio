@@ -33,7 +33,7 @@ h2.gradient {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: 2px;
-  animation: glowText 3s ease-in-out infinite alternate;
+  text-shadow: 0 0 18px #9a66ff; /* lueur fixe : animer text-shadow redessine le titre à chaque image */
 }
 
 #stars {
