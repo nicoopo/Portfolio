@@ -11,7 +11,9 @@ final class SmokeTest extends WebTestCase
     {
         foreach (['/', '/projects', '/projects/portfolio', '/competences', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
             yield $url => [$url];
-            yield '/en'.$url => ['/en'.$url];
+            foreach (['en', 'es', 'de', 'it', 'pt'] as $langue) {
+                yield "/$langue$url" => ["/$langue$url"];
+            }
         }
     }
 
@@ -24,7 +26,27 @@ final class SmokeTest extends WebTestCase
         self::assertSelectorTextContains('h1', 'My Skills');
         self::assertAnySelectorTextContains('.skills-category h2', 'Networks / Infra'); // contenu de la base
         self::assertSame('http://localhost/competences', $crawler->filter('link[hreflang="fr"]')->attr('href'));
-        self::assertSame('http://localhost/competences', $crawler->filter('a.lang-switch')->attr('href'));
+        self::assertSame('http://localhost/competences', $crawler->filter('#langues a[hreflang="fr"]')->attr('href'));
+    }
+
+    /** Autres langues : interface traduite, contenu de la base traduit, menu et hreflang vers les six langues */
+    public function testLesAutresLanguesSontTraduites(): void
+    {
+        $client = static::createClient();
+
+        $crawler = $client->request('GET', '/es/competences');
+        self::assertSelectorExists('html[lang="es"]');
+        self::assertSelectorTextContains('h1', 'Mis competencias');
+        self::assertAnySelectorTextContains('.skills-category h2', 'Redes / Infra'); // contenu de la base
+        self::assertCount(6, $crawler->filter('#langues a'));
+        self::assertSame('true', $crawler->filter('#langues a[hreflang="es"]')->attr('aria-current'));
+        self::assertCount(7, $crawler->filter('link[rel="alternate"][hreflang]')); // six langues + x-default
+
+        $client->request('GET', '/de/projects/pendu');
+        self::assertSelectorTextContains('h1', 'Galgenmännchen');
+
+        $client->request('GET', '/pt/mentions-legales');
+        self::assertSelectorTextContains('h1', 'Informação legal');
     }
 
     #[DataProvider('pages')]
@@ -125,6 +147,11 @@ final class SmokeTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
         self::assertSelectorTextContains('h1', 'Page not found');
         self::assertSelectorExists('html[lang="en"] .erreur-liens a[href="/en/cerveau"]');
+
+        $client->request('GET', '/it/non-esiste');
+        self::assertResponseStatusCodeSame(404);
+        self::assertSelectorTextContains('h1', 'Pagina non trovata');
+        self::assertSelectorExists('html[lang="it"] .erreur-liens a[href="/it/cerveau"]');
     }
 
     /** La lettre de motivation suit la langue de la page (visionneuse et téléchargement) */
@@ -138,5 +165,9 @@ final class SmokeTest extends WebTestCase
         $en = $client->request('GET', '/en/univers');
         self::assertStringContainsString('cover-letter', $en->filter('a[download="Cover_Letter_Nicolas_Cataluna.pdf"]')->attr('href'));
         self::assertStringContainsString('cover-letter', $en->filter('button[data-pdf-title-param="My cover letter"]')->attr('data-pdf-url-param'));
+
+        // Pas de lettre dans les autres langues : la version anglaise
+        $es = $client->request('GET', '/es/univers');
+        self::assertStringContainsString('cover-letter', $es->filter('a[download="Cover_Letter_Nicolas_Cataluna.pdf"]')->attr('href'));
     }
 }

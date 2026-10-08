@@ -142,9 +142,19 @@ final class AdminTest extends WebTestCase
         $page = $client->request('GET', '/projects/pendu');
         self::assertCount(2, $page->filter('.projet-texte p'));
 
+        // Traduction : affichée dans sa langue ; vidée, la page retombe sur le français
+        $client->request('GET', $url);
+        $client->submitForm('Sauvegarder les modifications', ['Projet[traductions][it][titre]' => 'Impiccato modificato']);
+        $client->request('GET', '/it/projects/pendu');
+        self::assertSelectorTextContains('h1', 'Impiccato modificato');
+        $client->request('GET', $url);
+        $client->submitForm('Sauvegarder les modifications', ['Projet[traductions][it][titre]' => '']);
+        $client->request('GET', '/it/projects/pendu');
+        self::assertSelectorTextContains('h1', 'Jeu du pendu');
+
         // Remis en état pour les autres tests
         $client->request('GET', $url);
-        $client->submitForm('Sauvegarder les modifications', ['Projet[details]' => '']);
+        $client->submitForm('Sauvegarder les modifications', ['Projet[details]' => '', 'Projet[traductions][it][titre]' => 'L\'impiccato']);
     }
 
     /** Image envoyée depuis l'admin : rangée dans public/uploads/projets, affichée à la place de celle du dépôt */

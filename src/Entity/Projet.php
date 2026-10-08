@@ -18,6 +18,8 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[UniqueEntity('slug')]
 class Projet
 {
+    use Traduisible;
+
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
     private ?int $id = null;
 
@@ -77,21 +79,6 @@ class Projet
     #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $demo = null;
-
-    // Traductions anglaises (facultatives : vides, le français s'affiche ; voir App\Twig\Traduction)
-    #[Assert\Length(max: 100)]
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $titreEn = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $descriptionEn = null;
-
-    #[Assert\Length(max: 50)]
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $categorieEn = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $detailsEn = null;
 
     /** @var Collection<int, Competence> */
     #[ORM\ManyToMany(targetEntity: Competence::class, inversedBy: 'projets')]
@@ -161,17 +148,8 @@ class Projet
         return $this;
     }
 
-    public function getTitreEn(): ?string { return $this->titreEn; }
-    public function setTitreEn(?string $titreEn): static { $this->titreEn = $titreEn ?: null; return $this; }
-    public function getDescriptionEn(): ?string { return $this->descriptionEn; }
-    public function setDescriptionEn(?string $descriptionEn): static { $this->descriptionEn = $descriptionEn ?: null; return $this; }
-    public function getCategorieEn(): ?string { return $this->categorieEn; }
-    public function setCategorieEn(?string $categorieEn): static { $this->categorieEn = $categorieEn ?: null; return $this; }
-
     public function getDetails(): ?string { return $this->details; }
     public function setDetails(?string $details): static { $this->details = $details ?: null; return $this; }
-    public function getDetailsEn(): ?string { return $this->detailsEn; }
-    public function setDetailsEn(?string $detailsEn): static { $this->detailsEn = $detailsEn ?: null; return $this; }
     public function getDepot(): ?string { return $this->depot; }
     public function setDepot(?string $depot): static { $this->depot = $depot ?: null; return $this; }
     public function getDemo(): ?string { return $this->demo; }

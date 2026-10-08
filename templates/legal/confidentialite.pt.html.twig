@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Política de privacidade - Nicolas Cataluna{% endblock %}
+
+{% block description %}Que dados o nicolascataluna.fr recolhe, porquê, durante quanto tempo e como exercer os seus direitos.{% endblock %}
+
+{% block body %}
+<section class="legal-section">
+    <article class="legal-container">
+        <h1>Política de privacidade</h1>
+        <p class="legal-maj">Última atualização: 4 de outubro de 2026 · Tradução: em caso de divergência, prevalece a <a href="{{ path('app_confidentialite', {_locale: 'fr'}) }}" hreflang="fr">versão francesa</a>.</p>
+
+        <p>
+            Este site é um portfólio pessoal. Não tem publicidade, nem medição de audiência, nem conteúdos carregados a partir de serviços de terceiros:
+            os tipos de letra, os scripts e as imagens são servidos pelo próprio site.
+        </p>
+
+        <h2>Responsável pelo tratamento</h2>
+        <p>Nicolas Cataluna — <a href="mailto:{{ contact_email }}">{{ contact_email }}</a></p>
+
+        <h2>Formulário de contacto</h2>
+        <ul>
+            <li><strong>Dados</strong>: o seu nome, o seu endereço de e-mail, a sua mensagem e o idioma da página.</li>
+            <li><strong>Finalidade</strong>: apenas responder-lhe. Nada é vendido, partilhado ou utilizado para fins comerciais.</li>
+            <li><strong>Fundamento jurídico</strong>: interesse legítimo em responder aos pedidos recebidos.</li>
+            <li><strong>Onde</strong>: na base de dados do site, no servidor pessoal do editor em França. Recebo uma cópia por e-mail através do Proton Mail (Proton AG, Suíça, país reconhecido pela Comissão Europeia como assegurando um nível de proteção adequado).</li>
+            <li><strong>Durante quanto tempo</strong>: 12 meses após a receção da mensagem; depois, são apagados.</li>
+        </ul>
+
+        <h2>Registos técnicos</h2>
+        <ul>
+            <li><strong>Registo do site</strong>: a data e o endereço IP de cada envio do formulário de contacto e de cada tentativa de acesso à área de administração, para detetar abusos. Conservados durante 12 meses.</li>
+            <li><strong>Erros</strong>: quando uma página falha, são enviadas informações técnicas (página pedida, navegador, detalhe do erro) a uma ferramenta de acompanhamento de erros instalada no mesmo servidor, sem endereço IP nem cookies.</li>
+            <li><strong>Cópias de segurança</strong>: a base de dados é copiada todas as noites, no servidor e num armazenamento cifrado (Proton Drive). Cada cópia é apagada ao fim de 14 dias.</li>
+        </ul>
+
+        <h2>Cookies</h2>
+        <p>
+            Nenhum cookie de rastreio ou de medição de audiência. O site apenas define cookies técnicos, indispensáveis e que não exigem consentimento:
+            um token de segurança (<code>csrf-token</code>) que protege o formulário de contacto e um cookie de sessão para a área de administração do site.
+        </p>
+
+        <h2>Os seus direitos</h2>
+        <p>
+            Pode pedir o acesso, a retificação ou o apagamento dos seus dados, opor-se ao seu tratamento ou limitar a sua utilização,
+            escrevendo para <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>. Receberá uma resposta no prazo máximo de um mês.
+        </p>
+        <p>
+            Se considerar que os seus direitos não são respeitados, pode apresentar uma reclamação à CNIL, a autoridade francesa de proteção de dados
+            (<a href="https://www.cnil.fr/en/complaints">www.cnil.fr</a>).
+        </p>
+    </article>
+</section>
+{% endblock %}

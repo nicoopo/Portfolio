@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Aviso legal - Nicolas Cataluna{% endblock %}
+
+{% block description %}Aviso legal de nicolascataluna.fr: editor, director de la publicación y alojamiento.{% endblock %}
+
+{% block body %}
+<section class="legal-section">
+    <article class="legal-container">
+        <h1>Aviso legal</h1>
+        <p class="legal-maj">Última actualización: 4 de octubre de 2026 · Traducción: en caso de discrepancia, prevalece la <a href="{{ path('app_mentions_legales', {_locale: 'fr'}) }}" hreflang="fr">versión francesa</a>.</p>
+
+        <h2>Editor</h2>
+        <p>
+            <strong>nicolascataluna.fr</strong> es editado por <strong>Nicolas Cataluna</strong>, como particular y sin fines comerciales.<br>
+            Contacto: <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>
+        </p>
+
+        <h2>Director de la publicación</h2>
+        <p>Nicolas Cataluna.</p>
+
+        <h2>Alojamiento</h2>
+        <p>
+            El sitio está <strong>autoalojado</strong> por su editor, en un servidor personal situado en Francia.<br>
+            Acceso a internet proporcionado por Free SAS, 16 rue de la Ville-l’Évêque, 75008 París, Francia (<a href="https://www.free.fr">www.free.fr</a>).
+        </p>
+
+        <h2>Propiedad intelectual</h2>
+        <p>
+            Los textos, imágenes y código propios de este sitio pertenecen a Nicolas Cataluna, salvo que se indique lo contrario.
+            El código fuente está publicado en <a href="https://github.com/nicoopo/Portfolio">GitHub</a>, bajo la licencia indicada en el repositorio.
+        </p>
+
+        <h2>Datos personales</h2>
+        <p>
+            Los datos enviados mediante el formulario de contacto y los registros técnicos del sitio se describen en la
+            <a href="{{ path('app_confidentialite') }}">política de privacidad</a>.
+        </p>
+    </article>
+</section>
+{% endblock %}
