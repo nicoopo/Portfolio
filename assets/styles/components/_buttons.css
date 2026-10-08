@@ -9,6 +9,16 @@
   transition: all 0.3s ease-in-out;
   border-radius: 50px;
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
+}
+
+/* Lueur qui pulse autour du bouton */
+.btn-galactic::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 20px rgba(162, 194, 255, 0.7), 0 0 40px rgba(255, 255, 255, 0.3);
+  pointer-events: none;
   animation: pulse-glow 3s infinite ease-in-out;
 }
 
@@ -42,21 +52,17 @@
 .btn-galactic {
     transition: all 0.3s ease;
     position: relative;
-    overflow: hidden;
 }
 
+/* Onde au survol : un halo qui part du centre, sans dépasser du bouton (la lueur, elle, doit dépasser) */
 .btn-galactic::after {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 5px;
-    height: 5px;
-    background: rgba(255, 255, 255, 0.5);
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.5), transparent 70%);
     opacity: 0;
-    border-radius: 100%;
-    transform: scale(1, 1) translate(-50%, -50%);
-    transform-origin: 50% 50%;
+    pointer-events: none;
 }
 
 .btn-galactic:hover::after {
