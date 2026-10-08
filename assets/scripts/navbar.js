@@ -8,6 +8,7 @@ qualite.checked = preferences.qualite === 'haute';
 transitions.addEventListener('change', () => setPreference('transitions', transitions.checked));
 qualite.addEventListener('change', () => {
     setPreference('qualite', qualite.checked ? 'haute' : 'basse');
+    setPreference('qualiteAuto', false); // choisi à la main : plus de proposition automatique
     location.reload(); // cerveau et trous noirs sont construits au chargement
 });
 

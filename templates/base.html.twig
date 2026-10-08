@@ -104,6 +104,16 @@
         </div>
     </nav>
 
+    {# Proposé par qualite_auto.js quand le site rame #}
+    <div id="qualiteAuto" class="qualite-auto" role="status" hidden>
+        <p>{{ "Le site a l'air de ramer sur cet appareil. Passer en qualité basse ?"|trans }}</p>
+        <div class="qualite-auto-actions">
+            <button type="button" data-qualite="basse">{{ 'Passer en qualité basse'|trans }}</button>
+            <button type="button" data-qualite="garder">{{ 'Non merci'|trans }}</button>
+        </div>
+        <small>{{ 'Modifiable à tout moment dans les réglages ⚙'|trans }}</small>
+    </div>
+
     <main>
         {% block body %}
         {% endblock %}
