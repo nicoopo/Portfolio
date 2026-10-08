@@ -11,8 +11,11 @@ const PALETTE = ['#fff4d6', '#ffb347', '#ff5fa2', '#7f5af0'];
 const INNER = 1.5, OUTER = 3.6; // rayons du disque, en rayons d'ombre
 const TILT = 0.22;              // aplatissement du disque (0 = vu par la tranche)
 
+import { basseQualite } from './preferences.js';
+
 /** Disque d'accrétion de `particles` grains ; draw(ctx, x, y, r, dt) dessine le tout, r = rayon de l'ombre. */
 export function createBlackHole({ particles = 900 } = {}) {
+    if (basseQualite()) particles = Math.round(particles / 3);
     const grains = Array.from({ length: particles }, () => {
         const t = Math.random() ** 1.6; // plus dense près du bord intérieur
         const rho = INNER + (OUTER - INNER) * t;
@@ -85,7 +88,7 @@ export function createBlackHole({ particles = 900 } = {}) {
 
 /** Canvas net sur écran haute densité : taille interne = taille affichée × densité de pixels. */
 export function fitCanvas(canvas) {
-    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    const ratio = basseQualite() ? 1 : Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = canvas.clientWidth * ratio;
     canvas.height = canvas.clientHeight * ratio;
     const ctx = canvas.getContext('2d');

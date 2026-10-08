@@ -54,23 +54,47 @@
                    hreflang="{{ other_locale }}" lang="{{ other_locale }}"
                    title="{{ other_locale == 'en' ? 'Read in English' : 'Lire en français' }}">{{ other_locale|upper }}</a>
 
-                <!-- 🌌 Menu icon -->
-                <div class="dropdown">
-                    <button type="button" class="menu-button" id="menuToggle" aria-label="{{ 'Menu'|trans }}">
-                        {{ ux_icon('bi:menu-app-fill', {'height': '32px', 'width': '32px', 'color': '#cfe9ff'}) }}
-                    </button>
-
-                    <!-- Menu déroulant -->
-                    <ul class="dropdown-menu-galactic" id="menuDropdown">
-                        <li><a href="{{ path('app_home') }}">{{ 'Accueil'|trans }}</a></li>
-                        <li><a href="{{ path('app_cerveau') }}">{{ 'Mon Cerveau'|trans }}</a></li>
-                        <li><a href="{{ path('app_projects') }}">{{ 'Projets'|trans }}</a></li>
-                        <li><a href="{{ path('app_univers') }}">{{ 'Mon Univers'|trans }}</a></li>
-                        <li><a href="{{ path('app_competences') }}">{{ 'Compétences'|trans }}</a></li>
-                        <li><a href="{{ path('app_contact') }}">{{ 'Contact'|trans }}</a></li>
-                    </ul>
+                {# Réglages : panneau natif (popover), fermé par Échap ou un clic ailleurs #}
+                <button type="button" class="menu-button" popovertarget="reglages" aria-label="{{ 'Réglages'|trans }}">
+                    {{ ux_icon('bi:gear-fill') }}
+                </button>
+                <div id="reglages" class="reglages" popover>
+                    <p class="reglages-titre">{{ 'Réglages'|trans }}</p>
+                    <label class="interrupteur">
+                        <span>{{ 'Effets trou noir'|trans }}<small>{{ 'Transitions entre les pages, clic long'|trans }}</small></span>
+                        <input type="checkbox" role="switch" id="prefTransitions">
+                    </label>
+                    <label class="interrupteur">
+                        <span>{{ 'Haute qualité'|trans }}<small>{{ 'À couper si le site rame'|trans }}</small></span>
+                        <input type="checkbox" role="switch" id="prefQualite">
+                    </label>
                 </div>
+
+                <button type="button" class="menu-button" popovertarget="menu" aria-label="{{ 'Menu'|trans }}">
+                    {{ ux_icon('bi:menu-app-fill') }}
+                </button>
             </div>
+
+            {# Menu plein écran #}
+            <nav id="menu" class="menu-galactic" popover aria-label="{{ 'Menu'|trans }}">
+                <button type="button" class="menu-button menu-fermer" popovertarget="menu" popovertargetaction="hide" aria-label="{{ 'Fermer le menu'|trans }}">
+                    {{ ux_icon('bi:x-lg') }}
+                </button>
+                <ul>
+                    {% for route, label in {
+                        app_home: 'Accueil',
+                        app_cerveau: 'Mon Cerveau',
+                        app_projects: 'Projets',
+                        app_univers: 'Mon Univers',
+                        app_competences: 'Compétences',
+                        app_contact: 'Contact',
+                    } %}
+                        <li style="--i: {{ loop.index0 }}">
+                            <a href="{{ path(route) }}" {% if canonical_route == route %}aria-current="page"{% endif %}>{{ label|trans }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </nav>
         </div>
     </nav>
 

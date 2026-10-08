@@ -110,3 +110,10 @@ h2.gradient {
   z-index: 0;
   pointer-events: none;
 }
+
+/* Appui long de l'easter egg (stars.js) : pas de sélection ni de menu « Copier » sur mobile */
+.trou-noir-maintenu {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
