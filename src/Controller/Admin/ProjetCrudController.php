@@ -54,7 +54,7 @@ final class ProjetCrudController extends AbstractCrudController
             ->setRequired(false)
             ->setHelp('JPG, PNG ou WebP, 3 Mo maximum. Prend la place de l’image du dépôt.');
         yield TextField::new('image', 'Image du dépôt')
-            ->setHelp('Ancienne méthode, utilisée si aucune image n’est envoyée : chemin sous assets/images/projets/, ex. symfony/portfolio-cerveau.jpg')
+            ->setHelp('Ancienne méthode, utilisée si aucune image n’est envoyée : chemin sous assets/images/projets/, ex. symfony/portfolio-cerveau.webp')
             ->hideOnIndex();
         yield TextField::new('categorie', 'Groupe')->setHelp('Ex. « PHP / Symfony » : regroupe les projets sur la page Projets');
         yield AssociationField::new('competences', 'Compétences utilisées')
