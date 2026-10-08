@@ -68,6 +68,10 @@
                         <span>{{ 'Haute qualité'|trans }}<small>{{ 'À couper si le site rame'|trans }}</small></span>
                         <input type="checkbox" role="switch" id="prefQualite">
                     </label>
+                    <label class="interrupteur">
+                        <span>{{ 'Son'|trans }}<small>{{ 'Ambiance sonore du cerveau 3D'|trans }}</small></span>
+                        <input type="checkbox" role="switch" id="prefSon">
+                    </label>
                     <fieldset class="choix-curseur">
                         <legend>{{ 'Curseur'|trans }}</legend>
                         {% for valeur, label in {comete: 'Comète', orbite: 'Orbite', 'trou-noir': 'Trou noir', systeme: 'Classique'} %}

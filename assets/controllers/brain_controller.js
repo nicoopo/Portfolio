@@ -13,6 +13,7 @@ import { Synapses } from '../cerveau/synapses.js';
 import { createNebulae } from '../cerveau/nebulae.js';
 import { createSouvenirs } from '../cerveau/souvenirs.js';
 import { Ambiance } from '../cerveau/ambiance.js';
+import { preferences, setPreference } from '../scripts/preferences.js';
 import { basseQualite } from '../scripts/preferences.js';
 
 const HOME_TARGET = new THREE.Vector3(0, 0, 0);
@@ -109,6 +110,13 @@ export default class extends Controller {
         this.listen(this.renderer.domElement, 'pointerleave', () => this.hover(null));
         // Onglet caché : plus de son ni de calcul audio
         this.listen(document, 'visibilitychange', () => this.ambiance?.setVisible(!document.hidden));
+        // Son : préférence du site (panneau ⚙ ou bouton « Son »)
+        this.listen(document, 'preference', (e) => { if (e.detail.name === 'son') this.setSound(e.detail.value); });
+        // Déjà activé : le navigateur n'autorise le son qu'après un geste, on démarre au premier clic ou à la première touche
+        // (sauf sur le bouton « Son » et le panneau ⚙, qui changent eux-mêmes la préférence)
+        const startSound = (e) => { if (!e.target.closest?.('#reglages, [data-brain-target="soundButton"]')) this.setSound(preferences.son); };
+        this.listen(document, 'pointerdown', startSound);
+        this.listen(document, 'keydown', startSound);
         // Échap fait aussi sortir du plein écran : le bouton suit l'état réel
         this.listen(document, 'fullscreenchange', () => {
             const on = document.fullscreenElement === this.element;
@@ -332,10 +340,16 @@ export default class extends Controller {
         }
     }
 
-    /** Bouton « Son » : l'audio n'est créé qu'au premier clic (les navigateurs l'exigent) */
+    /** Bouton « Son » : change la préférence, qui revient par l'événement « preference » */
     toggleSound() {
+        setPreference('son', !this.ambiance?.on);
+    }
+
+    /** L'audio n'est créé qu'au premier geste (les navigateurs l'exigent) */
+    setSound(on) {
+        if (!window.AudioContext || on === !!this.ambiance?.on) return;
         this.ambiance ??= new Ambiance();
-        const on = this.ambiance.toggle();
+        this.ambiance.toggle();
         this.soundButtonTarget.textContent = on ? this.textsValue.mute : this.textsValue.sound;
         this.soundButtonTarget.setAttribute('aria-pressed', String(on));
     }
