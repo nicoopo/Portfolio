@@ -13,8 +13,7 @@ import { Synapses } from '../cerveau/synapses.js';
 import { createNebulae } from '../cerveau/nebulae.js';
 import { createSouvenirs } from '../cerveau/souvenirs.js';
 import { Ambiance } from '../cerveau/ambiance.js';
-import { preferences, setPreference } from '../scripts/preferences.js';
-import { basseQualite } from '../scripts/preferences.js';
+import { basseQualite, preferences, setPreference } from '../scripts/preferences.js';
 
 const HOME_TARGET = new THREE.Vector3(0, 0, 0);
 const CLICK_TOLERANCE_PX = 5;
