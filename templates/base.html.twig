@@ -1,6 +1,6 @@
-{# Langue de la page et version dans l'autre langue (même route, même paramètres) #}
+{# Langue de la page ; les autres langues (global « langues_site » = framework.enabled_locales) : même route, mêmes paramètres #}
 {% set locale = app.request.locale %}
-{% set other_locale = locale == 'en' ? 'fr' : 'en' %}
+{% set noms_langues = {fr: 'Français', en: 'English', es: 'Español', de: 'Deutsch', it: 'Italiano', pt: 'Português'} %}
 {# _route est déjà le nom sans suffixe de langue (app_contact, pas app_contact.en) ; absent sur une page d'erreur #}
 {% set canonical_route = app.request.attributes.get('_route') %}
 {% set route_params = app.request.attributes.get('_route_params', {}) %}
@@ -18,11 +18,13 @@
     {% set page_url = app.request.schemeAndHttpHost ~ app.request.pathInfo %}
     <link rel="canonical" href="{{ page_url }}">
     {# Les deux versions de la page, pour les moteurs de recherche #}
-    <link rel="alternate" hreflang="fr" href="{{ _self.url_in('fr', canonical_route, route_params) }}">
-    <link rel="alternate" hreflang="en" href="{{ _self.url_in('en', canonical_route, route_params) }}">
+    {% for langue in langues_site %}
+    <link rel="alternate" hreflang="{{ langue }}" href="{{ _self.url_in(langue, canonical_route, route_params) }}">
+    {% endfor %}
+    <link rel="alternate" hreflang="x-default" href="{{ _self.url_in('fr', canonical_route, route_params) }}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="{{ 'Univers de Nico'|trans }}">
-    <meta property="og:locale" content="{{ locale == 'en' ? 'en_GB' : 'fr_FR' }}">
+    <meta property="og:locale" content="{{ {fr: 'fr_FR', en: 'en_GB', es: 'es_ES', de: 'de_DE', it: 'it_IT', pt: 'pt_PT'}[locale] }}">
     <meta property="og:title" content="{{ block('title')|trim }}">
     <meta property="og:description" content="{{ block('description')|trim }}">
     <meta property="og:url" content="{{ page_url }}">
@@ -49,10 +51,14 @@
             </a>
 
             <div class="navbar-actions">
-                {# Bascule de langue : la même page dans l'autre langue #}
-                <a href="{{ _self.url_in(other_locale, canonical_route, route_params) }}" class="lang-switch"
-                   hreflang="{{ other_locale }}" lang="{{ other_locale }}"
-                   title="{{ other_locale == 'en' ? 'Read in English' : 'Lire en français' }}">{{ other_locale|upper }}</a>
+                {# Langues : la même page dans chaque langue, chaque nom écrit dans sa propre langue #}
+                <button type="button" class="lang-switch" popovertarget="langues" aria-label="{{ 'Langue'|trans }} : {{ noms_langues[locale] }}">{{ locale|upper }}</button>
+                <ul id="langues" class="langues" popover>
+                    {% for langue in langues_site %}
+                    <li><a href="{{ _self.url_in(langue, canonical_route, route_params) }}" hreflang="{{ langue }}" lang="{{ langue }}"
+                           {% if langue == locale %}aria-current="true"{% endif %}>{{ noms_langues[langue] }}</a></li>
+                    {% endfor %}
+                </ul>
 
                 {# Réglages : panneau natif (popover), fermé par Échap ou un clic ailleurs #}
                 <button type="button" class="menu-button" popovertarget="reglages" aria-label="{{ 'Réglages'|trans }}">

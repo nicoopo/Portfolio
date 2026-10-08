@@ -62,12 +62,14 @@ Portfolio/
   représentent mes passions ; un fil de souvenirs retrace mon parcours.
 - **Compétences** : Présentation de mes compétences techniques et professionnelles.
 - **Portfolio** : Galerie de projets avec descriptions et captures d'écran.
-- **CV en ligne** : page et PDF (thème clair ou sombre) générés depuis la base, en français et en anglais ; modifiables dans l’administration (section « CV »).
+- **CV en ligne** : page et PDF (thème clair ou sombre) générés depuis la base, dans les six langues du site ; modifiables dans l’administration (section « CV »).
 - **Contact** : formulaire (anti-spam par champ piège), e-mail, GitHub, LinkedIn et CV numérique.
 - **Responsive** : Optimisé pour tous les appareils.
-- **Français / anglais** : version anglaise sous `/en` (bouton FR/EN dans la navigation). Textes des pages :
-  `translations/messages.en.yaml` (la clé est le texte français) ; contenu de la base : champs « … (anglais) »
-  de l'administration (vide = le français s'affiche). Seule la lettre de motivation (PDF) reste en français.
+- **Six langues** : français (sans préfixe), anglais `/en`, espagnol `/es`, allemand `/de`, italien `/it` et portugais `/pt`
+  (menu des langues dans la navigation ; liste : `framework.enabled_locales`, à garder en phase avec `config/routes.yaml`).
+  Textes des pages : `translations/messages.<langue>.yaml` (la clé est le texte français) ; contenu de la base : colonne
+  JSON `traductions` (trait `Traduisible`), section « Traductions » de l'administration (vide = le français s'affiche).
+  La lettre de motivation (PDF) existe en français et en anglais ; les autres langues affichent l'anglaise.
 
 ## 🛠 Technologies
 

@@ -3,10 +3,12 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Competence;
+use App\Form\TraductionsField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
@@ -34,8 +36,8 @@ final class CompetenceCrudController extends AbstractCrudController
         // Les projets se relient depuis l'écran Projets (côté propriétaire de la relation)
         yield AssociationField::new('projets')->onlyOnIndex();
 
-        // Version anglaise du site : vide = le français s'affiche
-        yield FormField::addFieldset('Anglais (facultatif)')->collapsible()->renderCollapsed();
-        yield TextField::new('nomEn', 'Nom')->hideOnIndex();
+        // Autres langues du site (framework.enabled_locales) : vide = le français s'affiche
+        yield FormField::addFieldset('Traductions (facultatif)')->collapsible()->renderCollapsed();
+        yield TraductionsField::new()->champs(['nom' => 'Nom']);
     }
 }

@@ -13,6 +13,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: ExperienceRepository::class)]
 class Experience
 {
+    use Traduisible;
+
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
     private ?int $id = null;
 
@@ -58,22 +60,6 @@ class Experience
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $site = null;
 
-    // Traductions anglaises (facultatives : vides, le français s'affiche ; voir App\Twig\Traduction)
-    #[Assert\Length(max: 100)]
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $posteEn = null;
-
-    #[Assert\Length(max: 50)]
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $periodeEn = null;
-
-    #[Assert\Length(max: 50)]
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $contratEn = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $missionsEn = null;
-
     public function getId(): ?int { return $this->id; }
     public function getPoste(): string { return $this->poste; }
     public function setPoste(?string $poste): static { $this->poste = $poste ?? ''; return $this; }
@@ -91,15 +77,6 @@ class Experience
     public function setPosition(?int $position): static { $this->position = $position ?? 0; return $this; }
     public function getSite(): ?string { return $this->site; }
     public function setSite(?string $site): static { $this->site = $site ?: null; return $this; }
-
-    public function getPosteEn(): ?string { return $this->posteEn; }
-    public function setPosteEn(?string $posteEn): static { $this->posteEn = $posteEn ?: null; return $this; }
-    public function getPeriodeEn(): ?string { return $this->periodeEn; }
-    public function setPeriodeEn(?string $periodeEn): static { $this->periodeEn = $periodeEn ?: null; return $this; }
-    public function getContratEn(): ?string { return $this->contratEn; }
-    public function setContratEn(?string $contratEn): static { $this->contratEn = $contratEn ?: null; return $this; }
-    public function getMissionsEn(): ?string { return $this->missionsEn; }
-    public function setMissionsEn(?string $missionsEn): static { $this->missionsEn = $missionsEn ?: null; return $this; }
 
     public function __toString(): string { return $this->poste; }
 }

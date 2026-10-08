@@ -14,6 +14,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity('nom')]
 class EtapeParcours
 {
+    use Traduisible;
+
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
     private ?int $id = null;
 
@@ -58,23 +60,6 @@ class EtapeParcours
     #[ORM\Column]
     private int $position;
 
-    // Traductions anglaises (facultatives : vides, le français s'affiche ; voir App\Twig\Traduction)
-    #[Assert\Length(max: 50)]
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $nomEn = null;
-
-    #[Assert\Length(max: 150)]
-    #[ORM\Column(length: 150, nullable: true)]
-    private ?string $intituleEn = null;
-
-    #[Assert\Length(max: 150)]
-    #[ORM\Column(length: 150, nullable: true)]
-    private ?string $specialiteEn = null;
-
-    #[Assert\Length(max: 100)]
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $resultatEn = null;
-
     public function getId(): ?int { return $this->id; }
     public function getNom(): string { return $this->nom; }
     public function getDates(): string { return $this->dates; }
@@ -93,15 +78,6 @@ class EtapeParcours
     public function setLieu(?string $lieu): static { $this->lieu = $lieu ?? ''; return $this; }
     public function setResultat(?string $resultat): static { $this->resultat = $resultat ?? ''; return $this; }
     public function setPosition(?int $position): static { $this->position = $position ?? 0; return $this; }
-
-    public function getNomEn(): ?string { return $this->nomEn; }
-    public function setNomEn(?string $nomEn): static { $this->nomEn = $nomEn ?: null; return $this; }
-    public function getIntituleEn(): ?string { return $this->intituleEn; }
-    public function setIntituleEn(?string $intituleEn): static { $this->intituleEn = $intituleEn ?: null; return $this; }
-    public function getSpecialiteEn(): ?string { return $this->specialiteEn; }
-    public function setSpecialiteEn(?string $specialiteEn): static { $this->specialiteEn = $specialiteEn ?: null; return $this; }
-    public function getResultatEn(): ?string { return $this->resultatEn; }
-    public function setResultatEn(?string $resultatEn): static { $this->resultatEn = $resultatEn ?: null; return $this; }
 
     public function __toString(): string { return $this->nom; }
 }

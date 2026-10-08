@@ -73,5 +73,5 @@ export const sons = {
     constellation: () => [0, 2, 4, 5, 7].forEach((n, i) => ton(NOTES[n], NOTES[n], 1.5, 0.05, i * 0.1)),
 };
 
-// Menu et réglages sont des popovers natifs ; « toggle » ne remonte pas, on l'écoute à la capture
-document.addEventListener('toggle', (e) => { if (e.target.matches?.('#menu, #reglages')) sons.menu(e.newState === 'open'); }, true);
+// Menu, réglages et langues sont des popovers natifs ; « toggle » ne remonte pas, on l'écoute à la capture
+document.addEventListener('toggle', (e) => { if (e.target.matches?.('#menu, #reglages, #langues')) sons.menu(e.newState === 'open'); }, true);

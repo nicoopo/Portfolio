@@ -1,5 +1,5 @@
 # Version anglaise du site. Clé = le texte français tel qu'il est écrit dans les templates
-# (une clé absente s'affiche en français). Contenu de la base : colonnes « …_en » (App\Twig\Traduction).
+# (une clé absente s'affiche en français). Contenu de la base : colonne « traductions » (App\Entity\Traduisible).
 
 # Navigation et méta
 "Univers de Nico": "Nico's Universe"
@@ -12,6 +12,7 @@
 "Compétences": "Skills"
 "Contact": "Contact"
 "Fermer": "Close"
+"Langue": "Language"
 
 # Accueil
 "BIENVENUE DANS": "WELCOME TO"
@@ -141,6 +142,7 @@
 "Effets trou noir": "Black hole effects"
 "Haute qualité": "High quality"
 "Réglages": "Settings"
+"Ambiance sonore du cerveau 3D": "3D brain soundscape"
 "Transitions entre les pages, easter eggs": "Page transitions, easter eggs"
 "À couper si le site rame": "Turn off if the site lags"
 "Fermer le menu": "Close menu"

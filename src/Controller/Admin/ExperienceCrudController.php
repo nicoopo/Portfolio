@@ -3,12 +3,14 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Experience;
+use App\Form\TraductionsField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\UrlField;
 
 final class ExperienceCrudController extends AbstractCrudController
@@ -37,11 +39,8 @@ final class ExperienceCrudController extends AbstractCrudController
         yield UrlField::new('site')->setHelp("Facultatif : site de l'entreprise ou du produit auquel j'ai contribué (lien sur le CV)")->hideOnIndex();
         yield IntegerField::new('position')->setHelp("Ordre d'affichage (croissant)");
 
-        // Version anglaise du site : vide = le français s'affiche
-        yield FormField::addFieldset('Anglais (facultatif)')->collapsible()->renderCollapsed();
-        yield TextField::new('posteEn', 'Poste')->hideOnIndex();
-        yield TextField::new('periodeEn', 'Période')->hideOnIndex();
-        yield TextField::new('contratEn', 'Contrat')->hideOnIndex();
-        yield TextareaField::new('missionsEn', 'Missions')->hideOnIndex();
+        // Autres langues du site (framework.enabled_locales) : vide = le français s'affiche
+        yield FormField::addFieldset('Traductions (facultatif)')->collapsible()->renderCollapsed();
+        yield TraductionsField::new()->champs(['poste' => 'Poste', 'periode' => 'Période', 'contrat' => 'Contrat', 'missions' => 'Missions'], ['missions']);
     }
 }

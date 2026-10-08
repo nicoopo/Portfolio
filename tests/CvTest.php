@@ -20,6 +20,10 @@ final class CvTest extends WebTestCase
         self::assertSelectorTextContains('.subtitle', 'Full-stack Developer');
         self::assertAnySelectorTextContains('.section-title', 'Work Experience');
         self::assertAnySelectorTextContains('.experience-title', 'IT Technician Intern');
+
+        $client->request('GET', '/de/CV');
+        self::assertSelectorTextContains('.subtitle', 'Full-Stack-Entwickler');
+        self::assertAnySelectorTextContains('.section-title', 'Berufserfahrung');
     }
 
     public function testLeCvAnglaisSeTelechargeEnPdf(): void
@@ -29,6 +33,9 @@ final class CvTest extends WebTestCase
 
         self::assertResponseHeaderSame('Content-Type', 'application/pdf');
         self::assertStringContainsString('CV_Nicolas_Cataluna_en_light.pdf', $client->getResponse()->headers->get('Content-Disposition'));
+
+        $client->request('GET', '/es/CV/download?theme=dark');
+        self::assertStringContainsString('CV_Nicolas_Cataluna_es_dark.pdf', $client->getResponse()->headers->get('Content-Disposition'));
     }
 
     public function testLApercuAfficheLePdfSansLeTelecharger(): void

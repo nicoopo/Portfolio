@@ -1,5 +1,7 @@
 framework:
     default_locale: fr # le site est en français (validation, administration…)
+    # Langues du site ; à garder en phase avec le préfixe des routes (config/routes.yaml)
+    enabled_locales: [fr, en, es, de, it, pt]
     translator:
         default_path: '%kernel.project_dir%/translations'
         providers:

@@ -8,11 +8,16 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
-    # Français sans préfixe (les liens existants ne changent pas), anglais sous /en.
-    # path('app_home') donne la version de la langue courante ; _locale: 'en' force l'autre.
+    # Français sans préfixe (les liens existants ne changent pas), les autres langues sous /en, /es…
+    # (liste : framework.enabled_locales). path('app_home') donne la version de la langue courante ;
+    # _locale: 'es' force une autre langue.
     prefix:
         fr: ''
         en: '/en'
+        es: '/es'
+        de: '/de'
+        it: '/it'
+        pt: '/pt'
 
 # Hors du préfixe de langue ci-dessus : un seul sitemap, qui liste les deux langues
 app_sitemap:

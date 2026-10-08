@@ -3,14 +3,16 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Projet;
+use App\Form\TraductionsField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\UrlField;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints\Image;
@@ -67,12 +69,9 @@ final class ProjetCrudController extends AbstractCrudController
             ->setFormTypeOption('by_reference', false); // passe par addCompetence / removeCompetence
         yield IntegerField::new('position')->setHelp('Ordre d\'affichage (croissant)');
 
-        // Version anglaise du site : vide = le français s'affiche
-        yield FormField::addFieldset('Anglais (facultatif)')->collapsible()->renderCollapsed();
-        yield TextField::new('titreEn', 'Titre')->hideOnIndex();
-        yield TextareaField::new('descriptionEn', 'Description')->hideOnIndex();
-        yield TextareaField::new('detailsEn', 'Texte détaillé')->setNumOfRows(12)->hideOnIndex();
-        yield TextField::new('categorieEn', 'Groupe')->hideOnIndex();
+        // Autres langues du site (framework.enabled_locales) : vide = le français s'affiche
+        yield FormField::addFieldset('Traductions (facultatif)')->collapsible()->renderCollapsed();
+        yield TraductionsField::new()->champs(['titre' => 'Titre', 'description' => 'Description', 'details' => 'Texte détaillé', 'categorie' => 'Groupe'], ['description', 'details']);
     }
 
     /** Remplace l'enregistrement d'EasyAdmin : réduit l'image à LARGEUR_MAX px et l'écrit en WebP (transparence gardée) */
