@@ -305,3 +305,53 @@ html:has(.menu-galactic:popover-open) {
     transition: none;
   }
 }
+
+/* Choix du curseur : pastilles */
+.choix-curseur {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.6rem 0 0;
+  border: 0;
+  border-top: 1px solid rgba(127, 90, 240, 0.25);
+}
+
+.choix-curseur legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 0.4rem;
+  font-size: 1rem;
+}
+
+.choix-curseur label {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+  border: 1px solid rgba(127, 90, 240, 0.5);
+  border-radius: 999px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.choix-curseur label:has(:checked) {
+  color: #fff;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  border-color: transparent;
+}
+
+.choix-curseur label:has(:focus-visible) {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+.choix-curseur input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Pas de souris : pas de curseur à choisir */
+@media not ((hover: hover) and (pointer: fine)) {
+  .choix-curseur {
+    display: none;
+  }
+}
