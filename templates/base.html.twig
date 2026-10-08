@@ -68,6 +68,12 @@
                         <span>{{ 'Haute qualité'|trans }}<small>{{ 'À couper si le site rame'|trans }}</small></span>
                         <input type="checkbox" role="switch" id="prefQualite">
                     </label>
+                    <fieldset class="choix-curseur">
+                        <legend>{{ 'Curseur'|trans }}</legend>
+                        {% for valeur, label in {comete: 'Comète', orbite: 'Orbite', 'trou-noir': 'Trou noir', systeme: 'Classique'} %}
+                            <label><input type="radio" name="curseur" value="{{ valeur }}"> {{ label|trans }}</label>
+                        {% endfor %}
+                    </fieldset>
                 </div>
 
                 <button type="button" class="menu-button" popovertarget="menu" aria-label="{{ 'Menu'|trans }}">

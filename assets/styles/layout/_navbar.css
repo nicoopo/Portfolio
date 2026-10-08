@@ -77,7 +77,6 @@
   background: rgba(20, 20, 40, 0.45);
   padding: 0.45rem 0.6rem;
   border-radius: 10px;
-  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -250,7 +249,6 @@ html:has(.menu-galactic:popover-open) {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.6rem 0;
-  cursor: pointer;
 }
 
 .interrupteur + .interrupteur {
@@ -273,7 +271,6 @@ html:has(.menu-galactic:popover-open) {
   margin: 0;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.15);
-  cursor: pointer;
   transition: background 0.2s;
 }
 
@@ -306,5 +303,55 @@ html:has(.menu-galactic:popover-open) {
   .menu-galactic,
   .menu-galactic li {
     transition: none;
+  }
+}
+
+/* Choix du curseur : pastilles */
+.choix-curseur {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.6rem 0 0;
+  border: 0;
+  border-top: 1px solid rgba(127, 90, 240, 0.25);
+}
+
+.choix-curseur legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 0.4rem;
+  font-size: 1rem;
+}
+
+.choix-curseur label {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+  border: 1px solid rgba(127, 90, 240, 0.5);
+  border-radius: 999px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.choix-curseur label:has(:checked) {
+  color: #fff;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  border-color: transparent;
+}
+
+.choix-curseur label:has(:focus-visible) {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+.choix-curseur input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Pas de souris : pas de curseur à choisir */
+@media not ((hover: hover) and (pointer: fine)) {
+  .choix-curseur {
+    display: none;
   }
 }

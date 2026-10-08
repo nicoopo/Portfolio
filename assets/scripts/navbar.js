@@ -10,3 +10,9 @@ qualite.addEventListener('change', () => {
     setPreference('qualite', qualite.checked ? 'haute' : 'basse');
     location.reload(); // cerveau et trous noirs sont construits au chargement
 });
+
+// Curseur : appliqué tout de suite (curseur.js relit la préférence à chaque image)
+document.querySelectorAll('input[name="curseur"]').forEach((radio) => {
+    radio.checked = radio.value === preferences.curseur;
+    radio.addEventListener('change', () => setPreference('curseur', radio.value));
+});
