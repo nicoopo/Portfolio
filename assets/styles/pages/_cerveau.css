@@ -65,7 +65,6 @@
   padding: 0.5rem 1rem;
   font: inherit;
   font-size: 0.9rem;
-  cursor: pointer;
 }
 
 /* Boutons en bas à droite : Partager, Plein écran */
@@ -143,7 +142,6 @@
 }
 
 .brain-legend summary {
-  cursor: pointer;
   padding: 0.25rem 0;
 }
 

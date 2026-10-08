@@ -99,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const open = () => {
         hole.target = 1;
+        document.body.classList.add('trou-noir-ouvert');
         if (hole.canvas) return;
         hole.canvas = Object.assign(document.createElement('canvas'), { className: 'trou-noir-curseur' });
         hole.canvas.setAttribute('aria-hidden', 'true');
@@ -115,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(hole.timer);
         hole.timer = null;
         hole.target = 0;
-        document.body.classList.remove('trou-noir-maintenu');
+        document.body.classList.remove('trou-noir-maintenu', 'trou-noir-ouvert');
     };
 
     // « Le vide » : pas un lien, un champ, une image, le cerveau 3D… ni du texte

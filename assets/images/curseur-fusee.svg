@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Fusée inclinée vers le haut à gauche : le nez (6,6) est la pointe du curseur -->
+  <g transform="rotate(-45 16 16)">
+    <path d="M13 22 L16 29 L19 22Z" fill="#ffb347"/>
+    <path d="M11 17 L7 23 L11 22Z M21 17 L25 23 L21 22Z" fill="#7f5af0" stroke="#0a0a14" stroke-width="0.8"/>
+    <path d="M16 2 C20 6 21 12 21 18 L21 22 L11 22 L11 18 C11 12 12 6 16 2Z" fill="#e0f7ff" stroke="#0a0a14" stroke-width="1"/>
+    <circle cx="16" cy="13" r="2.5" fill="#00d4ff" stroke="#0a0a14" stroke-width="0.8"/>
+  </g>
+</svg>

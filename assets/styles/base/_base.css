@@ -111,6 +111,21 @@ h2.gradient {
   pointer-events: none;
 }
 
+/* Curseurs du site : fusée, planète sur ce qui se clique (pas de curseur sur écran tactile) */
+html {
+  cursor: url("../../images/curseur-fusee.svg") 6 6, auto;
+}
+
+a, button, label, summary, select, input[type="checkbox"], [role="button"] {
+  cursor: url("../../images/curseur-planete.svg") 16 16, pointer;
+}
+
+/* Easter egg ouvert : le trou noir remplace le curseur */
+.trou-noir-ouvert,
+.trou-noir-ouvert * {
+  cursor: none !important;
+}
+
 /* Appui long de l'easter egg (stars.js) : pas de sélection ni de menu « Copier » sur mobile */
 .trou-noir-maintenu {
   -webkit-user-select: none;
