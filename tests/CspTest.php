@@ -11,7 +11,7 @@ final class CspTest extends WebTestCase
     /** Les scripts de la page portent le nonce annoncé dans l'en-tête, et il change à chaque requête */
     public function testLesScriptsPortentLeNonceDeLaRequete(): void
     {
-        $client = static::createClient();
+        $client = static::createClient(server: ['HTTP_ACCEPT_LANGUAGE' => 'fr-FR']); // sinon / redirige vers /en/
         $nonces = [];
         foreach (['/', '/CV'] as $url) {
             $crawler = $client->request('GET', $url);

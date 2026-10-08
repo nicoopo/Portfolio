@@ -10,7 +10,7 @@ const pages = ['/', '/cerveau', '/projects', '/projects/portfolio', '/univers', 
     '/mentions-legales', '/confidentialite', '/nexiste-pas'];
 
 const navigateur = await chromium.launch();
-const onglet = await (await navigateur.newContext()).newPage();
+const onglet = await (await navigateur.newContext({ locale: 'fr-FR' })).newPage(); // sinon / redirige vers /en/
 let total = 0;
 
 for (const chemin of pages.flatMap((p) => [p, '/en' + (p === '/' ? '' : p)])) {
