@@ -1,9 +1,12 @@
 /*
  * Transition entre les pages : en cliquant un lien du site, la page est aspirée par un
  * trou noir qui grandit jusqu'à remplir l'écran ; la page suivante en ressort.
- * Sans animation (prefers-reduced-motion) : simple fondu à l'arrivée, navigation normale.
+ * Sans animation (prefers-reduced-motion ou réglage du menu) : simple fondu à l'arrivée, navigation normale.
  */
 import { reducedMotion } from './black_hole.js';
+import { preferences } from './preferences.js';
+
+const sansTrouNoir = () => reducedMotion() || !preferences.transitions;
 
 const DURATION_MS = 600;
 const ARRIVED_KEY = 'trou-noir'; // posé avant de partir : la page suivante sort du trou noir
@@ -23,7 +26,7 @@ function overlay(scale) {
 document.addEventListener('DOMContentLoaded', () => {
     const main = document.querySelector('main');
     if (!main) return;
-    const fromHole = storage((s) => s.getItem(ARRIVED_KEY)) && !reducedMotion();
+    const fromHole = storage((s) => s.getItem(ARRIVED_KEY)) && !sansTrouNoir();
     storage((s) => s.removeItem(ARRIVED_KEY));
 
     main.style.opacity = 0;
@@ -45,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('click', (e) => {
     const link = e.target.closest('a[href]');
     if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    if ((link.target && link.target !== '_self') || link.hasAttribute('download') || reducedMotion()) return;
+    if ((link.target && link.target !== '_self') || link.hasAttribute('download') || sansTrouNoir()) return;
     const url = new URL(link.href, location.href);
     if (url.origin !== location.origin || /\.\w+$/.test(url.pathname)) return; // autre site, fichier (PDF…)
     if (url.pathname === location.pathname && url.search === location.search) return; // ancre de la même page

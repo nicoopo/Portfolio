@@ -13,6 +13,7 @@ import { Synapses } from '../cerveau/synapses.js';
 import { createNebulae } from '../cerveau/nebulae.js';
 import { createSouvenirs } from '../cerveau/souvenirs.js';
 import { Ambiance } from '../cerveau/ambiance.js';
+import { basseQualite } from '../scripts/preferences.js';
 
 const HOME_TARGET = new THREE.Vector3(0, 0, 0);
 const CLICK_TOLERANCE_PX = 5;
@@ -57,7 +58,7 @@ export default class extends Controller {
 
         this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.setPixelRatio(basseQualite() ? 1 : Math.min(window.devicePixelRatio, 2));
         this.canvasTarget.appendChild(this.renderer.domElement);
 
         this.scene = new THREE.Scene();
@@ -121,7 +122,7 @@ export default class extends Controller {
         this.composer.addPass(new RenderPass(this.scene, this.camera));
         // Lueur (bloom) autour des points lumineux.
         // ponytail: coupée sur petit écran comme approximation des GPU faibles ; à affiner si besoin (mesure du FPS)
-        if (!window.matchMedia('(max-width: 576px)').matches) {
+        if (!basseQualite() && !window.matchMedia('(max-width: 576px)').matches) {
             this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(1, 1), 0.35, 0.3, 0.4) /* force, rayon, seuil */);
         }
         this.composer.addPass(new OutputPass());

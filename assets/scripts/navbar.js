@@ -1,14 +1,12 @@
-// Ouverture/fermeture du menu galactique (base.html.twig)
-const menuToggle = document.getElementById('menuToggle');
-const menuDropdown = document.getElementById('menuDropdown');
+// Menu et réglages (base.html.twig) s'ouvrent seuls (attribut popover) ; ici, seulement les préférences
+import { preferences, setPreference } from './preferences.js';
 
-menuToggle.addEventListener('click', () => {
-    menuDropdown.classList.toggle('show');
-});
-
-// Ferme le menu quand on clique ailleurs
-document.addEventListener('click', (e) => {
-    if (!menuToggle.contains(e.target) && !menuDropdown.contains(e.target)) {
-        menuDropdown.classList.remove('show');
-    }
+const transitions = document.getElementById('prefTransitions');
+const qualite = document.getElementById('prefQualite');
+transitions.checked = preferences.transitions;
+qualite.checked = preferences.qualite === 'haute';
+transitions.addEventListener('change', () => setPreference('transitions', transitions.checked));
+qualite.addEventListener('change', () => {
+    setPreference('qualite', qualite.checked ? 'haute' : 'basse');
+    location.reload(); // cerveau et trous noirs sont construits au chargement
 });
