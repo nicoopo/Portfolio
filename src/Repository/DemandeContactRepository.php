@@ -26,6 +26,17 @@ class DemandeContactRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /** @return list<\DateTimeImmutable> dates de réception depuis $date (graphique du tableau de bord) */
+    public function datesDepuis(\DateTimeImmutable $date): array
+    {
+        return array_column($this->createQueryBuilder('demande')
+            ->select('demande.recuLe')
+            ->where('demande.recuLe >= :date')
+            ->setParameter('date', $date)
+            ->getQuery()
+            ->getArrayResult(), 'recuLe');
+    }
+
     /** Supprime les demandes reçues avant $limite ; renvoie leur nombre */
     public function purgerAvant(\DateTimeImmutable $limite): int
     {
