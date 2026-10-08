@@ -3,9 +3,14 @@ import { preferences, setPreference } from './preferences.js';
 
 const transitions = document.getElementById('prefTransitions');
 const qualite = document.getElementById('prefQualite');
+const son = document.getElementById('prefSon');
 transitions.checked = preferences.transitions;
 qualite.checked = preferences.qualite === 'haute';
+son.checked = preferences.son;
 transitions.addEventListener('change', () => setPreference('transitions', transitions.checked));
+son.addEventListener('change', () => setPreference('son', son.checked));
+// Son coupé ou remis depuis le bouton de la page cerveau
+document.addEventListener('preference', (e) => { if (e.detail.name === 'son') son.checked = e.detail.value; });
 qualite.addEventListener('change', () => {
     setPreference('qualite', qualite.checked ? 'haute' : 'basse');
     setPreference('qualiteAuto', false); // choisi à la main : plus de proposition automatique
