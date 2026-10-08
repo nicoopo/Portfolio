@@ -7,6 +7,9 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class SmokeTest extends WebTestCase
 {
+    /** Sans ça, Request::create() envoie « en-us » et / redirige vers /en/ (LangueNavigateurListener) */
+    private const NAVIGATEUR_FRANCAIS = ['HTTP_ACCEPT_LANGUAGE' => 'fr-FR'];
+
     public static function pages(): iterable
     {
         foreach (['/', '/projects', '/projects/portfolio', '/competences', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
@@ -52,7 +55,7 @@ final class SmokeTest extends WebTestCase
     #[DataProvider('pages')]
     public function testPageRepond(string $url): void
     {
-        static::createClient()->request('GET', $url);
+        static::createClient(server: self::NAVIGATEUR_FRANCAIS)->request('GET', $url);
 
         self::assertResponseIsSuccessful();
         self::assertSelectorCount(1, 'h1'); // un seul titre principal par page (SEO, lecteurs d'écran)
@@ -104,7 +107,7 @@ final class SmokeTest extends WebTestCase
     #[DataProvider('pages')]
     public function testPageAUnApercuDePartage(string $url): void
     {
-        $crawler = static::createClient()->request('GET', $url);
+        $crawler = static::createClient(server: self::NAVIGATEUR_FRANCAIS)->request('GET', $url);
 
         self::assertNotEmpty($crawler->filter('meta[name="description"]')->attr('content'));
         self::assertStringStartsWith('http', $crawler->filter('meta[property="og:image"]')->attr('content'));
@@ -169,5 +172,37 @@ final class SmokeTest extends WebTestCase
         // Pas de lettre dans les autres langues : la version anglaise
         $es = $client->request('GET', '/es/univers');
         self::assertStringContainsString('cover-letter', $es->filter('a[download="Cover_Letter_Nicolas_Cataluna.pdf"]')->attr('href'));
+    }
+
+    /** Première visite sur / : langue du navigateur ; ensuite le cookie « langue » fige le choix */
+    public function testLaPremiereVisiteSuitLaLangueDuNavigateur(): void
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'de-DE,de;q=0.9,en;q=0.8']);
+        self::assertResponseRedirects('http://localhost/de/');
+        self::assertResponseNotHasCookie('langue');
+
+        $client->followRedirect();
+        self::assertResponseHasCookie('langue');
+        self::assertSame('de', $client->getCookieJar()->get('langue')->getValue());
+
+        // Clic sur « Français » : le cookie existe, plus de redirection
+        $client->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'de-DE']);
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('html[lang="fr"]');
+    }
+
+    public function testSansLangueConnueOnResteEnFrancais(): void
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => '']); // robot : pas d'Accept-Language
+        self::assertResponseIsSuccessful();
+
+        $client->getCookieJar()->clear();
+        $client->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'ja-JP']);
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('html[lang="fr"]');
     }
 }
