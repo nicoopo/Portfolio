@@ -1,4 +1,5 @@
 import { createBlackHole } from './black_hole.js';
+import { basseQualite, preferences } from './preferences.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.createElement('canvas');
@@ -8,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
 
     let stars = [];
-    const STAR_COUNT = 150;
+    const STAR_COUNT = basseQualite() ? 60 : 150;
     let mouseX = 0, mouseY = 0;
 
     const resize = () => {
@@ -35,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.beginPath();
             ctx.arc(star.x + offsetX, star.y + offsetY, star.r, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(255, 255, 255, ${0.7 / star.depth})`;
-            ctx.shadowBlur = 8;
+            ctx.shadowBlur = basseQualite() ? 0 : 8; // le flou d'ombre coûte cher
             ctx.shadowColor = '#aaf';
             ctx.fill();
 
@@ -98,8 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const open = () => {
         hole.target = 1;
-        document.body.style.userSelect = 'none';
-        window.getSelection()?.removeAllRanges();
         if (hole.canvas) return;
         hole.canvas = Object.assign(document.createElement('canvas'), { className: 'trou-noir-curseur' });
         hole.canvas.setAttribute('aria-hidden', 'true');
@@ -116,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(hole.timer);
         hole.timer = null;
         hole.target = 0;
-        document.body.style.userSelect = '';
+        document.body.classList.remove('trou-noir-maintenu');
     };
 
     // « Le vide » : pas un lien, un champ, une image, le cerveau 3D… ni du texte
@@ -125,7 +124,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let start = null;
     document.addEventListener('pointerdown', (e) => {
-        if (e.button !== 0 || !isEmptySpace(e.target)) return;
+        if (e.button !== 0 || !preferences.transitions || !isEmptySpace(e.target)) return;
+        // Dès le début de l'appui : sur mobile, la sélection de texte arrive avant le trou noir
+        document.body.classList.add('trou-noir-maintenu');
+        window.getSelection()?.removeAllRanges();
         start = { x: e.clientX, y: e.clientY };
         hole.x = e.clientX;
         hole.y = e.clientY;
@@ -141,6 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
         hole.x = e.clientX;
         hole.y = e.clientY;
     });
+    // Appui long au doigt : ni menu « Copier » ni loupe pendant le trou noir
+    document.addEventListener('contextmenu', (e) => { if (start || hole.target) e.preventDefault(); });
     ['pointerup', 'pointercancel'].forEach((type) => document.addEventListener(type, () => { start = null; close(); }));
 
     resize();
