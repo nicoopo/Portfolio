@@ -15,8 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let stars = [];
     const STAR_COUNT = basseQualite() ? 60 : 150;
     let mouseX = 0, mouseY = 0;
+    let centreX = 0, centreY = 0; // centre de l'écran, relu seulement au redimensionnement (le lire à chaque image force un recalcul de mise en page)
 
     const resize = () => {
+        centreX = window.innerWidth / 2;
+        centreY = window.innerHeight / 2;
         canvas.width = window.innerWidth;
         canvas.height = Math.max(document.body.scrollHeight, window.innerHeight);
         stars = Array.from({ length: STAR_COUNT }, () => ({
@@ -32,8 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         stars.forEach(star => {
             // effet de profondeur dynamique
-            const offsetX = (mouseX - window.innerWidth / 2) * 0.002 * star.depth;
-            const offsetY = (mouseY - window.innerHeight / 2) * 0.002 * star.depth;
+            const offsetX = (mouseX - centreX) * 0.002 * star.depth;
+            const offsetY = (mouseY - centreY) * 0.002 * star.depth;
 
             if (hole.strength > 0) pull(star, offsetX, offsetY);
 

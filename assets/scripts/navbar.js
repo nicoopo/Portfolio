@@ -1,11 +1,11 @@
 // Menu et réglages (base.html.twig) s'ouvrent seuls (attribut popover) ; ici, seulement les préférences
-import { preferences, setPreference } from './preferences.js';
+import { basseQualite, preferences, setPreference } from './preferences.js';
 
 const transitions = document.getElementById('prefTransitions');
 const qualite = document.getElementById('prefQualite');
 const son = document.getElementById('prefSon');
 transitions.checked = preferences.transitions;
-qualite.checked = preferences.qualite === 'haute';
+qualite.checked = !basseQualite();
 son.checked = preferences.son;
 transitions.addEventListener('change', () => setPreference('transitions', transitions.checked));
 son.addEventListener('change', () => setPreference('son', son.checked));
