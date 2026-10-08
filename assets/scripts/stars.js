@@ -145,6 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     // Appui long au doigt : ni menu « Copier » ni loupe pendant le trou noir
     document.addEventListener('contextmenu', (e) => { if (start || hole.target) e.preventDefault(); });
+    // Trou noir ouvert : le doigt le déplace au lieu de faire défiler la page (sinon pointercancel le referme)
+    document.addEventListener('touchmove', (e) => { if (hole.target) e.preventDefault(); }, { passive: false });
     ['pointerup', 'pointercancel'].forEach((type) => document.addEventListener(type, () => { start = null; close(); }));
 
     resize();
