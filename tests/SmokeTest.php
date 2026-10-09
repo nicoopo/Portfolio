@@ -210,6 +210,23 @@ final class SmokeTest extends WebTestCase
         self::assertNotEmpty(array_filter($entrees, fn (array $e) => 'competence' === $e['type'] && str_starts_with($e['url'], '/en/cerveau#')));
     }
 
+    /** Visite guidée : bouton sur l'accueil, cinq étapes vers des pages qui existent, textes traduits */
+    public function testLaVisiteGuideeMeneADesPagesQuiExistent(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/en/');
+        self::assertSelectorExists('button[data-visite-demarrer]');
+        $etapes = json_decode($crawler->filter('#visite')->attr('data-etapes'), true);
+        self::assertCount(5, $etapes);
+        self::assertStringStartsWith('Welcome!', $etapes[0]['texte']);
+
+        foreach ($etapes as $etape) {
+            self::assertStringStartsWith('/en/', $etape['url']);
+            $client->request('GET', $etape['url']);
+            self::assertResponseIsSuccessful($etape['url']);
+        }
+    }
+
     public function testTelechargementCvPdf(): void
     {
         $client = static::createClient();

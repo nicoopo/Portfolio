@@ -13,6 +13,7 @@
 @import './components/_buttons.css';
 @import './components/_pdf-viewer.css';
 @import './components/_palette.css';
+@import './components/_visite.css';
 
 /* Pages */
 @import './pages/_home.css';
