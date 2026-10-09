@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!-- Page affichée par le service worker (public/sw.js) quand une page est demandée sans réseau. Tout est dans ce fichier. -->
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hors ligne · Univers de Nico</title>
+    <meta name="theme-color" content="#0a0a19">
+    <style>
+        :root { color-scheme: dark; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 1.5rem;
+            box-sizing: border-box;
+            font-family: system-ui, sans-serif;
+            text-align: center;
+            color: #e0f7ff;
+            background:
+                radial-gradient(1px 1px at 20% 30%, #fff, transparent),
+                radial-gradient(1px 1px at 70% 20%, #cfe9ff, transparent),
+                radial-gradient(1.5px 1.5px at 80% 70%, #fff, transparent),
+                radial-gradient(1px 1px at 35% 80%, #cfe9ff, transparent),
+                radial-gradient(ellipse at bottom, #1a1040 0%, #05050f 70%);
+        }
+        .astre {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            border-radius: 50%;
+            background: radial-gradient(circle, #000 0 45%, #ffb347 47%, rgba(127, 90, 240, 0.5) 55%, transparent 70%);
+        }
+        h1 { margin: 0 0 1rem; font-size: 2rem; color: #b69cff; }
+        p { max-width: 32rem; margin: 0 auto 0.75rem; line-height: 1.6; }
+        [lang="en"] { opacity: 0.75; }
+        button {
+            margin-top: 1.5rem;
+            padding: 0.7rem 1.6rem;
+            font: inherit;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(90deg, #7f5af0, #00a8cc);
+            border: 0;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="astre" aria-hidden="true"></div>
+        <h1>Hors ligne</h1>
+        <p>Pas de réseau pour l’instant : cette page s’est perdue entre deux étoiles. Réessayez dès que la connexion revient.</p>
+        <p lang="en">You are offline: this page got lost between two stars. Try again once you are back online.</p>
+        <button type="button" onclick="location.reload()">Réessayer · Retry</button>
+    </main>
+</body>
+</html>
