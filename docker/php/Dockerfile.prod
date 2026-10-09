@@ -74,7 +74,7 @@ RUN composer install \
         --optimize-autoloader \
     && php bin/console asset-map:compile \
     && php bin/console cache:warmup \
-    && mkdir -p public/uploads/projets \
+    && mkdir -p public/uploads/projets public/uploads/articles \
     && chown -R www-data:www-data var/ public/uploads
 
 EXPOSE 80

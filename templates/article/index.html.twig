@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Articles - Portfolio'|trans }}{% endblock %}
+
+{% block description %}{{ 'Articles techniques : retours d’expérience, ce que j’apprends en cours, coulisses du portfolio.'|trans }}{% endblock %}
+
+{% block body %}
+<section class="projets container py-5">
+  <h1 class="text-center gradient fw-bold display-5">{{ 'Articles'|trans }}</h1>
+  <p class="projets-intro">{{ 'Retours d’expérience, ce que j’apprends, et les coulisses de ce site.'|trans }}</p>
+
+  {# Mêmes cartes que la page Projets #}
+  <div class="projets-grille">
+    {% for article in articles %}
+    <article class="projet-carte">
+      {% if article.image %}
+      <div class="projet-carte-image">
+        <img src="{{ asset('uploads/articles/' ~ article.image) }}" alt="" loading="lazy">
+      </div>
+      {% endif %}
+      <div class="projet-carte-corps">
+        <p class="article-date"><time datetime="{{ article.publieLe|date('Y-m-d') }}">{{ article.publieLe|format_date('long', locale: app.request.locale) }}</time></p>
+        <h2 class="projet-carte-titre">
+          <a href="{{ path('app_article', {slug: article.slug}) }}">{{ article|loc('titre') }}</a>
+        </h2>
+        <p class="projet-carte-description">{{ article|loc('resume') }}</p>
+        <span class="projet-carte-suite" aria-hidden="true">{{ 'Lire l’article'|trans }} →</span>
+      </div>
+    </article>
+    {% else %}
+    <p class="projets-intro">{{ 'Premier article bientôt.'|trans }}</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
