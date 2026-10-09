@@ -1,0 +1,108 @@
+/* Visite guidée (visite.js) : barre en bas de l'écran, au-dessus du contenu */
+
+.visite {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  z-index: 1050;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  width: min(760px, calc(100vw - 2rem));
+  padding: 0.9rem 1rem 1.1rem 1.25rem;
+  overflow: hidden;
+  color: var(--color-text-light);
+  background: rgba(15, 15, 30, 0.94);
+  border: 1px solid rgba(127, 90, 240, 0.5);
+  border-radius: 16px;
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: 0 0 30px rgba(127, 90, 240, 0.45);
+  transform: translateX(-50%);
+}
+
+.visite[hidden] {
+  display: none;
+}
+
+.visite-texte {
+  flex: 1 1 320px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.visite-numero {
+  margin-right: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-secondary);
+}
+
+.visite-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.visite-bouton {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  background: rgba(127, 90, 240, 0.2);
+  border: 1px solid rgba(127, 90, 240, 0.5);
+  border-radius: 999px;
+}
+
+.visite-bouton--principal {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.visite-bouton:hover,
+.visite-bouton:focus-visible {
+  border-color: var(--color-secondary);
+}
+
+.visite-fermer {
+  display: inline-flex;
+  padding: 0.4rem;
+  color: var(--color-text-light);
+  background: none;
+  border: none;
+  border-radius: 8px;
+}
+
+.visite-fermer svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Temps restant avant l'étape suivante ; sa fin fait avancer la visite (animationend dans visite.js) */
+.visite-progression {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  transform-origin: left;
+  animation: visite-temps 12s linear both;
+}
+
+.visite.en-pause .visite-progression {
+  animation-play-state: paused;
+}
+
+.visite.derniere .visite-progression {
+  display: none;
+}
+
+@keyframes visite-temps {
+  from { transform: scaleX(0); }
+}
+
+/* Page du cerveau : au-dessus de ses boutons du bas (visite du cerveau, Partager, Plein écran) */
+body:has(.brain-stage) .visite {
+  bottom: 4.5rem;
+}

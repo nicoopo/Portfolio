@@ -144,7 +144,7 @@
     <dialog id="palette" class="palette" aria-label="{{ 'Rechercher'|trans }}" data-url="{{ path('app_recherche') }}"
             data-textes="{{ {
                 page: 'Page'|trans, competence: 'Compétence'|trans, projet: 'Projet'|trans, article: 'Article'|trans, commande: 'Commande'|trans,
-                meteores: 'La pluie de météores'|trans, vide: 'Aucun résultat'|trans,
+                meteores: 'La pluie de météores'|trans, visite: 'Visite en 1 minute'|trans, vide: 'Aucun résultat'|trans,
                 sudo: 'Bien essayé. Ici, c’est l’univers qui a les droits root.'|trans,
             }|json_encode }}">
         <input type="text" class="palette-champ" role="combobox" aria-expanded="true" aria-controls="palette-resultats" aria-autocomplete="list"
@@ -153,6 +153,25 @@
         <p class="palette-message" role="status" hidden></p>
         <p class="palette-aide" aria-hidden="true"><kbd>↑</kbd><kbd>↓</kbd> {{ 'choisir'|trans }} · <kbd>↵</kbd> {{ 'ouvrir'|trans }} · <kbd>{{ 'Échap'|trans }}</kbd> {{ 'fermer'|trans }}</p>
     </dialog>
+
+    {# Visite guidée (visite.js) : une étape par page, environ 12 s chacune #}
+    <section id="visite" class="visite" aria-label="{{ 'Visite guidée'|trans }}" hidden
+             data-etapes="{{ [
+                 {url: path('app_home'), texte: 'Bienvenue ! Je suis Nicolas, développeur fullstack PHP / Symfony. Voici mon univers en une minute.'|trans},
+                 {url: path('app_cerveau'), texte: 'Mon cerveau en 3D : chaque neurone est une compétence, chaque souvenir une étape de mon parcours. Clique dessus pour explorer.'|trans},
+                 {url: path('app_projects'), texte: 'Mes projets, en orbite autour d’un trou noir : chacun a sa page, avec le code et ce que j’en retiens.'|trans},
+                 {url: path('app_univers'), texte: 'Mon parcours, du brevet au bachelor, et mon CV à télécharger.'|trans},
+                 {url: path('app_contact'), texte: 'Un projet, une alternance, une question ? Écris-moi ici.'|trans},
+             ]|json_encode }}"
+             data-textes="{{ {pause: 'Pause'|trans, reprendre: 'Reprendre'|trans, suivant: 'Suivant'|trans, terminer: 'Terminer'|trans}|json_encode }}">
+        <p class="visite-texte" aria-live="polite"><span class="visite-numero" data-numero></span> <span data-texte></span></p>
+        <div class="visite-actions">
+            <button type="button" class="visite-bouton" data-pause></button>
+            <button type="button" class="visite-bouton visite-bouton--principal" data-suivant></button>
+            <button type="button" class="visite-fermer" data-quitter aria-label="{{ 'Quitter la visite'|trans }}">{{ ux_icon('bi:x-lg') }}</button>
+        </div>
+        <div class="visite-progression" aria-hidden="true"></div>
+    </section>
 
     {# Nouvelle découverte d'un easter egg (decouvertes.js) #}
     <p id="decouverte" class="decouverte-toast" role="status" hidden>

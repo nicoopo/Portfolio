@@ -4,6 +4,7 @@
  * et lance quelques commandes. Liste au clavier : modèle combobox de l'ARIA (aria-activedescendant).
  */
 import { decouvrir } from './decouvertes.js';
+import { naviguer } from './naviguer.js';
 
 const dialog = document.getElementById('palette');
 const champ = dialog.querySelector('input');
@@ -14,6 +15,7 @@ const MAX = 12;
 
 const COMMANDES = [
     { type: 'commande', titre: textes.meteores, action: () => document.dispatchEvent(new CustomEvent('meteores')) },
+    { type: 'commande', titre: textes.visite, action: () => document.dispatchEvent(new CustomEvent('visite:demarrer')) },
 ];
 
 let entrees = null; // null tant que /recherche.json n'a pas répondu : seules les commandes sont cherchées
@@ -73,13 +75,7 @@ function activer(i) {
 function choisir(entree) {
     dialog.close();
     if (entree.action) return entree.action();
-    // Vrai clic sur un lien : la transition trou noir (page_transition.js) s'applique comme partout
-    const lien = Object.assign(document.createElement('a'), { href: entree.url, hidden: true });
-    document.body.append(lien);
-    lien.click();
-    lien.remove();
-    // Même page, autre ancre (neurone du cerveau) : le navigateur ne recharge pas, la page ne relit pas l'ancre
-    if (new URL(entree.url, location.href).pathname === location.pathname) location.reload();
+    naviguer(entree.url);
 }
 
 champ.addEventListener('input', filtrer);

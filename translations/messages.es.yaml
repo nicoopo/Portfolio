@@ -199,3 +199,16 @@
 "En ce moment": "Ahora"
 "Ce que je fais en ce moment : ce que je construis, ce que j’apprends.": "Lo que hago ahora mismo: lo que construyo, lo que aprendo."
 "Mis à jour le": "Actualizado el"
+
+# Visite guidée
+"Visite en 1 minute": "Visita de 1 minuto"
+"Bienvenue ! Je suis Nicolas, développeur fullstack PHP / Symfony. Voici mon univers en une minute.": "¡Bienvenido! Soy Nicolas, desarrollador fullstack PHP / Symfony. Este es mi universo en un minuto."
+"Mon cerveau en 3D : chaque neurone est une compétence, chaque souvenir une étape de mon parcours. Clique dessus pour explorer.": "Mi cerebro en 3D: cada neurona es una competencia, cada recuerdo una etapa de mi trayectoria. Haz clic para explorar."
+"Mes projets, en orbite autour d’un trou noir : chacun a sa page, avec le code et ce que j’en retiens.": "Mis proyectos, en órbita alrededor de un agujero negro: cada uno tiene su página, con el código y lo que aprendí."
+"Mon parcours, du brevet au bachelor, et mon CV à télécharger.": "Mi trayectoria, del colegio al bachelor, y mi CV para descargar."
+"Un projet, une alternance, une question ? Écris-moi ici.": "¿Un proyecto, una formación en alternancia, una pregunta? Escríbeme aquí."
+"Pause": "Pausa"
+"Reprendre": "Reanudar"
+"Suivant": "Siguiente"
+"Terminer": "Terminar"
+"Quitter la visite": "Salir de la visita"
