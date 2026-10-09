@@ -1,6 +1,7 @@
 /*
  * Réglages du visiteur, gardés dans son navigateur (menu de la navbar) :
- * - transitions : trou noir entre les pages
+ * - transitions : effets entre les pages (et easter eggs)
+ * - effet : 'hasard', 'trou-noir', 'teleportation', 'distorsion' ou 'lumiere' (page_transition.js)
  * - qualite : 'haute' ou 'basse' (moins de particules, pas de lueur, pour les machines modestes) ;
  *   sans choix du visiteur, basse d'office si le navigateur n'a pas d'accélération graphique
  * - curseur : 'comete', 'orbite', 'trou-noir' ou 'systeme' (curseur.js)
@@ -9,7 +10,7 @@
  * - qualiteAuto : proposer la qualité basse si le site rame (qualite_auto.js), jusqu'à ce que le visiteur choisisse
  */
 const KEY = 'preferences';
-const DEFAULTS = { transitions: true, qualite: 'haute', curseur: 'comete', son: false, qualiteAuto: true, decouvertes: [] };
+const DEFAULTS = { transitions: true, effet: 'hasard', qualite: 'haute', curseur: 'comete', son: false, qualiteAuto: true, decouvertes: [] };
 
 const read = () => { try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY)) }; } catch { return { ...DEFAULTS }; } };
 

@@ -265,6 +265,7 @@ final class SmokeTest extends WebTestCase
 
         self::assertStringContainsString('prefers-color-scheme: light', $crawler->filter('head script')->first()->text());
         self::assertSame(['systeme', 'dark', 'light'], $crawler->filter('#reglages input[name="theme"]')->extract(['value']));
+        self::assertSame(['hasard', 'trou-noir', 'teleportation', 'distorsion', 'lumiere'], $crawler->filter('#reglages input[name="effet"]')->extract(['value']));
         self::assertSelectorTextContains('#reglages', 'Theme');
     }
 

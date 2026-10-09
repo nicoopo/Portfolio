@@ -1,7 +1,7 @@
 /*
  * Easter egg : le code Konami (↑ ↑ ↓ ↓ ← → ← → B A) déclenche une pluie de météores ;
  * les plus gros s'écrasent : explosion, onde de choc et secousse de la page.
- * Coupé avec le réglage « Effets trou noir » ou les mouvements réduits.
+ * Coupé avec le réglage « Effets spéciaux » ou les mouvements réduits.
  */
 import { fitCanvas, reducedMotion } from './black_hole.js';
 import { basseQualite, preferences } from './preferences.js';
