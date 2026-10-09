@@ -7,6 +7,7 @@ use App\Entity\Competence;
 use App\Entity\Journal;
 use App\Entity\LienRecruteur;
 use App\Entity\Maintenant;
+use App\Entity\MessageLivreOr;
 use App\Entity\Projet;
 use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
@@ -96,7 +97,7 @@ final class AdminTest extends WebTestCase
 
     public static function listes(): iterable
     {
-        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours', 'utilisateur', 'demande-contact', 'journal', 'cv-profil', 'experience', 'cv-competence', 'langue', 'centre-interet', 'article', 'maintenant', 'lien-recruteur'] as $liste) {
+        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours', 'utilisateur', 'demande-contact', 'journal', 'cv-profil', 'experience', 'cv-competence', 'langue', 'centre-interet', 'article', 'maintenant', 'lien-recruteur', 'message-livre-or'] as $liste) {
             yield $liste => [$liste];
         }
     }
@@ -215,6 +216,39 @@ final class AdminTest extends WebTestCase
 
         $client->request('GET', '/admin/projet/'.$id.'/edit');
         $client->submitForm('Sauvegarder les modifications', ['Projet[annee]' => '']);
+    }
+
+    /** Livre d'or : un message envoyé attend la modération ; approuvé dans l'admin, il devient une étoile. Le robot du champ piège n'enregistre rien */
+    public function testUnMessageDuLivreDOrApparaitApresModeration(): void
+    {
+        $client = static::createClient(server: ['HTTP_ACCEPT_LANGUAGE' => 'fr-FR']);
+        $depot = fn () => self::getContainer()->get(EntityManagerInterface::class)->getRepository(MessageLivreOr::class);
+        $avant = $depot()->count([]);
+
+        $client->request('GET', '/livre-d-or');
+        $client->submitForm('Envoyer mon étoile', ['livre_or[prenom]' => 'Robot', 'livre_or[message]' => 'Achetez mes pilules', 'livre_or[website]' => 'spam.example']);
+        self::assertResponseRedirects();
+        self::assertSame($avant, $depot()->count([]));
+
+        $client->request('GET', '/livre-d-or');
+        $client->submitForm('Envoyer mon étoile', ['livre_or[prenom]' => 'Camille', 'livre_or[message]' => 'Superbe univers, bravo !']);
+        $client->followRedirect();
+        self::assertSelectorTextContains('.contact-flash--success', 'Merci');
+        self::assertSelectorTextNotContains('body', 'Superbe univers, bravo !'); // pas encore approuvé
+
+        $message = $depot()->findOneBy(['prenom' => 'Camille']);
+        self::assertSame('fr', $message->getLangue());
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $entityManager->getRepository(MessageLivreOr::class)->find($message->getId())->setApprouve(true);
+        $entityManager->flush();
+
+        $client->request('GET', '/livre-d-or');
+        self::assertSelectorTextContains('.livre-or-etoile', 'Superbe univers, bravo !');
+        self::assertSelectorTextContains('.livre-or-etoile', 'Camille');
+
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $entityManager->remove($entityManager->getRepository(MessageLivreOr::class)->find($message->getId()));
+        $entityManager->flush();
     }
 
     public function testUneCategorieUtiliseeNePeutPasEtreSupprimee(): void

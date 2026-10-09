@@ -83,3 +83,8 @@
 :root[data-theme="light"] code {
   color: #9c1f5a;
 }
+
+/* Livre d'or : étoiles cerclées de violet pour se détacher du ciel clair */
+:root[data-theme="light"] .livre-or-etoile {
+  box-shadow: 0 0 0 2px var(--color-primary), 0 0 14px var(--color-primary);
+}

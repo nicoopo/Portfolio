@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Livre d’or'|trans }} · {{ 'Univers de Nico'|trans }}{% endblock %}
+
+{% block description %}{{ 'Laissez un mot : il deviendra une étoile de mon ciel.'|trans }}{% endblock %}
+
+{% block body %}
+<section class="livre-or container py-5">
+  <h1 class="text-center gradient fw-bold display-6">{{ 'Livre d’or'|trans }}</h1>
+  <p class="projets-intro">{{ 'Laissez un mot : il deviendra une étoile de mon ciel.'|trans }}</p>
+
+  {# Une étoile par message approuvé ; position tirée de son numéro (stable d'une visite à l'autre).
+     Le message s'affiche au survol ou au focus ; les lecteurs d'écran lisent la liste telle quelle. #}
+  {% if messages is not empty %}
+  <ul class="livre-or-ciel" aria-label="{{ 'Messages des visiteurs'|trans }}">
+    {% for message in messages %}
+    <li class="livre-or-etoile" tabindex="0" style="--x: {{ (message.id * 37) % 88 + 6 }}%; --y: {{ (message.id * 61) % 76 + 12 }}%">
+      <span class="livre-or-bulle">
+        <q>{{ message.message }}</q>
+        <span class="livre-or-auteur">{{ message.prenom }}, {{ message.creeLe|format_date('medium', locale: app.request.locale) }}</span>
+      </span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p class="projets-intro">{{ 'Le ciel attend sa première étoile : la vôtre ?'|trans }}</p>
+  {% endif %}
+
+  <div class="livre-or-signer" id="signer">
+    <h2>{{ 'Signer le livre d’or'|trans }}</h2>
+    {% for type, flashes in app.flashes(['success', 'error']) %}
+      {% for flash in flashes %}
+        <p class="contact-flash contact-flash--{{ type }}" role="{{ type == 'error' ? 'alert' : 'status' }}">{{ flash }}</p>
+      {% endfor %}
+    {% endfor %}
+    {{ form_start(form, {attr: {class: 'contact-form', novalidate: 'novalidate'}}) }}
+      {{ form_row(form.prenom) }}
+      {{ form_row(form.message) }}
+      {{ form_row(form.website) }}
+      <button type="submit" class="btn btn-galactic btn-galactic-primary">{{ 'Envoyer mon étoile'|trans }}</button>
+    {{ form_end(form) }}
+  </div>
+</section>
+{% endblock %}

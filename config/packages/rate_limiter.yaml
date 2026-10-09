@@ -5,9 +5,16 @@ framework:
             policy: sliding_window
             limit: 10
             interval: '1 hour'
+        # Livre d'or (LivreOrController) : un mot ou deux par visiteur, pas un roman en dix envois
+        livre_or:
+            policy: sliding_window
+            limit: 3
+            interval: '1 hour'
 
 when@test:
     framework:
         rate_limiter:
             decouvertes:
                 policy: no_limit # l'état du limiteur survit entre deux lancements des tests (cache sur disque)
+            livre_or:
+                policy: no_limit
