@@ -12,6 +12,7 @@ export function decouvrir(id) {
     if (preferences.decouvertes.includes(id)) return;
     setPreference('decouvertes', [...preferences.decouvertes, id]);
     afficherCarnet();
+    compter(id);
 
     const toast = document.getElementById('decouverte');
     const ligne = document.querySelector(`[data-decouverte="${id}"]`);
@@ -25,6 +26,12 @@ export function decouvrir(id) {
         toast.timer = setTimeout(() => { toast.hidden = true; }, AFFICHAGE_MS);
     }
     if (trouvees === total) document.dispatchEvent(new CustomEvent('decouvertes:toutes'));
+}
+
+/** +1 au compteur commun (DecouverteController) ; sans réseau, tant pis : ce n'est qu'une statistique */
+function compter(id) {
+    const url = document.querySelector('.decouvertes')?.dataset.url;
+    if (url) fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }), keepalive: true }).catch(() => {});
 }
 
 const lignes = () => document.querySelectorAll('[data-decouverte]');

@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use App\Entity\Article;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -225,6 +226,32 @@ final class SmokeTest extends WebTestCase
             $client->request('GET', $etape['url']);
             self::assertResponseIsSuccessful($etape['url']);
         }
+    }
+
+    /** Statistiques des easter eggs : +1 par découverte envoyée depuis le site, affiché dans le carnet ; le reste est refusé */
+    public function testLesDecouvertesSontComptees(): void
+    {
+        $client = static::createClient(server: self::NAVIGATEUR_FRANCAIS);
+        $connection = self::getContainer()->get(Connection::class);
+        $nombre = fn () => (int) $connection->fetchOne("SELECT nombre FROM decouverte WHERE id = 'terminal'");
+        $avant = $nombre();
+        $envoyer = fn (string $id, array $server = []) => $client->request('POST', '/decouvertes', server: $server + ['CONTENT_TYPE' => 'application/json'], content: json_encode(['id' => $id]));
+
+        $envoyer('terminal', ['HTTP_SEC_FETCH_SITE' => 'same-origin']);
+        self::assertResponseStatusCodeSame(204);
+        self::assertSame($avant + 1, $nombre());
+        $client->request('GET', '/');
+        self::assertSelectorTextContains('[data-decouverte="terminal"] .decouverte-stat', 1 === $avant + 1 ? 'Trouvée par un visiteur' : 'Trouvée par '.($avant + 1).' visiteurs');
+
+        $envoyer('inconnue');
+        self::assertResponseStatusCodeSame(400);
+        $envoyer('terminal', ['HTTP_SEC_FETCH_SITE' => 'cross-site']);
+        self::assertResponseStatusCodeSame(403);
+        $client->request('GET', '/decouvertes');
+        self::assertResponseStatusCodeSame(405);
+        self::assertSame($avant + 1, $nombre());
+
+        $connection->executeStatement("UPDATE decouverte SET nombre = :n WHERE id = 'terminal'", ['n' => $avant]);
     }
 
     public function testTelechargementCvPdf(): void

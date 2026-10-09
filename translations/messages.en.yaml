@@ -212,3 +212,6 @@
 "Suivant": "Next"
 "Terminer": "Finish"
 "Quitter la visite": "Leave the tour"
+
+# Statistiques des easter eggs
+"{0} Personne ne l’a encore trouvée|{1} Trouvée par un visiteur|]1,Inf[ Trouvée par %count% visiteurs": "{0} Nobody has found it yet|{1} Found by one visitor|]1,Inf[ Found by %count% visitors"

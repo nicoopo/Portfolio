@@ -1,0 +1,13 @@
+framework:
+    rate_limiter:
+        # Compteur des easter eggs (DecouverteController) : il n'y en a que cinq à trouver
+        decouvertes:
+            policy: sliding_window
+            limit: 10
+            interval: '1 hour'
+
+when@test:
+    framework:
+        rate_limiter:
+            decouvertes:
+                policy: no_limit # l'état du limiteur survit entre deux lancements des tests (cache sur disque)
