@@ -31,6 +31,8 @@ document.addEventListener('keydown', (e) => {
 
 // Récompense du carnet de découvertes : tout est trouvé
 document.addEventListener('decouvertes:toutes', () => { if (lancable()) pluie(); });
+// Commande « Pluie de météores » de la palette (palette.js)
+document.addEventListener('meteores', () => { if (lancable()) pluie(); });
 
 function lancable() {
     return !enCours && preferences.transitions && !reducedMotion();

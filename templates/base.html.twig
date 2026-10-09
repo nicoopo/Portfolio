@@ -61,6 +61,11 @@
                     {% endfor %}
                 </ul>
 
+                {# Palette de commandes (palette.js) : aussi Ctrl+K / ⌘K ou « / » #}
+                <button type="button" class="menu-button" id="paletteOuvrir" aria-label="{{ 'Rechercher'|trans }}" aria-keyshortcuts="Control+K Meta+K" title="{{ 'Rechercher'|trans }} (Ctrl+K)">
+                    {{ ux_icon('bi:search') }}
+                </button>
+
                 {# Réglages : panneau natif (popover), fermé par Échap ou un clic ailleurs #}
                 <button type="button" class="menu-button" popovertarget="reglages" aria-label="{{ 'Réglages'|trans }}">
                     {{ ux_icon('bi:gear-fill') }}
@@ -94,6 +99,7 @@
                                 'konami': {nom: 'La pluie de météores', indice: 'Un vieux code de jeu vidéo, au clavier…'},
                                 'constellation-n': {nom: 'La constellation N', indice: 'Une initiale cachée dans le ciel…'},
                                 'constellation-lion': {nom: 'La constellation du Lion', indice: 'Un signe du zodiaque dans le ciel…'},
+                                'terminal': {nom: 'Le terminal secret', indice: 'Un mot magique d’administrateur, dans la recherche…'},
                             } %}
                                 <li data-decouverte="{{ id }}">
                                     <span class="decouverte-nom">{{ decouverte.nom|trans }}</span>
@@ -133,6 +139,20 @@
             </nav>
         </div>
     </nav>
+
+    {# Palette de commandes (palette.js) : résultats remplis depuis /recherche.json #}
+    <dialog id="palette" class="palette" aria-label="{{ 'Rechercher'|trans }}" data-url="{{ path('app_recherche') }}"
+            data-textes="{{ {
+                page: 'Page'|trans, competence: 'Compétence'|trans, projet: 'Projet'|trans, article: 'Article'|trans, commande: 'Commande'|trans,
+                meteores: 'La pluie de météores'|trans, vide: 'Aucun résultat'|trans,
+                sudo: 'Bien essayé. Ici, c’est l’univers qui a les droits root.'|trans,
+            }|json_encode }}">
+        <input type="text" class="palette-champ" role="combobox" aria-expanded="true" aria-controls="palette-resultats" aria-autocomplete="list"
+               aria-label="{{ 'Rechercher'|trans }}" placeholder="{{ 'Une page, une compétence, un projet…'|trans }}" autocomplete="off" spellcheck="false">
+        <ul id="palette-resultats" class="palette-resultats" role="listbox" aria-label="{{ 'Résultats'|trans }}"></ul>
+        <p class="palette-message" role="status" hidden></p>
+        <p class="palette-aide" aria-hidden="true"><kbd>↑</kbd><kbd>↓</kbd> {{ 'choisir'|trans }} · <kbd>↵</kbd> {{ 'ouvrir'|trans }} · <kbd>{{ 'Échap'|trans }}</kbd> {{ 'fermer'|trans }}</p>
+    </dialog>
 
     {# Nouvelle découverte d'un easter egg (decouvertes.js) #}
     <p id="decouverte" class="decouverte-toast" role="status" hidden>

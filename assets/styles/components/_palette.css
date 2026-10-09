@@ -1,0 +1,121 @@
+/* Palette de commandes (Ctrl+K) : même verre dépoli que le panneau Réglages */
+
+.palette {
+  width: min(600px, calc(100vw - 2rem));
+  max-height: min(70vh, 560px);
+  margin: 12vh auto auto;
+  padding: 0;
+  overflow: hidden;
+  color: var(--color-text-light);
+  background: rgba(15, 15, 30, 0.94);
+  border: 1px solid rgba(127, 90, 240, 0.5);
+  border-radius: 16px;
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: 0 0 40px rgba(127, 90, 240, 0.45);
+}
+
+.palette[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.palette::backdrop {
+  background: rgba(5, 5, 15, 0.6);
+  backdrop-filter: blur(3px);
+}
+
+.palette-champ {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  font-size: 1.1rem;
+  color: var(--color-text);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(127, 90, 240, 0.35);
+  outline: none;
+}
+
+.palette-champ::placeholder {
+  color: var(--color-text-light);
+  opacity: 0.6;
+}
+
+.palette-resultats {
+  flex: 1;
+  margin: 0;
+  padding: 0.4rem;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.palette-option {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 0 0.75rem;
+  align-items: baseline;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.palette-option[aria-selected="true"] {
+  background: rgba(127, 90, 240, 0.3);
+  box-shadow: inset 3px 0 0 var(--color-secondary);
+}
+
+.palette-type {
+  grid-row: span 2;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+}
+
+.palette-titre {
+  color: var(--color-text);
+}
+
+.palette-detail {
+  overflow: hidden;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  opacity: 0.7;
+}
+
+.palette-message {
+  margin: 0;
+  padding: 1rem 1.25rem;
+}
+
+.palette-aide {
+  margin: 0;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.75rem;
+  border-top: 1px solid rgba(127, 90, 240, 0.25);
+  opacity: 0.7;
+}
+
+.palette-aide kbd {
+  margin-right: 0.15rem;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.7rem;
+  color: var(--color-text);
+  background: rgba(127, 90, 240, 0.25);
+  border-radius: 4px;
+}
+
+@media (max-width: 576px) {
+  .palette-option {
+    grid-template-columns: 1fr;
+  }
+
+  .palette-type {
+    grid-row: auto;
+  }
+
+  .palette-aide {
+    display: none; /* pas de clavier physique */
+  }
+}

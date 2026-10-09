@@ -12,6 +12,7 @@
 /* Composants réutilisables */
 @import './components/_buttons.css';
 @import './components/_pdf-viewer.css';
+@import './components/_palette.css';
 
 /* Pages */
 @import './pages/_home.css';
