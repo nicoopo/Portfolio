@@ -18,6 +18,7 @@
             {valeur: demandes_mois, libelle: 'demande(s) de contact ce mois-ci', detail: demandes_total ~ ' au total', lien: path('admin_demande_contact_index'), alerte: false},
             {valeur: demandes_echec, libelle: 'e-mail(s) de contact en échec', detail: 'message conservé, à lire dans l’admin', lien: path('admin_demande_contact_index', {filters: {statut: {comparison: '=', value: 'echec'}}}), alerte: demandes_echec > 0},
             {valeur: connexions_refusees, libelle: 'connexion(s) refusée(s) en 7 jours', detail: 'mauvais mot de passe ou tentatives répétées', lien: path('admin_journal_index', {filters: {type: {comparison: '=', value: 'connexion_refusee'}}}), alerte: connexions_refusees > 0},
+            {valeur: a_relancer, libelle: 'candidature(s) à relancer', detail: 'sans réponse depuis plus d’une semaine', lien: path('admin_candidature_index'), alerte: a_relancer > 0},
             {valeur: nb_competences ~ ' / ' ~ nb_projets, libelle: 'compétences / projets', detail: 'contenu du cerveau', lien: path('admin_competence_index'), alerte: false},
         ] %}
         {% for chiffre in chiffres %}
