@@ -30,6 +30,24 @@
             <a href="{{ path('app_cerveau') }}" class="btn btn-galactic btn-galactic-outline-light">{{ 'Mon Cerveau'|trans }}</a>
             <a href="{{ path('app_projects') }}" class="btn btn-galactic btn-galactic-outline-light">{{ 'Projets'|trans }}</a>
         </nav>
+
+        {% if introuvable %}
+        {# Mini-jeu (asteroides_controller.js) : lancé seulement par le bouton ; les liens restent au-dessus #}
+        <div class="jeu-404" data-controller="asteroides" data-asteroides-textes-value="{{ {
+                perdu: 'Touché ! Tu as tenu %score% s.'|trans,
+                record: 'Nouveau record : %score% s !'|trans,
+                meilleur: 'Record : %score% s'|trans,
+                rejouer: 'Rejouer'|trans,
+            }|json_encode }}">
+            <p class="jeu-404-titre">{{ 'En attendant : évite les astéroïdes'|trans }}
+                <small>{{ 'Flèches ← → ou glisse le doigt'|trans }}</small></p>
+            <button type="button" class="btn btn-galactic btn-galactic-outline-light" data-asteroides-target="jouer" data-action="asteroides#jouer">{{ 'Jouer'|trans }}</button>
+            <canvas class="jeu-404-terrain" data-asteroides-target="canvas" tabindex="-1" hidden
+                    aria-label="{{ 'Jeu : un vaisseau évite des astéroïdes qui tombent'|trans }}"></canvas>
+            <p class="jeu-404-score" role="status" data-asteroides-target="score"></p>
+            <p class="jeu-404-record" data-asteroides-target="record"></p>
+        </div>
+        {% endif %}
     </div>
 </section>
 {% endblock %}

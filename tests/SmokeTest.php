@@ -301,6 +301,7 @@ final class SmokeTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
         self::assertSelectorTextContains('h1', 'Page introuvable');
         self::assertSelectorExists('html[lang="fr"] .erreur-liens a[href="/cerveau"]');
+        self::assertSelectorExists('[data-controller="asteroides"] button[data-action="asteroides#jouer"]'); // mini-jeu
 
         $client->request('GET', '/en/does-not-exist');
         self::assertResponseStatusCodeSame(404);
