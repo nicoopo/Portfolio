@@ -248,3 +248,13 @@
 "Nouveau": "Nuevo"
 "Première fois que j’utilise": "Primera vez que uso"
 "La frise se remplit : revenez bientôt.": "La línea de tiempo se está llenando: vuelva pronto."
+
+# Page 404 : mini-jeu
+"Touché ! Tu as tenu %score% s.": "¡Impacto! Aguantaste %score% s."
+"Nouveau record : %score% s !": "¡Nuevo récord: %score% s!"
+"Record : %score% s": "Récord: %score% s"
+"Rejouer": "Volver a jugar"
+"En attendant : évite les astéroïdes": "Mientras tanto: esquiva los asteroides"
+"Flèches ← → ou glisse le doigt": "Flechas ← → o desliza el dedo"
+"Jouer": "Jugar"
+"Jeu : un vaisseau évite des astéroïdes qui tombent": "Juego: una nave esquiva asteroides que caen"

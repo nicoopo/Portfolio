@@ -248,3 +248,13 @@
 "Nouveau": "New"
 "Première fois que j’utilise": "First time I used"
 "La frise se remplit : revenez bientôt.": "The timeline is filling up: come back soon."
+
+# Page 404 : mini-jeu
+"Touché ! Tu as tenu %score% s.": "Hit! You lasted %score% s."
+"Nouveau record : %score% s !": "New record: %score% s!"
+"Record : %score% s": "Record: %score% s"
+"Rejouer": "Play again"
+"En attendant : évite les astéroïdes": "Meanwhile: dodge the asteroids"
+"Flèches ← → ou glisse le doigt": "Arrow keys ← → or slide your finger"
+"Jouer": "Play"
+"Jeu : un vaisseau évite des astéroïdes qui tombent": "Game: a spaceship dodges falling asteroids"
