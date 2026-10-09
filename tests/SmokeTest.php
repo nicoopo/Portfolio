@@ -91,7 +91,7 @@ final class SmokeTest extends WebTestCase
         self::assertGreaterThan(1, $page->filter('.projet-texte p')->count());
         self::assertSelectorExists('a[href="https://github.com/nicoopo/Portfolio"]');
         self::assertSelectorExists('.projet-competences a[href^="/cerveau#"]');
-        self::assertStringContainsString('/portfolio-cerveau', $page->filter('meta[property="og:image"]')->attr('content'));
+        self::assertSame('http://localhost/partage/projet/portfolio.png', $page->filter('meta[property="og:image"]')->attr('content'));
 
         $client->request('GET', '/projects/inconnu');
         self::assertResponseStatusCodeSame(404);
@@ -282,6 +282,21 @@ final class SmokeTest extends WebTestCase
         $client = static::getClient();
         $client->request('GET', '/en/competences');
         self::assertSelectorExists('a[href="/en/competences/comparer"]');
+    }
+
+    /** Images de partage : un PNG 1200 × 630 par projet, dans la langue de l'adresse ; projet inconnu : 404 */
+    public function testLesImagesDePartageSontGenerees(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/en/partage/projet/pendu.png');
+
+        self::assertResponseHeaderSame('Content-Type', 'image/png');
+        self::assertStringContainsString('max-age=86400', $client->getResponse()->headers->get('Cache-Control'));
+        [$largeur, $hauteur] = getimagesizefromstring($client->getResponse()->getContent());
+        self::assertSame([1200, 630], [$largeur, $hauteur]);
+
+        $client->request('GET', '/partage/projet/inconnu.png');
+        self::assertResponseStatusCodeSame(404);
     }
 
     public function testTelechargementCvPdf(): void
