@@ -15,7 +15,7 @@ final class SmokeTest extends WebTestCase
 
     public static function pages(): iterable
     {
-        foreach (['/', '/projects', '/projects/portfolio', '/projects/frise', '/articles', '/now', '/livre-d-or', '/competences', '/competences/comparer', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
+        foreach (['/', '/projects', '/projects/portfolio', '/projects/frise', '/articles', '/now', '/livre-d-or', '/terminal', '/competences', '/competences/comparer', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
             yield $url => [$url];
             foreach (['en', 'es', 'de', 'it', 'pt'] as $langue) {
                 yield "/$langue$url" => ["/$langue$url"];
@@ -297,6 +297,19 @@ final class SmokeTest extends WebTestCase
 
         $client->request('GET', '/partage/projet/inconnu.png');
         self::assertResponseStatusCodeSame(404);
+    }
+
+    /** Terminal : profil, projets (avec leur page), compétences et contact fournis à la page, traduits */
+    public function testLeTerminalConnaitLePortfolio(): void
+    {
+        $crawler = static::createClient()->request('GET', '/en/terminal');
+
+        $donnees = json_decode($crawler->filter('[data-terminal-donnees-value]')->attr('data-terminal-donnees-value'), true);
+        self::assertContains('/en/projects/pendu', array_column($donnees['projets'], 'url'));
+        self::assertArrayHasKey('Networks / Infra', $donnees['competences']);
+        self::assertNotEmpty($donnees['resume']);
+        self::assertStringContainsString('@', $donnees['contact']['email']);
+        self::assertSelectorExists('label[for="terminal-commande"]');
     }
 
     public function testTelechargementCvPdf(): void
