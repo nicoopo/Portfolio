@@ -39,6 +39,7 @@
         {% for graphique in [
             {titre: 'Activité des 30 derniers jours', colonne: 'Jour', donnees: activite},
             {titre: 'Demandes de contact sur 12 mois', colonne: 'Mois', donnees: contacts_par_mois},
+            {titre: 'Pages vues sur 30 jours (sans robots ni administrateur)', colonne: 'Jour', donnees: visites},
         ] %}
         <div class="col-lg-6">
             <h2 class="h5">{{ graphique.titre }}</h2>
@@ -63,6 +64,27 @@
                     </tbody>
                 </table>
             </details>
+        </div>
+        {% endfor %}
+    </div>
+
+    {# Statistiques de visite : sans cookie ni IP, des totaux par page, provenance et langue #}
+    <div class="row g-4 mb-4">
+        {% for titre, classement in visites_classements %}
+        <div class="col-lg-4">
+            <h2 class="h5">{{ titre }} (30 jours)</h2>
+            {% if classement is empty %}
+                <p class="text-muted">Pas encore de visite comptée.</p>
+            {% else %}
+            <table class="table table-sm datagrid">
+                <thead class="visually-hidden"><tr><th scope="col">{{ titre }}</th><th scope="col">Pages vues</th></tr></thead>
+                <tbody>
+                {% for valeur, total in classement %}
+                    <tr><td>{{ valeur }}</td><td class="text-end">{{ total }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
         </div>
         {% endfor %}
     </div>

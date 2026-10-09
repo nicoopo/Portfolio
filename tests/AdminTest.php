@@ -73,7 +73,7 @@ final class AdminTest extends WebTestCase
         $entityManager->persist(new Journal(Journal::CONNEXION_REFUSEE, 'Test du graphique', null, null));
         $entityManager->flush();
         $crawler = $client->request('GET', '/admin');
-        self::assertCount(2, $crawler->filter('canvas[data-graphique]'));
+        self::assertCount(3, $crawler->filter('canvas[data-graphique]'));
         $activite = json_decode($crawler->filter('canvas[data-graphique]')->first()->attr('data-graphique'), true);
         $refusees = array_column($activite['series'], 'data', 'label')['Connexions refusées'];
         self::assertCount(30, $refusees);
@@ -275,6 +275,27 @@ final class AdminTest extends WebTestCase
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->remove($entityManager->getRepository(Candidature::class)->findOneBy(['entreprise' => 'Initech']));
         $entityManager->flush();
+    }
+
+    /** Statistiques : une page vue par un vrai navigateur venant de LinkedIn est comptée ; robots et administrateur ne le sont pas */
+    public function testLesVisitesSontCompteesSansRobotsNiAdmin(): void
+    {
+        $client = static::createClient(server: ['HTTP_ACCEPT_LANGUAGE' => 'fr-FR']);
+        $connection = self::getContainer()->get(\Doctrine\DBAL\Connection::class);
+        $nombre = fn (string $source) => (int) $connection->fetchOne("SELECT COALESCE(SUM(nombre), 0) FROM visite_jour WHERE chemin = '/projects/pendu' AND langue = 'de' AND source = ?", [$source]);
+        $avant = $nombre('linkedin.com');
+
+        $client->request('GET', '/de/projects/pendu', server: ['HTTP_USER_AGENT' => 'Mozilla/5.0 Firefox/140', 'HTTP_REFERER' => 'https://www.linkedin.com/feed/']);
+        self::assertSame($avant + 1, $nombre('linkedin.com'));
+
+        $client->request('GET', '/de/projects/pendu', server: ['HTTP_USER_AGENT' => 'Mozilla/5.0 (compatible; Googlebot/2.1)', 'HTTP_REFERER' => 'https://www.linkedin.com/feed/']);
+        self::loginAdmin($client);
+        $client->request('GET', '/de/projects/pendu', server: ['HTTP_USER_AGENT' => 'Mozilla/5.0 Firefox/140', 'HTTP_REFERER' => 'https://www.linkedin.com/feed/']);
+        self::assertSame($avant + 1, $nombre('linkedin.com'));
+
+        $client->request('GET', '/admin');
+        self::assertSelectorTextContains('body', 'Pages vues sur 30 jours');
+        self::assertSelectorTextContains('body', 'linkedin.com');
     }
 
     public function testUneCategorieUtiliseeNePeutPasEtreSupprimee(): void
