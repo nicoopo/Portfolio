@@ -5,7 +5,10 @@
 {% block description %}{{ article|loc('resume') }}{% endblock %}
 
 {% block og_image %}
-    {% if article.image %}<meta property="og:image" content="{{ absolute_url(asset('uploads/articles/' ~ article.image)) }}">{% else %}{{ parent() }}{% endif %}
+    {# Préfère l'image de l'article ; sinon carte 1200×630 générée si présente (scripts/generate_og_images.py --kind articles), sinon défaut global #}
+    {% if article.image %}
+    <meta property="og:image" content="{{ absolute_url(asset('uploads/articles/' ~ article.image)) }}">
+    {% else %}{{ parent() }}{% endif %}
 {% endblock %}
 
 {% block body %}
