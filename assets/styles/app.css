@@ -25,3 +25,4 @@
 @import './pages/_cerveau.css';
 @import './pages/_legal.css';
 @import './pages/_erreur.css';
+@import './base/_theme-clair.css'; /* en dernier : passe devant les pages */

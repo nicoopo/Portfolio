@@ -25,18 +25,18 @@
 }
 
 /* Thème clair « aube cosmique » : ciel pastel de lever du jour, tons doux (pas de blanc pur, moins éblouissant),
-   panneaux en verre lavande. Accents assombris pour garder un contraste AA sur ces fonds.
+   panneaux lavande très clair, bordés et ombrés (_theme-clair.css). Accents assombris pour garder un contraste AA sur ces fonds.
    Le cerveau 3D reste une fenêtre sur l'espace, toujours sombre (.theme-sombre). */
 :root[data-theme="light"] {
   color-scheme: light;
   --color-primary: #5634c4;
-  --color-secondary: #085a7e;
+  --color-secondary: #064a69;
   --color-text: #1d1840;
   --color-text-light: #322c5c;
   --texte-doux: #4a4570;
-  --fond: radial-gradient(ellipse at bottom, #e6cbbd 0%, #d6cdea 45%, #c7cfe6 100%);
-  --fond-image: #d4cce6;
-  --surface-rgb: 226 219 240;
+  --fond: radial-gradient(ellipse at bottom, #dcc2c8 0%, #c8bfe0 50%, #b9c1df 100%);
+  --fond-image: #d9d2ec;
+  --surface-rgb: 240 236 250;
   --voile-rgb: 60 40 120;
 }
 
