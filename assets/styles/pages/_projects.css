@@ -76,7 +76,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: rgba(10, 10, 25, 0.65);
+  background: rgb(var(--surface-rgb) / 0.65);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(127, 90, 240, 0.3);
   border-radius: 16px;
@@ -100,7 +100,7 @@
 .projet-carte-image {
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: #05050f;
+  background: var(--fond-image);
   border-bottom: 1px solid rgba(127, 90, 240, 0.2);
 }
 
@@ -236,7 +236,7 @@
   width: 100%;
   max-height: 520px;
   object-fit: contain;
-  background: #05050f;
+  background: var(--fond-image);
 }
 
 .projet-texte p {
@@ -248,7 +248,7 @@
 
 .projet-fiche {
   padding: 1.5rem;
-  background: rgba(10, 10, 25, 0.65);
+  background: rgb(var(--surface-rgb) / 0.65);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(127, 90, 240, 0.3);
   border-radius: 16px;
@@ -286,7 +286,7 @@
   font-size: 0.85rem;
   color: var(--color-text);
   text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgb(var(--voile-rgb) / 0.15);
   border-radius: 999px;
   transition: border-color 0.2s;
 }
@@ -413,7 +413,7 @@
   text-align: center;
   color: var(--color-text);
   text-decoration: none;
-  background: rgba(10, 10, 25, 0.75);
+  background: rgb(var(--surface-rgb) / 0.75);
   border: 1px solid rgba(127, 90, 240, 0.45);
   border-radius: 10px;
   box-shadow: 0 0 18px rgba(127, 90, 240, 0.25);
@@ -430,7 +430,7 @@
   width: 100%;
   aspect-ratio: 16 / 10;
   object-fit: contain;
-  background: #05050f;
+  background: var(--fond-image);
   border-radius: 6px;
 }
 

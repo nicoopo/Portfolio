@@ -8,7 +8,7 @@ body {
   overflow-x: hidden;
   color: var(--color-text);
   font-family: 'Inter', sans-serif;
-  background: radial-gradient(ellipse at bottom, #0a0a12 0%, #000 100%);
+  background: var(--fond);
 }
 
 /* Pied de page en bas de l'écran, même quand la page est courte */
@@ -131,13 +131,13 @@ h2.gradient {
   z-index: 1001;
   margin: 0;
   padding: 0.6rem 1.2rem;
-  color: #fff;
+  color: var(--color-text);
   font-weight: 600;
   letter-spacing: 0.05em;
   width: max-content;
   max-width: calc(100vw - 2rem);
   text-align: center;
-  background: rgba(15, 15, 30, 0.9);
+  background: rgb(var(--surface-rgb) / 0.9);
   border: 1px solid rgba(127, 90, 240, 0.6);
   border-radius: 999px;
   box-shadow: 0 0 25px rgba(127, 90, 240, 0.5);

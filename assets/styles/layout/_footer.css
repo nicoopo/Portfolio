@@ -11,7 +11,7 @@
   padding: 1.2rem 1rem;
   font-size: 0.85rem;
   color: var(--color-text-light);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgb(var(--voile-rgb) / 0.1);
 }
 
 .site-footer a {

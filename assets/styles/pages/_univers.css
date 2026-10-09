@@ -95,7 +95,7 @@
 .frise-carte {
   padding: 1.25rem 1.5rem;
   color: var(--color-text-light);
-  background: rgba(10, 10, 25, 0.6);
+  background: rgb(var(--surface-rgb) / 0.6);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(127, 90, 240, 0.35);
   border-radius: 16px;

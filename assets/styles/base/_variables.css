@@ -2,14 +2,42 @@
 
 :root {
   --navbar-height: 75px;
-  --color-primary: #7f5af0;
-  --color-secondary: #00d4ff;
-  --color-text: #f5f5f5;
-  --color-text-light: #e0f7ff;
   --spacing-xl: 6rem;
   --spacing-lg: 4rem;
   --spacing-md: 2.5rem;
   --spacing-sm: 1.5rem;
+}
+
+/* Thème (data-theme sur <html>, posé en tête de base.html.twig) : couleurs, fond, panneaux en verre et leur voile.
+   .theme-sombre garde un bloc sombre dans le thème clair (scène du cerveau 3D) */
+:root,
+.theme-sombre {
+  color-scheme: dark;
+  --color-primary: #7f5af0;
+  --color-secondary: #00d4ff;
+  --color-text: #f5f5f5;
+  --color-text-light: #e0f7ff;
+  --texte-doux: #aaa;
+  --fond: radial-gradient(ellipse at bottom, #0a0a12 0%, #000 100%);
+  --fond-image: #05050f;
+  --surface-rgb: 15 15 30;
+  --voile-rgb: 255 255 255;
+}
+
+/* Thème clair « aube cosmique » : ciel de lever du jour, panneaux en verre blanc.
+   Couleurs d'accent assombries pour garder un contraste AA sur fond clair.
+   Le cerveau 3D reste une fenêtre sur l'espace, toujours sombre (.theme-sombre). */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-primary: #6a45e0;
+  --color-secondary: #0b6f9a;
+  --color-text: #1d1840;
+  --color-text-light: #3b3566;
+  --texte-doux: #5d5880;
+  --fond: radial-gradient(ellipse at bottom, #ffe1cf 0%, #f1e6ff 45%, #dde5ff 100%);
+  --fond-image: #e9e4f7;
+  --surface-rgb: 255 255 255;
+  --voile-rgb: 60 40 120;
 }
 
 @media (max-width: 768px) {
