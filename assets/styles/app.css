@@ -16,6 +16,7 @@
 /* Pages */
 @import './pages/_home.css';
 @import './pages/_projects.css';
+@import './pages/_articles.css';
 @import './pages/_univers.css';
 @import './pages/_competences.css';
 @import './pages/_contact.css';

@@ -74,9 +74,10 @@ final class ProjetCrudController extends AbstractCrudController
         yield TraductionsField::new()->champs(['titre' => 'Titre', 'description' => 'Description', 'details' => 'Texte détaillé', 'categorie' => 'Groupe'], ['description', 'details']);
     }
 
-    /** Remplace l'enregistrement d'EasyAdmin : réduit l'image à LARGEUR_MAX px et l'écrit en WebP (transparence gardée) */
-    private static function enregistrerEnWebp(UploadedFile $fichier, string $dossier, string $nom): void
+    /** Remplace l'enregistrement d'EasyAdmin : réduit l'image à LARGEUR_MAX px et l'écrit en WebP (transparence gardée). Sert aussi aux articles */
+    public static function enregistrerEnWebp(UploadedFile $fichier, string $dossier, string $nom): void
     {
+        is_dir($dossier) || mkdir($dossier, 0775, true); // public/uploads/articles n'existe pas encore dans le volume de prod
         $image = imagecreatefromstring(file_get_contents($fichier->getPathname()))
             ?: throw new \RuntimeException('Image illisible : '.$fichier->getClientOriginalName());
         imagepalettetotruecolor($image); // PNG à palette : imagewebp n'accepte que les vraies couleurs
