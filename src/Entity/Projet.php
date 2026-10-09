@@ -64,6 +64,11 @@ class Projet
     #[ORM\Column]
     private int $position;
 
+    /** Année du projet (frise /projects/frise) ; vide : absent de la frise */
+    #[Assert\Range(min: 2000, max: 2100)]
+    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    private ?int $annee = null;
+
     /** Page du projet (/projects/slug) : texte long, paragraphes séparés par une ligne vide ; vide = description */
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $details = null;
@@ -148,6 +153,8 @@ class Projet
         return $this;
     }
 
+    public function getAnnee(): ?int { return $this->annee; }
+    public function setAnnee(?int $annee): static { $this->annee = $annee; return $this; }
     public function getDetails(): ?string { return $this->details; }
     public function setDetails(?string $details): static { $this->details = $details ?: null; return $this; }
     public function getDepot(): ?string { return $this->depot; }

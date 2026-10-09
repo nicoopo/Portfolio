@@ -4,7 +4,7 @@
  * - en haut à droite, un « N » (Nico) : bas gauche → haut gauche → diagonale → haut droite
  * - en haut à gauche, le Lion : la faucille de la tête (ε → Régulus), puis le corps jusqu'à
  *   la queue (Dénébola), et retour sur Algieba pour refermer
- * Une mauvaise étoile efface tout. Coupé avec le réglage « Effets trou noir ».
+ * Une mauvaise étoile efface tout. Coupé avec le réglage « Effets spéciaux ».
  */
 import { reducedMotion } from './black_hole.js';
 import { preferences } from './preferences.js';

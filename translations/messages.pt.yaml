@@ -139,7 +139,6 @@
 
 # CV : lien sous une expérience
 "Site auquel j’ai contribué :": "Site em que colaborei:"
-"Effets trou noir": "Efeitos de buraco negro"
 "Haute qualité": "Alta qualidade"
 "Réglages": "Definições"
 "Ambiance sonore du cerveau 3D": "Ambiente sonoro do cérebro 3D"
@@ -221,3 +220,60 @@
 "Système": "Sistema"
 "Sombre": "Escuro"
 "Clair": "Claro"
+
+# Mode recruteur
+"Message pour vous": "Uma mensagem para vocês"
+"Bonjour l’équipe de %entreprise% !": "Olá à equipa da %entreprise%!"
+"Merci de votre visite. Tout ce qu’il faut savoir pour le poste de %poste% est à deux clics :": "Obrigado pela visita. Tudo o que precisam para a vaga de %poste% está a dois cliques:"
+"Merci de votre visite. L’essentiel est à deux clics :": "Obrigado pela visita. O essencial está a dois cliques:"
+"Me contacter": "Contactar-me"
+
+# Comparateur offre / compétences
+"Comparer avec votre offre": "Comparar com a sua oferta"
+"Collez une offre d’emploi ou d’alternance : mes compétences qui y correspondent, et les projets qui le prouvent.": "Cole uma oferta de emprego ou de alternância: as minhas competências que correspondem e os projetos que o provam."
+"%trouvees% compétences de mon profil apparaissent dans cette offre.": "%trouvees% competências do meu perfil aparecem nesta oferta."
+"Aucune de mes compétences n’apparaît telle quelle dans ce texte : parlons-en quand même !": "Nenhuma das minhas competências aparece tal e qual neste texto: falemos na mesma!"
+"Prouvé par": "Comprovado por"
+"Texte de l’offre": "Texto da oferta"
+"Ex. : Vous maîtrisez PHP et Symfony, connaissez Docker et Git…": "Ex.: Domina PHP e Symfony, conhece Docker e Git…"
+"Tout se passe dans votre navigateur : le texte n’est envoyé nulle part.": "Tudo acontece no seu navegador: o texto não é enviado para lado nenhum."
+
+# Frise des projets
+"Voir mes projets dans le temps": "Ver os meus projetos no tempo"
+"Mes projets dans le temps": "Os meus projetos no tempo"
+"Mes projets dans le temps, de la plus ancienne année à la plus récente, et ce que chacun m’a appris.": "Os meus projetos no tempo, do ano mais antigo ao mais recente, e o que cada um me ensinou."
+"Filtrer par techno": "Filtrar por tecnologia"
+"Toutes": "Todas"
+"Nouveau": "Novo"
+"Première fois que j’utilise": "Primeira vez que uso"
+"La frise se remplit : revenez bientôt.": "A cronologia está a encher-se: volte em breve."
+
+# Page 404 : mini-jeu
+"Touché ! Tu as tenu %score% s.": "Atingido! Aguentaste %score% s."
+"Nouveau record : %score% s !": "Novo recorde: %score% s!"
+"Record : %score% s": "Recorde: %score% s"
+"Rejouer": "Jogar de novo"
+"En attendant : évite les astéroïdes": "Entretanto: desvia-te dos asteroides"
+"Flèches ← → ou glisse le doigt": "Setas ← → ou desliza o dedo"
+"Jouer": "Jogar"
+"Jeu : un vaisseau évite des astéroïdes qui tombent": "Jogo: uma nave desvia-se de asteroides que caem"
+
+# Transitions de page
+"Transition entre les pages": "Transição entre páginas"
+"Au hasard": "Ao acaso"
+"Téléportation": "Teletransporte"
+"Distorsion": "Distorção"
+"Vitesse lumière": "Velocidade da luz"
+"Effets spéciaux": "Efeitos especiais"
+
+# Livre d’or
+"Livre d’or": "Livro de visitas"
+"Laissez un mot : il deviendra une étoile de mon ciel.": "Deixe uma mensagem: vai tornar-se uma estrela do meu céu."
+"Messages des visiteurs": "Mensagens dos visitantes"
+"Le ciel attend sa première étoile : la vôtre ?": "O céu espera a sua primeira estrela: a sua?"
+"Signer le livre d’or": "Assinar o livro de visitas"
+"Envoyer mon étoile": "Enviar a minha estrela"
+"Prénom ou pseudo": "Nome ou alcunha"
+"Votre message (280 caractères)": "A sua mensagem (280 caracteres)"
+"Merci ! Votre étoile apparaîtra dans le ciel dès que je l’aurai lue.": "Obrigado! A sua estrela aparecerá no céu assim que eu a ler."
+"Beaucoup de messages d’un coup : réessayez dans une heure.": "Muitas mensagens de uma vez: tente novamente daqui a uma hora."

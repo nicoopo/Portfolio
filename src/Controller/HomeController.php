@@ -3,21 +3,32 @@
 namespace App\Controller;
 
 use App\Entity\EtapeParcours;
+use App\Entity\LienRecruteur;
 use App\Entity\Passion;
 use App\Repository\CategorieCompetenceRepository;
 use App\Repository\EtapeParcoursRepository;
 use App\Repository\PassionRepository;
 use App\Twig\Traduction;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class HomeController extends AbstractController
 {
+    /** Lien recruteur (/?pour=code) : accueil personnalisé, visite comptée sauf pour l'administrateur connecté */
     #[Route('/', name: 'app_home')]
-    public function index(): Response
+    public function index(Request $request, EntityManagerInterface $entityManager): Response
     {
-        return $this->render('home/index.html.twig');
+        $code = $request->query->getString('pour');
+        $recruteur = '' !== $code ? $entityManager->getRepository(LienRecruteur::class)->findOneBy(['code' => $code]) : null;
+        if ($recruteur && !$this->isGranted('ROLE_ADMIN')) {
+            $recruteur->visiter();
+            $entityManager->flush();
+        }
+
+        return $this->render('home/index.html.twig', ['recruteur' => $recruteur]);
     }
 
     #[Route('/cerveau', name: 'app_cerveau')]

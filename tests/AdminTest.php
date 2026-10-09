@@ -5,7 +5,9 @@ namespace App\Tests;
 use App\Entity\Article;
 use App\Entity\Competence;
 use App\Entity\Journal;
+use App\Entity\LienRecruteur;
 use App\Entity\Maintenant;
+use App\Entity\MessageLivreOr;
 use App\Entity\Projet;
 use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
@@ -95,7 +97,7 @@ final class AdminTest extends WebTestCase
 
     public static function listes(): iterable
     {
-        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours', 'utilisateur', 'demande-contact', 'journal', 'cv-profil', 'experience', 'cv-competence', 'langue', 'centre-interet', 'article', 'maintenant'] as $liste) {
+        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours', 'utilisateur', 'demande-contact', 'journal', 'cv-profil', 'experience', 'cv-competence', 'langue', 'centre-interet', 'article', 'maintenant', 'lien-recruteur', 'message-livre-or'] as $liste) {
             yield $liste => [$liste];
         }
     }
@@ -153,6 +155,100 @@ final class AdminTest extends WebTestCase
         // Remis en état pour les autres tests
         $client->request('GET', $url);
         $client->submitForm('Sauvegarder les modifications', ['Maintenant[contenu]' => $avant]);
+    }
+
+    /** Lien recruteur : créé dans l'admin, l'accueil salue l'entreprise ; visite comptée (pas celles de l'admin), même après la redirection de langue */
+    public function testUnLienRecruteurPersonnaliseLAccueil(): void
+    {
+        $client = static::createClient();
+        self::loginAdmin($client);
+        $client->request('GET', '/admin/lien-recruteur/new');
+        $client->submitForm('Créer', ['LienRecruteur[entreprise]' => 'Acme', 'LienRecruteur[poste]' => 'développeur Symfony en alternance']);
+        self::assertResponseRedirects();
+        // Relu à chaque fois : le noyau redémarre entre deux requêtes
+        $relire = fn () => self::getContainer()->get(EntityManagerInterface::class)->getRepository(LienRecruteur::class)->findOneBy(['entreprise' => 'Acme']);
+        $code = $relire()->getCode();
+        self::assertMatchesRegularExpression('/^[0-9a-f]{10}$/', $code);
+
+        // L'admin connecté ne compte pas
+        $client->request('GET', '/?pour='.$code, server: ['HTTP_ACCEPT_LANGUAGE' => 'fr-FR']);
+        self::assertSelectorTextContains('.recruteur-bonjour', 'Bonjour l’équipe de Acme !');
+        self::assertSame(0, $relire()->getVisites());
+
+        // Visiteur au navigateur anglais : redirigé vers /en/ avec son lien, salué en anglais, visite comptée
+        $client->request('GET', '/logout');
+        $client->getCookieJar()->clear();
+        $client->request('GET', '/?pour='.$code, server: ['HTTP_ACCEPT_LANGUAGE' => 'en-GB']);
+        self::assertResponseRedirects('http://localhost/en/?pour='.$code);
+        $client->followRedirect();
+        self::assertSelectorTextContains('.recruteur-bonjour', 'Hello to the Acme team!');
+        self::assertSelectorTextContains('.recruteur', 'développeur Symfony en alternance');
+        self::assertSame(1, $relire()->getVisites());
+        self::assertNotNull($relire()->getPremiereVisite());
+
+        // Code inconnu : accueil normal
+        $client->request('GET', '/en/?pour=inconnu');
+        self::assertSelectorNotExists('.recruteur');
+
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $entityManager->remove($entityManager->getRepository(LienRecruteur::class)->findOneBy(['code' => $code]));
+        $entityManager->flush();
+    }
+
+    /** Frise des projets : un projet daté dans l'admin y apparaît, à son année, avec ses technos nouvelles ; le filtre connaît ses technos */
+    public function testUnProjetDateApparaitDansLaFrise(): void
+    {
+        $client = static::createClient();
+        self::loginAdmin($client);
+        $id = self::getContainer()->get(EntityManagerInterface::class)->getRepository(Projet::class)->findOneBy(['slug' => 'pendu'])->getId();
+
+        $client->request('GET', '/admin/projet/'.$id.'/edit');
+        $client->submitForm('Sauvegarder les modifications', ['Projet[annee]' => '1999']);
+        self::assertResponseStatusCodeSame(422);
+
+        $client->request('GET', '/admin/projet/'.$id.'/edit');
+        $client->submitForm('Sauvegarder les modifications', ['Projet[annee]' => '2001']);
+        $crawler = $client->request('GET', '/projects/frise');
+        self::assertSame('2001', $crawler->filter('.frise-projets-annee h2')->first()->text()); // le plus ancien d'abord
+        $carte = $crawler->filter('.frise-projet a[href="/projects/pendu"]')->closest('.frise-projet');
+        self::assertGreaterThan(0, $carte->filter('.frise-projet-nouveau')->count()); // premier projet de la frise : tout est nouveau
+        self::assertContains('Java', $crawler->filter('.frise-filtres button')->extract(['_text']));
+
+        $client->request('GET', '/admin/projet/'.$id.'/edit');
+        $client->submitForm('Sauvegarder les modifications', ['Projet[annee]' => '']);
+    }
+
+    /** Livre d'or : un message envoyé attend la modération ; approuvé dans l'admin, il devient une étoile. Le robot du champ piège n'enregistre rien */
+    public function testUnMessageDuLivreDOrApparaitApresModeration(): void
+    {
+        $client = static::createClient(server: ['HTTP_ACCEPT_LANGUAGE' => 'fr-FR']);
+        $depot = fn () => self::getContainer()->get(EntityManagerInterface::class)->getRepository(MessageLivreOr::class);
+        $avant = $depot()->count([]);
+
+        $client->request('GET', '/livre-d-or');
+        $client->submitForm('Envoyer mon étoile', ['livre_or[prenom]' => 'Robot', 'livre_or[message]' => 'Achetez mes pilules', 'livre_or[website]' => 'spam.example']);
+        self::assertResponseRedirects();
+        self::assertSame($avant, $depot()->count([]));
+
+        $client->request('GET', '/livre-d-or');
+        $client->submitForm('Envoyer mon étoile', ['livre_or[prenom]' => 'Camille', 'livre_or[message]' => 'Superbe univers, bravo !']);
+        $client->followRedirect();
+        self::assertSelectorTextContains('.contact-flash--success', 'Merci');
+        self::assertSelectorTextNotContains('body', 'Superbe univers, bravo !'); // pas encore approuvé
+
+        $message = $depot()->findOneBy(['prenom' => 'Camille']);
+        self::assertSame('fr', $message->getLangue());
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $entityManager->getRepository(MessageLivreOr::class)->find($message->getId())->setApprouve(true);
+        $entityManager->flush();
+
+        $client->request('GET', '/livre-d-or');
+        self::assertSelectorTextContains('.livre-or-etoile', 'Superbe univers, bravo !');
+        self::assertSelectorTextContains('.livre-or-etoile', 'Camille');
+
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $entityManager->remove($entityManager->getRepository(MessageLivreOr::class)->find($message->getId()));
+        $entityManager->flush();
     }
 
     public function testUneCategorieUtiliseeNePeutPasEtreSupprimee(): void

@@ -33,7 +33,9 @@ final class LangueNavigateurListener
 
         $langue = $request->getPreferredLanguage($this->langues);
         if ('fr' !== $langue) {
-            $reponse = new RedirectResponse($request->getUriForPath("/$langue/"));
+            // Paramètres gardés : un lien recruteur (/?pour=…) doit survivre à la redirection
+            $requete = $request->getQueryString();
+            $reponse = new RedirectResponse($request->getUriForPath("/$langue/").($requete ? '?'.$requete : ''));
             $reponse->setVary(['Accept-Language', 'Cookie']);
             $event->setResponse($reponse);
         }

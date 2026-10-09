@@ -15,7 +15,7 @@ final class SmokeTest extends WebTestCase
 
     public static function pages(): iterable
     {
-        foreach (['/', '/projects', '/projects/portfolio', '/articles', '/now', '/competences', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
+        foreach (['/', '/projects', '/projects/portfolio', '/projects/frise', '/articles', '/now', '/livre-d-or', '/competences', '/competences/comparer', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
             yield $url => [$url];
             foreach (['en', 'es', 'de', 'it', 'pt'] as $langue) {
                 yield "/$langue$url" => ["/$langue$url"];
@@ -265,7 +265,23 @@ final class SmokeTest extends WebTestCase
 
         self::assertStringContainsString('prefers-color-scheme: light', $crawler->filter('head script')->first()->text());
         self::assertSame(['systeme', 'dark', 'light'], $crawler->filter('#reglages input[name="theme"]')->extract(['value']));
+        self::assertSame(['hasard', 'trou-noir', 'teleportation', 'distorsion', 'lumiere'], $crawler->filter('#reglages input[name="effet"]')->extract(['value']));
         self::assertSelectorTextContains('#reglages', 'Theme');
+    }
+
+    /** Comparateur : chaque compétence arrive avec ses mots-clés (nom français, traduit, synonymes) et ses projets */
+    public function testLeComparateurConnaitLesMotsDeChaqueCompetence(): void
+    {
+        $crawler = static::createClient()->request('GET', '/en/competences/comparer');
+
+        $competences = array_column(json_decode($crawler->filter('[data-comparateur-competences-value]')->attr('data-comparateur-competences-value'), true), null, 'nom');
+        self::assertContains('Symfony', $competences['PHP / Symfony']['mots']);
+        self::assertContains('html', $competences['HTML5']['mots']);
+        self::assertContains('Travail en équipe', $competences['Teamwork']['mots']); // offre en français, page en anglais
+        self::assertNotEmpty($competences['PHP / Symfony']['projets']);
+        $client = static::getClient();
+        $client->request('GET', '/en/competences');
+        self::assertSelectorExists('a[href="/en/competences/comparer"]');
     }
 
     public function testTelechargementCvPdf(): void
@@ -286,6 +302,7 @@ final class SmokeTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
         self::assertSelectorTextContains('h1', 'Page introuvable');
         self::assertSelectorExists('html[lang="fr"] .erreur-liens a[href="/cerveau"]');
+        self::assertSelectorExists('[data-controller="asteroides"] button[data-action="asteroides#jouer"]'); // mini-jeu
 
         $client->request('GET', '/en/does-not-exist');
         self::assertResponseStatusCodeSame(404);
@@ -310,9 +327,13 @@ final class SmokeTest extends WebTestCase
         self::assertStringContainsString('cover-letter', $en->filter('a[download="Cover_Letter_Nicolas_Cataluna.pdf"]')->attr('href'));
         self::assertStringContainsString('cover-letter', $en->filter('button[data-pdf-title-param="My cover letter"]')->attr('data-pdf-url-param'));
 
-        // Pas de lettre dans les autres langues : la version anglaise
-        $es = $client->request('GET', '/es/univers');
-        self::assertStringContainsString('cover-letter', $es->filter('a[download="Cover_Letter_Nicolas_Cataluna.pdf"]')->attr('href'));
+        // Chaque langue a sa lettre, et le PDF existe bien
+        foreach (['es' => 'carta-de-presentacion', 'de' => 'anschreiben', 'it' => 'lettera-di-presentazione', 'pt' => 'carta-de-apresentacao'] as $langue => $fichier) {
+            $href = $client->request('GET', "/$langue/univers")->filter('a[download]')->attr('href');
+            self::assertStringContainsString($fichier, $href, $langue);
+            $client->request('GET', $href);
+            self::assertResponseIsSuccessful($href);
+        }
     }
 
     /** Première visite sur / : langue du navigateur ; ensuite le cookie « langue » fige le choix */

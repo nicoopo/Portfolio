@@ -20,8 +20,8 @@ final class RechercheController extends AbstractController
 {
     /** Route => libellé (clé de traduction déjà utilisée par le menu ou les pages) */
     private const PAGES = [
-        'app_home' => 'Accueil', 'app_cerveau' => 'Mon Cerveau', 'app_projects' => 'Projets', 'app_articles' => 'Articles',
-        'app_univers' => 'Mon Univers', 'app_competences' => 'Compétences', 'app_cv' => 'Mon CV', 'app_contact' => 'Contact', 'app_now' => 'En ce moment',
+        'app_home' => 'Accueil', 'app_cerveau' => 'Mon Cerveau', 'app_projects' => 'Projets', 'app_projects_frise' => 'Mes projets dans le temps', 'app_articles' => 'Articles',
+        'app_univers' => 'Mon Univers', 'app_competences' => 'Compétences', 'app_comparateur' => 'Comparer avec votre offre', 'app_cv' => 'Mon CV', 'app_contact' => 'Contact', 'app_now' => 'En ce moment', 'app_livre_or' => 'Livre d’or',
         'app_mentions_legales' => 'Mentions légales', 'app_confidentialite' => 'Confidentialité',
     ];
 

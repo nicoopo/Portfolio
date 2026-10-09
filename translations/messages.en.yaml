@@ -139,7 +139,6 @@
 
 # CV : lien sous une expérience
 "Site auquel j’ai contribué :": "Website I contributed to:"
-"Effets trou noir": "Black hole effects"
 "Haute qualité": "High quality"
 "Réglages": "Settings"
 "Ambiance sonore du cerveau 3D": "3D brain soundscape"
@@ -221,3 +220,60 @@
 "Système": "System"
 "Sombre": "Dark"
 "Clair": "Light"
+
+# Mode recruteur
+"Message pour vous": "A message for you"
+"Bonjour l’équipe de %entreprise% !": "Hello to the %entreprise% team!"
+"Merci de votre visite. Tout ce qu’il faut savoir pour le poste de %poste% est à deux clics :": "Thanks for stopping by. Everything you need for the %poste% position is two clicks away:"
+"Merci de votre visite. L’essentiel est à deux clics :": "Thanks for stopping by. The essentials are two clicks away:"
+"Me contacter": "Contact me"
+
+# Comparateur offre / compétences
+"Comparer avec votre offre": "Compare with your job offer"
+"Collez une offre d’emploi ou d’alternance : mes compétences qui y correspondent, et les projets qui le prouvent.": "Paste a job or work-study offer: see which of my skills match it, and the projects that prove them."
+"%trouvees% compétences de mon profil apparaissent dans cette offre.": "%trouvees% skills from my profile appear in this offer."
+"Aucune de mes compétences n’apparaît telle quelle dans ce texte : parlons-en quand même !": "None of my skills appears as such in this text: let's talk anyway!"
+"Prouvé par": "Proven by"
+"Texte de l’offre": "Job offer text"
+"Ex. : Vous maîtrisez PHP et Symfony, connaissez Docker et Git…": "E.g.: You master PHP and Symfony, know Docker and Git…"
+"Tout se passe dans votre navigateur : le texte n’est envoyé nulle part.": "Everything happens in your browser: the text is sent nowhere."
+
+# Frise des projets
+"Voir mes projets dans le temps": "See my projects over time"
+"Mes projets dans le temps": "My projects over time"
+"Mes projets dans le temps, de la plus ancienne année à la plus récente, et ce que chacun m’a appris.": "My projects over time, from the earliest year to the latest, and what each one taught me."
+"Filtrer par techno": "Filter by technology"
+"Toutes": "All"
+"Nouveau": "New"
+"Première fois que j’utilise": "First time I used"
+"La frise se remplit : revenez bientôt.": "The timeline is filling up: come back soon."
+
+# Page 404 : mini-jeu
+"Touché ! Tu as tenu %score% s.": "Hit! You lasted %score% s."
+"Nouveau record : %score% s !": "New record: %score% s!"
+"Record : %score% s": "Record: %score% s"
+"Rejouer": "Play again"
+"En attendant : évite les astéroïdes": "Meanwhile: dodge the asteroids"
+"Flèches ← → ou glisse le doigt": "Arrow keys ← → or slide your finger"
+"Jouer": "Play"
+"Jeu : un vaisseau évite des astéroïdes qui tombent": "Game: a spaceship dodges falling asteroids"
+
+# Transitions de page
+"Transition entre les pages": "Page transition"
+"Au hasard": "Random"
+"Téléportation": "Teleportation"
+"Distorsion": "Distortion"
+"Vitesse lumière": "Light speed"
+"Effets spéciaux": "Special effects"
+
+# Livre d’or
+"Livre d’or": "Guestbook"
+"Laissez un mot : il deviendra une étoile de mon ciel.": "Leave a note: it will become a star in my sky."
+"Messages des visiteurs": "Visitors' messages"
+"Le ciel attend sa première étoile : la vôtre ?": "The sky is waiting for its first star: yours?"
+"Signer le livre d’or": "Sign the guestbook"
+"Envoyer mon étoile": "Send my star"
+"Prénom ou pseudo": "First name or nickname"
+"Votre message (280 caractères)": "Your message (280 characters)"
+"Merci ! Votre étoile apparaîtra dans le ciel dès que je l’aurai lue.": "Thank you! Your star will appear in the sky as soon as I've read it."
+"Beaucoup de messages d’un coup : réessayez dans une heure.": "Lots of messages at once: try again in an hour."

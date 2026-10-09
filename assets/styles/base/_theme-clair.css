@@ -10,7 +10,7 @@
 }
 
 /* Blocs : opaques, bordés, ombrés */
-:root[data-theme="light"] :is(.hero-card, .skills-category, .projet-carte, .projet-fiche, .frise-carte,
+:root[data-theme="light"] :is(.recruteur, .hero-card, .skills-category, .projet-carte, .projet-fiche, .frise-carte,
     .contact-container, .legal-container, .palette, .reglages, .langues, .visite, .decouverte-toast) {
   background: rgb(var(--surface-rgb));
   border: 1px solid var(--bordure);
@@ -82,4 +82,9 @@
 /* Code en ligne : le rose de Bootstrap manque de contraste sur les panneaux clairs */
 :root[data-theme="light"] code {
   color: #9c1f5a;
+}
+
+/* Livre d'or : étoiles cerclées de violet pour se détacher du ciel clair */
+:root[data-theme="light"] .livre-or-etoile {
+  box-shadow: 0 0 0 2px var(--color-primary), 0 0 14px var(--color-primary);
 }

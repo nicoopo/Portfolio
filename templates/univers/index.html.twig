@@ -33,10 +33,16 @@
     </div>
 
     <h2 class="gradient mb-4">{{ 'Ma lettre de motivation'|trans }}</h2>
-    {# Lettre en français sur la page française, en anglais sur toutes les autres (pas d'autre version) #}
-    {% set lettre = app.request.locale == 'fr'
-        ? {pdf: 'docs/lettre de motivation.pdf', nom: 'Lettre_Motivation_Nicolas_Cataluna.pdf'}
-        : {pdf: 'docs/cover-letter.pdf', nom: 'Cover_Letter_Nicolas_Cataluna.pdf'} %}
+    {# Lettre dans la langue de la page (assets/docs) ; une langue sans lettre aurait la version anglaise #}
+    {% set lettres = {
+        fr: {pdf: 'docs/lettre de motivation.pdf', nom: 'Lettre_Motivation_Nicolas_Cataluna.pdf'},
+        en: {pdf: 'docs/cover-letter.pdf', nom: 'Cover_Letter_Nicolas_Cataluna.pdf'},
+        es: {pdf: 'docs/carta-de-presentacion.pdf', nom: 'Carta_Presentacion_Nicolas_Cataluna.pdf'},
+        de: {pdf: 'docs/anschreiben.pdf', nom: 'Anschreiben_Nicolas_Cataluna.pdf'},
+        it: {pdf: 'docs/lettera-di-presentazione.pdf', nom: 'Lettera_Presentazione_Nicolas_Cataluna.pdf'},
+        pt: {pdf: 'docs/carta-de-apresentacao.pdf', nom: 'Carta_Apresentacao_Nicolas_Cataluna.pdf'},
+    } %}
+    {% set lettre = lettres[app.request.locale] ?? lettres.en %}
 
     <div class="d-flex justify-content-center gap-3 flex-wrap">
         <!-- Voir la lettre - Ouvre dans un iframe sur la même page -->
