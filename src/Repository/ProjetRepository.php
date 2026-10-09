@@ -17,6 +17,21 @@ class ProjetRepository extends ServiceEntityRepository
     }
 
     /**
+     * Projets qui ont une année, du plus ancien au plus récent (frise).
+     *
+     * @return list<Projet>
+     */
+    public function findDates(): array
+    {
+        return $this->createQueryBuilder('projet')
+            ->where('projet.annee IS NOT NULL')
+            ->orderBy('projet.annee')
+            ->addOrderBy('projet.position')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * Projets regroupés par catégorie (dans l'ordre de leurs projets), avec leurs compétences.
      *
      * @return array<string, list<Projet>>

@@ -194,6 +194,29 @@ final class AdminTest extends WebTestCase
         $entityManager->flush();
     }
 
+    /** Frise des projets : un projet daté dans l'admin y apparaît, à son année, avec ses technos nouvelles ; le filtre connaît ses technos */
+    public function testUnProjetDateApparaitDansLaFrise(): void
+    {
+        $client = static::createClient();
+        self::loginAdmin($client);
+        $id = self::getContainer()->get(EntityManagerInterface::class)->getRepository(Projet::class)->findOneBy(['slug' => 'pendu'])->getId();
+
+        $client->request('GET', '/admin/projet/'.$id.'/edit');
+        $client->submitForm('Sauvegarder les modifications', ['Projet[annee]' => '1999']);
+        self::assertResponseStatusCodeSame(422);
+
+        $client->request('GET', '/admin/projet/'.$id.'/edit');
+        $client->submitForm('Sauvegarder les modifications', ['Projet[annee]' => '2001']);
+        $crawler = $client->request('GET', '/projects/frise');
+        self::assertSame('2001', $crawler->filter('.frise-projets-annee h2')->first()->text()); // le plus ancien d'abord
+        $carte = $crawler->filter('.frise-projet a[href="/projects/pendu"]')->closest('.frise-projet');
+        self::assertGreaterThan(0, $carte->filter('.frise-projet-nouveau')->count()); // premier projet de la frise : tout est nouveau
+        self::assertContains('Java', $crawler->filter('.frise-filtres button')->extract(['_text']));
+
+        $client->request('GET', '/admin/projet/'.$id.'/edit');
+        $client->submitForm('Sauvegarder les modifications', ['Projet[annee]' => '']);
+    }
+
     public function testUneCategorieUtiliseeNePeutPasEtreSupprimee(): void
     {
         $client = static::createClient();

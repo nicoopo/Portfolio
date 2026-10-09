@@ -68,6 +68,7 @@ final class ProjetCrudController extends AbstractCrudController
         yield AssociationField::new('competences', 'Compétences utilisées')
             ->setFormTypeOption('by_reference', false); // passe par addCompetence / removeCompetence
         yield IntegerField::new('position')->setHelp('Ordre d\'affichage (croissant)');
+        yield IntegerField::new('annee', 'Année')->setHelp('Année du projet, pour la frise /projects/frise. Vide : le projet n’y apparaît pas.');
 
         // Autres langues du site (framework.enabled_locales) : vide = le français s'affiche
         yield FormField::addFieldset('Traductions (facultatif)')->collapsible()->renderCollapsed();
