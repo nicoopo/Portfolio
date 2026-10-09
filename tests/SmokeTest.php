@@ -15,7 +15,7 @@ final class SmokeTest extends WebTestCase
 
     public static function pages(): iterable
     {
-        foreach (['/', '/projects', '/projects/portfolio', '/articles', '/now', '/competences', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
+        foreach (['/', '/projects', '/projects/portfolio', '/articles', '/now', '/competences', '/competences/comparer', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
             yield $url => [$url];
             foreach (['en', 'es', 'de', 'it', 'pt'] as $langue) {
                 yield "/$langue$url" => ["/$langue$url"];
@@ -266,6 +266,21 @@ final class SmokeTest extends WebTestCase
         self::assertStringContainsString('prefers-color-scheme: light', $crawler->filter('head script')->first()->text());
         self::assertSame(['systeme', 'dark', 'light'], $crawler->filter('#reglages input[name="theme"]')->extract(['value']));
         self::assertSelectorTextContains('#reglages', 'Theme');
+    }
+
+    /** Comparateur : chaque compétence arrive avec ses mots-clés (nom français, traduit, synonymes) et ses projets */
+    public function testLeComparateurConnaitLesMotsDeChaqueCompetence(): void
+    {
+        $crawler = static::createClient()->request('GET', '/en/competences/comparer');
+
+        $competences = array_column(json_decode($crawler->filter('[data-comparateur-competences-value]')->attr('data-comparateur-competences-value'), true), null, 'nom');
+        self::assertContains('Symfony', $competences['PHP / Symfony']['mots']);
+        self::assertContains('html', $competences['HTML5']['mots']);
+        self::assertContains('Travail en équipe', $competences['Teamwork']['mots']); // offre en français, page en anglais
+        self::assertNotEmpty($competences['PHP / Symfony']['projets']);
+        $client = static::getClient();
+        $client->request('GET', '/en/competences');
+        self::assertSelectorExists('a[href="/en/competences/comparer"]');
     }
 
     public function testTelechargementCvPdf(): void

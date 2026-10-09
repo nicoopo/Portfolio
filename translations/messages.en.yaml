@@ -228,3 +228,13 @@
 "Merci de votre visite. Tout ce qu’il faut savoir pour le poste de %poste% est à deux clics :": "Thanks for stopping by. Everything you need for the %poste% position is two clicks away:"
 "Merci de votre visite. L’essentiel est à deux clics :": "Thanks for stopping by. The essentials are two clicks away:"
 "Me contacter": "Contact me"
+
+# Comparateur offre / compétences
+"Comparer avec votre offre": "Compare with your job offer"
+"Collez une offre d’emploi ou d’alternance : mes compétences qui y correspondent, et les projets qui le prouvent.": "Paste a job or work-study offer: see which of my skills match it, and the projects that prove them."
+"%trouvees% compétences de mon profil apparaissent dans cette offre.": "%trouvees% skills from my profile appear in this offer."
+"Aucune de mes compétences n’apparaît telle quelle dans ce texte : parlons-en quand même !": "None of my skills appears as such in this text: let's talk anyway!"
+"Prouvé par": "Proven by"
+"Texte de l’offre": "Job offer text"
+"Ex. : Vous maîtrisez PHP et Symfony, connaissez Docker et Git…": "E.g.: You master PHP and Symfony, know Docker and Git…"
+"Tout se passe dans votre navigateur : le texte n’est envoyé nulle part.": "Everything happens in your browser: the text is sent nowhere."

@@ -1,0 +1,103 @@
+/* Comparateur offre / compétences (competences/comparer.html.twig) */
+
+.comparateur-grille {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.comparateur-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.comparateur-offre {
+  width: 100%;
+  padding: 1rem;
+  color: var(--color-text);
+  background: rgb(var(--surface-rgb) / 0.85);
+  border: 1px solid rgba(127, 90, 240, 0.5);
+  border-radius: 14px;
+  resize: vertical;
+}
+
+.comparateur-offre:focus {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+.comparateur-note {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--texte-doux);
+}
+
+.comparateur-resume {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.comparateur-surligne {
+  max-height: 12rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  overflow-y: auto;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  color: var(--color-text-light);
+  background: rgb(var(--surface-rgb) / 0.6);
+  border-radius: 12px;
+}
+
+.comparateur-surligne mark {
+  padding: 0 0.15em;
+  color: inherit;
+  background: rgba(127, 90, 240, 0.45);
+  border-radius: 4px;
+}
+
+.comparateur-resultats {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.comparateur-resultats li {
+  padding: 0.7rem 1rem;
+  background: rgb(var(--voile-rgb) / 0.06);
+  border: 1px solid rgba(127, 90, 240, 0.35);
+  border-radius: 12px;
+}
+
+.comparateur-categorie {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-secondary);
+}
+
+.comparateur-resultats p {
+  margin: 0.3rem 0 0;
+  font-size: 0.85rem;
+}
+
+.comparateur-resultats a {
+  color: var(--color-secondary);
+}
+
+.comparateur-suite {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+@media (max-width: 768px) {
+  .comparateur-grille {
+    grid-template-columns: 1fr;
+  }
+}
