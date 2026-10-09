@@ -12,6 +12,8 @@
 /* Composants réutilisables */
 @import './components/_buttons.css';
 @import './components/_pdf-viewer.css';
+@import './components/_palette.css';
+@import './components/_visite.css';
 
 /* Pages */
 @import './pages/_home.css';
@@ -23,3 +25,4 @@
 @import './pages/_cerveau.css';
 @import './pages/_legal.css';
 @import './pages/_erreur.css';
+@import './base/_theme-clair.css'; /* en dernier : passe devant les pages */

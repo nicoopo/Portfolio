@@ -176,3 +176,48 @@
 "Lire l’article": "Ler o artigo"
 "Premier article bientôt.": "Primeiro artigo em breve."
 "Tous les articles": "Todos os artigos"
+
+# Palette de commandes (Ctrl+K)
+"Rechercher": "Pesquisar"
+"Page": "Página"
+"Compétence": "Competência"
+"Projet": "Projeto"
+"Article": "Artigo"
+"Commande": "Comando"
+"Aucun résultat": "Nenhum resultado"
+"Bien essayé. Ici, c’est l’univers qui a les droits root.": "Boa tentativa. Aqui, quem tem permissões de root é o universo."
+"Une page, une compétence, un projet…": "Uma página, uma competência, um projeto…"
+"Résultats": "Resultados"
+"choisir": "escolher"
+"ouvrir": "abrir"
+"fermer": "fechar"
+"Échap": "Esc"
+"Le terminal secret": "O terminal secreto"
+"Un mot magique d’administrateur, dans la recherche…": "Uma palavra mágica de administrador, na pesquisa…"
+
+# Page /now
+"En ce moment": "Agora"
+"Ce que je fais en ce moment : ce que je construis, ce que j’apprends.": "O que estou a fazer agora: o que construo, o que aprendo."
+"Mis à jour le": "Atualizado a"
+
+# Visite guidée
+"Visite en 1 minute": "Visita de 1 minuto"
+"Bienvenue ! Je suis Nicolas, développeur fullstack PHP / Symfony. Voici mon univers en une minute.": "Bem-vindo! Sou o Nicolas, programador fullstack PHP / Symfony. Eis o meu universo num minuto."
+"Mon cerveau en 3D : chaque neurone est une compétence, chaque souvenir une étape de mon parcours. Clique dessus pour explorer.": "O meu cérebro em 3D: cada neurónio é uma competência, cada memória uma etapa do meu percurso. Clica para explorar."
+"Mes projets, en orbite autour d’un trou noir : chacun a sa page, avec le code et ce que j’en retiens.": "Os meus projetos, em órbita à volta de um buraco negro: cada um tem a sua página, com o código e o que aprendi."
+"Mon parcours, du brevet au bachelor, et mon CV à télécharger.": "O meu percurso, do ensino básico ao bachelor, e o meu CV para descarregar."
+"Un projet, une alternance, une question ? Écris-moi ici.": "Um projeto, uma formação em alternância, uma pergunta? Escreve-me aqui."
+"Pause": "Pausa"
+"Reprendre": "Retomar"
+"Suivant": "Seguinte"
+"Terminer": "Terminar"
+"Quitter la visite": "Sair da visita"
+
+# Statistiques des easter eggs
+"{0} Personne ne l’a encore trouvée|{1} Trouvée par un visiteur|]1,Inf[ Trouvée par %count% visiteurs": "{0} Ninguém o encontrou ainda|{1} Encontrado por um visitante|]1,Inf[ Encontrado por %count% visitantes"
+
+# Thème
+"Thème": "Tema"
+"Système": "Sistema"
+"Sombre": "Escuro"
+"Clair": "Claro"

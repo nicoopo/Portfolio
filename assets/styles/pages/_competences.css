@@ -3,7 +3,7 @@
 .skills-page {
   position: relative;
   min-height: 100vh;
-  color: #fff;
+  color: var(--color-text);
   overflow: hidden;
   padding-bottom: 5rem;
 }
@@ -25,7 +25,7 @@
 }
 
 .skills-header p {
-  color: #aaa;
+  color: var(--texte-doux);
   font-size: 1.2rem;
 }
 
@@ -39,10 +39,10 @@
 
 .skills-category {
   backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--voile-rgb) / 0.05);
   border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 0 25px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 25px rgb(var(--voile-rgb) / 0.1);
   transition: all 0.4s ease;
 }
 
@@ -62,24 +62,110 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .skill-card {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 0.3rem;
   padding: 0.8rem 1.2rem;
+  text-align: center;
+  background: rgb(var(--voile-rgb) / 0.08);
+  border: 1px solid rgb(var(--voile-rgb) / 0.1);
   border-radius: 12px;
   transition: 0.3s;
-  color: inherit;
-  text-decoration: none;
-  flex-grow: 1;
-  text-align: center;
 }
 
-.skill-card:hover {
+.skill-card:hover,
+.skill-card.eclairee {
   background: rgba(107, 225, 255, 0.15);
-  transform: scale(1.05);
   box-shadow: 0 0 15px rgba(107, 225, 255, 0.3);
+}
+
+.skill-nom {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Lien étiré : toute la carte mène au neurone ; les liens des projets passent par-dessus */
+.skill-nom::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.skill-projets {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+}
+
+.skill-projets a {
+  position: relative;
+  z-index: 1;
+  color: var(--color-secondary);
+}
+
+/* Constellations : une étoile par compétence, de la couleur de la catégorie (--etoile) */
+.ciel-competences {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: -0.5rem 0 1rem;
+  overflow: visible;
+}
+
+.ciel-competences line {
+  stroke: var(--etoile);
+  stroke-width: 0.8;
+  stroke-opacity: 0.35;
+}
+
+.ciel-competences circle {
+  fill: #fff;
+  filter: drop-shadow(0 0 3px var(--etoile)) drop-shadow(0 0 6px var(--etoile));
+  transition: transform 0.3s;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.ciel-competences text {
+  font-size: 11px;
+  text-anchor: middle;
+  fill: var(--color-text);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.etoile:hover circle,
+.etoile.eclairee circle {
+  transform: scale(1.6);
+}
+
+.etoile:hover text,
+.etoile.eclairee text {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ciel-competences circle {
+    animation: scintille 3s ease-in-out infinite alternate;
+  }
+
+  .etoile:nth-child(3n) circle { animation-delay: -1s; }
+  .etoile:nth-child(3n + 1) circle { animation-delay: -2s; }
+}
+
+@keyframes scintille {
+  to { opacity: 0.55; }
 }
 
 @media (max-width: 576px) {

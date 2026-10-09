@@ -17,6 +17,19 @@ qualite.addEventListener('change', () => {
     location.reload(); // cerveau et trous noirs sont construits au chargement
 });
 
+// Thème : même clé que le bouton du CV ; « Système » suit le réglage de l'appareil (script en tête de base.html.twig)
+const systeme = matchMedia('(prefers-color-scheme: light)');
+const themeChoisi = () => { try { return localStorage.getItem('theme'); } catch { return null; } };
+const appliquerTheme = () => { document.documentElement.dataset.theme = themeChoisi() || (systeme.matches ? 'light' : 'dark'); };
+document.querySelectorAll('input[name="theme"]').forEach((radio) => {
+    radio.checked = radio.value === (themeChoisi() || 'systeme');
+    radio.addEventListener('change', () => {
+        try { radio.value === 'systeme' ? localStorage.removeItem('theme') : localStorage.setItem('theme', radio.value); } catch { /* navigation privée */ }
+        appliquerTheme();
+    });
+});
+systeme.addEventListener('change', appliquerTheme);
+
 // Curseur : appliqué tout de suite (curseur.js relit la préférence à chaque image)
 document.querySelectorAll('input[name="curseur"]').forEach((radio) => {
     radio.checked = radio.value === preferences.curseur;

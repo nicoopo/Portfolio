@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use App\Entity\Article;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -14,7 +15,7 @@ final class SmokeTest extends WebTestCase
 
     public static function pages(): iterable
     {
-        foreach (['/', '/projects', '/projects/portfolio', '/articles', '/competences', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
+        foreach (['/', '/projects', '/projects/portfolio', '/articles', '/now', '/competences', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
             yield $url => [$url];
             foreach (['en', 'es', 'de', 'it', 'pt'] as $langue) {
                 yield "/$langue$url" => ["/$langue$url"];
@@ -67,7 +68,11 @@ final class SmokeTest extends WebTestCase
     {
         $crawler = static::createClient()->request('GET', '/competences');
 
-        self::assertGreaterThan(0, $crawler->filter('a.skill-card[href^="/cerveau#"]')->count());
+        self::assertGreaterThan(0, $crawler->filter('.skill-card a.skill-nom[href^="/cerveau#"]')->count());
+        // Constellations : une étoile par compétence, même lien que sa carte ; les projets de chaque compétence sont liés
+        self::assertSame($crawler->filter('.skill-card')->count(), $crawler->filter('svg.ciel-competences a.etoile')->count());
+        self::assertSame($crawler->filter('.skill-card a.skill-nom')->extract(['href']), $crawler->filter('svg.ciel-competences a.etoile')->extract(['href']));
+        self::assertGreaterThan(0, $crawler->filter('.skill-projets a[href^="/projects/"]')->count());
     }
 
     /** Chaque carte de la liste mène à la page de son projet ; texte long, liens et compétences y sont */
@@ -175,6 +180,12 @@ final class SmokeTest extends WebTestCase
             self::assertSame('Published test', (string) $flux->xpath('//item[link="http://localhost/en/articles/test-publie"]/title')[0]);
             self::assertSame('/en/articles/rss.xml', $client->request('GET', '/en/articles')->filter('link[type="application/rss+xml"]')->attr('href'));
 
+            // Palette de commandes : article publié cherchable, pas le brouillon
+            $client->request('GET', '/recherche.json');
+            $urls = array_column(json_decode($client->getResponse()->getContent(), true), 'url');
+            self::assertContains('/articles/test-publie', $urls);
+            self::assertNotContains('/articles/test-brouillon', $urls);
+
             $client->request('GET', '/sitemap.xml');
             self::assertStringContainsString('http://localhost/es/articles/test-publie', $client->getResponse()->getContent());
             self::assertStringNotContainsString('test-brouillon', $client->getResponse()->getContent());
@@ -184,6 +195,77 @@ final class SmokeTest extends WebTestCase
             }
             $entityManager->flush();
         }
+    }
+
+    /** Palette de commandes (Ctrl+K) : bouton et fenêtre sur chaque page ; pages, compétences et projets cherchables, dans la langue de l'adresse */
+    public function testLaPaletteDeCommandesCherchePartout(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/en/projects');
+        self::assertSelectorExists('#paletteOuvrir[aria-keyshortcuts]');
+        self::assertSame('/en/recherche.json', $crawler->filter('dialog#palette')->attr('data-url'));
+        self::assertSame('Command', json_decode($crawler->filter('dialog#palette')->attr('data-textes'), true)['commande']);
+
+        $client->request('GET', '/en/recherche.json');
+        self::assertResponseHeaderSame('Content-Type', 'application/json');
+        $entrees = json_decode($client->getResponse()->getContent(), true);
+        self::assertContains(['type' => 'page', 'titre' => 'Skills', 'url' => '/en/competences'], $entrees);
+        $parUrl = array_column($entrees, null, 'url');
+        self::assertSame('projet', $parUrl['/en/projects/pendu']['type']);
+        self::assertNotEmpty(array_filter($entrees, fn (array $e) => 'competence' === $e['type'] && str_starts_with($e['url'], '/en/cerveau#')));
+    }
+
+    /** Visite guidée : bouton sur l'accueil, cinq étapes vers des pages qui existent, textes traduits */
+    public function testLaVisiteGuideeMeneADesPagesQuiExistent(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/en/');
+        self::assertSelectorExists('button[data-visite-demarrer]');
+        $etapes = json_decode($crawler->filter('#visite')->attr('data-etapes'), true);
+        self::assertCount(5, $etapes);
+        self::assertStringStartsWith('Welcome!', $etapes[0]['texte']);
+
+        foreach ($etapes as $etape) {
+            self::assertStringStartsWith('/en/', $etape['url']);
+            $client->request('GET', $etape['url']);
+            self::assertResponseIsSuccessful($etape['url']);
+        }
+    }
+
+    /** Statistiques des easter eggs : +1 par découverte envoyée depuis le site, affiché dans le carnet ; le reste est refusé */
+    public function testLesDecouvertesSontComptees(): void
+    {
+        $client = static::createClient(server: self::NAVIGATEUR_FRANCAIS);
+        $connection = self::getContainer()->get(Connection::class);
+        $nombre = fn () => (int) $connection->fetchOne("SELECT nombre FROM decouverte WHERE id = 'terminal'");
+        $avant = $nombre();
+        $envoyer = fn (string $id, array $server = []) => $client->request('POST', '/decouvertes', server: $server + ['CONTENT_TYPE' => 'application/json'], content: json_encode(['id' => $id]));
+
+        $envoyer('terminal', ['HTTP_SEC_FETCH_SITE' => 'same-origin']);
+        self::assertResponseStatusCodeSame(204);
+        self::assertSame($avant + 1, $nombre());
+        $client->request('GET', '/');
+        self::assertSelectorTextContains('[data-decouverte="terminal"] .decouverte-stat', 1 === $avant + 1 ? 'Trouvée par un visiteur' : 'Trouvée par '.($avant + 1).' visiteurs');
+
+        $envoyer('inconnue');
+        self::assertResponseStatusCodeSame(400);
+        $envoyer('terminal', ['HTTP_SEC_FETCH_SITE' => 'cross-site']);
+        self::assertResponseStatusCodeSame(403);
+        $client->request('GET', '/decouvertes');
+        self::assertResponseStatusCodeSame(405);
+        self::assertSame($avant + 1, $nombre());
+
+        $connection->executeStatement("UPDATE decouverte SET nombre = :n WHERE id = 'terminal'", ['n' => $avant]);
+    }
+
+    /** Thème : posé dans <head> avant l'affichage (choix du visiteur, sinon le système), choix Système / Sombre / Clair dans les Réglages */
+    public function testLeThemeSeChoisitDansLesReglages(): void
+    {
+        $crawler = static::createClient()->request('GET', '/en/projects');
+
+        self::assertStringContainsString('prefers-color-scheme: light', $crawler->filter('head script')->first()->text());
+        self::assertSame(['systeme', 'dark', 'light'], $crawler->filter('#reglages input[name="theme"]')->extract(['value']));
+        self::assertSelectorTextContains('#reglages', 'Theme');
     }
 
     public function testTelechargementCvPdf(): void

@@ -12,15 +12,41 @@
     <p>{{ 'Un aperçu de mes connaissances techniques et humaines'|trans }}</p>
   </section>
 
-  <section class="skills-grid">
+  <section class="skills-grid" data-controller="constellation">
     {% for categorie in categories %}
-    <div class="skills-category">
+    {% set competences = categorie.competences %}
+    {% set ciel = constellation(competences|length, loop.index) %}
+    <div class="skills-category" style="--etoile: {{ categorie.couleur }}">
       <h2>{{ categorie|loc('nom') }}</h2>
-      <div class="skills-cards">
-        {% for competence in categorie.competences %}
-        <a class="skill-card" href="{{ path('app_cerveau') }}#{{ competence|loc('nom')|url_encode }}" title="{{ 'Voir ce neurone dans mon cerveau'|trans }}"><span>{{ competence|loc('nom') }}</span></a>
+
+      {# Chaque compétence est une étoile ; plus elle sert de projets, plus elle brille.
+         Décor : les mêmes liens sont dans la liste en dessous (survol de l'un = éclaire l'autre, constellation_controller.js) #}
+      <svg class="ciel-competences" viewBox="0 0 320 180" aria-hidden="true" focusable="false">
+        {% for lien in ciel.liens %}
+          {% set a, b = ciel.etoiles[lien[0]], ciel.etoiles[lien[1]] %}
+          <line x1="{{ a[0] }}" y1="{{ a[1] }}" x2="{{ b[0] }}" y2="{{ b[1] }}"/>
         {% endfor %}
-      </div>
+        {% for competence in competences %}
+          {% set e = ciel.etoiles[loop.index0] %}
+          <a href="{{ path('app_cerveau') }}#{{ competence|loc('nom')|url_encode }}" tabindex="-1" class="etoile" data-competence="{{ competence.id }}">
+            <circle cx="{{ e[0] }}" cy="{{ e[1] }}" r="{{ 2.5 + min(competence.projets|length, 4) }}"/>
+            <text x="{{ e[0] }}" y="{{ e[1] - 9 }}">{{ competence|loc('nom') }}</text>
+          </a>
+        {% endfor %}
+      </svg>
+
+      <ul class="skills-cards">
+        {% for competence in competences %}
+        <li class="skill-card" data-competence="{{ competence.id }}">
+          <a class="skill-nom" href="{{ path('app_cerveau') }}#{{ competence|loc('nom')|url_encode }}" title="{{ 'Voir ce neurone dans mon cerveau'|trans }}">{{ competence|loc('nom') }}</a>
+          {% if competence.projets is not empty %}
+          <span class="skill-projets">
+            {% for projet in competence.projets %}<a href="{{ path('app_project', {slug: projet.slug}) }}">{{ projet|loc('titre') }}</a>{% endfor %}
+          </span>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
     </div>
     {% endfor %}
   </section>

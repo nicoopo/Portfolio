@@ -176,3 +176,48 @@
 "Lire l’article": "Read the article"
 "Premier article bientôt.": "First article coming soon."
 "Tous les articles": "All articles"
+
+# Palette de commandes (Ctrl+K)
+"Rechercher": "Search"
+"Page": "Page"
+"Compétence": "Skill"
+"Projet": "Project"
+"Article": "Article"
+"Commande": "Command"
+"Aucun résultat": "No results"
+"Bien essayé. Ici, c’est l’univers qui a les droits root.": "Nice try. Around here, the universe has root."
+"Une page, une compétence, un projet…": "A page, a skill, a project…"
+"Résultats": "Results"
+"choisir": "select"
+"ouvrir": "open"
+"fermer": "close"
+"Échap": "Esc"
+"Le terminal secret": "The secret terminal"
+"Un mot magique d’administrateur, dans la recherche…": "An administrator's magic word, in the search…"
+
+# Page /now
+"En ce moment": "Now"
+"Ce que je fais en ce moment : ce que je construis, ce que j’apprends.": "What I'm doing right now: what I'm building, what I'm learning."
+"Mis à jour le": "Updated on"
+
+# Visite guidée
+"Visite en 1 minute": "1-minute tour"
+"Bienvenue ! Je suis Nicolas, développeur fullstack PHP / Symfony. Voici mon univers en une minute.": "Welcome! I'm Nicolas, a full-stack PHP / Symfony developer. Here's my universe in one minute."
+"Mon cerveau en 3D : chaque neurone est une compétence, chaque souvenir une étape de mon parcours. Clique dessus pour explorer.": "My brain in 3D: each neuron is a skill, each memory a step of my journey. Click them to explore."
+"Mes projets, en orbite autour d’un trou noir : chacun a sa page, avec le code et ce que j’en retiens.": "My projects, orbiting a black hole: each has its own page, with the code and what I took away from it."
+"Mon parcours, du brevet au bachelor, et mon CV à télécharger.": "My journey, from middle school to my bachelor's degree, and my CV to download."
+"Un projet, une alternance, une question ? Écris-moi ici.": "A project, a work-study position, a question? Write to me here."
+"Pause": "Pause"
+"Reprendre": "Resume"
+"Suivant": "Next"
+"Terminer": "Finish"
+"Quitter la visite": "Leave the tour"
+
+# Statistiques des easter eggs
+"{0} Personne ne l’a encore trouvée|{1} Trouvée par un visiteur|]1,Inf[ Trouvée par %count% visiteurs": "{0} Nobody has found it yet|{1} Found by one visitor|]1,Inf[ Found by %count% visitors"
+
+# Thème
+"Thème": "Theme"
+"Système": "System"
+"Sombre": "Dark"
+"Clair": "Light"

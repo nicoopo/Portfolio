@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const animate = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const clair = document.documentElement.dataset.theme === 'light'; // étoiles foncées sur le ciel clair
         stars.forEach(star => {
             // effet de profondeur dynamique
             const offsetX = (mouseX - centreX) * 0.002 * star.depth;
@@ -44,9 +45,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             ctx.beginPath();
             ctx.arc(star.x + offsetX, star.y + offsetY, star.r, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${0.7 / star.depth})`;
+            ctx.fillStyle = clair ? `rgba(70, 50, 150, ${0.5 / star.depth})` : `rgba(255, 255, 255, ${0.7 / star.depth})`;
             ctx.shadowBlur = basseQualite() ? 0 : 8; // le flou d'ombre coûte cher
-            ctx.shadowColor = '#aaf';
+            ctx.shadowColor = clair ? 'transparent' : '#aaf';
             ctx.fill();
 
             star.y += star.s;
