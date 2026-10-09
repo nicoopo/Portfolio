@@ -7,7 +7,7 @@ import { preferences, setPreference } from './preferences.js';
 
 const AFFICHAGE_MS = 5000;
 
-/** Appelé par chaque easter egg : 'trou-noir', 'konami', 'constellation-n', 'constellation-lion' */
+/** Appelé par chaque easter egg : 'trou-noir', 'konami', 'constellation-n', 'constellation-lion', 'terminal' */
 export function decouvrir(id) {
     if (preferences.decouvertes.includes(id)) return;
     setPreference('decouvertes', [...preferences.decouvertes, id]);

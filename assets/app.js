@@ -13,6 +13,7 @@ import './scripts/konami.js';
 import './scripts/constellation.js';
 import './scripts/qualite_auto.js';
 import './scripts/sons.js';
+import './scripts/palette.js';
 
 // 4. Stimulus : comportements attachés à un élément via data-controller (assets/controllers/)
 import './stimulus_bootstrap.js';

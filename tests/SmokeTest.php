@@ -175,6 +175,12 @@ final class SmokeTest extends WebTestCase
             self::assertSame('Published test', (string) $flux->xpath('//item[link="http://localhost/en/articles/test-publie"]/title')[0]);
             self::assertSame('/en/articles/rss.xml', $client->request('GET', '/en/articles')->filter('link[type="application/rss+xml"]')->attr('href'));
 
+            // Palette de commandes : article publié cherchable, pas le brouillon
+            $client->request('GET', '/recherche.json');
+            $urls = array_column(json_decode($client->getResponse()->getContent(), true), 'url');
+            self::assertContains('/articles/test-publie', $urls);
+            self::assertNotContains('/articles/test-brouillon', $urls);
+
             $client->request('GET', '/sitemap.xml');
             self::assertStringContainsString('http://localhost/es/articles/test-publie', $client->getResponse()->getContent());
             self::assertStringNotContainsString('test-brouillon', $client->getResponse()->getContent());
@@ -184,6 +190,24 @@ final class SmokeTest extends WebTestCase
             }
             $entityManager->flush();
         }
+    }
+
+    /** Palette de commandes (Ctrl+K) : bouton et fenêtre sur chaque page ; pages, compétences et projets cherchables, dans la langue de l'adresse */
+    public function testLaPaletteDeCommandesCherchePartout(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/en/projects');
+        self::assertSelectorExists('#paletteOuvrir[aria-keyshortcuts]');
+        self::assertSame('/en/recherche.json', $crawler->filter('dialog#palette')->attr('data-url'));
+        self::assertSame('Command', json_decode($crawler->filter('dialog#palette')->attr('data-textes'), true)['commande']);
+
+        $client->request('GET', '/en/recherche.json');
+        self::assertResponseHeaderSame('Content-Type', 'application/json');
+        $entrees = json_decode($client->getResponse()->getContent(), true);
+        self::assertContains(['type' => 'page', 'titre' => 'Skills', 'url' => '/en/competences'], $entrees);
+        $parUrl = array_column($entrees, null, 'url');
+        self::assertSame('projet', $parUrl['/en/projects/pendu']['type']);
+        self::assertNotEmpty(array_filter($entrees, fn (array $e) => 'competence' === $e['type'] && str_starts_with($e['url'], '/en/cerveau#')));
     }
 
     public function testTelechargementCvPdf(): void
