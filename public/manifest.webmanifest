@@ -1,0 +1,15 @@
+{
+    "name": "Univers de Nico — Nicolas Cataluna",
+    "short_name": "Univers de Nico",
+    "description": "Portfolio de Nicolas Cataluna, développeur fullstack PHP / Symfony.",
+    "lang": "fr",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#05050f",
+    "theme_color": "#0a0a19",
+    "icons": [
+        { "src": "/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+        { "src": "/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    ]
+}

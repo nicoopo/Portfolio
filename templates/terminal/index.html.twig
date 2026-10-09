@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Terminal · {{ 'Univers de Nico'|trans }}{% endblock %}
+
+{% block description %}{{ 'Explorez mon portfolio en ligne de commande : ls, cat, whoami… Tapez help pour commencer.'|trans }}{% endblock %}
+
+{% block body %}
+<section class="terminal-page container py-5">
+  <h1 class="text-center gradient fw-bold display-6">Terminal</h1>
+  <p class="projets-intro">{{ 'Explorez mon portfolio en ligne de commande : ls, cat, whoami… Tapez help pour commencer.'|trans }}</p>
+
+  {# terminal_controller.js : commandes, historique (↑ ↓), complétion (Tab) #}
+  <div class="terminal" data-controller="terminal" data-action="click->terminal#focus"
+       data-terminal-donnees-value="{{ donnees|json_encode }}"
+       data-terminal-textes-value="{{ {
+           bienvenue: 'Bienvenue dans mon univers. Tapez « help » pour la liste des commandes.'|trans,
+           aide: [
+               ['help', 'cette aide'|trans],
+               ['whoami', 'qui je suis'|trans],
+               ['ls', 'le contenu : projets, competences, cv, contact'|trans],
+               ['ls projets', 'la liste de mes projets'|trans],
+               ['cat projets/<nom>', 'le détail d’un projet'|trans],
+               ['ls competences', 'mes compétences par catégorie'|trans],
+               ['cat cv', 'mon profil'|trans],
+               ['cat contact', 'comment me joindre'|trans],
+               ['open <page|projet>', 'ouvrir une page (cv, contact, cerveau…) ou un projet'|trans],
+               ['clear', 'effacer l’écran'|trans],
+               ['exit', 'retour à l’accueil'|trans],
+           ],
+           inconnue: 'commande introuvable : %commande%. Tapez « help ».'|trans,
+           introuvable: 'aucun fichier ou dossier de ce nom : %nom%'|trans,
+           ouverture: 'ouverture de %nom%…'|trans,
+           sudo: 'Bien essayé. Ici, c’est l’univers qui a les droits root.'|trans,
+       }|json_encode }}">
+    <div class="terminal-barre" aria-hidden="true"><span></span><span></span><span></span> visiteur@univers: ~</div>
+    <div class="terminal-sortie" role="log" aria-live="polite" data-terminal-target="sortie"></div>
+    <form class="terminal-ligne" data-action="submit->terminal#executer">
+      <label for="terminal-commande" class="terminal-invite">visiteur@univers:~$</label>
+      <input id="terminal-commande" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+             data-terminal-target="champ" data-action="keydown->terminal#touche" aria-describedby="terminal-aide">
+    </form>
+  </div>
+  <p id="terminal-aide" class="terminal-note">{{ '↑ ↓ : commandes précédentes · Tab : compléter'|trans }}</p>
+</section>
+{% endblock %}

@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Candidature;
 use App\Entity\Competence;
 use App\Entity\DemandeContact;
 use App\Entity\Journal;
@@ -39,10 +40,18 @@ final class DashboardController extends AbstractDashboardController
             'connexions_refusees' => $this->journal->compterDepuis(Journal::CONNEXION_REFUSEE, new \DateTimeImmutable('-7 days')),
             'nb_competences' => $this->entityManager->getRepository(Competence::class)->count([]),
             'nb_projets' => $this->projets->count([]),
+            'a_relancer' => (int) $this->entityManager->createQuery('SELECT COUNT(c) FROM '.Candidature::class.' c WHERE c.relancerLe <= :aujourdhui')
+                ->setParameter('aujourdhui', new \DateTimeImmutable('today'))->getSingleScalarResult(),
             'dernieres_demandes' => $this->demandes->findBy([], ['recuLe' => 'DESC'], 5),
             'dernier_journal' => $this->journal->findBy([], ['date' => 'DESC'], 8),
             'activite' => $this->activite(),
             'contacts_par_mois' => $this->contactsParMois(),
+            'visites' => $this->visitesParJour(),
+            'visites_classements' => [
+                'Pages' => $this->classementVisites('chemin'),
+                'Provenance' => $this->classementVisites('source'),
+                'Langues' => $this->classementVisites('langue'),
+            ],
         ]);
     }
 
@@ -75,6 +84,36 @@ final class DashboardController extends AbstractDashboardController
             'labels' => array_map(static fn (string $jour) => (new \DateTimeImmutable($jour))->format('d/m'), array_keys($jours)),
             'series' => array_map(static fn (string $serie, array $parJour) => ['label' => $serie, 'data' => array_values($parJour)], array_keys($series), $series),
         ];
+    }
+
+    /** Graphique : pages vues par jour sur 30 jours (App\EventListener\StatistiquesListener) */
+    private function visitesParJour(): array
+    {
+        $jours = [];
+        for ($i = 29; $i >= 0; --$i) {
+            $jours[(new \DateTimeImmutable("-$i days"))->format('Y-m-d')] = 0;
+        }
+        $lignes = $this->entityManager->getConnection()->fetchAllKeyValue(
+            "SELECT to_char(jour, 'YYYY-MM-DD'), SUM(nombre) FROM visite_jour WHERE jour >= CURRENT_DATE - 29 GROUP BY jour",
+        );
+        foreach ($lignes as $jour => $nombre) {
+            $jours[$jour] = (int) $nombre;
+        }
+
+        return [
+            'labels' => array_map(static fn (string $jour) => (new \DateTimeImmutable($jour))->format('d/m'), array_keys($jours)),
+            'series' => [['label' => 'Pages vues', 'data' => array_values($jours)]],
+        ];
+    }
+
+    /** Les 8 premières valeurs d'une colonne de visite_jour sur 30 jours (« site » exclu des provenances : c'est de la navigation interne) */
+    private function classementVisites(string $colonne): array
+    {
+        return array_map('intval', $this->entityManager->getConnection()->fetchAllKeyValue(
+            "SELECT $colonne, SUM(nombre) AS total FROM visite_jour WHERE jour >= CURRENT_DATE - 29"
+            .('source' === $colonne ? " AND source <> 'site'" : '')
+            ." GROUP BY $colonne ORDER BY total DESC LIMIT 8",
+        ));
     }
 
     /** Graphique : demandes de contact par mois sur 12 mois */
@@ -118,9 +157,11 @@ final class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(CvCompetenceCrudController::class, 'Compétences du CV', 'fa fa-code');
         yield MenuItem::linkTo(LangueCrudController::class, 'Langues', 'fa fa-language');
         yield MenuItem::linkTo(CentreInteretCrudController::class, "Centres d'intérêt", 'fa fa-heart');
+        yield MenuItem::section('Alternance');
+        yield MenuItem::linkTo(CandidatureCrudController::class, 'Candidatures', 'fa fa-paper-plane');
+        yield MenuItem::linkTo(LienRecruteurCrudController::class, 'Liens recruteur', 'fa fa-link');
         yield MenuItem::section('Visiteurs');
         yield MenuItem::linkTo(DemandeContactCrudController::class, 'Demandes de contact', 'fa fa-envelope');
-        yield MenuItem::linkTo(LienRecruteurCrudController::class, 'Liens recruteur', 'fa fa-link');
         yield MenuItem::linkTo(MessageLivreOrCrudController::class, 'Livre d’or', 'fa fa-star-half-stroke');
         yield MenuItem::section('Administration');
         yield MenuItem::linkTo(UtilisateurCrudController::class, 'Comptes', 'fa fa-user-shield');

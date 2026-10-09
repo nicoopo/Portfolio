@@ -141,7 +141,6 @@
 "Site auquel j’ai contribué :": "Website I contributed to:"
 "Haute qualité": "High quality"
 "Réglages": "Settings"
-"Ambiance sonore du cerveau 3D": "3D brain soundscape"
 "Transitions entre les pages, easter eggs": "Page transitions, easter eggs"
 "À couper si le site rame": "Turn off if the site lags"
 "Fermer le menu": "Close menu"
@@ -277,3 +276,25 @@
 "Votre message (280 caractères)": "Your message (280 characters)"
 "Merci ! Votre étoile apparaîtra dans le ciel dès que je l’aurai lue.": "Thank you! Your star will appear in the sky as soon as I've read it."
 "Beaucoup de messages d’un coup : réessayez dans une heure.": "Lots of messages at once: try again in an hour."
+
+# Terminal
+"Explorez mon portfolio en ligne de commande : ls, cat, whoami… Tapez help pour commencer.": "Explore my portfolio from the command line: ls, cat, whoami… Type help to get started."
+"Bienvenue dans mon univers. Tapez « help » pour la liste des commandes.": "Welcome to my universe. Type “help” for the list of commands."
+"cette aide": "this help"
+"qui je suis": "who I am"
+"le contenu : projets, competences, cv, contact": "contents: projets, competences, cv, contact"
+"la liste de mes projets": "the list of my projects"
+"le détail d’un projet": "details of a project"
+"mes compétences par catégorie": "my skills by category"
+"mon profil": "my profile"
+"comment me joindre": "how to reach me"
+"ouvrir une page (cv, contact, cerveau…) ou un projet": "open a page (cv, contact, cerveau…) or a project"
+"effacer l’écran": "clear the screen"
+"retour à l’accueil": "back to the home page"
+"commande introuvable : %commande%. Tapez « help ».": "command not found: %commande%. Type “help”."
+"aucun fichier ou dossier de ce nom : %nom%": "no such file or directory: %nom%"
+"ouverture de %nom%…": "opening %nom%…"
+"↑ ↓ : commandes précédentes · Tab : compléter": "↑ ↓: previous commands · Tab: complete"
+
+# Ambiance sonore par page
+"Ambiance sonore de chaque page": "Soundscape on every page"

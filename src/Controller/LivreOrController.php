@@ -6,6 +6,7 @@ use App\Entity\Journal;
 use App\Entity\MessageLivreOr;
 use App\Form\LivreOrType;
 use App\Service\Journaliste;
+use App\Service\Notificateur;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,6 +28,7 @@ final class LivreOrController extends AbstractController
         TranslatorInterface $translator,
         Journaliste $journaliste,
         RateLimiterFactoryInterface $livreOrLimiter,
+        Notificateur $notificateur,
     ): Response {
         $form = $this->createForm(LivreOrType::class);
         $form->handleRequest($request);
@@ -42,6 +44,7 @@ final class LivreOrController extends AbstractController
             } else {
                 $entityManager->persist(new MessageLivreOr(trim($data['prenom']), trim($data['message']), $request->getLocale()));
                 $entityManager->flush();
+                $notificateur->prevenir('Livre d’or : nouveau message à modérer', trim($data['prenom']).' : '.trim($data['message']), 'star');
             }
             // Même réponse pour un robot : il ne sait pas qu'il a été repéré
             $this->addFlash('success', $translator->trans('Merci ! Votre étoile apparaîtra dans le ciel dès que je l’aurai lue.'));

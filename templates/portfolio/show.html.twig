@@ -4,8 +4,11 @@
 
 {% block description %}{{ projet|loc('description') }}{% endblock %}
 
+{# Aperçu de partage généré (PartageController) : titre et technos, lisible même en petit #}
 {% block og_image %}
-    {% if projet.imageChemin %}<meta property="og:image" content="{{ absolute_url(asset(projet.imageChemin)) }}">{% endif %}
+    <meta property="og:image" content="{{ url('app_partage_projet', {slug: projet.slug}) }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
 {% endblock %}
 
 {% block body %}

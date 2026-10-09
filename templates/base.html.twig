@@ -37,6 +37,10 @@
     {% endblock %}
     <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" href="{{ asset('images/nico-symbol.svg') }}">
+    {# Application installable : manifeste, icônes et service worker dans public/ (adresses fixes, hors AssetMapper) #}
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/icone-180.png">
+    <meta name="theme-color" content="#0a0a19">
     <link rel="alternate" type="application/rss+xml" title="{{ 'Articles'|trans }} · {{ 'Univers de Nico'|trans }}" href="{{ path('app_articles_rss') }}">
     {% block javascripts %}
         {# Charge aussi app.js → bootstrap.css + styles/app.css #}
@@ -46,7 +50,7 @@
     {% block stylesheets %}{% endblock %}
 </head>
 
-<body>
+<body data-page="{{ canonical_route }}">
     <nav class="navbar-galactic">
         <div class="navbar-container">
             <a href="{{ path('app_home') }}" class="logo gradient" aria-label="{{ 'Accueil'|trans }}">
@@ -83,7 +87,7 @@
                         <input type="checkbox" role="switch" id="prefQualite">
                     </label>
                     <label class="interrupteur">
-                        <span>{{ 'Son'|trans }}<small>{{ 'Ambiance sonore du cerveau 3D'|trans }}</small></span>
+                        <span>{{ 'Son'|trans }}<small>{{ 'Ambiance sonore de chaque page'|trans }}</small></span>
                         <input type="checkbox" role="switch" id="prefSon">
                     </label>
                     <fieldset class="choix-curseur">
@@ -215,6 +219,7 @@
         <span>© {{ 'now'|date('Y') }} Nicolas Cataluna</span>
         <a href="{{ path('app_now') }}">{{ 'En ce moment'|trans }}</a>
         <a href="{{ path('app_livre_or') }}">{{ 'Livre d’or'|trans }}</a>
+        <a href="{{ path('app_terminal') }}">Terminal</a>
         <a href="{{ path('app_mentions_legales') }}">{{ 'Mentions légales'|trans }}</a>
         <a href="{{ path('app_confidentialite') }}">{{ 'Confidentialité'|trans }}</a>
     </footer>

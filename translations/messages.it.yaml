@@ -141,7 +141,6 @@
 "Site auquel j’ai contribué :": "Sito a cui ho contribuito:"
 "Haute qualité": "Alta qualità"
 "Réglages": "Impostazioni"
-"Ambiance sonore du cerveau 3D": "Atmosfera sonora del cervello 3D"
 "Transitions entre les pages, easter eggs": "Transizioni tra le pagine, easter egg"
 "À couper si le site rame": "Da disattivare se il sito è lento"
 "Fermer le menu": "Chiudi il menu"
@@ -277,3 +276,25 @@
 "Votre message (280 caractères)": "Il vostro messaggio (280 caratteri)"
 "Merci ! Votre étoile apparaîtra dans le ciel dès que je l’aurai lue.": "Grazie! La vostra stella apparirà nel cielo appena l'avrò letta."
 "Beaucoup de messages d’un coup : réessayez dans une heure.": "Tanti messaggi tutti insieme: riprovate tra un'ora."
+
+# Terminal
+"Explorez mon portfolio en ligne de commande : ls, cat, whoami… Tapez help pour commencer.": "Esplorate il mio portfolio da riga di comando: ls, cat, whoami… Digitate help per iniziare."
+"Bienvenue dans mon univers. Tapez « help » pour la liste des commandes.": "Benvenuti nel mio universo. Digitate «help» per l'elenco dei comandi."
+"cette aide": "questo aiuto"
+"qui je suis": "chi sono"
+"le contenu : projets, competences, cv, contact": "il contenuto: projets, competences, cv, contact"
+"la liste de mes projets": "l'elenco dei miei progetti"
+"le détail d’un projet": "il dettaglio di un progetto"
+"mes compétences par catégorie": "le mie competenze per categoria"
+"mon profil": "il mio profilo"
+"comment me joindre": "come contattarmi"
+"ouvrir une page (cv, contact, cerveau…) ou un projet": "aprire una pagina (cv, contact, cerveau…) o un progetto"
+"effacer l’écran": "pulire lo schermo"
+"retour à l’accueil": "tornare alla home"
+"commande introuvable : %commande%. Tapez « help ».": "comando non trovato: %commande%. Digitate «help»."
+"aucun fichier ou dossier de ce nom : %nom%": "file o directory inesistente: %nom%"
+"ouverture de %nom%…": "apertura di %nom%…"
+"↑ ↓ : commandes précédentes · Tab : compléter": "↑ ↓: comandi precedenti · Tab: completare"
+
+# Ambiance sonore par page
+"Ambiance sonore de chaque page": "Atmosfera sonora su ogni pagina"

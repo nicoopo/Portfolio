@@ -15,7 +15,7 @@ final class SmokeTest extends WebTestCase
 
     public static function pages(): iterable
     {
-        foreach (['/', '/projects', '/projects/portfolio', '/projects/frise', '/articles', '/now', '/livre-d-or', '/competences', '/competences/comparer', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
+        foreach (['/', '/projects', '/projects/portfolio', '/projects/frise', '/articles', '/now', '/livre-d-or', '/terminal', '/competences', '/competences/comparer', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
             yield $url => [$url];
             foreach (['en', 'es', 'de', 'it', 'pt'] as $langue) {
                 yield "/$langue$url" => ["/$langue$url"];
@@ -91,7 +91,7 @@ final class SmokeTest extends WebTestCase
         self::assertGreaterThan(1, $page->filter('.projet-texte p')->count());
         self::assertSelectorExists('a[href="https://github.com/nicoopo/Portfolio"]');
         self::assertSelectorExists('.projet-competences a[href^="/cerveau#"]');
-        self::assertStringContainsString('/portfolio-cerveau', $page->filter('meta[property="og:image"]')->attr('content'));
+        self::assertSame('http://localhost/partage/projet/portfolio.png', $page->filter('meta[property="og:image"]')->attr('content'));
 
         $client->request('GET', '/projects/inconnu');
         self::assertResponseStatusCodeSame(404);
@@ -267,6 +267,7 @@ final class SmokeTest extends WebTestCase
         self::assertSame(['systeme', 'dark', 'light'], $crawler->filter('#reglages input[name="theme"]')->extract(['value']));
         self::assertSame(['hasard', 'trou-noir', 'teleportation', 'distorsion', 'lumiere'], $crawler->filter('#reglages input[name="effet"]')->extract(['value']));
         self::assertSelectorTextContains('#reglages', 'Theme');
+        self::assertSelectorExists('body[data-page="app_projects"]'); // profil de l'ambiance sonore (ambiance_page.js)
     }
 
     /** Comparateur : chaque compétence arrive avec ses mots-clés (nom français, traduit, synonymes) et ses projets */
@@ -282,6 +283,53 @@ final class SmokeTest extends WebTestCase
         $client = static::getClient();
         $client->request('GET', '/en/competences');
         self::assertSelectorExists('a[href="/en/competences/comparer"]');
+    }
+
+    /** Images de partage : un PNG 1200 × 630 par projet, dans la langue de l'adresse ; projet inconnu : 404 */
+    public function testLesImagesDePartageSontGenerees(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/en/partage/projet/pendu.png');
+
+        self::assertResponseHeaderSame('Content-Type', 'image/png');
+        self::assertStringContainsString('max-age=86400', $client->getResponse()->headers->get('Cache-Control'));
+        [$largeur, $hauteur] = getimagesizefromstring($client->getResponse()->getContent());
+        self::assertSame([1200, 630], [$largeur, $hauteur]);
+
+        $client->request('GET', '/partage/projet/inconnu.png');
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    /** Terminal : profil, projets (avec leur page), compétences et contact fournis à la page, traduits */
+    public function testLeTerminalConnaitLePortfolio(): void
+    {
+        $crawler = static::createClient()->request('GET', '/en/terminal');
+
+        $donnees = json_decode($crawler->filter('[data-terminal-donnees-value]')->attr('data-terminal-donnees-value'), true);
+        self::assertContains('/en/projects/pendu', array_column($donnees['projets'], 'url'));
+        self::assertArrayHasKey('Networks / Infra', $donnees['competences']);
+        self::assertNotEmpty($donnees['resume']);
+        self::assertStringContainsString('@', $donnees['contact']['email']);
+        self::assertSelectorExists('label[for="terminal-commande"]');
+    }
+
+    /** Application installable : manifeste valide avec ses icônes, service worker, page hors ligne, autorisés par la CSP */
+    public function testLeSiteEstInstallable(): void
+    {
+        $client = static::createClient(server: self::NAVIGATEUR_FRANCAIS);
+        $crawler = $client->request('GET', '/');
+        self::assertSame('/manifest.webmanifest', $crawler->filter('link[rel="manifest"]')->attr('href'));
+        self::assertStringContainsString("worker-src 'self'", $client->getResponse()->headers->get('Content-Security-Policy'));
+
+        $public = self::getContainer()->getParameter('kernel.project_dir').'/public';
+        $manifeste = json_decode(file_get_contents($public.'/manifest.webmanifest'), true, flags: \JSON_THROW_ON_ERROR);
+        self::assertSame('/', $manifeste['start_url']);
+        foreach ($manifeste['icons'] as $icone) {
+            [$largeur, $hauteur] = getimagesize($public.$icone['src']);
+            self::assertSame($icone['sizes'], "{$largeur}x{$hauteur}");
+        }
+        self::assertStringContainsString("'/hors-ligne.html'", file_get_contents($public.'/sw.js'));
+        self::assertFileExists($public.'/hors-ligne.html');
     }
 
     public function testTelechargementCvPdf(): void

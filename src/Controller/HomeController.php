@@ -6,6 +6,7 @@ use App\Entity\EtapeParcours;
 use App\Entity\LienRecruteur;
 use App\Entity\Passion;
 use App\Repository\CategorieCompetenceRepository;
+use App\Service\Notificateur;
 use App\Repository\EtapeParcoursRepository;
 use App\Repository\PassionRepository;
 use App\Twig\Traduction;
@@ -17,15 +18,18 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class HomeController extends AbstractController
 {
-    /** Lien recruteur (/?pour=code) : accueil personnalisé, visite comptée sauf pour l'administrateur connecté */
+    /** Lien recruteur (/?pour=code) : accueil personnalisé, visite comptée sauf pour l'administrateur connecté, notification à la première */
     #[Route('/', name: 'app_home')]
-    public function index(Request $request, EntityManagerInterface $entityManager): Response
+    public function index(Request $request, EntityManagerInterface $entityManager, Notificateur $notificateur): Response
     {
         $code = $request->query->getString('pour');
         $recruteur = '' !== $code ? $entityManager->getRepository(LienRecruteur::class)->findOneBy(['code' => $code]) : null;
         if ($recruteur && !$this->isGranted('ROLE_ADMIN')) {
             $recruteur->visiter();
             $entityManager->flush();
+            if (1 === $recruteur->getVisites()) { // la première ouverture seulement : de quoi relancer au bon moment
+                $notificateur->prevenir('Lien recruteur ouvert', $recruteur->getEntreprise().' vient d’ouvrir ton portfolio'.($recruteur->getPoste() ? ' ('.$recruteur->getPoste().')' : ''), 'eyes');
+            }
         }
 
         return $this->render('home/index.html.twig', ['recruteur' => $recruteur]);
