@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Comparer avec votre offre'|trans }} · {{ 'Univers de Nico'|trans }}{% endblock %}
+
+{% block description %}{{ 'Collez une offre d’emploi ou d’alternance : mes compétences qui y correspondent, et les projets qui le prouvent.'|trans }}{% endblock %}
+
+{% block body %}
+<section class="comparateur container py-5" data-controller="comparateur"
+         data-comparateur-competences-value="{{ competences|json_encode }}"
+         data-comparateur-textes-value="{{ {
+             resume: '%trouvees% compétences de mon profil apparaissent dans cette offre.'|trans,
+             aucune: 'Aucune de mes compétences n’apparaît telle quelle dans ce texte : parlons-en quand même !'|trans,
+             projets: 'Prouvé par'|trans,
+         }|json_encode }}">
+  <h1 class="text-center gradient fw-bold display-6">{{ 'Comparer avec votre offre'|trans }}</h1>
+  <p class="projets-intro">{{ 'Collez une offre d’emploi ou d’alternance : mes compétences qui y correspondent, et les projets qui le prouvent.'|trans }}</p>
+
+  <div class="comparateur-grille">
+    <div>
+      <label class="comparateur-label" for="offre">{{ 'Texte de l’offre'|trans }}</label>
+      <textarea id="offre" class="comparateur-offre" rows="14" data-comparateur-target="offre" data-action="input->comparateur#comparer"
+                placeholder="{{ 'Ex. : Vous maîtrisez PHP et Symfony, connaissez Docker et Git…'|trans }}"></textarea>
+      <p class="comparateur-note">{{ 'Tout se passe dans votre navigateur : le texte n’est envoyé nulle part.'|trans }}</p>
+    </div>
+
+    <div aria-live="polite">
+      <p class="comparateur-resume" data-comparateur-target="resume"></p>
+      <div class="comparateur-surligne" data-comparateur-target="surligne" hidden></div>
+      <ul class="comparateur-resultats" data-comparateur-target="resultats"></ul>
+    </div>
+  </div>
+
+  <div class="comparateur-suite">
+    <a href="{{ path('app_cv') }}" class="btn btn-galactic btn-galactic-primary">{{ 'Mon CV'|trans }}</a>
+    <a href="{{ path('app_contact') }}" class="btn btn-galactic btn-galactic-outline-light">{{ 'Me contacter'|trans }}</a>
+  </div>
+</section>
+{% endblock %}

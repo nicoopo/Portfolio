@@ -228,3 +228,13 @@
 "Merci de votre visite. Tout ce qu’il faut savoir pour le poste de %poste% est à deux clics :": "Obrigado pela visita. Tudo o que precisam para a vaga de %poste% está a dois cliques:"
 "Merci de votre visite. L’essentiel est à deux clics :": "Obrigado pela visita. O essencial está a dois cliques:"
 "Me contacter": "Contactar-me"
+
+# Comparateur offre / compétences
+"Comparer avec votre offre": "Comparar com a sua oferta"
+"Collez une offre d’emploi ou d’alternance : mes compétences qui y correspondent, et les projets qui le prouvent.": "Cole uma oferta de emprego ou de alternância: as minhas competências que correspondem e os projetos que o provam."
+"%trouvees% compétences de mon profil apparaissent dans cette offre.": "%trouvees% competências do meu perfil aparecem nesta oferta."
+"Aucune de mes compétences n’apparaît telle quelle dans ce texte : parlons-en quand même !": "Nenhuma das minhas competências aparece tal e qual neste texto: falemos na mesma!"
+"Prouvé par": "Comprovado por"
+"Texte de l’offre": "Texto da oferta"
+"Ex. : Vous maîtrisez PHP et Symfony, connaissez Docker et Git…": "Ex.: Domina PHP e Symfony, conhece Docker e Git…"
+"Tout se passe dans votre navigateur : le texte n’est envoyé nulle part.": "Tudo acontece no seu navegador: o texto não é enviado para lado nenhum."
