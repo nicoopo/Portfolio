@@ -165,6 +165,16 @@ final class SmokeTest extends WebTestCase
                 self::assertResponseStatusCodeSame(404);
             }
 
+            // Flux RSS dans la langue de l'adresse, brouillon exclu ; annoncé dans l'en-tête des pages
+            $client->request('GET', '/en/articles/rss.xml');
+            self::assertResponseHeaderSame('Content-Type', 'application/rss+xml; charset=UTF-8');
+            $flux = simplexml_load_string($client->getResponse()->getContent());
+            $items = array_map('strval', $flux->xpath('//item/link'));
+            self::assertContains('http://localhost/en/articles/test-publie', $items);
+            self::assertNotContains('http://localhost/en/articles/test-brouillon', $items);
+            self::assertSame('Published test', (string) $flux->xpath('//item[link="http://localhost/en/articles/test-publie"]/title')[0]);
+            self::assertSame('/en/articles/rss.xml', $client->request('GET', '/en/articles')->filter('link[type="application/rss+xml"]')->attr('href'));
+
             $client->request('GET', '/sitemap.xml');
             self::assertStringContainsString('http://localhost/es/articles/test-publie', $client->getResponse()->getContent());
             self::assertStringNotContainsString('test-brouillon', $client->getResponse()->getContent());

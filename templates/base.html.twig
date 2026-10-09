@@ -35,6 +35,7 @@
     {% endblock %}
     <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" href="{{ asset('images/nico-symbol.svg') }}">
+    <link rel="alternate" type="application/rss+xml" title="{{ 'Articles'|trans }} · {{ 'Univers de Nico'|trans }}" href="{{ path('app_articles_rss') }}">
     {% block javascripts %}
         {# Charge aussi app.js → bootstrap.css + styles/app.css #}
         {% block importmap %}{{ importmap('app', {nonce: csp_nonce('script')}) }}{% endblock %}
