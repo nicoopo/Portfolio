@@ -2,6 +2,8 @@
 
 namespace App\Tests;
 
+use App\Entity\Article;
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -12,7 +14,7 @@ final class SmokeTest extends WebTestCase
 
     public static function pages(): iterable
     {
-        foreach (['/', '/projects', '/projects/portfolio', '/competences', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
+        foreach (['/', '/projects', '/projects/portfolio', '/articles', '/competences', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
             yield $url => [$url];
             foreach (['en', 'es', 'de', 'it', 'pt'] as $langue) {
                 yield "/$langue$url" => ["/$langue$url"];
@@ -124,6 +126,63 @@ final class SmokeTest extends WebTestCase
         $urls = array_map('strval', $sitemap->xpath('//*[local-name()="loc"]'));
         foreach (self::pages() as [$url]) {
             self::assertContains('http://localhost'.$url, $urls);
+        }
+    }
+
+    /** Blog : article publié rendu depuis le Markdown (HTML brut échappé) ; brouillon et article programmé invisibles */
+    public function testSeulsLesArticlesPubliesSontVisibles(): void
+    {
+        $client = static::createClient(server: self::NAVIGATEUR_FRANCAIS);
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $article = fn (string $slug, ?string $publieLe) => (new Article())->setSlug($slug)->setTitre("Titre $slug")->setResume('Résumé')
+            ->setContenu("# Partie\n\nDu **gras**, <script>alert(1)</script> et [un lien](javascript:alert(1)).")
+            ->setPublieLe($publieLe ? new \DateTimeImmutable($publieLe) : null);
+        $articles = [$article('test-publie', '-1 day')->setTraductions(['en' => ['titre' => 'Published test']]), $article('test-brouillon', null), $article('test-programme', '+1 day')];
+        array_map($entityManager->persist(...), $articles);
+        $entityManager->flush();
+
+        try {
+            $liste = $client->request('GET', '/articles')->filter('.projet-carte-titre a')->extract(['href']);
+            self::assertContains('/articles/test-publie', $liste);
+            self::assertNotContains('/articles/test-brouillon', $liste);
+            self::assertNotContains('/articles/test-programme', $liste);
+
+            $page = $client->request('GET', '/articles/test-publie');
+            self::assertSelectorCount(1, 'h1');
+            self::assertSelectorTextContains('.article-texte h2', 'Partie');
+            self::assertSelectorTextContains('.article-texte strong', 'gras');
+            self::assertCount(0, $page->filter('.article-texte script'));
+            self::assertStringContainsString('<script>', $page->filter('.article-texte')->text());
+            self::assertCount(0, $page->filter('.article-texte a[href^="javascript"]'));
+
+            // Traduction du titre ; contenu non traduit : le français s'affiche
+            $client->request('GET', '/en/articles/test-publie');
+            self::assertSelectorTextContains('h1', 'Published test');
+            self::assertSelectorTextContains('.article-texte strong', 'gras');
+
+            foreach (['test-brouillon', 'test-programme'] as $slug) {
+                $client->request('GET', "/articles/$slug");
+                self::assertResponseStatusCodeSame(404);
+            }
+
+            // Flux RSS dans la langue de l'adresse, brouillon exclu ; annoncé dans l'en-tête des pages
+            $client->request('GET', '/en/articles/rss.xml');
+            self::assertResponseHeaderSame('Content-Type', 'application/rss+xml; charset=UTF-8');
+            $flux = simplexml_load_string($client->getResponse()->getContent());
+            $items = array_map('strval', $flux->xpath('//item/link'));
+            self::assertContains('http://localhost/en/articles/test-publie', $items);
+            self::assertNotContains('http://localhost/en/articles/test-brouillon', $items);
+            self::assertSame('Published test', (string) $flux->xpath('//item[link="http://localhost/en/articles/test-publie"]/title')[0]);
+            self::assertSame('/en/articles/rss.xml', $client->request('GET', '/en/articles')->filter('link[type="application/rss+xml"]')->attr('href'));
+
+            $client->request('GET', '/sitemap.xml');
+            self::assertStringContainsString('http://localhost/es/articles/test-publie', $client->getResponse()->getContent());
+            self::assertStringNotContainsString('test-brouillon', $client->getResponse()->getContent());
+        } finally {
+            foreach ($articles as $a) {
+                $entityManager->remove($entityManager->find(Article::class, $a->getId()));
+            }
+            $entityManager->flush();
         }
     }
 

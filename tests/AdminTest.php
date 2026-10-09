@@ -2,6 +2,7 @@
 
 namespace App\Tests;
 
+use App\Entity\Article;
 use App\Entity\Competence;
 use App\Entity\Journal;
 use App\Entity\Projet;
@@ -93,7 +94,7 @@ final class AdminTest extends WebTestCase
 
     public static function listes(): iterable
     {
-        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours', 'utilisateur', 'demande-contact', 'journal', 'cv-profil', 'experience', 'cv-competence', 'langue', 'centre-interet'] as $liste) {
+        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours', 'utilisateur', 'demande-contact', 'journal', 'cv-profil', 'experience', 'cv-competence', 'langue', 'centre-interet', 'article'] as $liste) {
             yield $liste => [$liste];
         }
     }
@@ -106,6 +107,28 @@ final class AdminTest extends WebTestCase
         $client->request('GET', '/admin/'.$liste);
 
         self::assertResponseIsSuccessful();
+    }
+
+    /** Article créé dans l'admin sans date de publication : brouillon, invisible sur le site */
+    public function testUnArticleSansDateEstUnBrouillon(): void
+    {
+        $client = static::createClient();
+        self::loginAdmin($client);
+        $client->request('GET', '/admin/article/new');
+        $client->submitForm('Créer', [
+            'Article[titre]' => 'Mon brouillon',
+            'Article[slug]' => 'mon-brouillon',
+            'Article[resume]' => 'En cours d’écriture.',
+            'Article[contenu]' => "## Plan\n\n- idée",
+        ]);
+        self::assertResponseRedirects();
+
+        $client->request('GET', '/articles/mon-brouillon');
+        self::assertResponseStatusCodeSame(404);
+
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $entityManager->remove($entityManager->getRepository(Article::class)->findOneBy(['slug' => 'mon-brouillon']));
+        $entityManager->flush();
     }
 
     public function testUneCategorieUtiliseeNePeutPasEtreSupprimee(): void

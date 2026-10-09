@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ article|loc('titre') }} · {{ 'Articles'|trans }}{% endblock %}
+
+{% block description %}{{ article|loc('resume') }}{% endblock %}
+
+{% block og_image %}
+    {% if article.image %}<meta property="og:image" content="{{ absolute_url(asset('uploads/articles/' ~ article.image)) }}">{% else %}{{ parent() }}{% endif %}
+{% endblock %}
+
+{% block body %}
+<article class="projet container py-5">
+  <a class="projet-retour" href="{{ path('app_articles') }}">← {{ 'Tous les articles'|trans }}</a>
+
+  <header class="projet-entete">
+    <p class="projet-groupe"><time datetime="{{ article.publieLe|date('Y-m-d') }}">{{ article.publieLe|format_date('long', locale: app.request.locale) }}</time></p>
+    <h1 class="gradient fw-bold">{{ article|loc('titre') }}</h1>
+    <p class="projet-chapo">{{ article|loc('resume') }}</p>
+  </header>
+
+  {% if article.image %}
+  <figure class="projet-image">
+    <img src="{{ asset('uploads/articles/' ~ article.image) }}" alt="">
+  </figure>
+  {% endif %}
+
+  <div class="projet-texte article-texte">
+    {{ article|loc('contenu')|markdown }}
+  </div>
+</article>
+{% endblock %}
