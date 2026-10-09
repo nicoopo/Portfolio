@@ -10,7 +10,7 @@
 }
 
 /* Blocs : opaques, bordés, ombrés */
-:root[data-theme="light"] :is(.hero-card, .skills-category, .projet-carte, .projet-fiche, .frise-carte,
+:root[data-theme="light"] :is(.recruteur, .hero-card, .skills-category, .projet-carte, .projet-fiche, .frise-carte,
     .contact-container, .legal-container, .palette, .reglages, .langues, .visite, .decouverte-toast) {
   background: rgb(var(--surface-rgb));
   border: 1px solid var(--bordure);
