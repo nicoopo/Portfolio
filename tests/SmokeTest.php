@@ -68,7 +68,11 @@ final class SmokeTest extends WebTestCase
     {
         $crawler = static::createClient()->request('GET', '/competences');
 
-        self::assertGreaterThan(0, $crawler->filter('a.skill-card[href^="/cerveau#"]')->count());
+        self::assertGreaterThan(0, $crawler->filter('.skill-card a.skill-nom[href^="/cerveau#"]')->count());
+        // Constellations : une étoile par compétence, même lien que sa carte ; les projets de chaque compétence sont liés
+        self::assertSame($crawler->filter('.skill-card')->count(), $crawler->filter('svg.ciel-competences a.etoile')->count());
+        self::assertSame($crawler->filter('.skill-card a.skill-nom')->extract(['href']), $crawler->filter('svg.ciel-competences a.etoile')->extract(['href']));
+        self::assertGreaterThan(0, $crawler->filter('.skill-projets a[href^="/projects/"]')->count());
     }
 
     /** Chaque carte de la liste mène à la page de son projet ; texte long, liens et compétences y sont */
