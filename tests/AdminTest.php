@@ -5,6 +5,7 @@ namespace App\Tests;
 use App\Entity\Article;
 use App\Entity\Competence;
 use App\Entity\Journal;
+use App\Entity\LienRecruteur;
 use App\Entity\Maintenant;
 use App\Entity\Projet;
 use App\Entity\Utilisateur;
@@ -95,7 +96,7 @@ final class AdminTest extends WebTestCase
 
     public static function listes(): iterable
     {
-        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours', 'utilisateur', 'demande-contact', 'journal', 'cv-profil', 'experience', 'cv-competence', 'langue', 'centre-interet', 'article', 'maintenant'] as $liste) {
+        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours', 'utilisateur', 'demande-contact', 'journal', 'cv-profil', 'experience', 'cv-competence', 'langue', 'centre-interet', 'article', 'maintenant', 'lien-recruteur'] as $liste) {
             yield $liste => [$liste];
         }
     }
@@ -153,6 +154,44 @@ final class AdminTest extends WebTestCase
         // Remis en état pour les autres tests
         $client->request('GET', $url);
         $client->submitForm('Sauvegarder les modifications', ['Maintenant[contenu]' => $avant]);
+    }
+
+    /** Lien recruteur : créé dans l'admin, l'accueil salue l'entreprise ; visite comptée (pas celles de l'admin), même après la redirection de langue */
+    public function testUnLienRecruteurPersonnaliseLAccueil(): void
+    {
+        $client = static::createClient();
+        self::loginAdmin($client);
+        $client->request('GET', '/admin/lien-recruteur/new');
+        $client->submitForm('Créer', ['LienRecruteur[entreprise]' => 'Acme', 'LienRecruteur[poste]' => 'développeur Symfony en alternance']);
+        self::assertResponseRedirects();
+        // Relu à chaque fois : le noyau redémarre entre deux requêtes
+        $relire = fn () => self::getContainer()->get(EntityManagerInterface::class)->getRepository(LienRecruteur::class)->findOneBy(['entreprise' => 'Acme']);
+        $code = $relire()->getCode();
+        self::assertMatchesRegularExpression('/^[0-9a-f]{10}$/', $code);
+
+        // L'admin connecté ne compte pas
+        $client->request('GET', '/?pour='.$code, server: ['HTTP_ACCEPT_LANGUAGE' => 'fr-FR']);
+        self::assertSelectorTextContains('.recruteur-bonjour', 'Bonjour l’équipe de Acme !');
+        self::assertSame(0, $relire()->getVisites());
+
+        // Visiteur au navigateur anglais : redirigé vers /en/ avec son lien, salué en anglais, visite comptée
+        $client->request('GET', '/logout');
+        $client->getCookieJar()->clear();
+        $client->request('GET', '/?pour='.$code, server: ['HTTP_ACCEPT_LANGUAGE' => 'en-GB']);
+        self::assertResponseRedirects('http://localhost/en/?pour='.$code);
+        $client->followRedirect();
+        self::assertSelectorTextContains('.recruteur-bonjour', 'Hello to the Acme team!');
+        self::assertSelectorTextContains('.recruteur', 'développeur Symfony en alternance');
+        self::assertSame(1, $relire()->getVisites());
+        self::assertNotNull($relire()->getPremiereVisite());
+
+        // Code inconnu : accueil normal
+        $client->request('GET', '/en/?pour=inconnu');
+        self::assertSelectorNotExists('.recruteur');
+
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $entityManager->remove($entityManager->getRepository(LienRecruteur::class)->findOneBy(['code' => $code]));
+        $entityManager->flush();
     }
 
     public function testUneCategorieUtiliseeNePeutPasEtreSupprimee(): void

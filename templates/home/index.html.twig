@@ -4,6 +4,21 @@
 <div class="hero-container">
     <div class="hero-content fade-in-up">
 
+        {# Lien recruteur (/?pour=code, HomeController) : bonjour personnalisé et l'essentiel en deux clics #}
+        {% if recruteur %}
+        <aside class="recruteur" aria-label="{{ 'Message pour vous'|trans }}">
+            <p class="recruteur-bonjour">{{ 'Bonjour l’équipe de %entreprise% !'|trans({'%entreprise%': recruteur.entreprise}) }}</p>
+            <p>{{ recruteur.poste
+                ? 'Merci de votre visite. Tout ce qu’il faut savoir pour le poste de %poste% est à deux clics :'|trans({'%poste%': recruteur.poste})
+                : 'Merci de votre visite. L’essentiel est à deux clics :'|trans }}</p>
+            {% if recruteur.message %}<p class="recruteur-message">{{ recruteur.message|nl2br }}</p>{% endif %}
+            <div class="recruteur-actions">
+                <a href="{{ path('app_cv') }}" class="btn btn-galactic btn-galactic-primary">{{ 'Mon CV'|trans }}</a>
+                <a href="{{ path('app_contact') }}" class="btn btn-galactic btn-galactic-outline-light">{{ 'Me contacter'|trans }}</a>
+            </div>
+        </aside>
+        {% endif %}
+
         <h1 class="title">
             {{ 'BIENVENUE DANS'|trans }}<br>
             <span class="gradient">{{ "L'UNIVERS"|trans }}</span><br>

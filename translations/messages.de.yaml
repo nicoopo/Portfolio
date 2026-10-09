@@ -221,3 +221,10 @@
 "Système": "System"
 "Sombre": "Dunkel"
 "Clair": "Hell"
+
+# Mode recruteur
+"Message pour vous": "Eine Nachricht für Sie"
+"Bonjour l’équipe de %entreprise% !": "Hallo an das Team von %entreprise%!"
+"Merci de votre visite. Tout ce qu’il faut savoir pour le poste de %poste% est à deux clics :": "Danke für Ihren Besuch. Alles für die Stelle als %poste% ist nur zwei Klicks entfernt:"
+"Merci de votre visite. L’essentiel est à deux clics :": "Danke für Ihren Besuch. Das Wichtigste ist nur zwei Klicks entfernt:"
+"Me contacter": "Kontakt aufnehmen"

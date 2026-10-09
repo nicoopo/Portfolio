@@ -221,3 +221,10 @@
 "Système": "System"
 "Sombre": "Dark"
 "Clair": "Light"
+
+# Mode recruteur
+"Message pour vous": "A message for you"
+"Bonjour l’équipe de %entreprise% !": "Hello to the %entreprise% team!"
+"Merci de votre visite. Tout ce qu’il faut savoir pour le poste de %poste% est à deux clics :": "Thanks for stopping by. Everything you need for the %poste% position is two clicks away:"
+"Merci de votre visite. L’essentiel est à deux clics :": "Thanks for stopping by. The essentials are two clicks away:"
+"Me contacter": "Contact me"
