@@ -75,7 +75,7 @@
                 <div id="reglages" class="reglages" popover>
                     <p class="reglages-titre">{{ 'Réglages'|trans }}</p>
                     <label class="interrupteur">
-                        <span>{{ 'Effets trou noir'|trans }}<small>{{ 'Transitions entre les pages, easter eggs'|trans }}</small></span>
+                        <span>{{ 'Effets spéciaux'|trans }}<small>{{ 'Transitions entre les pages, easter eggs'|trans }}</small></span>
                         <input type="checkbox" role="switch" id="prefTransitions">
                     </label>
                     <label class="interrupteur">
@@ -86,6 +86,12 @@
                         <span>{{ 'Son'|trans }}<small>{{ 'Ambiance sonore du cerveau 3D'|trans }}</small></span>
                         <input type="checkbox" role="switch" id="prefSon">
                     </label>
+                    <fieldset class="choix-curseur">
+                        <legend>{{ 'Transition entre les pages'|trans }}</legend>
+                        {% for valeur, label in {hasard: 'Au hasard', 'trou-noir': 'Trou noir', teleportation: 'Téléportation', distorsion: 'Distorsion', lumiere: 'Vitesse lumière'} %}
+                            <label><input type="radio" name="effet" value="{{ valeur }}"> {{ label|trans }}</label>
+                        {% endfor %}
+                    </fieldset>
                     <fieldset class="choix-curseur">
                         <legend>{{ 'Thème'|trans }}</legend>
                         {% for valeur, label in {systeme: 'Système', dark: 'Sombre', light: 'Clair'} %}

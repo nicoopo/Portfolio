@@ -139,7 +139,6 @@
 
 # CV : lien sous une expérience
 "Site auquel j’ai contribué :": "Website, an der ich mitgearbeitet habe:"
-"Effets trou noir": "Schwarzes-Loch-Effekte"
 "Haute qualité": "Hohe Qualität"
 "Réglages": "Einstellungen"
 "Ambiance sonore du cerveau 3D": "Klangkulisse des 3D-Gehirns"
@@ -258,3 +257,11 @@
 "Flèches ← → ou glisse le doigt": "Pfeiltasten ← → oder mit dem Finger wischen"
 "Jouer": "Spielen"
 "Jeu : un vaisseau évite des astéroïdes qui tombent": "Spiel: Ein Raumschiff weicht fallenden Asteroiden aus"
+
+# Transitions de page
+"Transition entre les pages": "Seitenübergang"
+"Au hasard": "Zufällig"
+"Téléportation": "Teleportation"
+"Distorsion": "Verzerrung"
+"Vitesse lumière": "Lichtgeschwindigkeit"
+"Effets spéciaux": "Spezialeffekte"

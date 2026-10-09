@@ -30,6 +30,12 @@ document.querySelectorAll('input[name="theme"]').forEach((radio) => {
 });
 systeme.addEventListener('change', appliquerTheme);
 
+// Transition entre les pages (page_transition.js la relit à chaque clic)
+document.querySelectorAll('input[name="effet"]').forEach((radio) => {
+    radio.checked = radio.value === preferences.effet;
+    radio.addEventListener('change', () => setPreference('effet', radio.value));
+});
+
 // Curseur : appliqué tout de suite (curseur.js relit la préférence à chaque image)
 document.querySelectorAll('input[name="curseur"]').forEach((radio) => {
     radio.checked = radio.value === preferences.curseur;

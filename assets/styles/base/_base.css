@@ -83,16 +83,22 @@ h2.gradient {
 
 /* Trou noir des transitions de page (scripts/page_transition.js) : à pleine taille, son
    ombre couvre tout l'écran ; il grandit au départ et rétrécit à l'arrivée */
-.trou-noir-transition {
+/* Voiles plein écran des transitions de page (page_transition.js) : repliés, puis .visible les déploie */
+.transition-voile {
   position: fixed;
+  z-index: 2000;
+  pointer-events: none;
+  transition: transform 0.6s cubic-bezier(0.6, 0, 0.9, 0.4), opacity 0.6s ease;
+}
+
+/* Trou noir : grandit depuis le centre jusqu'à remplir l'écran */
+.transition-voile--trou-noir {
   top: 50%;
   left: 50%;
-  z-index: 2000;
   width: 300vmax;
   height: 300vmax;
   margin: -150vmax 0 0 -150vmax;
   border-radius: 50%;
-  pointer-events: none;
   background: radial-gradient(circle closest-side,
       #000 0 40%,
       #fff4d6 40.6%,
@@ -100,7 +106,58 @@ h2.gradient {
       rgba(255, 95, 162, 0.55) 44%,
       rgba(127, 90, 240, 0.3) 50%,
       rgba(127, 90, 240, 0) 65%);
-  transition: transform 0.6s cubic-bezier(0.6, 0, 0.9, 0.4);
+  transform: scale(0);
+}
+
+.transition-voile--trou-noir.visible {
+  transform: scale(1);
+}
+
+/* Téléportation : un trait de lumière horizontal qui s'ouvre en éclair */
+.transition-voile--teleportation {
+  inset: 0;
+  background: linear-gradient(transparent 0 40%, rgba(0, 212, 255, 0.9) 49%, #fff 50%, rgba(0, 212, 255, 0.9) 51%, transparent 60% 100%);
+  opacity: 0;
+  transform: scaleY(0.05);
+}
+
+.transition-voile--teleportation.visible {
+  opacity: 1;
+  transform: scaleY(3);
+}
+
+/* Distorsion : voile irisé qui ondule */
+.transition-voile--distorsion {
+  inset: 0;
+  background: conic-gradient(from 0deg, #7f5af0, #00d4ff, #f25f8c, #ffb347, #7f5af0);
+  mix-blend-mode: hard-light;
+  opacity: 0;
+  transform: scale(1.4) rotate(-20deg);
+}
+
+.transition-voile--distorsion.visible {
+  opacity: 0.9;
+  transform: scale(1) rotate(0deg);
+}
+
+/* Vitesse lumière : tunnel d'étoiles étirées qui s'ouvre depuis le centre */
+.transition-voile--lumiere {
+  top: 50%;
+  left: 50%;
+  width: 300vmax;
+  height: 300vmax;
+  margin: -150vmax 0 0 -150vmax;
+  background:
+    radial-gradient(circle closest-side, #fff 0 1%, rgba(255, 255, 255, 0) 12%),
+    repeating-conic-gradient(rgba(255, 255, 255, 0.85) 0 0.35deg, transparent 0.35deg 5deg),
+    radial-gradient(circle closest-side, #05050f 0 45%, rgba(5, 5, 15, 0) 60%);
+  -webkit-mask-image: radial-gradient(circle closest-side, #000 45%, transparent 60%);
+  mask-image: radial-gradient(circle closest-side, #000 45%, transparent 60%);
+  transform: scale(0) rotate(0deg);
+}
+
+.transition-voile--lumiere.visible {
+  transform: scale(1) rotate(15deg);
 }
 
 /* Easter egg : constellation cachée (scripts/constellation.js) */
