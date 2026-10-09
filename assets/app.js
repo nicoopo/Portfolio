@@ -13,6 +13,7 @@ import './scripts/konami.js';
 import './scripts/constellation.js';
 import './scripts/qualite_auto.js';
 import './scripts/sons.js';
+import './scripts/ambiance_page.js';
 import './scripts/palette.js';
 import './scripts/visite.js';
 

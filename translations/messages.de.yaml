@@ -141,7 +141,6 @@
 "Site auquel j’ai contribué :": "Website, an der ich mitgearbeitet habe:"
 "Haute qualité": "Hohe Qualität"
 "Réglages": "Einstellungen"
-"Ambiance sonore du cerveau 3D": "Klangkulisse des 3D-Gehirns"
 "Transitions entre les pages, easter eggs": "Seitenübergänge, Easter Eggs"
 "À couper si le site rame": "Ausschalten, wenn die Seite ruckelt"
 "Fermer le menu": "Menü schließen"
@@ -296,3 +295,6 @@
 "aucun fichier ou dossier de ce nom : %nom%": "Datei oder Verzeichnis nicht gefunden: %nom%"
 "ouverture de %nom%…": "%nom% wird geöffnet…"
 "↑ ↓ : commandes précédentes · Tab : compléter": "↑ ↓: vorherige Befehle · Tab: vervollständigen"
+
+# Ambiance sonore par page
+"Ambiance sonore de chaque page": "Klangkulisse auf jeder Seite"

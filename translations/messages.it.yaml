@@ -141,7 +141,6 @@
 "Site auquel j’ai contribué :": "Sito a cui ho contribuito:"
 "Haute qualité": "Alta qualità"
 "Réglages": "Impostazioni"
-"Ambiance sonore du cerveau 3D": "Atmosfera sonora del cervello 3D"
 "Transitions entre les pages, easter eggs": "Transizioni tra le pagine, easter egg"
 "À couper si le site rame": "Da disattivare se il sito è lento"
 "Fermer le menu": "Chiudi il menu"
@@ -296,3 +295,6 @@
 "aucun fichier ou dossier de ce nom : %nom%": "file o directory inesistente: %nom%"
 "ouverture de %nom%…": "apertura di %nom%…"
 "↑ ↓ : commandes précédentes · Tab : compléter": "↑ ↓: comandi precedenti · Tab: completare"
+
+# Ambiance sonore par page
+"Ambiance sonore de chaque page": "Atmosfera sonora su ogni pagina"
