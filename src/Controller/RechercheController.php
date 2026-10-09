@@ -21,7 +21,7 @@ final class RechercheController extends AbstractController
     /** Route => libellé (clé de traduction déjà utilisée par le menu ou les pages) */
     private const PAGES = [
         'app_home' => 'Accueil', 'app_cerveau' => 'Mon Cerveau', 'app_projects' => 'Projets', 'app_articles' => 'Articles',
-        'app_univers' => 'Mon Univers', 'app_competences' => 'Compétences', 'app_cv' => 'Mon CV', 'app_contact' => 'Contact',
+        'app_univers' => 'Mon Univers', 'app_competences' => 'Compétences', 'app_cv' => 'Mon CV', 'app_contact' => 'Contact', 'app_now' => 'En ce moment',
         'app_mentions_legales' => 'Mentions légales', 'app_confidentialite' => 'Confidentialité',
     ];
 

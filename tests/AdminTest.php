@@ -5,6 +5,7 @@ namespace App\Tests;
 use App\Entity\Article;
 use App\Entity\Competence;
 use App\Entity\Journal;
+use App\Entity\Maintenant;
 use App\Entity\Projet;
 use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
@@ -94,7 +95,7 @@ final class AdminTest extends WebTestCase
 
     public static function listes(): iterable
     {
-        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours', 'utilisateur', 'demande-contact', 'journal', 'cv-profil', 'experience', 'cv-competence', 'langue', 'centre-interet', 'article'] as $liste) {
+        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours', 'utilisateur', 'demande-contact', 'journal', 'cv-profil', 'experience', 'cv-competence', 'langue', 'centre-interet', 'article', 'maintenant'] as $liste) {
             yield $liste => [$liste];
         }
     }
@@ -129,6 +130,29 @@ final class AdminTest extends WebTestCase
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->remove($entityManager->getRepository(Article::class)->findOneBy(['slug' => 'mon-brouillon']));
         $entityManager->flush();
+    }
+
+    /** Page /now : modifiée dans l'admin, rendue depuis le Markdown, datée du dernier enregistrement */
+    public function testLaPageNowSeModifieDepuisLAdmin(): void
+    {
+        $client = static::createClient();
+        self::loginAdmin($client);
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $maintenant = $entityManager->getRepository(Maintenant::class)->findOneBy([]);
+        $avant = $maintenant->getContenu();
+        $url = '/admin/maintenant/'.$maintenant->getId().'/edit';
+
+        $client->request('GET', $url);
+        $client->submitForm('Sauvegarder les modifications', ['Maintenant[contenu]' => "## J’apprends\n\nLes **tests** fonctionnels."]);
+        self::assertResponseRedirects();
+        $client->request('GET', '/now');
+        self::assertSelectorTextContains('.article-texte h2', 'J’apprends');
+        self::assertSelectorTextContains('.article-texte strong', 'tests');
+        self::assertSelectorExists('time[datetime="'.date('Y-m-d').'"]');
+
+        // Remis en état pour les autres tests
+        $client->request('GET', $url);
+        $client->submitForm('Sauvegarder les modifications', ['Maintenant[contenu]' => $avant]);
     }
 
     public function testUneCategorieUtiliseeNePeutPasEtreSupprimee(): void
