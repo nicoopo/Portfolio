@@ -327,9 +327,13 @@ final class SmokeTest extends WebTestCase
         self::assertStringContainsString('cover-letter', $en->filter('a[download="Cover_Letter_Nicolas_Cataluna.pdf"]')->attr('href'));
         self::assertStringContainsString('cover-letter', $en->filter('button[data-pdf-title-param="My cover letter"]')->attr('data-pdf-url-param'));
 
-        // Pas de lettre dans les autres langues : la version anglaise
-        $es = $client->request('GET', '/es/univers');
-        self::assertStringContainsString('cover-letter', $es->filter('a[download="Cover_Letter_Nicolas_Cataluna.pdf"]')->attr('href'));
+        // Chaque langue a sa lettre, et le PDF existe bien
+        foreach (['es' => 'carta-de-presentacion', 'de' => 'anschreiben', 'it' => 'lettera-di-presentazione', 'pt' => 'carta-de-apresentacao'] as $langue => $fichier) {
+            $href = $client->request('GET', "/$langue/univers")->filter('a[download]')->attr('href');
+            self::assertStringContainsString($fichier, $href, $langue);
+            $client->request('GET', $href);
+            self::assertResponseIsSuccessful($href);
+        }
     }
 
     /** Première visite sur / : langue du navigateur ; ensuite le cookie « langue » fige le choix */
