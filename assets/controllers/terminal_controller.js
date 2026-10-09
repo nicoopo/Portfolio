@@ -15,6 +15,7 @@ export default class extends Controller {
         this.historique = [];
         this.position = 0;
         this.ecrire(this.textesValue.bienvenue);
+        decouvrir('terminal'); // ouvrir le terminal suffit (« sudo » dans la recherche la valide aussi)
     }
 
     focus() { this.champTarget.focus(); }
@@ -38,7 +39,7 @@ export default class extends Controller {
             open: () => this.ouvrir(argument),
             clear: () => this.sortieTarget.replaceChildren(),
             exit: () => naviguer(this.donneesValue.pages.accueil),
-            sudo: () => { this.ecrire(this.textesValue.sudo); decouvrir('terminal'); },
+            sudo: () => this.ecrire(this.textesValue.sudo),
         };
         (actions[commande.toLowerCase()] ?? (() => this.ecrire(this.textesValue.inconnue.replace('%commande%', commande))))();
     }

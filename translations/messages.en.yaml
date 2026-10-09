@@ -141,7 +141,6 @@
 "Site auquel j’ai contribué :": "Website I contributed to:"
 "Haute qualité": "High quality"
 "Réglages": "Settings"
-"Ambiance sonore du cerveau 3D": "3D brain soundscape"
 "Transitions entre les pages, easter eggs": "Page transitions, easter eggs"
 "À couper si le site rame": "Turn off if the site lags"
 "Fermer le menu": "Close menu"
@@ -296,3 +295,6 @@
 "aucun fichier ou dossier de ce nom : %nom%": "no such file or directory: %nom%"
 "ouverture de %nom%…": "opening %nom%…"
 "↑ ↓ : commandes précédentes · Tab : compléter": "↑ ↓: previous commands · Tab: complete"
+
+# Ambiance sonore par page
+"Ambiance sonore de chaque page": "Soundscape on every page"

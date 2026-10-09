@@ -267,6 +267,7 @@ final class SmokeTest extends WebTestCase
         self::assertSame(['systeme', 'dark', 'light'], $crawler->filter('#reglages input[name="theme"]')->extract(['value']));
         self::assertSame(['hasard', 'trou-noir', 'teleportation', 'distorsion', 'lumiere'], $crawler->filter('#reglages input[name="effet"]')->extract(['value']));
         self::assertSelectorTextContains('#reglages', 'Theme');
+        self::assertSelectorExists('body[data-page="app_projects"]'); // profil de l'ambiance sonore (ambiance_page.js)
     }
 
     /** Comparateur : chaque compétence arrive avec ses mots-clés (nom français, traduit, synonymes) et ses projets */

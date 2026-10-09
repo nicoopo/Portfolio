@@ -1,21 +1,35 @@
 /**
- * Ambiance sonore du cerveau, synthétisée (Web Audio, aucun fichier) :
- * sinusoïdes pures dans une grande réverbération — une nappe qui ondule lentement,
- * des notes de cloche aléatoires (gamme pentatonique : jamais de fausse note)
- * et une note à chaque sélection.
- * À créer seulement après un geste de l'utilisateur (règle des navigateurs).
+ * Ambiance sonore, synthétisée (Web Audio, aucun fichier) : celle du cerveau, et une par page du site
+ * (assets/scripts/ambiance_page.js). Sinusoïdes pures dans une grande réverbération — une nappe qui ondule
+ * lentement, des notes de cloche aléatoires (gamme pentatonique : jamais de fausse note) et, sur le cerveau,
+ * une note à chaque sélection. À créer seulement après un geste de l'utilisateur (règle des navigateurs).
  */
 const VOLUME = 1.5;         // volume général : crête ≈ 0,09 (≈ -21 dB), un fond discret
 const FADE_S = 2;           // fondu à l'activation / la coupure
 const REVERB_S = 6;         // longueur de la réverbération
-const PAD_NOTES = [130.81, 196, 261.63]; // Do, Sol, Do : nappe douce
-// Do majeur pentatonique, deux octaves aiguës : les « étoiles »
-const STAR_NOTES = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51];
-const STAR_EVERY_S = [3, 8]; // une note toutes les 3 à 8 s
+/**
+ * Une couleur par page : nappe (accord grave), « étoiles » (pentatonique aiguë, vide = nappe seule)
+ * et intervalle entre deux étoiles, en secondes.
+ */
+export const PROFILS = {
+    // Do majeur : le cerveau, tel qu'il a toujours sonné
+    cerveau: { nappe: [130.81, 196, 261.63], etoiles: [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51], rythme: [3, 8] },
+    // Ré majeur, lumineux : l'accueil
+    accueil: { nappe: [146.83, 220, 293.66], etoiles: [587.33, 659.25, 739.99, 880, 987.77, 1174.66, 1318.51, 1479.98], rythme: [4, 9] },
+    // La mineur, plus vif : les projets
+    projets: { nappe: [110, 164.81, 220], etoiles: [440, 523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66], rythme: [2, 6] },
+    // Fa majeur, lent et grave : le parcours
+    univers: { nappe: [87.31, 130.81, 174.61], etoiles: [698.46, 783.99, 880, 1046.5, 1174.66, 1396.91], rythme: [5, 11] },
+    // Sol majeur : les compétences
+    competences: { nappe: [98, 146.83, 196], etoiles: [783.99, 880, 987.77, 1174.66, 1318.51, 1567.98], rythme: [3, 7] },
+    // Nappe seule, sans étoiles : pages où l'on lit ou écrit (contact, CV, articles…)
+    calme: { nappe: [130.81, 196, 261.63], etoiles: [], rythme: [0, 0] },
+};
 const PING_NOTES = { neuron: 783.99, nebula: 523.25, souvenir: 1046.5 };
 
 export class Ambiance {
-    constructor() {
+    constructor(profil = PROFILS.cerveau) {
+        this.profil = profil;
         this.context = new AudioContext();
         this.master = this.context.createGain();
         this.master.gain.value = 0;
@@ -27,7 +41,7 @@ export class Ambiance {
         this.reverb.connect(this.master);
 
         // Nappe : chaque note monte et descend lentement, à son propre rythme
-        for (const [i, frequency] of PAD_NOTES.entries()) {
+        for (const [i, frequency] of profil.nappe.entries()) {
             const oscillator = this.context.createOscillator();
             oscillator.frequency.value = frequency;
             const gain = this.context.createGain();
@@ -74,9 +88,10 @@ export class Ambiance {
 
     /** Étoile : une note de cloche au hasard, puis la suivante quelques secondes plus tard */
     scheduleStar() {
-        const [min, max] = STAR_EVERY_S;
+        const { etoiles, rythme: [min, max] } = this.profil;
+        if (!etoiles.length) return;
         this.starTimeout = setTimeout(() => {
-            this.bell(STAR_NOTES[Math.floor(Math.random() * STAR_NOTES.length)], 0.03);
+            this.bell(etoiles[Math.floor(Math.random() * etoiles.length)], 0.03);
             this.scheduleStar();
         }, (min + Math.random() * (max - min)) * 1000);
     }

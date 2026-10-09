@@ -5,7 +5,7 @@
  * - qualite : 'haute' ou 'basse' (moins de particules, pas de lueur, pour les machines modestes) ;
  *   sans choix du visiteur, basse d'office si le navigateur n'a pas d'accélération graphique
  * - curseur : 'comete', 'orbite', 'trou-noir' ou 'systeme' (curseur.js)
- * - son : ambiance sonore du cerveau (brain_controller.js) et petits sons du site (sons.js)
+ * - son : ambiance sonore du cerveau (brain_controller.js) et des autres pages (ambiance_page.js), petits sons du site (sons.js)
  * - decouvertes : easter eggs déjà trouvés (decouvertes.js)
  * - qualiteAuto : proposer la qualité basse si le site rame (qualite_auto.js), jusqu'à ce que le visiteur choisisse
  */
