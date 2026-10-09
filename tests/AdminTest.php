@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use App\Entity\Article;
+use App\Entity\Candidature;
 use App\Entity\Competence;
 use App\Entity\Journal;
 use App\Entity\LienRecruteur;
@@ -97,7 +98,7 @@ final class AdminTest extends WebTestCase
 
     public static function listes(): iterable
     {
-        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours', 'utilisateur', 'demande-contact', 'journal', 'cv-profil', 'experience', 'cv-competence', 'langue', 'centre-interet', 'article', 'maintenant', 'lien-recruteur', 'message-livre-or'] as $liste) {
+        foreach (['categorie-competence', 'competence', 'projet', 'passion', 'etape-parcours', 'utilisateur', 'demande-contact', 'journal', 'cv-profil', 'experience', 'cv-competence', 'langue', 'centre-interet', 'article', 'maintenant', 'lien-recruteur', 'message-livre-or', 'candidature'] as $liste) {
             yield $liste => [$liste];
         }
     }
@@ -248,6 +249,31 @@ final class AdminTest extends WebTestCase
 
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->remove($entityManager->getRepository(MessageLivreOr::class)->find($message->getId()));
+        $entityManager->flush();
+    }
+
+    /** Candidature saisie dans l'admin : relance calculée, comptée sur le tableau de bord une fois la date passée */
+    public function testUneCandidatureSeSuitDansLAdmin(): void
+    {
+        $client = static::createClient();
+        self::loginAdmin($client);
+        $client->request('GET', '/admin/candidature/new');
+        $client->submitForm('Créer', [
+            'Candidature[entreprise]' => 'Initech',
+            'Candidature[poste]' => 'Développeur PHP',
+            'Candidature[statut]' => 'envoyee',
+            'Candidature[envoyeeLe]' => (new \DateTimeImmutable('-10 days'))->format('Y-m-d'),
+        ]);
+        self::assertResponseRedirects();
+
+        $client->request('GET', '/admin/candidature');
+        self::assertSelectorTextContains('body', 'Initech');
+        self::assertSelectorTextContains('body', '⚠');
+        $client->request('GET', '/admin');
+        self::assertSelectorTextContains('body', 'candidature(s) à relancer');
+
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $entityManager->remove($entityManager->getRepository(Candidature::class)->findOneBy(['entreprise' => 'Initech']));
         $entityManager->flush();
     }
 

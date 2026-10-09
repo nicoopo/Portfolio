@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Candidature;
 use App\Entity\Competence;
 use App\Entity\DemandeContact;
 use App\Entity\Journal;
@@ -39,6 +40,8 @@ final class DashboardController extends AbstractDashboardController
             'connexions_refusees' => $this->journal->compterDepuis(Journal::CONNEXION_REFUSEE, new \DateTimeImmutable('-7 days')),
             'nb_competences' => $this->entityManager->getRepository(Competence::class)->count([]),
             'nb_projets' => $this->projets->count([]),
+            'a_relancer' => (int) $this->entityManager->createQuery('SELECT COUNT(c) FROM '.Candidature::class.' c WHERE c.relancerLe <= :aujourdhui')
+                ->setParameter('aujourdhui', new \DateTimeImmutable('today'))->getSingleScalarResult(),
             'dernieres_demandes' => $this->demandes->findBy([], ['recuLe' => 'DESC'], 5),
             'dernier_journal' => $this->journal->findBy([], ['date' => 'DESC'], 8),
             'activite' => $this->activite(),
@@ -118,9 +121,11 @@ final class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(CvCompetenceCrudController::class, 'Compétences du CV', 'fa fa-code');
         yield MenuItem::linkTo(LangueCrudController::class, 'Langues', 'fa fa-language');
         yield MenuItem::linkTo(CentreInteretCrudController::class, "Centres d'intérêt", 'fa fa-heart');
+        yield MenuItem::section('Alternance');
+        yield MenuItem::linkTo(CandidatureCrudController::class, 'Candidatures', 'fa fa-paper-plane');
+        yield MenuItem::linkTo(LienRecruteurCrudController::class, 'Liens recruteur', 'fa fa-link');
         yield MenuItem::section('Visiteurs');
         yield MenuItem::linkTo(DemandeContactCrudController::class, 'Demandes de contact', 'fa fa-envelope');
-        yield MenuItem::linkTo(LienRecruteurCrudController::class, 'Liens recruteur', 'fa fa-link');
         yield MenuItem::linkTo(MessageLivreOrCrudController::class, 'Livre d’or', 'fa fa-star-half-stroke');
         yield MenuItem::section('Administration');
         yield MenuItem::linkTo(UtilisateurCrudController::class, 'Comptes', 'fa fa-user-shield');
