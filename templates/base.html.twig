@@ -37,6 +37,10 @@
     {% endblock %}
     <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" href="{{ asset('images/nico-symbol.svg') }}">
+    {# Application installable : manifeste, icônes et service worker dans public/ (adresses fixes, hors AssetMapper) #}
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/icone-180.png">
+    <meta name="theme-color" content="#0a0a19">
     <link rel="alternate" type="application/rss+xml" title="{{ 'Articles'|trans }} · {{ 'Univers de Nico'|trans }}" href="{{ path('app_articles_rss') }}">
     {% block javascripts %}
         {# Charge aussi app.js → bootstrap.css + styles/app.css #}

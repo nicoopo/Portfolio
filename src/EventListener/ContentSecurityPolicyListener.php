@@ -45,6 +45,7 @@ final class ContentSecurityPolicyListener implements ResetInterface
             // Attributs style="" (couleurs de la légende du cerveau, EasyAdmin) : risque faible, contrairement aux scripts
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data:",
+            "worker-src 'self'",         // service worker (public/sw.js) : 'strict-dynamic' ne couvre pas les workers
             "frame-src 'self'",          // visionneuse PDF de /univers
             "frame-ancestors 'self'",
             "object-src 'none'",

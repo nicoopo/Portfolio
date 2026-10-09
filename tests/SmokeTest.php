@@ -312,6 +312,25 @@ final class SmokeTest extends WebTestCase
         self::assertSelectorExists('label[for="terminal-commande"]');
     }
 
+    /** Application installable : manifeste valide avec ses icônes, service worker, page hors ligne, autorisés par la CSP */
+    public function testLeSiteEstInstallable(): void
+    {
+        $client = static::createClient(server: self::NAVIGATEUR_FRANCAIS);
+        $crawler = $client->request('GET', '/');
+        self::assertSame('/manifest.webmanifest', $crawler->filter('link[rel="manifest"]')->attr('href'));
+        self::assertStringContainsString("worker-src 'self'", $client->getResponse()->headers->get('Content-Security-Policy'));
+
+        $public = self::getContainer()->getParameter('kernel.project_dir').'/public';
+        $manifeste = json_decode(file_get_contents($public.'/manifest.webmanifest'), true, flags: \JSON_THROW_ON_ERROR);
+        self::assertSame('/', $manifeste['start_url']);
+        foreach ($manifeste['icons'] as $icone) {
+            [$largeur, $hauteur] = getimagesize($public.$icone['src']);
+            self::assertSame($icone['sizes'], "{$largeur}x{$hauteur}");
+        }
+        self::assertStringContainsString("'/hors-ligne.html'", file_get_contents($public.'/sw.js'));
+        self::assertFileExists($public.'/hors-ligne.html');
+    }
+
     public function testTelechargementCvPdf(): void
     {
         $client = static::createClient();
