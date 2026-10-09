@@ -24,19 +24,19 @@
   --voile-rgb: 255 255 255;
 }
 
-/* Thème clair « aube cosmique » : ciel de lever du jour, panneaux en verre blanc.
-   Couleurs d'accent assombries pour garder un contraste AA sur fond clair.
+/* Thème clair « aube cosmique » : ciel pastel de lever du jour, tons doux (pas de blanc pur, moins éblouissant),
+   panneaux en verre lavande. Accents assombris pour garder un contraste AA sur ces fonds.
    Le cerveau 3D reste une fenêtre sur l'espace, toujours sombre (.theme-sombre). */
 :root[data-theme="light"] {
   color-scheme: light;
-  --color-primary: #6a45e0;
-  --color-secondary: #0b6f9a;
+  --color-primary: #5634c4;
+  --color-secondary: #085a7e;
   --color-text: #1d1840;
-  --color-text-light: #3b3566;
-  --texte-doux: #5d5880;
-  --fond: radial-gradient(ellipse at bottom, #ffe1cf 0%, #f1e6ff 45%, #dde5ff 100%);
-  --fond-image: #e9e4f7;
-  --surface-rgb: 255 255 255;
+  --color-text-light: #322c5c;
+  --texte-doux: #4a4570;
+  --fond: radial-gradient(ellipse at bottom, #e6cbbd 0%, #d6cdea 45%, #c7cfe6 100%);
+  --fond-image: #d4cce6;
+  --surface-rgb: 226 219 240;
   --voile-rgb: 60 40 120;
 }
 
