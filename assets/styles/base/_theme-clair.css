@@ -1,0 +1,85 @@
+/* Thème clair : en verre transparent, les panneaux se fondaient dans le ciel clair.
+   Ici, tout ce qui est un bloc ou un bouton se détache nettement : fond plus clair que le ciel,
+   bordure violette, ombre douce. Importé après les feuilles des pages, pour passer devant. */
+
+:root[data-theme="light"] {
+  --bordure: rgba(70, 40, 170, 0.32);
+  --bordure-forte: rgba(70, 40, 170, 0.55);
+  --ombre: 0 6px 20px rgba(40, 20, 90, 0.14);
+  --encre: #241b52; /* fond des éléments foncés : pastille du logo */
+}
+
+/* Blocs : opaques, bordés, ombrés */
+:root[data-theme="light"] :is(.hero-card, .skills-category, .projet-carte, .projet-fiche, .frise-carte,
+    .contact-container, .legal-container, .palette, .reglages, .langues, .visite, .decouverte-toast) {
+  background: rgb(var(--surface-rgb));
+  border: 1px solid var(--bordure);
+  box-shadow: var(--ombre);
+  backdrop-filter: none;
+}
+
+/* Blocs dans un bloc (compétences d'une catégorie, liens de contact, champs) : teintés plutôt qu'ombrés */
+:root[data-theme="light"] :is(.skill-card, .contact-item, .contact-form input, .contact-form textarea) {
+  background: rgba(70, 40, 170, 0.07);
+  border: 1px solid var(--bordure);
+  box-shadow: none;
+}
+
+:root[data-theme="light"] :is(.hero-card, .skill-card, .projet-carte, .contact-item):hover,
+:root[data-theme="light"] .skill-card.eclairee {
+  border-color: var(--bordure-forte);
+  background: rgba(70, 40, 170, 0.12);
+}
+
+/* Barre de navigation : barre pleine, séparée de la page par un trait */
+:root[data-theme="light"] .navbar-galactic {
+  background: rgb(var(--surface-rgb) / 0.96);
+  border-bottom: 1px solid var(--bordure);
+  box-shadow: 0 2px 12px rgba(40, 20, 90, 0.1);
+}
+
+:root[data-theme="light"] :is(.menu-button, .lang-switch) {
+  background: rgba(70, 40, 170, 0.1);
+  border: 1px solid var(--bordure);
+}
+
+:root[data-theme="light"] :is(.menu-button, .lang-switch):is(:hover, :focus-visible) {
+  background: rgba(70, 40, 170, 0.18);
+  border-color: var(--bordure-forte);
+}
+
+/* Logo dessiné pour un fond noir : posé sur une pastille sombre */
+:root[data-theme="light"] .logo-sm {
+  padding: 4px;
+  border-radius: 50%;
+  background: var(--encre);
+  box-shadow: 0 0 0 1px var(--bordure-forte);
+}
+
+/* Titres en dégradé : violets plus profonds, sans halo (illisible sur fond clair) */
+:root[data-theme="light"] :is(span.gradient, h1.gradient, h2.gradient, .skills-header h1, .frise-dates) {
+  background-image: linear-gradient(90deg, #4a2bb8, #8a2fc4);
+  text-shadow: none;
+}
+
+/* Boutons contour : fond léger pour qu'ils existent même sans survol */
+:root[data-theme="light"] .btn-galactic-outline-light {
+  background: rgb(var(--surface-rgb));
+  border-color: var(--bordure-forte);
+}
+
+/* Constellations des compétences : étoiles de la couleur de leur catégorie (blanches, elles disparaissaient) */
+:root[data-theme="light"] .ciel-competences circle {
+  fill: var(--etoile);
+  stroke: var(--encre);
+  stroke-width: 0.6;
+}
+
+:root[data-theme="light"] .ciel-competences line {
+  stroke-opacity: 0.7;
+}
+
+/* Code en ligne : le rose de Bootstrap manque de contraste sur les panneaux clairs */
+:root[data-theme="light"] code {
+  color: #9c1f5a;
+}

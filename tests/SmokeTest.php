@@ -258,6 +258,16 @@ final class SmokeTest extends WebTestCase
         $connection->executeStatement("UPDATE decouverte SET nombre = :n WHERE id = 'terminal'", ['n' => $avant]);
     }
 
+    /** Thème : posé dans <head> avant l'affichage (choix du visiteur, sinon le système), choix Système / Sombre / Clair dans les Réglages */
+    public function testLeThemeSeChoisitDansLesReglages(): void
+    {
+        $crawler = static::createClient()->request('GET', '/en/projects');
+
+        self::assertStringContainsString('prefers-color-scheme: light', $crawler->filter('head script')->first()->text());
+        self::assertSame(['systeme', 'dark', 'light'], $crawler->filter('#reglages input[name="theme"]')->extract(['value']));
+        self::assertSelectorTextContains('#reglages', 'Theme');
+    }
+
     public function testTelechargementCvPdf(): void
     {
         $client = static::createClient();

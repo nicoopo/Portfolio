@@ -11,14 +11,14 @@
 }
 
 .contact-container {
-  background: rgba(20, 20, 40, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgb(var(--surface-rgb) / 0.6);
+  border: 1px solid rgb(var(--voile-rgb) / 0.1);
   backdrop-filter: blur(12px);
   border-radius: 20px;
   padding: 40px 60px;
   max-width: 700px;
   text-align: center;
-  box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 25px rgb(var(--voile-rgb) / 0.05);
   animation: float 6s ease-in-out infinite alternate;
 }
 
@@ -27,7 +27,7 @@
   color: var(--color-primary);
   margin-bottom: 15px;
   letter-spacing: 1px;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 10px rgb(var(--voile-rgb) / 0.3);
 }
 
 .contact-subtitle {
@@ -47,13 +47,13 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--voile-rgb) / 0.05);
   border-radius: 10px;
   padding: 12px 20px;
   text-decoration: none;
   color: var(--color-text-light);
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgb(var(--voile-rgb) / 0.08);
 }
 
 .contact-item i {
@@ -72,7 +72,7 @@
 
 .contact-item:hover {
   transform: translateY(-3px) scale(1.03);
-  background: rgba(255, 255, 255, 0.12);
+  background: rgb(var(--voile-rgb) / 0.12);
   box-shadow: 0 0 15px rgba(255, 136, 0, 0.3);
 }
 
@@ -107,8 +107,8 @@
   padding: 0.6rem 0.8rem;
   color: var(--color-text);
   font: inherit;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgb(var(--voile-rgb) / 0.06);
+  border: 1px solid rgb(var(--voile-rgb) / 0.15);
   border-radius: 10px;
 }
 

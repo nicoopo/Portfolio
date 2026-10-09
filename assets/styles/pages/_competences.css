@@ -3,7 +3,7 @@
 .skills-page {
   position: relative;
   min-height: 100vh;
-  color: #fff;
+  color: var(--color-text);
   overflow: hidden;
   padding-bottom: 5rem;
 }
@@ -25,7 +25,7 @@
 }
 
 .skills-header p {
-  color: #aaa;
+  color: var(--texte-doux);
   font-size: 1.2rem;
 }
 
@@ -39,10 +39,10 @@
 
 .skills-category {
   backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--voile-rgb) / 0.05);
   border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 0 25px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 25px rgb(var(--voile-rgb) / 0.1);
   transition: all 0.4s ease;
 }
 
@@ -75,8 +75,8 @@
   gap: 0.3rem;
   padding: 0.8rem 1.2rem;
   text-align: center;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgb(var(--voile-rgb) / 0.08);
+  border: 1px solid rgb(var(--voile-rgb) / 0.1);
   border-radius: 12px;
   transition: 0.3s;
 }

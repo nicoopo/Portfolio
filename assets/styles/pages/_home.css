@@ -71,9 +71,9 @@
 }
 
 .hero-card {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgb(var(--voile-rgb) / 0.03);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgb(var(--voile-rgb) / 0.05);
   padding: 1.5rem;
   border-radius: 20px;
   display: flex;
@@ -95,14 +95,14 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  background: linear-gradient(135deg, rgb(var(--voile-rgb) / 0.1) 0%, transparent 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
 .hero-card:hover {
   transform: translateY(-10px);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgb(var(--voile-rgb) / 0.08);
   border-color: rgba(127, 90, 240, 0.3);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
     0 0 20px rgba(127, 90, 240, 0.2);

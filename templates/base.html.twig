@@ -12,6 +12,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    {# Thème posé avant l'affichage (pas de flash) : choix du visiteur (Réglages, bouton du CV), sinon celui du système #}
+    <script nonce="{{ csp_nonce('script') }}">try { document.documentElement.dataset.theme = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); } catch { document.documentElement.dataset.theme = 'dark'; }</script>
     <title>{% block title %}{{ 'Univers de Nico'|trans }}{% endblock %}</title>
     <meta name="description" content="{% block description %}{{ 'Portfolio de Nicolas Cataluna, développeur fullstack PHP / Symfony : compétences, projets, parcours, et un cerveau 3D interactif pour tout explorer.'|trans }}{% endblock %}">
     {# Aperçu des liens partagés (LinkedIn, Discord, Slack…) #}
@@ -84,6 +86,12 @@
                         <span>{{ 'Son'|trans }}<small>{{ 'Ambiance sonore du cerveau 3D'|trans }}</small></span>
                         <input type="checkbox" role="switch" id="prefSon">
                     </label>
+                    <fieldset class="choix-curseur">
+                        <legend>{{ 'Thème'|trans }}</legend>
+                        {% for valeur, label in {systeme: 'Système', dark: 'Sombre', light: 'Clair'} %}
+                            <label><input type="radio" name="theme" value="{{ valeur }}"> {{ label|trans }}</label>
+                        {% endfor %}
+                    </fieldset>
                     <fieldset class="choix-curseur">
                         <legend>{{ 'Curseur'|trans }}</legend>
                         {% for valeur, label in {comete: 'Comète', orbite: 'Orbite', 'trou-noir': 'Trou noir', systeme: 'Classique'} %}
