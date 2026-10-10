@@ -164,7 +164,12 @@ final class AdminTest extends WebTestCase
         $client = static::createClient();
         self::loginAdmin($client);
         $client->request('GET', '/admin/lien-recruteur/new');
-        $client->submitForm('Créer', ['LienRecruteur[entreprise]' => 'Acme', 'LienRecruteur[poste]' => 'développeur Symfony en alternance']);
+        $pendu = self::getContainer()->get(EntityManagerInterface::class)->getRepository(Projet::class)->findOneBy(['slug' => 'pendu']);
+        $client->submitForm('Créer', [
+            'LienRecruteur[entreprise]' => 'Acme',
+            'LienRecruteur[poste]' => 'développeur Symfony en alternance',
+            'LienRecruteur[projets]' => [$pendu->getId()],
+        ]);
         self::assertResponseRedirects();
         // Relu à chaque fois : le noyau redémarre entre deux requêtes
         $relire = fn () => self::getContainer()->get(EntityManagerInterface::class)->getRepository(LienRecruteur::class)->findOneBy(['entreprise' => 'Acme']);
@@ -174,6 +179,7 @@ final class AdminTest extends WebTestCase
         // L'admin connecté ne compte pas
         $client->request('GET', '/?pour='.$code, server: ['HTTP_ACCEPT_LANGUAGE' => 'fr-FR']);
         self::assertSelectorTextContains('.recruteur-bonjour', 'Bonjour l’équipe de Acme !');
+        self::assertSelectorExists('.recruteur-projets a[href="/projects/pendu"]');
         self::assertSame(0, $relire()->getVisites());
 
         $client->request('GET', '/logout');

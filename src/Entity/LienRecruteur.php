@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -36,6 +38,12 @@ class LienRecruteur
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $message = null;
 
+    /** @var Collection<int, Projet> mis en avant sur l'accueil, dans l'ordre de la page Projets */
+    #[Assert\Count(max: 3)]
+    #[ORM\ManyToMany(targetEntity: Projet::class)]
+    #[ORM\OrderBy(['position' => 'ASC'])]
+    private Collection $projets;
+
     #[ORM\Column]
     private int $visites = 0;
 
@@ -48,7 +56,13 @@ class LienRecruteur
     public function __construct()
     {
         $this->code = bin2hex(random_bytes(5));
+        $this->projets = new ArrayCollection();
     }
+
+    /** @return Collection<int, Projet> */
+    public function getProjets(): Collection { return $this->projets; }
+    public function addProjet(Projet $projet): static { if (!$this->projets->contains($projet)) { $this->projets->add($projet); } return $this; }
+    public function removeProjet(Projet $projet): static { $this->projets->removeElement($projet); return $this; }
 
     public function visiter(): void
     {
