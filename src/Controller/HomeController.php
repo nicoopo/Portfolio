@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\EtapeParcours;
 use App\Entity\LienRecruteur;
 use App\Entity\Passion;
+use App\EventListener\StatistiquesListener;
 use App\Repository\CategorieCompetenceRepository;
 use App\Service\Notificateur;
 use App\Repository\EtapeParcoursRepository;
@@ -18,13 +19,13 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class HomeController extends AbstractController
 {
-    /** Lien recruteur (/?pour=code) : accueil personnalisé, visite comptée sauf pour l'administrateur connecté, notification à la première */
+    /** Lien recruteur (/?pour=code) : accueil personnalisé, visite comptée sauf pour l'administrateur connecté et les robots d'aperçu (LinkedIn, Slack…), notification à la première */
     #[Route('/', name: 'app_home')]
     public function index(Request $request, EntityManagerInterface $entityManager, Notificateur $notificateur): Response
     {
         $code = $request->query->getString('pour');
         $recruteur = '' !== $code ? $entityManager->getRepository(LienRecruteur::class)->findOneBy(['code' => $code]) : null;
-        if ($recruteur && !$this->isGranted('ROLE_ADMIN')) {
+        if ($recruteur && !$this->isGranted('ROLE_ADMIN') && !preg_match(StatistiquesListener::ROBOTS, $request->headers->get('User-Agent', ''))) {
             $recruteur->visiter();
             $entityManager->flush();
             if (1 === $recruteur->getVisites()) { // la première ouverture seulement : de quoi relancer au bon moment

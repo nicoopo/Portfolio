@@ -10,6 +10,11 @@ framework:
             policy: sliding_window
             limit: 3
             interval: '1 hour'
+        # Formulaire de contact (ContactController) : chaque envoi part par e-mail, un flot ferait bloquer le SMTP
+        contact:
+            policy: sliding_window
+            limit: 5
+            interval: '1 hour'
 
 when@test:
     framework:
@@ -17,4 +22,6 @@ when@test:
             decouvertes:
                 policy: no_limit # l'état du limiteur survit entre deux lancements des tests (cache sur disque)
             livre_or:
+                policy: no_limit
+            contact:
                 policy: no_limit

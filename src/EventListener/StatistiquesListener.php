@@ -14,7 +14,8 @@ use Symfony\Component\HttpKernel\KernelEvents;
  */
 final class StatistiquesListener
 {
-    private const ROBOTS = '/bot|crawl|spider|slurp|preview|facebookexternalhit|headless|lighthouse|curl|wget|python|axe-core/i';
+    /** Aussi pour les liens recruteur (HomeController) : un aperçu de lien n'est pas une visite */
+    public const ROBOTS = '/bot|crawl|spider|slurp|preview|facebookexternalhit|headless|lighthouse|curl|wget|python|axe-core/i';
 
     public function __construct(
         private readonly Connection $connection,
