@@ -21,7 +21,7 @@
             </ul>
             {% endif %}
             <div class="recruteur-actions">
-                <a href="{{ path('app_cv') }}" class="btn btn-galactic btn-galactic-primary">{{ 'Mon CV'|trans }}</a>
+                <a href="{{ path('app_cv', {pour: recruteur.code}) }}" class="btn btn-galactic btn-galactic-primary">{{ 'Mon CV'|trans }}</a>
                 <a href="{{ path('app_comparateur') }}" class="btn btn-galactic btn-galactic-outline-light">{{ 'Comparer avec votre offre'|trans }}</a>
                 <a href="{{ path('app_contact') }}" class="btn btn-galactic btn-galactic-outline-light">{{ 'Me contacter'|trans }}</a>
             </div>

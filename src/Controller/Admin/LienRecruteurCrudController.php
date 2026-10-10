@@ -36,6 +36,11 @@ final class LienRecruteurCrudController extends AbstractCrudController
         yield AssociationField::new('projets', 'Projets à mettre en avant')->hideOnIndex()
             ->setFormTypeOption('by_reference', false)
             ->setHelp('3 au plus, ceux qui collent à l’offre : affichés sous le bonjour');
+        yield TextareaField::new('accroche', 'Accroche du CV')->hideOnIndex()
+            ->setHelp('Facultatif : remplace l’accroche du profil sur le CV (page et PDF) ouvert depuis ce lien');
+        yield AssociationField::new('competences', 'Points forts pour ce poste')->hideOnIndex()
+            ->setFormTypeOption('by_reference', false)
+            ->setHelp('5 au plus : en tête du CV ouvert depuis ce lien');
         yield TextField::new('code', 'Lien à envoyer')->hideOnForm()
             ->formatValue(fn (string $code) => $this->generateUrl('app_home', ['pour' => $code], UrlGeneratorInterface::ABSOLUTE_URL));
         yield IntegerField::new('visites')->hideOnForm();

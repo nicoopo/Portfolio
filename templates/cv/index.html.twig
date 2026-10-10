@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block body %}
-<div class="cv-page" data-controller="cv" data-cv-download-url-value="{{ path('app_cv_download') }}"
+<div class="cv-page" data-controller="cv" data-cv-download-url-value="{{ path('app_cv_download', recruteur ? {pour: recruteur.code} : {}) }}"
      data-cv-texts-value="{{ {light: 'Mode Clair'|trans, dark: 'Mode Sombre'|trans, generating: 'Génération…'|trans}|json_encode }}">
     <!-- Download Button -->
     <button class="download-button" id="downloadButton" data-action="cv#download" data-cv-target="download" aria-label="{{ 'Télécharger le CV'|trans }}">
