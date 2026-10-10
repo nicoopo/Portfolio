@@ -2,12 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\LienRecruteur;
 use App\Repository\CentreInteretRepository;
 use App\Repository\CvCompetenceRepository;
 use App\Repository\CvProfilRepository;
 use App\Repository\EtapeParcoursRepository;
 use App\Repository\ExperienceRepository;
 use App\Repository\LangueRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,13 +27,14 @@ final class CVController extends AbstractController
         private readonly EtapeParcoursRepository $parcours,
         private readonly LangueRepository $langues,
         private readonly CentreInteretRepository $interets,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
     #[Route('/CV', name: 'app_cv')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        return $this->render('cv/index.html.twig', $this->contenu());
+        return $this->render('cv/index.html.twig', $this->contenu($request));
     }
 
     #[Route('/CV/download', name: 'app_cv_download')]
@@ -56,7 +59,7 @@ final class CVController extends AbstractController
         $options->set('defaultFont', 'DejaVu Sans');
 
         $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($this->renderView('cv/pdf.html.twig', ['theme' => $theme] + $this->contenu()));
+        $dompdf->loadHtml($this->renderView('cv/pdf.html.twig', ['theme' => $theme] + $this->contenu($request)));
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
@@ -71,12 +74,14 @@ final class CVController extends AbstractController
         ]);
     }
 
-    /** Les données du CV, communes à la page et au PDF */
-    private function contenu(): array
+    /** Les données du CV, communes à la page et au PDF ; ?pour=code : CV adapté au lien recruteur (accroche, points forts) */
+    private function contenu(Request $request): array
     {
         $ordre = ['position' => 'ASC'];
+        $code = $request->query->getString('pour');
 
         return [
+            'recruteur' => '' !== $code ? $this->entityManager->getRepository(LienRecruteur::class)->findOneBy(['code' => $code]) : null,
             'profil' => $this->profil->findOneBy([]) ?? throw $this->createNotFoundException('Profil du CV absent : lancer les migrations.'),
             'experiences' => $this->experiences->findBy([], $ordre),
             'competences' => $this->competences->findBy([], $ordre),

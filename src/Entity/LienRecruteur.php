@@ -44,6 +44,17 @@ class LienRecruteur
     #[ORM\OrderBy(['position' => 'ASC'])]
     private Collection $projets;
 
+    /** CV ouvert depuis ce lien : remplace l'accroche du profil */
+    #[Assert\Length(max: 600)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $accroche = null;
+
+    /** @var Collection<int, Competence> en tête du CV ouvert depuis ce lien (« Points forts pour ce poste ») */
+    #[Assert\Count(max: 5)]
+    #[ORM\ManyToMany(targetEntity: Competence::class)]
+    #[ORM\OrderBy(['position' => 'ASC'])]
+    private Collection $competences;
+
     #[ORM\Column]
     private int $visites = 0;
 
@@ -57,7 +68,15 @@ class LienRecruteur
     {
         $this->code = bin2hex(random_bytes(5));
         $this->projets = new ArrayCollection();
+        $this->competences = new ArrayCollection();
     }
+
+    /** @return Collection<int, Competence> */
+    public function getCompetences(): Collection { return $this->competences; }
+    public function addCompetence(Competence $competence): static { if (!$this->competences->contains($competence)) { $this->competences->add($competence); } return $this; }
+    public function removeCompetence(Competence $competence): static { $this->competences->removeElement($competence); return $this; }
+    public function getAccroche(): ?string { return $this->accroche; }
+    public function setAccroche(?string $accroche): static { $this->accroche = $accroche ?: null; return $this; }
 
     /** @return Collection<int, Projet> */
     public function getProjets(): Collection { return $this->projets; }

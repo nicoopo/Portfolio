@@ -52,7 +52,11 @@
 <div class="section">
     <h2 class="section-title">{{ cv.icone('bi:person-fill', pdf) }}{{ 'Profil'|trans }}</h2>
     <p class="profile-text">{{ profil|loc('resume') }}</p>
-    {% set accroche = profil|loc('accroche') %}
+    {# Lien recruteur (?pour=code) : son accroche remplace celle du profil, ses points forts en tête #}
+    {% set accroche = (recruteur ? recruteur.accroche : null) ?: profil|loc('accroche') %}
+    {% if recruteur and recruteur.competences is not empty %}
+    <p class="profile-highlight">{{ 'Points forts pour ce poste'|trans }} : {{ recruteur.competences|map(c => c|loc('nom'))|join(', ') }}</p>
+    {% endif %}
     {% if accroche %}
     <p class="profile-highlight">{{ (pdf ? accroche|sans_emoji : accroche)|nl2br }}</p>
     {% endif %}
