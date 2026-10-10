@@ -35,6 +35,23 @@ final class NotificateurTest extends TestCase
         self::assertCount(1, $requetes); // file vidée
     }
 
+    /** Boutons : en-tête Actions de ntfy, un POST par bouton, notification effacée après le tap */
+    public function testLesBoutonsDeviennentDesActionsNtfy(): void
+    {
+        $entetes = [];
+        $client = new MockHttpClient(function (string $methode, string $url, array $options) use (&$entetes) {
+            $entetes = $options['headers'];
+
+            return new MockResponse('');
+        });
+        $notificateur = new Notificateur($client, new NullLogger(), 'https://ntfy.sh', 'sujet');
+
+        $notificateur->prevenir('Livre d’or', 'Ada : bravo', 'star', ['Approuver' => 'https://exemple.fr/a?_hash=x', 'Supprimer' => 'https://exemple.fr/s?_hash=y']);
+        $notificateur->envoyer();
+
+        self::assertContains('Actions: http, Approuver, https://exemple.fr/a?_hash=x, method=POST, clear=true; http, Supprimer, https://exemple.fr/s?_hash=y, method=POST, clear=true', $entetes);
+    }
+
     public function testSansSujetRienNePart(): void
     {
         $client = new MockHttpClient(fn () => self::fail('aucune requête attendue'));

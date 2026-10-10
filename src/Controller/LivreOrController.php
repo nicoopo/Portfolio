@@ -11,8 +11,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\UriSigner;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -29,6 +31,7 @@ final class LivreOrController extends AbstractController
         Journaliste $journaliste,
         RateLimiterFactoryInterface $livreOrLimiter,
         Notificateur $notificateur,
+        UriSigner $uriSigner,
     ): Response {
         $form = $this->createForm(LivreOrType::class);
         $form->handleRequest($request);
@@ -42,9 +45,12 @@ final class LivreOrController extends AbstractController
 
                 return $this->redirectToRoute('app_livre_or', ['_fragment' => 'signer']);
             } else {
-                $entityManager->persist(new MessageLivreOr(trim($data['prenom']), trim($data['message']), $request->getLocale()));
+                $entityManager->persist($message = new MessageLivreOr(trim($data['prenom']), trim($data['message']), $request->getLocale()));
                 $entityManager->flush();
-                $notificateur->prevenir('Livre d’or : nouveau message à modérer', trim($data['prenom']).' : '.trim($data['message']), 'star');
+                // Boutons de l'alerte : liens signés, valables 7 jours (modérer sans ouvrir l'admin)
+                $bouton = fn (string $action) => $uriSigner->sign($this->generateUrl('app_livre_or_moderer', ['id' => $message->getId(), 'action' => $action, '_locale' => 'fr'], UrlGeneratorInterface::ABSOLUTE_URL), new \DateTimeImmutable('+7 days'));
+                $notificateur->prevenir('Livre d’or : nouveau message à modérer', trim($data['prenom']).' : '.trim($data['message']), 'star',
+                    ['Approuver' => $bouton('approuver'), 'Supprimer' => $bouton('supprimer')]);
             }
             // Même réponse pour un robot : il ne sait pas qu'il a été repéré
             $this->addFlash('success', $translator->trans('Merci ! Votre étoile apparaîtra dans le ciel dès que je l’aurai lue.'));
@@ -56,5 +62,23 @@ final class LivreOrController extends AbstractController
             'form' => $form,
             'messages' => $entityManager->getRepository(MessageLivreOr::class)->findBy(['approuve' => true], ['creeLe' => 'DESC']),
         ]);
+    }
+
+    /** Bouton de l'alerte ntfy (appelé en POST par l'appli) : lien signé et pas expiré, sinon 403 */
+    #[Route('/livre-d-or/moderer/{id}/{action}', name: 'app_livre_or_moderer', requirements: ['id' => '\d+', 'action' => 'approuver|supprimer'], methods: ['POST'])]
+    public function moderer(int $id, string $action, Request $request, UriSigner $uriSigner, EntityManagerInterface $entityManager, Journaliste $journaliste): Response
+    {
+        if (!$uriSigner->checkRequest($request)) {
+            return new Response('Lien invalide ou expiré.', Response::HTTP_FORBIDDEN);
+        }
+        $message = $entityManager->find(MessageLivreOr::class, $id) ?? throw $this->createNotFoundException('Message déjà supprimé.');
+
+        $approuver = 'approuver' === $action;
+        $approuver ? $message->setApprouve(true) : $entityManager->remove($message);
+        $entityManager->flush();
+        $journaliste->noter($approuver ? Journal::MODIFICATION : Journal::SUPPRESSION,
+            ($approuver ? 'Approuvé' : 'Supprimé')." depuis le téléphone — Message du livre d'or « ".$message->getPrenom().' »', 'ntfy');
+
+        return new Response($approuver ? 'Message approuvé.' : 'Message supprimé.');
     }
 }
