@@ -150,6 +150,12 @@ docker compose -f compose.yaml -f compose.prod.yaml exec -T database \
     pg_restore -U app -d app --clean --if-exists --no-owner < ~/sauvegardes/portfolio/portfolio-AAAA-MM-JJ_HHMM.dump
 ```
 
+Test de restauration : `scripts/test-restauration.sh`, le 1er de chaque mois à 4 h (crontab de `nicolas`, log dans
+`~/cron-logs/portfolio-restauration.log`). La dernière sauvegarde est restaurée dans un container PostgreSQL jetable
+(`portfolio_restauration_test`, supprimé ensuite ; la prod n'est jamais touchée), puis on vérifie que les tables du
+portfolio ne sont pas vides et que l'archive d'images se lit. Sauvegarde absente, de plus de deux jours, ou non
+restaurable : alerte ntfy (`NTFY_TOPIC` de `.env.local`).
+
 Restaurer les images envoyées depuis l'admin :
 
 ```bash
@@ -176,6 +182,13 @@ qu'aucune image n'est envoyée.
 `make prod-relances`, chaque matin à 8 h 30 (crontab de `nicolas`, depuis `~/deploy/portfolio`, log dans
 `~/cron-logs/portfolio-relances.log`) : une alerte ntfy liste les candidatures dont la date de relance est passée
 (`app:candidatures:relances`) ; aucune, aucune alerte. Nécessite `NTFY_TOPIC`.
+
+### Bilan de la semaine
+
+`make prod-bilan`, le dimanche à 19 h (crontab de `nicolas`, depuis `~/deploy/portfolio`, log dans
+`~/cron-logs/portfolio-bilan.log`) : une alerte ntfy résume les 7 derniers jours (`app:bilan:hebdo`) : pages vues et
+évolution, pages et provenances les plus fréquentes, liens recruteur ouverts, messages reçus, livre d'or à modérer,
+candidatures à relancer. Nécessite `NTFY_TOPIC`.
 
 ## 📝 Commandes Utiles
 
