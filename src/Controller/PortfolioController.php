@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Projet;
 use App\Repository\ProjetRepository;
+use App\Service\ActiviteGithub;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,10 +13,11 @@ use Symfony\Component\Routing\Attribute\Route;
 final class PortfolioController extends AbstractController
 {
     #[Route('/projects', name: 'app_projects')]
-    public function index(ProjetRepository $projets): Response
+    public function index(ProjetRepository $projets, ActiviteGithub $github): Response
     {
         return $this->render('portfolio/index.html.twig', [
             'categories' => $projets->findAllByCategorie(),
+            'depots' => $github->depots(),
         ]);
     }
 

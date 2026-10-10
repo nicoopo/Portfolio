@@ -52,5 +52,24 @@
     </div>
   </section>
   {% endfor %}
+
+  {# Derniers dépôts publics (App\Service\ActiviteGithub, cache d'une heure) ; GitHub indisponible : rien #}
+  {% if depots is not empty %}
+  <section class="projets-groupe" aria-labelledby="groupe-github">
+    <h2 class="projets-groupe-titre" id="groupe-github">{{ 'Activité récente sur GitHub'|trans }}</h2>
+    <div class="projets-grille">
+      {% for depot in depots %}
+      <article class="projet-carte">
+        <div class="projet-carte-corps">
+          <h3 class="projet-carte-titre"><a href="{{ depot.url }}" rel="noopener">{{ depot.nom }}</a></h3>
+          {% if depot.description %}<p class="projet-carte-description">{{ depot.description }}</p>{% endif %}
+          {% if depot.langage %}<ul class="projet-techs" aria-label="{{ 'Technologies'|trans }}"><li>{{ depot.langage }}</li></ul>{% endif %}
+          <span class="projet-carte-suite">{{ 'Mis à jour le'|trans }} <time datetime="{{ depot.misAJour }}">{{ depot.misAJour|format_date('long', locale: app.request.locale) }}</time></span>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
 </section>
 {% endblock %}
