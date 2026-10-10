@@ -4,6 +4,7 @@ namespace App\Tests;
 
 use App\Entity\Article;
 use App\Entity\Candidature;
+use App\Entity\StatutCandidature;
 use App\Entity\Competence;
 use App\Entity\Journal;
 use App\Entity\LienRecruteur;
@@ -164,7 +165,12 @@ final class AdminTest extends WebTestCase
         $client = static::createClient();
         self::loginAdmin($client);
         $client->request('GET', '/admin/lien-recruteur/new');
-        $client->submitForm('Créer', ['LienRecruteur[entreprise]' => 'Acme', 'LienRecruteur[poste]' => 'développeur Symfony en alternance']);
+        $pendu = self::getContainer()->get(EntityManagerInterface::class)->getRepository(Projet::class)->findOneBy(['slug' => 'pendu']);
+        $client->submitForm('Créer', [
+            'LienRecruteur[entreprise]' => 'Acme',
+            'LienRecruteur[poste]' => 'développeur Symfony en alternance',
+            'LienRecruteur[projets]' => [$pendu->getId()],
+        ]);
         self::assertResponseRedirects();
         // Relu à chaque fois : le noyau redémarre entre deux requêtes
         $relire = fn () => self::getContainer()->get(EntityManagerInterface::class)->getRepository(LienRecruteur::class)->findOneBy(['entreprise' => 'Acme']);
@@ -174,6 +180,7 @@ final class AdminTest extends WebTestCase
         // L'admin connecté ne compte pas
         $client->request('GET', '/?pour='.$code, server: ['HTTP_ACCEPT_LANGUAGE' => 'fr-FR']);
         self::assertSelectorTextContains('.recruteur-bonjour', 'Bonjour l’équipe de Acme !');
+        self::assertSelectorExists('.recruteur-projets a[href="/projects/pendu"]');
         self::assertSame(0, $relire()->getVisites());
 
         $client->request('GET', '/logout');
@@ -286,12 +293,30 @@ final class AdminTest extends WebTestCase
         self::assertStringContainsString('Lettre_Nicolas_Cataluna_Initech.pdf', $client->getResponse()->headers->get('Content-Disposition'));
         self::assertStringStartsWith('%PDF', $client->getResponse()->getContent());
 
+        // Entretien : fichier .ics pour l'agenda, à l'heure de Paris saisie
+        $client->request('GET', '/admin/candidature/'.$id.'/edit');
+        $client->submitForm('Sauvegarder les modifications', [
+            'Candidature[email]' => 'rh@initech.example',
+            'Candidature[entretienLe]' => '2026-11-03T14:30',
+        ]);
+        $client->request('GET', '/admin/candidature/'.$id.'/entretien.ics');
+        self::assertResponseHeaderSame('Content-Type', 'text/calendar; charset=UTF-8');
+        self::assertStringContainsString("DTSTART;TZID=Europe/Paris:20261103T143000\r\n", $client->getResponse()->getContent());
+        self::assertStringContainsString('SUMMARY:Entretien Initech — Développeur PHP', $client->getResponse()->getContent());
+
+        // Relance en un clic : messagerie ouverte avec le message, candidature passée en « Relancée »
+        $client->request('GET', '/admin/candidature/'.$id.'/relancer');
+        $mailto = $client->getResponse()->headers->get('Location');
+        self::assertStringStartsWith('mailto:rh%40initech.example?subject=', $mailto);
+        self::assertStringContainsString('D%C3%A9veloppeur%20PHP%20en%20alternance', $mailto);
+        self::assertSame(StatutCandidature::Relancee, self::getContainer()->get(EntityManagerInterface::class)->getRepository(Candidature::class)->find($id)->getStatut());
+
         // Statistiques du tableau de bord et export pour un tableur
         $client->request('GET', '/admin');
         self::assertSelectorTextContains('body', 'délai moyen de réponse');
         $client->request('GET', '/admin/candidature/export');
         self::assertResponseHeaderSame('Content-Type', 'text/csv; charset=UTF-8');
-        self::assertStringContainsString('Initech;"Développeur PHP";Envoyée;', $client->getResponse()->getContent());
+        self::assertStringContainsString('Initech;"Développeur PHP";Relancée;', $client->getResponse()->getContent());
 
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->remove($entityManager->getRepository(Candidature::class)->find($id));
