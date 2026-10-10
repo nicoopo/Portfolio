@@ -34,6 +34,29 @@
         {% endfor %}
     </div>
 
+    {# Candidatures d'alternance : taux en % du total (ou des candidatures avec lien recruteur) #}
+    {% if candidatures.total > 0 %}
+    {% import _self as outils %}
+    <h2 class="h5">Candidatures</h2>
+    <div class="row g-3 mb-4">
+        {% for chiffre in [
+            {valeur: candidatures.total, libelle: 'candidature(s) envoyée(s)'},
+            {valeur: outils.pourcent(candidatures.reponses, candidatures.total), libelle: 'de réponses', detail: candidatures.reponses ~ ' réponse(s)'},
+            {valeur: outils.pourcent(candidatures.entretiens, candidatures.total), libelle: 'd’entretiens', detail: candidatures.entretiens ~ ' entretien(s)'},
+            {valeur: candidatures.delai is null ? '—' : candidatures.delai ~ ' j', libelle: 'délai moyen de réponse', detail: 'depuis l’envoi'},
+            {valeur: outils.pourcent(candidatures.liens_ouverts, candidatures.avec_lien), libelle: 'liens recruteur ouverts', detail: candidatures.liens_ouverts ~ ' sur ' ~ candidatures.avec_lien ~ ' envoyé(s)'},
+        ] %}
+        <div class="col-sm-6 col-xl">
+            <div class="card h-100"><div class="card-body">
+                <div class="fs-3 fw-bold">{{ chiffre.valeur }}</div>
+                <div>{{ chiffre.libelle }}</div>
+                {% if chiffre.detail is defined %}<small class="text-muted">{{ chiffre.detail }}</small>{% endif %}
+            </div></div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     {# Graphiques (assets/admin_graphiques.js) ; les chiffres exacts dans un tableau, pour les lecteurs d'écran et les couleurs peu contrastées #}
     <div class="row g-4 mb-4">
         {% for graphique in [
@@ -137,3 +160,5 @@
         </div>
     </div>
 {% endblock %}
+
+{% macro pourcent(n, sur) %}{{ sur > 0 ? (100 * n / sur)|round ~ ' %' : '—' }}{% endmacro %}

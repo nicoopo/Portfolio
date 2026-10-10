@@ -44,6 +44,10 @@ class Candidature
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $relancerLe = null;
 
+    /** Jour où la réponse est arrivée (statut sorti de l'attente) : délai de réponse du tableau de bord */
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $reponseLe = null;
+
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $notes = null;
 
@@ -65,6 +69,7 @@ class Candidature
     public function getEnvoyeeLe(): \DateTimeImmutable { return $this->envoyeeLe; }
     public function getStatut(): StatutCandidature { return $this->statut; }
     public function getRelancerLe(): ?\DateTimeImmutable { return $this->relancerLe; }
+    public function getReponseLe(): ?\DateTimeImmutable { return $this->reponseLe; }
     public function getNotes(): ?string { return $this->notes; }
     public function getLien(): ?LienRecruteur { return $this->lien; }
 
@@ -93,6 +98,11 @@ class Candidature
                 StatutCandidature::Relancee => new \DateTimeImmutable('today +'.self::RELANCE_JOURS.' days'),
                 default => null,
             };
+            if ($statut->enAttente()) {
+                $this->reponseLe = null;
+            } elseif ($this->statut->enAttente()) { // entretien → acceptée : la réponse date du premier passage
+                $this->reponseLe = new \DateTimeImmutable('today');
+            }
         }
         $this->statut = $statut;
 
