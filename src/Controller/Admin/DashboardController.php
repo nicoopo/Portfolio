@@ -42,6 +42,15 @@ final class DashboardController extends AbstractDashboardController
             'nb_projets' => $this->projets->count([]),
             'a_relancer' => (int) $this->entityManager->createQuery('SELECT COUNT(c) FROM '.Candidature::class.' c WHERE c.relancerLe <= :aujourdhui')
                 ->setParameter('aujourdhui', new \DateTimeImmutable('today'))->getSingleScalarResult(),
+            'candidatures' => $this->entityManager->getConnection()->fetchAssociative(
+                "SELECT COUNT(*) AS total,
+                        COUNT(*) FILTER (WHERE c.statut NOT IN ('envoyee', 'relancee')) AS reponses,
+                        COUNT(*) FILTER (WHERE c.statut IN ('entretien', 'acceptee')) AS entretiens,
+                        ROUND(AVG(c.reponse_le - c.envoyee_le)) AS delai,
+                        COUNT(c.lien_id) AS avec_lien,
+                        COUNT(*) FILTER (WHERE l.visites > 0) AS liens_ouverts
+                 FROM candidature c LEFT JOIN lien_recruteur l ON l.id = c.lien_id",
+            ),
             'dernieres_demandes' => $this->demandes->findBy([], ['recuLe' => 'DESC'], 5),
             'dernier_journal' => $this->journal->findBy([], ['date' => 'DESC'], 8),
             'activite' => $this->activite(),
