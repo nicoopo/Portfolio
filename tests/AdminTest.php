@@ -279,8 +279,22 @@ final class AdminTest extends WebTestCase
         $client->request('GET', '/admin');
         self::assertSelectorTextContains('body', 'candidature(s) à relancer');
 
+        // Lettre de motivation à son nom, en PDF
+        $id = self::getContainer()->get(EntityManagerInterface::class)->getRepository(Candidature::class)->findOneBy(['entreprise' => 'Initech'])->getId();
+        $client->request('GET', '/admin/candidature/'.$id.'/lettre');
+        self::assertResponseHeaderSame('Content-Type', 'application/pdf');
+        self::assertStringContainsString('Lettre_Nicolas_Cataluna_Initech.pdf', $client->getResponse()->headers->get('Content-Disposition'));
+        self::assertStringStartsWith('%PDF', $client->getResponse()->getContent());
+
+        // Statistiques du tableau de bord et export pour un tableur
+        $client->request('GET', '/admin');
+        self::assertSelectorTextContains('body', 'délai moyen de réponse');
+        $client->request('GET', '/admin/candidature/export');
+        self::assertResponseHeaderSame('Content-Type', 'text/csv; charset=UTF-8');
+        self::assertStringContainsString('Initech;"Développeur PHP";Envoyée;', $client->getResponse()->getContent());
+
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        $entityManager->remove($entityManager->getRepository(Candidature::class)->findOneBy(['entreprise' => 'Initech']));
+        $entityManager->remove($entityManager->getRepository(Candidature::class)->find($id));
         $entityManager->flush();
     }
 
