@@ -14,6 +14,13 @@
   animation: float-nav 6s ease-in-out infinite alternate;
 }
 
+/* Mouvements réduits (réglage du système) : le décor ne bouge plus en boucle */
+@media (prefers-reduced-motion: reduce) {
+  .navbar-galactic {
+    animation: none;
+  }
+}
+
 .navbar-galactic:hover {
   box-shadow: 0 0 30px rgba(127, 90, 240, 0.45), 0 0 60px rgba(0, 212, 255, 0.35);
 }

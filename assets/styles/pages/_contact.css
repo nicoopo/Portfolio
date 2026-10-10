@@ -22,6 +22,13 @@
   animation: float 6s ease-in-out infinite alternate;
 }
 
+/* Mouvements réduits (réglage du système) : le décor ne bouge plus en boucle */
+@media (prefers-reduced-motion: reduce) {
+  .contact-container {
+    animation: none;
+  }
+}
+
 .contact-container h1 {
   font-size: 2.4rem;
   color: var(--color-primary);

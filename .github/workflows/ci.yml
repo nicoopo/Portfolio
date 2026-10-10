@@ -132,8 +132,10 @@ jobs:
           php bin/console asset-map:compile
           php bin/console doctrine:migrations:migrate --no-interaction
 
+      # variables_order=EGPCS : sans « E », le serveur intégré ne passe pas l'environnement du job (DATABASE_URL)
+      # à l'application, qui retombe sur la base du poste de dev (.env) : toute page lisant la base répondait 500
       - name: Démarrer le site
-        run: php -S 127.0.0.1:8000 -t public > /tmp/serveur.log 2>&1 &
+        run: php -d variables_order=EGPCS -S 127.0.0.1:8000 -t public > /tmp/serveur.log 2>&1 &
 
       - name: Installer Playwright et axe-core
         run: |
@@ -142,6 +144,10 @@ jobs:
 
       - name: Audit d'accessibilité
         run: node tests/accessibilite.mjs
+
+      # Palette, terminal, comparateur, contact, langue ; échoue aussi sur une erreur JavaScript
+      - name: Parcours dans le navigateur
+        run: node tests/parcours.mjs
 
       - name: Logs du serveur (en cas d'échec)
         if: failure()
