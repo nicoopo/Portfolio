@@ -150,6 +150,12 @@ docker compose -f compose.yaml -f compose.prod.yaml exec -T database \
     pg_restore -U app -d app --clean --if-exists --no-owner < ~/sauvegardes/portfolio/portfolio-AAAA-MM-JJ_HHMM.dump
 ```
 
+Test de restauration : `scripts/test-restauration.sh`, le 1er de chaque mois à 4 h (crontab de `nicolas`, log dans
+`~/cron-logs/portfolio-restauration.log`). La dernière sauvegarde est restaurée dans un container PostgreSQL jetable
+(`portfolio_restauration_test`, supprimé ensuite ; la prod n'est jamais touchée), puis on vérifie que les tables du
+portfolio ne sont pas vides et que l'archive d'images se lit. Sauvegarde absente, de plus de deux jours, ou non
+restaurable : alerte ntfy (`NTFY_TOPIC` de `.env.local`).
+
 Restaurer les images envoyées depuis l'admin :
 
 ```bash
