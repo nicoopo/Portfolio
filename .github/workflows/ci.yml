@@ -143,6 +143,10 @@ jobs:
       - name: Audit d'accessibilité
         run: node tests/accessibilite.mjs
 
+      # Palette, terminal, comparateur, contact, langue ; échoue aussi sur une erreur JavaScript
+      - name: Parcours dans le navigateur
+        run: node tests/parcours.mjs
+
       - name: Logs du serveur (en cas d'échec)
         if: failure()
         run: cat /tmp/serveur.log
