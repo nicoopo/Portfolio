@@ -52,7 +52,6 @@ final class CVController extends AbstractController
         $theme = 'light' === $request->query->get('theme') ? 'light' : 'dark';
 
         $options = new Options();
-        $options->set('isRemoteEnabled', true);
         $options->set('isHtml5ParserEnabled', true);
         $options->set('defaultFont', 'DejaVu Sans');
 

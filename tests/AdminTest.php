@@ -176,9 +176,16 @@ final class AdminTest extends WebTestCase
         self::assertSelectorTextContains('.recruteur-bonjour', 'Bonjour l’équipe de Acme !');
         self::assertSame(0, $relire()->getVisites());
 
-        // Visiteur au navigateur anglais : redirigé vers /en/ avec son lien, salué en anglais, visite comptée
         $client->request('GET', '/logout');
         $client->getCookieJar()->clear();
+
+        // Robot d'aperçu de lien (LinkedIn, Slack…) : salué, mais ni visite ni alerte
+        $client->request('GET', '/?pour='.$code, server: ['HTTP_ACCEPT_LANGUAGE' => 'fr-FR', 'HTTP_USER_AGENT' => 'LinkedInBot/1.0']);
+        self::assertSelectorTextContains('.recruteur-bonjour', 'Bonjour l’équipe de Acme !');
+        self::assertSame(0, $relire()->getVisites());
+        $client->getCookieJar()->clear(); // cookie « langue » posé : sans ça, plus de redirection vers /en/
+
+        // Visiteur au navigateur anglais : redirigé vers /en/ avec son lien, salué en anglais, visite comptée
         $client->request('GET', '/?pour='.$code, server: ['HTTP_ACCEPT_LANGUAGE' => 'en-GB']);
         self::assertResponseRedirects('http://localhost/en/?pour='.$code);
         $client->followRedirect();
