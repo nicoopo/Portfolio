@@ -16,7 +16,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 final class Notificateur
 {
-    /** @var list<array{string, string, string}> titre, message, étiquette */
+    /** @var list<array{string, string, string, array<string, string>}> titre, message, étiquette, boutons */
     private array $enAttente = [];
 
     public function __construct(
@@ -27,21 +27,30 @@ final class Notificateur
     ) {
     }
 
-    /** $etiquette : émoji ntfy (https://docs.ntfy.sh/emojis/), ex. « eyes », « star » */
-    public function prevenir(string $titre, string $message, string $etiquette): void
+    /**
+     * $etiquette : émoji ntfy (https://docs.ntfy.sh/emojis/), ex. « eyes », « star ».
+     * $boutons : libellé => URL appelée en POST par l'appli ntfy (https://docs.ntfy.sh/publish/#http-action).
+     *
+     * @param array<string, string> $boutons
+     */
+    public function prevenir(string $titre, string $message, string $etiquette, array $boutons = []): void
     {
         if ('' !== $this->sujet) {
-            $this->enAttente[] = [$titre, $message, $etiquette];
+            $this->enAttente[] = [$titre, $message, $etiquette, $boutons];
         }
     }
 
     #[AsEventListener(KernelEvents::TERMINATE)]
     public function envoyer(): void
     {
-        foreach ($this->enAttente as [$titre, $message, $etiquette]) {
+        foreach ($this->enAttente as [$titre, $message, $etiquette, $boutons]) {
             try {
                 $this->httpClient->request('POST', rtrim($this->serveur, '/').'/'.$this->sujet, [
-                    'headers' => ['Title' => $titre, 'Tags' => $etiquette],
+                    'headers' => ['Title' => $titre, 'Tags' => $etiquette] + ($boutons ? ['Actions' => implode('; ', array_map(
+                        fn (string $libelle, string $url) => "http, $libelle, $url, method=POST, clear=true",
+                        array_keys($boutons),
+                        $boutons,
+                    ))] : []),
                     'body' => $message,
                     'timeout' => 3,
                 ])->getStatusCode();
