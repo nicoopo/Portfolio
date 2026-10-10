@@ -170,6 +170,7 @@ final class DashboardController extends AbstractDashboardController
         yield MenuItem::section('Alternance');
         yield MenuItem::linkTo(CandidatureCrudController::class, 'Candidatures', 'fa fa-paper-plane');
         yield MenuItem::linkTo(LienRecruteurCrudController::class, 'Liens recruteur', 'fa fa-link');
+        yield MenuItem::linkTo(CreneauCrudController::class, 'Créneaux d’entretien', 'fa fa-calendar-days');
         yield MenuItem::section('Visiteurs');
         yield MenuItem::linkTo(DemandeContactCrudController::class, 'Demandes de contact', 'fa fa-envelope');
         yield MenuItem::linkTo(MessageLivreOrCrudController::class, 'Livre d’or', 'fa fa-star-half-stroke');

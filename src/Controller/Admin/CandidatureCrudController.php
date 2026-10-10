@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Candidature;
 use App\Entity\StatutCandidature;
 use App\Repository\CvProfilRepository;
+use App\Service\Agenda;
 use Doctrine\ORM\EntityManagerInterface;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -61,21 +62,14 @@ final class CandidatureCrudController extends AbstractCrudController
 
     /** Entretien en .ics : s'ouvre dans l'agenda (heure de Paris, une heure par défaut) */
     #[AdminRoute('/{id}/entretien.ics')]
-    public function agenda(Candidature $candidature): Response
+    public function agenda(Candidature $candidature, Agenda $agenda): Response
     {
-        $debut = $candidature->getEntretienLe() ?? throw $this->createNotFoundException('Pas de date d’entretien.');
-        $texte = fn (string $t) => str_replace(["\\", ';', ',', "\r\n", "\n"], ['\\\\', '\\;', '\\,', '\\n', '\\n'], $t); // RFC 5545
-        $ics = implode("\r\n", [
-            'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//nicolascataluna.fr//portfolio//FR', 'BEGIN:VEVENT',
-            'UID:candidature-'.$candidature->getId().'@nicolascataluna.fr',
-            'DTSTAMP:'.gmdate('Ymd\THis\Z'),
-            'DTSTART;TZID=Europe/Paris:'.$debut->format('Ymd\THis'),
-            'DTEND;TZID=Europe/Paris:'.$debut->modify('+1 hour')->format('Ymd\THis'),
-            'SUMMARY:'.$texte('Entretien '.$candidature->getEntreprise().' — '.$candidature->getPoste()),
-            'DESCRIPTION:'.$texte(trim(($candidature->getAnnonce() ?? '')."\n".($candidature->getNotes() ?? ''))),
-            'BEGIN:VALARM', 'TRIGGER:-PT1H', 'ACTION:DISPLAY', 'DESCRIPTION:Entretien dans une heure', 'END:VALARM',
-            'END:VEVENT', 'END:VCALENDAR', '',
-        ]);
+        $ics = $agenda->ics(
+            'candidature-'.$candidature->getId(),
+            $candidature->getEntretienLe() ?? throw $this->createNotFoundException('Pas de date d’entretien.'),
+            'Entretien '.$candidature->getEntreprise().' — '.$candidature->getPoste(),
+            trim(($candidature->getAnnonce() ?? '')."\n".($candidature->getNotes() ?? '')),
+        );
 
         return new Response($ics, Response::HTTP_OK, [
             'Content-Type' => 'text/calendar; charset=UTF-8',
