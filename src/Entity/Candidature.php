@@ -44,6 +44,16 @@ class Candidature
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $relancerLe = null;
 
+    /** Adresse du recruteur : bouton « Relancer » (e-mail prêt à envoyer) */
+    #[Assert\Email]
+    #[Assert\Length(max: 180)]
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $email = null;
+
+    /** Heure de Paris, telle que saisie : rappel ntfy la veille, fichier .ics pour l'agenda */
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $entretienLe = null;
+
     /** Jour où la réponse est arrivée (statut sorti de l'attente) : délai de réponse du tableau de bord */
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $reponseLe = null;
@@ -70,6 +80,8 @@ class Candidature
     public function getStatut(): StatutCandidature { return $this->statut; }
     public function getRelancerLe(): ?\DateTimeImmutable { return $this->relancerLe; }
     public function getReponseLe(): ?\DateTimeImmutable { return $this->reponseLe; }
+    public function getEmail(): ?string { return $this->email; }
+    public function getEntretienLe(): ?\DateTimeImmutable { return $this->entretienLe; }
     public function getNotes(): ?string { return $this->notes; }
     public function getLien(): ?LienRecruteur { return $this->lien; }
 
@@ -77,6 +89,8 @@ class Candidature
     public function setPoste(?string $poste): static { $this->poste = $poste ?? ''; return $this; }
     public function setAnnonce(?string $annonce): static { $this->annonce = $annonce ?: null; return $this; }
     public function setNotes(?string $notes): static { $this->notes = $notes ?: null; return $this; }
+    public function setEmail(?string $email): static { $this->email = $email ?: null; return $this; }
+    public function setEntretienLe(?\DateTimeImmutable $entretienLe): static { $this->entretienLe = $entretienLe; return $this; }
     public function setLien(?LienRecruteur $lien): static { $this->lien = $lien; return $this; }
 
     public function setEnvoyeeLe(?\DateTimeImmutable $envoyeeLe): static
