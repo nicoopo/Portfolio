@@ -177,6 +177,13 @@ qu'aucune image n'est envoyée.
 `~/cron-logs/portfolio-relances.log`) : une alerte ntfy liste les candidatures dont la date de relance est passée
 (`app:candidatures:relances`) ; aucune, aucune alerte. Nécessite `NTFY_TOPIC`.
 
+### Bilan de la semaine
+
+`make prod-bilan`, le dimanche à 19 h (crontab de `nicolas`, depuis `~/deploy/portfolio`, log dans
+`~/cron-logs/portfolio-bilan.log`) : une alerte ntfy résume les 7 derniers jours (`app:bilan:hebdo`) : pages vues et
+évolution, pages et provenances les plus fréquentes, liens recruteur ouverts, messages reçus, livre d'or à modérer,
+candidatures à relancer. Nécessite `NTFY_TOPIC`.
+
 ## 📝 Commandes Utiles
 
 - Lancer les tests (crée et migre la base `app_test` au besoin) :
