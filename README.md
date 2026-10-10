@@ -171,6 +171,12 @@ qu'aucune image n'est envoyée.
 `~/cron-logs/portfolio-purge.log`) : supprime le journal (`app:journal:purge`) et les demandes de contact
 (`app:contact:purge`) de plus de 12 mois, la durée annoncée dans la politique de confidentialité (`/confidentialite`).
 
+### Rappel des relances
+
+`make prod-relances`, chaque matin à 8 h 30 (crontab de `nicolas`, depuis `~/deploy/portfolio`, log dans
+`~/cron-logs/portfolio-relances.log`) : une alerte ntfy liste les candidatures dont la date de relance est passée
+(`app:candidatures:relances`) ; aucune, aucune alerte. Nécessite `NTFY_TOPIC`.
+
 ## 📝 Commandes Utiles
 
 - Lancer les tests (crée et migre la base `app_test` au besoin) :

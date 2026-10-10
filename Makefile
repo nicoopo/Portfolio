@@ -67,6 +67,9 @@ prod-purge: ## Supprime le journal et les demandes de contact de plus de 12 mois
 	$(DC_PROD) exec -T php php bin/console app:journal:purge
 	$(DC_PROD) exec -T php php bin/console app:contact:purge
 
+prod-relances: ## Alerte ntfy des candidatures à relancer (prod ; cron chaque matin, voir README)
+	$(DC_PROD) exec -T php php bin/console app:candidatures:relances
+
 prod-bash: ## Shell dans le conteneur (prod)
 	$(DC_PROD) exec php bash
 
