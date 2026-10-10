@@ -181,6 +181,24 @@
   font-style: italic;
 }
 
+.recruteur-projets {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.recruteur-projets a {
+  font-weight: 600;
+}
+
+.recruteur-projets span {
+  opacity: 0.7;
+  font-size: 0.875em;
+}
+
 .recruteur-actions {
   display: flex;
   flex-wrap: wrap;

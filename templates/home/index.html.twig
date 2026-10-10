@@ -12,6 +12,14 @@
                 ? 'Merci de votre visite. Tout ce qu’il faut savoir pour le poste de %poste% est à deux clics :'|trans({'%poste%': recruteur.poste})
                 : 'Merci de votre visite. L’essentiel est à deux clics :'|trans }}</p>
             {% if recruteur.message %}<p class="recruteur-message">{{ recruteur.message|nl2br }}</p>{% endif %}
+            {% if recruteur.projets is not empty %}
+            <p>{{ 'Les projets que je vous conseille :'|trans }}</p>
+            <ul class="recruteur-projets">
+                {% for projet in recruteur.projets %}
+                <li><a href="{{ path('app_project', {slug: projet.slug}) }}">{{ projet|loc('titre') }}</a> <span>{{ projet|loc('categorie') }}</span></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
             <div class="recruteur-actions">
                 <a href="{{ path('app_cv') }}" class="btn btn-galactic btn-galactic-primary">{{ 'Mon CV'|trans }}</a>
                 <a href="{{ path('app_comparateur') }}" class="btn btn-galactic btn-galactic-outline-light">{{ 'Comparer avec votre offre'|trans }}</a>
