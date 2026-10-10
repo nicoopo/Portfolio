@@ -180,8 +180,8 @@ qu'aucune image n'est envoyée.
 ### Rappel des relances
 
 `make prod-relances`, chaque matin à 8 h 30 (crontab de `nicolas`, depuis `~/deploy/portfolio`, log dans
-`~/cron-logs/portfolio-relances.log`) : une alerte ntfy liste les candidatures dont la date de relance est passée
-(`app:candidatures:relances`) ; aucune, aucune alerte. Nécessite `NTFY_TOPIC`.
+`~/cron-logs/portfolio-relances.log`) : une alerte ntfy pour les entretiens d'aujourd'hui et de demain, une autre pour
+les candidatures dont la date de relance est passée (`app:candidatures:relances`) ; rien à signaler, aucune alerte. Nécessite `NTFY_TOPIC`.
 
 ### Bilan de la semaine
 

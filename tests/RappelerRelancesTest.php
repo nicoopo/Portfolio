@@ -11,7 +11,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 final class RappelerRelancesTest extends KernelTestCase
 {
-    /** Seules les candidatures dont la date de relance est passée sont listées */
+    /** Seules les candidatures dont la date de relance est passée sont listées, et les entretiens d'aujourd'hui et demain */
     public function testSeulesLesCandidaturesEnRetardSontListees(): void
     {
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
@@ -19,7 +19,9 @@ final class RappelerRelancesTest extends KernelTestCase
         $recente = (new Candidature())->setEntreprise('Jeune Pousse')->setPoste('Dev');
         $repondu = (new Candidature())->setEntreprise('Déjà Répondu')->setPoste('Dev')
             ->setEnvoyeeLe(new \DateTimeImmutable('-10 days'))->setStatut(StatutCandidature::Entretien);
-        foreach ([$enRetard, $recente, $repondu] as $candidature) {
+        $entretienDemain = (new Candidature())->setEntreprise('Entretien Demain')->setPoste('Dev')->setEntretienLe(new \DateTimeImmutable('tomorrow 14:30'));
+        $entretienLoin = (new Candidature())->setEntreprise('Entretien Lointain')->setPoste('Dev')->setEntretienLe(new \DateTimeImmutable('+5 days'));
+        foreach ([$enRetard, $recente, $repondu, $entretienDemain, $entretienLoin] as $candidature) {
             $entityManager->persist($candidature);
         }
         $entityManager->flush();
@@ -32,8 +34,10 @@ final class RappelerRelancesTest extends KernelTestCase
             self::assertStringContainsString('Acme Relance', $sortie);
             self::assertStringNotContainsString('Jeune Pousse', $sortie);
             self::assertStringNotContainsString('Déjà Répondu', $sortie);
+            self::assertStringContainsString('Entretien Demain — Dev : demain à 14:30', $sortie);
+            self::assertStringNotContainsString('Entretien Lointain', $sortie);
         } finally {
-            foreach ([$enRetard, $recente, $repondu] as $candidature) {
+            foreach ([$enRetard, $recente, $repondu, $entretienDemain, $entretienLoin] as $candidature) {
                 $entityManager->remove($candidature);
             }
             $entityManager->flush();
