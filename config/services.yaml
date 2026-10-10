@@ -9,6 +9,8 @@
 parameters:
     # Destinataire du formulaire de contact (déjà publique sur la page Contact)
     app.contact_email: 'nicolas.cataluna@proton.me'
+    # Compte GitHub dont la page Projets montre les derniers dépôts (App\Service\ActiviteGithub) ; vide = section masquée
+    app.github_utilisateur: 'nicoopo'
 
 services:
     # default configuration for services in *this* file
@@ -25,6 +27,8 @@ services:
     # please note that last definitions always *replace* previous ones
 
 when@test:
+    parameters:
+        app.github_utilisateur: '' # jamais d'appel à GitHub pendant les tests
     services:
         # Client d'AssetMapper (importmap:audit, importmap:install) : celui qui authentifie l'API GitHub (framework.yaml)
         asset_mapper.http_client: '@github_api.client'
