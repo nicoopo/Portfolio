@@ -11,6 +11,9 @@ services:
       context: .
       dockerfile: docker/php/Dockerfile.prod
     container_name: portfolio_php_prod
+    logging: # sans rotation, un flot de requêtes (ex. /csp-report) remplirait le disque
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
     ports:
       - "127.0.0.1:8081:80" # joignable seulement par Caddy, jamais directement depuis Internet
     environment:
