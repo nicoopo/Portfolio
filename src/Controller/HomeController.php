@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Creneau;
 use App\Entity\EtapeParcours;
 use App\Entity\LienRecruteur;
 use App\Entity\Passion;
@@ -33,7 +34,12 @@ final class HomeController extends AbstractController
             }
         }
 
-        return $this->render('home/index.html.twig', ['recruteur' => $recruteur]);
+        return $this->render('home/index.html.twig', [
+            'recruteur' => $recruteur,
+            // Bouton « Choisir un créneau » : un créneau libre à plus de 12 heures, ou déjà réservé par ce lien
+            'rendez_vous' => $recruteur && (int) $entityManager->createQuery('SELECT COUNT(c) FROM '.Creneau::class.' c WHERE (c.lien IS NULL AND c.debut > :limite) OR c.lien = :lien')
+                ->setParameter('limite', new \DateTimeImmutable('+12 hours'))->setParameter('lien', $recruteur)->getSingleScalarResult() > 0,
+        ]);
     }
 
     #[Route('/cerveau', name: 'app_cerveau')]
