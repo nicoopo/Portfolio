@@ -54,6 +54,18 @@ const parcours = {
         assert.equal(await onglet.getAttribute('html', 'lang'), 'en');
     },
 
+    'Transition de page : la page arrive avec l\'effet, sans transform qui fasse défiler les éléments fixes': async (onglet) => {
+        await onglet.emulateMedia({ reducedMotion: 'no-preference' });
+        await ouvrir(onglet, '/projects');
+        await onglet.evaluate(() => { const a = Object.assign(document.createElement('a'), { href: '/CV' }); document.body.append(a); a.click(); });
+        await onglet.waitForURL(/\/CV$/);
+        assert.ok(await onglet.getAttribute('html', 'data-arrivee'), 'effet de la page précédente');
+        await onglet.waitForTimeout(800); // fin de l'animation d'arrivée
+        await onglet.evaluate(() => scrollTo(0, 800));
+        assert.equal(await onglet.locator('main').evaluate((m) => getComputedStyle(m).transform), 'none');
+        assert.equal(await onglet.locator('.theme-toggle').evaluate((t) => Math.round(t.getBoundingClientRect().top)), 90);
+    },
+
     'Aucune erreur JavaScript sur les pages principales': async (onglet) => {
         for (const chemin of ['/', '/cerveau', '/projects', '/projects/frise', '/univers', '/competences', '/CV', '/livre-d-or', '/now', '/terminal', '/nexiste-pas']) {
             await onglet.goto(base + chemin);
