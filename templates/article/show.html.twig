@@ -12,11 +12,14 @@
 {% endblock %}
 
 {% block body %}
+{% set contenu = article|loc('contenu')|markdown %}
+{% set titres = sommaire(contenu) %}
+{% set minutes = max(1, ((article|loc('contenu')|replace({"\n": ' '})|split(' ')|filter(mot => mot)|length) / 200)|round(0, 'ceil')) %}{# 200 mots par minute #}
 <article class="projet container py-5">
   <a class="projet-retour" href="{{ path('app_articles') }}">← {{ 'Tous les articles'|trans }}</a>
 
   <header class="projet-entete">
-    <p class="projet-groupe"><time datetime="{{ article.publieLe|date('Y-m-d') }}">{{ article.publieLe|format_date('long', locale: app.request.locale) }}</time></p>
+    <p class="projet-groupe"><time datetime="{{ article.publieLe|date('Y-m-d') }}">{{ article.publieLe|format_date('long', locale: app.request.locale) }}</time> · {{ '%minutes% min de lecture'|trans({'%minutes%': minutes}) }}</p>
     <h1 class="gradient fw-bold">{{ article|loc('titre') }}</h1>
     <p class="projet-chapo">{{ article|loc('resume') }}</p>
   </header>
@@ -27,8 +30,24 @@
   </figure>
   {% endif %}
 
+  {% if titres|length >= 3 %}
+  <nav class="article-sommaire" aria-labelledby="sommaire-titre">
+    <p id="sommaire-titre" class="article-sommaire-titre">{{ 'Sommaire'|trans }}</p>
+    <ol>
+      {% for id, titre in titres %}<li><a href="#{{ id }}">{{ titre }}</a></li>{% endfor %}
+    </ol>
+  </nav>
+  {% endif %}
+
   <div class="projet-texte article-texte">
-    {{ article|loc('contenu')|markdown }}
+    {{ contenu|raw }}{# déjà assaini par |markdown, qui échappe le HTML brut #}
   </div>
+
+  {% if precedent or suivant %}
+  <nav class="article-voisins" aria-label="{{ 'Autres articles'|trans }}">
+    {% if precedent %}<a class="article-voisin" href="{{ path('app_article', {slug: precedent.slug}) }}" rel="prev"><small>← {{ 'Article précédent'|trans }}</small>{{ precedent|loc('titre') }}</a>{% endif %}
+    {% if suivant %}<a class="article-voisin article-voisin--suivant" href="{{ path('app_article', {slug: suivant.slug}) }}" rel="next"><small>{{ 'Article suivant'|trans }} →</small>{{ suivant|loc('titre') }}</a>{% endif %}
+  </nav>
+  {% endif %}
 </article>
 {% endblock %}
