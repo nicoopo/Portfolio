@@ -66,6 +66,20 @@ const parcours = {
         assert.equal(await onglet.locator('.theme-toggle').evaluate((t) => Math.round(t.getBoundingClientRect().top)), 90);
     },
 
+    'Code Konami au doigt : glisser ↑ ↑ ↓ ↓ ← → ← →, toucher deux fois, et les météores tombent': async (onglet) => {
+        await onglet.emulateMedia({ reducedMotion: 'no-preference' });
+        await ouvrir(onglet, '/projects');
+        await onglet.evaluate(() => {
+            const geste = (dx, dy) => {
+                const toucher = (x, y) => [new Touch({ identifier: 1, target: document.body, clientX: x, clientY: y })];
+                document.body.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, touches: toucher(200, 300), changedTouches: toucher(200, 300) }));
+                document.body.dispatchEvent(new TouchEvent('touchend', { bubbles: true, touches: [], changedTouches: toucher(200 + dx, 300 + dy) }));
+            };
+            [[0, -100], [0, -100], [0, 100], [0, 100], [-100, 0], [100, 0], [-100, 0], [100, 0], [0, 0], [0, 0]].forEach(([dx, dy]) => geste(dx, dy));
+        });
+        await onglet.locator('canvas.pluie-meteores').waitFor({ state: 'attached' });
+    },
+
     'Aucune erreur JavaScript sur les pages principales': async (onglet) => {
         for (const chemin of ['/', '/cerveau', '/projects', '/projects/frise', '/univers', '/competences', '/CV', '/livre-d-or', '/now', '/terminal', '/nexiste-pas']) {
             await onglet.goto(base + chemin);

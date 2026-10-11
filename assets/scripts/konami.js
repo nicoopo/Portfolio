@@ -1,5 +1,6 @@
 /*
  * Easter egg : le code Konami (↑ ↑ ↓ ↓ ← → ← → B A) déclenche une pluie de météores ;
+ * sur écran tactile : glisser ↑ ↑ ↓ ↓ ← → ← →, puis toucher deux fois l'écran (B A) ;
  * les plus gros s'écrasent : explosion, onde de choc et secousse de la page.
  * Coupé avec le réglage « Effets spéciaux » ou les mouvements réduits.
  */
@@ -18,16 +19,33 @@ const GRAVITE = 300;          // chute des éclats, en px/s²
 const tapees = [];
 let enCours = false;
 
-document.addEventListener('keydown', (e) => {
-    if (e.target.closest?.('input, textarea, select, [contenteditable]')) return;
-    tapees.push(e.key.toLowerCase());
+const champ = (cible) => cible.closest?.('input, textarea, select, [contenteditable]');
+
+function saisir(touche) {
+    tapees.push(touche);
     if (tapees.length > 10) tapees.shift();
     if (tapees.join() !== CODE) return;
     tapees.length = 0;
     if (!lancable()) return;
     pluie();
     decouvrir('konami');
-});
+}
+
+document.addEventListener('keydown', (e) => { if (!champ(e.target)) saisir(e.key.toLowerCase()); });
+
+// Tactile : un glissement de plus de 30 px vaut une flèche, un simple toucher vaut B puis A
+let depart = null;
+document.addEventListener('touchstart', (e) => {
+    depart = e.touches.length === 1 && !champ(e.target) ? [e.touches[0].clientX, e.touches[0].clientY] : null;
+}, { passive: true });
+document.addEventListener('touchend', (e) => {
+    if (!depart) return;
+    const dx = e.changedTouches[0].clientX - depart[0], dy = e.changedTouches[0].clientY - depart[1];
+    depart = null;
+    if (Math.hypot(dx, dy) < 30) saisir(tapees.at(-1) === 'b' ? 'a' : 'b');
+    else if (Math.abs(dx) > Math.abs(dy)) saisir(dx > 0 ? 'arrowright' : 'arrowleft');
+    else saisir(dy > 0 ? 'arrowdown' : 'arrowup');
+}, { passive: true });
 
 // Récompense du carnet de découvertes : tout est trouvé
 document.addEventListener('decouvertes:toutes', () => { if (lancable()) pluie(); });
@@ -167,7 +185,7 @@ function onde(ctx, o) {
     ctx.stroke();
 }
 
-/** La page tremble un instant (l'animation passe devant le transform posé par page_transition.js). */
+/** La page tremble un instant. */
 function secousse() {
     const main = document.querySelector('main');
     if (!main) return;
