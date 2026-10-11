@@ -128,13 +128,23 @@ le dossier de travail et sa branche ne sont jamais touchés par un déploiement.
 Une seule fois, sur le serveur :
 
 1. `.env.local` : `APP_SECRET=...`, `POSTGRES_PASSWORD=...`, `MAILER_DSN=...` (SMTP du formulaire de contact ;
-   en dev les e-mails ne partent pas, ils sont visibles dans la barre de debug).
+   en dev les e-mails ne partent pas, ils sont visibles dans la barre de debug), `NTFY_TOPIC=<sujet long et secret>`
+   (alertes téléphone ; s'abonner à ce sujet dans l'appli ntfy).
 2. DNS (OVH) : `AAAA` de `nicolascataluna.fr` et `www.nicolascataluna.fr` vers l'IPv6 fixe de la machine.
 3. Box : pare-feu IPv6, n'ouvrir que les ports **80 et 443** vers la machine (80 sert au certificat et à la
    redirection vers HTTPS).
 4. Caddy : `sudo install -m 644 docker/caddy/Caddyfile /etc/frankenphp/Caddyfile && sudo systemctl reload frankenphp`
    (à refaire après chaque modification de `docker/caddy/Caddyfile`).
 5. Après le premier déploiement : `make prod-admin-create`.
+6. Tâches planifiées (`mkdir -p ~/cron-logs`, puis `crontab -e` en tant que `nicolas`), détaillées ci-dessous :
+
+   ```cron
+   15 3 * * *  cd ~/deploy/portfolio && bash scripts/sauvegarde-base.sh >> ~/cron-logs/portfolio-sauvegarde.log 2>&1
+   30 3 * * *  cd ~/deploy/portfolio && make prod-purge >> ~/cron-logs/portfolio-purge.log 2>&1
+   0 4 1 * *   cd ~/deploy/portfolio && bash scripts/test-restauration.sh >> ~/cron-logs/portfolio-restauration.log 2>&1
+   30 8 * * *  cd ~/deploy/portfolio && make prod-relances >> ~/cron-logs/portfolio-relances.log 2>&1
+   0 19 * * 0  cd ~/deploy/portfolio && make prod-bilan >> ~/cron-logs/portfolio-bilan.log 2>&1
+   ```
 
 ### Sauvegardes de la base
 
