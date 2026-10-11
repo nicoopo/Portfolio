@@ -27,8 +27,19 @@ function saisir(touche) {
     if (tapees.length > 10) tapees.shift();
     if (tapees.join() !== CODE) return;
     tapees.length = 0;
+    const dejaTrouve = preferences.decouvertes.includes('konami');
     decouvrir('konami'); // même sans effets : la notification confirme que le code est bon
     if (lancable()) pluie();
+    else if (dejaTrouve && !enCours) signalerEffetsCoupes(); // première fois : la notification de découverte suffit
+}
+
+/** Code bon mais pas de pluie possible : on le dit, sinon rien ne distingue un code raté d'effets coupés */
+function signalerEffetsCoupes() {
+    const message = document.getElementById('effetsCoupes');
+    if (!message) return;
+    message.hidden = false;
+    clearTimeout(message.timer);
+    message.timer = setTimeout(() => { message.hidden = true; }, 7000);
 }
 
 document.addEventListener('keydown', (e) => { if (!champ(e.target)) saisir(e.key.toLowerCase()); });
