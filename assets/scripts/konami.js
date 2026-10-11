@@ -19,11 +19,26 @@ const GRAVITE = 300;          // chute des éclats, en px/s²
 const tapees = [];
 let enCours = false;
 
+// shortcut: diagnostic temporaire du code au doigt sur iPhone (?konami-debug affiche les gestes reçus), à retirer une fois réglé
+const diagnostic = new URLSearchParams(location.search).has('konami-debug') && Object.assign(document.createElement('pre'), { ariaHidden: 'true' });
+const lignes = [];
+function trace(texte) {
+    if (!diagnostic) return;
+    lignes.push(texte);
+    diagnostic.textContent = lignes.slice(-14).join('\n');
+    if (!diagnostic.isConnected) {
+        Object.assign(diagnostic.style, { position: 'fixed', left: '8px', bottom: '8px', zIndex: 3000, margin: 0, padding: '6px 8px', maxWidth: '90vw',
+            font: '12px/1.35 monospace', color: '#0f0', background: 'rgba(0, 0, 0, 0.85)', borderRadius: '6px', pointerEvents: 'none', whiteSpace: 'pre-wrap' });
+        document.body.append(diagnostic);
+    }
+}
+
 const champ = (cible) => cible.closest?.('input, textarea, select, [contenteditable]');
 
 function saisir(touche) {
     tapees.push(touche);
     if (tapees.length > 10) tapees.shift();
+    trace(`  => ${touche.replace('arrow', '')}   [${tapees.map((t) => t.replace('arrow', '')[0]).join('')}]`);
     if (tapees.join() !== CODE) return;
     tapees.length = 0;
     decouvrir('konami'); // même sans effets : la notification confirme que le code est bon
@@ -37,11 +52,13 @@ let depart = null, dernier = null;
 document.addEventListener('touchstart', (e) => {
     depart = e.touches.length === 1 && !champ(e.target) ? [e.touches[0].clientX, e.touches[0].clientY] : null;
     dernier = depart;
+    trace(`start ${e.touches.length} doigt(s) ${depart ? depart.map(Math.round) : 'ignoré'}`);
 }, { passive: true });
 document.addEventListener('touchmove', (e) => { if (depart) dernier = [e.touches[0].clientX, e.touches[0].clientY]; }, { passive: true });
-document.addEventListener('touchend', (e) => geste([e.changedTouches[0].clientX, e.changedTouches[0].clientY], false), { passive: true });
+document.addEventListener('touchend', (e) => { trace(`end ${[e.changedTouches[0].clientX, e.changedTouches[0].clientY].map(Math.round)}`); geste([e.changedTouches[0].clientX, e.changedTouches[0].clientY], false); }, { passive: true });
 // Certains navigateurs mobiles annulent le toucher dès que la page défile : c'est alors forcément un glissement
-document.addEventListener('touchcancel', () => geste(dernier, true), { passive: true });
+document.addEventListener('touchcancel', () => { trace(`cancel ${dernier ? dernier.map(Math.round) : '-'}`); geste(dernier, true); }, { passive: true });
+if (diagnostic) document.addEventListener('DOMContentLoaded', () => trace('diagnostic prêt : fais les gestes'));
 
 function geste(fin, glissement) {
     if (!depart || !fin) return;
