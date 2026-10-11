@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Statistiques'|trans }} · {{ 'Univers de Nico'|trans }}{% endblock %}
+
+{% block description %}{{ 'Les visites du site, en toute transparence : sans cookie, sans adresse IP, seulement des totaux.'|trans }}{% endblock %}
+
+{% block body %}
+{% set mois = jours|reduce((somme, n) => somme + n, 0) %}
+{% set pic = max(1, max(jours)) %}
+<article class="projet container py-5">
+  <header class="projet-entete">
+    <h1 class="gradient fw-bold">{{ 'Statistiques'|trans }}</h1>
+    <p class="projet-chapo">{{ 'Les visites du site, en toute transparence : sans cookie, sans adresse IP, seulement des totaux.'|trans }}
+      <a href="{{ path('app_confidentialite') }}">{{ 'Confidentialité'|trans }}</a></p>
+  </header>
+
+  <div class="stats-chiffres">
+    <p><strong>{{ mois|format_number(locale: app.request.locale) }}</strong> {{ 'pages vues ces 30 derniers jours'|trans }}</p>
+    <p><strong>{{ total|format_number(locale: app.request.locale) }}</strong> {{ 'pages vues en tout'|trans }}{% if depuis %}, {{ 'depuis le'|trans }} {{ depuis|format_date('long', locale: app.request.locale) }}{% endif %}</p>
+  </div>
+
+  <h2 class="stats-titre">{{ '30 derniers jours'|trans }}</h2>
+  <ol class="stats-jours">
+    {% for jour, nombre in jours %}
+    <li style="--part: {{ (nombre / pic * 100)|round }}%" title="{{ jour|format_date('medium', locale: app.request.locale) }} : {{ nombre }}">
+      <span class="visually-hidden">{{ jour|format_date('medium', locale: app.request.locale) }} : {{ nombre }}</span>
+    </li>
+    {% endfor %}
+  </ol>
+
+  <div class="stats-listes">
+    <section>
+      <h2 class="stats-titre">{{ 'Pages les plus vues'|trans }}</h2>
+      <ol>
+        {% for chemin, nombre in pages %}<li><a href="{{ app.request.locale == 'fr' ? chemin : '/' ~ app.request.locale ~ (chemin == '/' ? '' : chemin) }}">{{ chemin }}</a> <span>{{ nombre }}</span></li>
+        {% else %}<li>{{ 'Pas encore de visite.'|trans }}</li>{% endfor %}
+      </ol>
+    </section>
+    <section>
+      <h2 class="stats-titre">{{ 'Langues'|trans }}</h2>
+      <ul>
+        {% for langue, nombre in langues %}<li>{{ langue|language_name(app.request.locale)|capitalize }} <span>{{ (nombre / max(1, mois) * 100)|round }} %</span></li>
+        {% else %}<li>{{ 'Pas encore de visite.'|trans }}</li>{% endfor %}
+      </ul>
+    </section>
+  </div>
+</article>
+{% endblock %}

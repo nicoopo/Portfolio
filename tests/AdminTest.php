@@ -131,8 +131,19 @@ final class AdminTest extends WebTestCase
         $client->request('GET', '/articles/mon-brouillon');
         self::assertResponseStatusCodeSame(404);
 
+        // Aperçu depuis l'admin : rendu comme sur le site, signalé comme brouillon ; fermé aux visiteurs
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        $entityManager->remove($entityManager->getRepository(Article::class)->findOneBy(['slug' => 'mon-brouillon']));
+        $brouillon = $entityManager->getRepository(Article::class)->findOneBy(['slug' => 'mon-brouillon']);
+        $client->request('GET', '/admin/article/'.$brouillon->getId().'/apercu');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Mon brouillon');
+        self::assertSelectorTextContains('.article-texte h2', 'Plan');
+        self::assertSelectorTextContains('.article-apercu', 'brouillon');
+        $client->request('GET', '/logout');
+        $client->request('GET', '/admin/article/'.$brouillon->getId().'/apercu');
+        self::assertResponseRedirects('/login');
+
+        $entityManager->remove($entityManager->find(Article::class, $brouillon->getId()));
         $entityManager->flush();
     }
 

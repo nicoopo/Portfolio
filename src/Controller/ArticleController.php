@@ -29,8 +29,14 @@ final class ArticleController extends AbstractController
     #[Route('/articles/{slug}', name: 'app_article', requirements: ['slug' => '[a-z0-9-]+'])]
     public function show(string $slug, ArticleRepository $articles): Response
     {
+        $article = $articles->findPublie($slug) ?? throw $this->createNotFoundException();
+        $publies = $articles->findPublies(); // le plus récent d'abord
+        $rang = array_search($article, $publies, true);
+
         return $this->render('article/show.html.twig', [
-            'article' => $articles->findPublie($slug) ?? throw $this->createNotFoundException(),
+            'article' => $article,
+            'precedent' => $publies[$rang + 1] ?? null,
+            'suivant' => $publies[$rang - 1] ?? null,
         ]);
     }
 }
