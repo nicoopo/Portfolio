@@ -4,6 +4,9 @@ namespace App\Controller\Admin;
 
 use App\Entity\Article;
 use App\Form\TraductionsField;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
@@ -11,6 +14,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Constraints\Image;
 
 final class ArticleCrudController extends AbstractCrudController
@@ -26,6 +30,21 @@ final class ArticleCrudController extends AbstractCrudController
             ->setEntityLabelInSingular('Article')
             ->setEntityLabelInPlural('Articles')
             ->setDefaultSort(['publieLe' => 'DESC']);
+    }
+
+    public function configureActions(Actions $actions): Actions
+    {
+        $apercu = Action::new('apercu', 'Aperçu', 'fa fa-eye')->linkToCrudAction('apercu')
+            ->setHtmlAttributes(['target' => '_blank']);
+
+        return $actions->add(Crud::PAGE_INDEX, $apercu)->add(Crud::PAGE_EDIT, $apercu);
+    }
+
+    /** L'article tel qu'il s'affichera sur le site, brouillon ou programmé compris (dernière version enregistrée) */
+    #[AdminRoute('/{id}/apercu')]
+    public function apercu(Article $article): Response
+    {
+        return $this->render('article/show.html.twig', ['article' => $article, 'apercu' => true, 'precedent' => null, 'suivant' => null]);
     }
 
     public function configureFields(string $pageName): iterable
