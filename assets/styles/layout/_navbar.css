@@ -12,6 +12,9 @@
   box-shadow: 0 0 25px rgba(127, 90, 240, 0.25), 0 0 40px rgba(0, 212, 255, 0.15);
   transition: all 0.4s ease;
   animation: float-nav 6s ease-in-out infinite alternate;
+  /* Le doigt ne fait pas défiler la page depuis la barre : le code Konami au doigt s'y fait d'un trait
+     (sur iPhone, une page qui défile encore sur son élan ne reçoit pas le geste suivant) */
+  touch-action: none;
 }
 
 /* Mouvements réduits (réglage du système) : le décor ne bouge plus en boucle */
