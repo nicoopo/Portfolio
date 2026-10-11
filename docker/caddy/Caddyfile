@@ -17,6 +17,9 @@ nicolascataluna.fr {
 	reverse_proxy 127.0.0.1:8081
 }
 
+# Autres services de la machine (ex. ~/outils/jellyfin), chacun installe son fichier dans /etc/frankenphp/sites/
+import sites/*.caddy
+
 www.nicolascataluna.fr {
 	redir https://nicolascataluna.fr{uri} permanent
 }
