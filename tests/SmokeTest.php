@@ -377,7 +377,7 @@ final class SmokeTest extends WebTestCase
 
         // Chaque langue a sa lettre, et le PDF existe bien
         foreach (['es' => 'carta-de-presentacion', 'de' => 'anschreiben', 'it' => 'lettera-di-presentazione', 'pt' => 'carta-de-apresentacao'] as $langue => $fichier) {
-            $href = $client->request('GET', "/$langue/univers")->filter('a[download]')->attr('href');
+            $href = $client->request('GET', "/$langue/univers")->filter('a[download$=".pdf"]')->attr('href');
             self::assertStringContainsString($fichier, $href, $langue);
             $client->request('GET', $href);
             self::assertResponseIsSuccessful($href);

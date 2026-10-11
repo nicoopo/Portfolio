@@ -12,12 +12,12 @@ const sansTrouNoir = () => reducedMotion() || !preferences.transitions;
 const DURATION_MS = 600;
 const ARRIVED_KEY = 'trou-noir'; // posé avant de partir (nom de l'effet) : la page suivante arrive avec le même
 
-/** Pour chaque effet : la page qui part, la page qui arrive, et le voile plein écran (_base.css) */
+/** Pour chaque effet : la page qui part (l'arrivée est dans _base.css, @keyframes arrivee-*) et le voile plein écran */
 const EFFETS = {
-    'trou-noir': { depart: 'scale(0.05) rotate(30deg)', filtre: 'blur(4px)', arrivee: 'scale(0.6) rotate(-6deg)' },
-    teleportation: { depart: 'scaleX(1.25) scaleY(0.004)', filtre: 'brightness(3)', arrivee: 'scaleX(1.2) scaleY(0.02)' },
-    distorsion: { depart: 'skewX(28deg) scale(1.08)', filtre: 'blur(6px) hue-rotate(160deg) saturate(3)', arrivee: 'skewX(-18deg) scale(0.96)' },
-    lumiere: { depart: 'scale(2.6)', filtre: 'blur(10px)', arrivee: 'scale(0.35)' },
+    'trou-noir': { depart: 'scale(0.05) rotate(30deg)', filtre: 'blur(4px)' },
+    teleportation: { depart: 'scaleX(1.25) scaleY(0.004)', filtre: 'brightness(3)' },
+    distorsion: { depart: 'skewX(28deg) scale(1.08)', filtre: 'blur(6px) hue-rotate(160deg) saturate(3)' },
+    lumiere: { depart: 'scale(2.6)', filtre: 'blur(10px)' },
 };
 
 const storage = (action) => { try { return action(sessionStorage); } catch { return null; } };
@@ -34,26 +34,14 @@ function voile(effet, visible) {
     return element;
 }
 
-// Arrivée
+// Arrivée : la page s'anime en CSS (_base.css, html[data-arrivee] posé dans base.html.twig) ; ici, le voile qui se replie
 document.addEventListener('DOMContentLoaded', () => {
-    const main = document.querySelector('main');
-    if (!main) return;
-    const nom = storage((s) => s.getItem(ARRIVED_KEY));
-    const effet = !sansTrouNoir() && EFFETS[nom] ? nom : null;
-    storage((s) => s.removeItem(ARRIVED_KEY));
-
-    main.style.opacity = 0;
-    main.style.transformOrigin = `50% ${window.innerHeight / 2 - main.offsetTop}px`;
-    main.style.transform = effet ? EFFETS[effet].arrivee : 'translateY(30px)';
-    main.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    const element = effet && voile(effet, true);
+    const effet = document.documentElement.dataset.arrivee;
+    if (!EFFETS[effet] || sansTrouNoir()) return;
+    const element = voile(effet, true);
     requestAnimationFrame(() => requestAnimationFrame(() => {
-        main.style.opacity = 1;
-        main.style.transform = 'translateY(0)';
-        if (element) {
-            element.classList.remove('visible');
-            element.addEventListener('transitionend', () => element.remove(), { once: true });
-        }
+        element.classList.remove('visible');
+        element.addEventListener('transitionend', () => element.remove(), { once: true });
     }));
 });
 
@@ -90,8 +78,5 @@ window.addEventListener('pageshow', (e) => {
     document.querySelectorAll('.transition-voile').forEach((element) => element.remove());
     storage((s) => s.removeItem(ARRIVED_KEY));
     const main = document.querySelector('main');
-    if (main) {
-        main.style.transition = 'none';
-        Object.assign(main.style, { transform: 'translateY(0)', opacity: 1, filter: '' });
-    }
+    if (main) Object.assign(main.style, { transition: 'none', transform: '', opacity: '', filter: '' });
 });
