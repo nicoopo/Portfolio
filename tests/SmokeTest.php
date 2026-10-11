@@ -197,6 +197,41 @@ final class SmokeTest extends WebTestCase
         }
     }
 
+    /** Page d'un article : temps de lecture, sommaire (3 titres et plus) vers les ids des titres, article précédent et suivant */
+    public function testArticleSommaireEtVoisins(): void
+    {
+        $client = static::createClient(server: self::NAVIGATEUR_FRANCAIS);
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        // Il y a 20 ans : plus anciens que tout vrai article, donc voisins l'un de l'autre
+        $ancien = (new Article())->setSlug('test-ancien')->setTitre('Ancien')->setResume('Résumé')->setPublieLe(new \DateTimeImmutable('-20 years'))
+            ->setContenu("## Bug n°1 : la page\n\nTexte.\n\n## Deuxième partie\n\nTexte.\n\n# Troisième `partie`\n\nTexte.");
+        $recent = (new Article())->setSlug('test-recent')->setTitre('Récent')->setResume('Résumé')->setPublieLe(new \DateTimeImmutable('-20 years +1 day'))
+            ->setContenu("## Une seule partie\n\nTexte.");
+        array_map($entityManager->persist(...), [$ancien, $recent]);
+        $entityManager->flush();
+
+        try {
+            $page = $client->request('GET', '/articles/test-ancien');
+            self::assertSelectorTextContains('.projet-groupe', '1 min de lecture');
+            $liens = $page->filter('.article-sommaire a');
+            self::assertSame(['Bug n°1 : la page', 'Deuxième partie', 'Troisième partie'], $liens->each(fn ($lien) => $lien->text()));
+            foreach ($liens->extract(['href']) as $href) {
+                self::assertCount(1, $page->filter('.article-texte h2'.$href), $href);
+            }
+            self::assertSame('/articles/test-recent', $page->filter('.article-voisins a[rel="next"]')->attr('href'));
+            self::assertCount(0, $page->filter('.article-voisins a[rel="prev"]'));
+
+            $page = $client->request('GET', '/articles/test-recent');
+            self::assertCount(0, $page->filter('.article-sommaire'));
+            self::assertSame('/articles/test-ancien', $page->filter('.article-voisins a[rel="prev"]')->attr('href'));
+        } finally {
+            foreach ([$ancien, $recent] as $a) {
+                $entityManager->remove($entityManager->find(Article::class, $a->getId()));
+            }
+            $entityManager->flush();
+        }
+    }
+
     /** Palette de commandes (Ctrl+K) : bouton et fenêtre sur chaque page ; pages, compétences et projets cherchables, dans la langue de l'adresse */
     public function testLaPaletteDeCommandesCherchePartout(): void
     {

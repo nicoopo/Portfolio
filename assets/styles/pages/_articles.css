@@ -58,3 +58,66 @@
   max-width: 100%;
   border-radius: 12px;
 }
+
+/* Lien vers un titre (#id) : pas caché sous la barre de navigation fixe */
+.article-texte :is(h2, h3, h4) {
+  scroll-margin-top: calc(var(--navbar-height) + 1rem);
+}
+
+/* Sommaire (3 titres et plus) */
+.article-sommaire {
+  max-width: 760px;
+  margin: 0 0 2rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(127, 90, 240, 0.35);
+  border-radius: 12px;
+}
+
+.article-sommaire-titre {
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.article-sommaire ol {
+  margin: 0;
+  line-height: 1.8;
+}
+
+.article-sommaire a {
+  color: var(--color-secondary);
+}
+
+/* Article précédent / suivant */
+.article-voisins {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  max-width: 760px;
+  margin-top: 3rem;
+}
+
+.article-voisin {
+  flex: 1 1 15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(127, 90, 240, 0.35);
+  border-radius: 12px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.article-voisin:hover,
+.article-voisin:focus-visible {
+  border-color: var(--color-secondary);
+}
+
+.article-voisin small {
+  color: var(--color-text-light);
+}
+
+.article-voisin--suivant {
+  text-align: right;
+}
