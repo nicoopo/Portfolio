@@ -202,6 +202,11 @@
         <span data-bravo hidden>— {{ 'tout est trouvé, bravo !'|trans }}</span> ✦
     </p>
 
+    {# Code Konami reconnu alors que les effets sont coupés (konami.js) #}
+    <p id="effetsCoupes" class="decouverte-toast" role="status" hidden>
+        {{ 'Code reconnu ! Mais les effets sont coupés : activez-les dans les réglages ⚙, ou désactivez « Réduire les animations » sur votre appareil.'|trans }}
+    </p>
+
     {# Proposé par qualite_auto.js quand le site rame #}
     <div id="qualiteAuto" class="qualite-auto" role="status" hidden>
         <p>{{ "Le site a l'air de ramer sur cet appareil. Passer en qualité basse ?"|trans }}</p>
