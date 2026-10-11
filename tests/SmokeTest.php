@@ -15,7 +15,7 @@ final class SmokeTest extends WebTestCase
 
     public static function pages(): iterable
     {
-        foreach (['/', '/projects', '/projects/portfolio', '/projects/frise', '/articles', '/now', '/uses', '/livre-d-or', '/terminal', '/competences', '/competences/comparer', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
+        foreach (['/', '/projects', '/projects/portfolio', '/projects/frise', '/articles', '/now', '/uses', '/stats', '/livre-d-or', '/terminal', '/competences', '/competences/comparer', '/CV', '/contact', '/univers', '/cerveau', '/mentions-legales', '/confidentialite'] as $url) {
             yield $url => [$url];
             foreach (['en', 'es', 'de', 'it', 'pt'] as $langue) {
                 yield "/$langue$url" => ["/$langue$url"];
@@ -194,6 +194,31 @@ final class SmokeTest extends WebTestCase
                 $entityManager->remove($entityManager->find(Article::class, $a->getId()));
             }
             $entityManager->flush();
+        }
+    }
+
+    /** /stats : totaux de visite_jour sur 30 jours, pages les plus vues ; jamais les provenances */
+    public function testLesStatistiquesPubliquesMontrentLesTotaux(): void
+    {
+        $client = static::createClient(server: self::NAVIGATEUR_FRANCAIS);
+        $connection = self::getContainer()->get(Connection::class);
+        $connection->executeStatement("DELETE FROM visite_jour");
+        $connection->executeStatement("INSERT INTO visite_jour (jour, chemin, langue, source, nombre) VALUES
+            (CURRENT_DATE, '/projects', 'fr', 'entreprise-secrete.example', 7),
+            (CURRENT_DATE - 3, '/cerveau', 'en', 'direct', 3),
+            (CURRENT_DATE - 40, '/ancienne', 'fr', 'direct', 100)");
+
+        try {
+            $page = $client->request('GET', '/stats');
+            self::assertResponseIsSuccessful();
+            self::assertSelectorTextContains('.stats-chiffres', '10 pages vues ces 30 derniers jours');
+            self::assertSelectorTextContains('.stats-chiffres', '110 pages vues en tout');
+            self::assertCount(30, $page->filter('.stats-jours li'));
+            self::assertSame(['/projects', '/cerveau'], $page->filter('.stats-listes a')->each(fn ($lien) => $lien->text()));
+            self::assertSame('/en/cerveau', $client->request('GET', '/en/stats')->filter('.stats-listes a')->eq(1)->attr('href'));
+            self::assertStringNotContainsString('entreprise-secrete', $client->getResponse()->getContent());
+        } finally {
+            $connection->executeStatement("DELETE FROM visite_jour");
         }
     }
 

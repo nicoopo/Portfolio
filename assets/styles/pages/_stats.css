@@ -1,0 +1,64 @@
+/* Statistiques publiques (/stats) : la page reprend les classes de la page Projets */
+
+.stats-chiffres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 3rem;
+  margin-bottom: 2.5rem;
+  color: var(--color-text-light);
+}
+
+.stats-chiffres strong {
+  display: block;
+  font-size: 2.5rem;
+  line-height: 1.1;
+  color: var(--color-text);
+}
+
+.stats-titre {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* Une barre par jour, hauteur relative au jour le plus visité (--part) */
+.stats-jours {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 160px;
+  margin: 0 0 2.5rem;
+  padding: 0 0 2px;
+  list-style: none;
+  border-bottom: 1px solid rgba(127, 90, 240, 0.35);
+}
+
+.stats-jours li {
+  flex: 1;
+  height: max(var(--part), 2px);
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(to top, #7f5af0, #00d4ff);
+}
+
+.stats-listes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 2rem;
+}
+
+.stats-listes :is(ol, ul) {
+  margin: 0;
+  padding-left: 1.25rem;
+  line-height: 2;
+  color: var(--color-text-light);
+}
+
+.stats-listes li span {
+  float: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-listes a {
+  color: var(--color-secondary);
+}
