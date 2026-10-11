@@ -120,9 +120,9 @@ Internet ──IPv6:443──▶ Caddy (FrankenPHP, sur la machine) ──▶ 12
          (certificat Let's Encrypt automatique, HTTP → HTTPS, www → domaine nu, en-têtes de sécurité)
 ```
 
-Un push sur `master` déploie (`.github/workflows/deploy-prod.yml` → `scripts/deploy-prod.sh` : build, redémarrage,
+Un push sur `main` déploie (`.github/workflows/deploy-prod.yml` → `scripts/deploy-prod.sh` : build, redémarrage,
 migrations). La prod a son propre projet Docker (`portfolio_prod`) et sa propre base (volume `db_data_prod`).
-Le code de prod est déployé dans un git worktree séparé (`~/deploy/portfolio`, HEAD détachée sur `origin/master`) :
+Le code de prod est déployé dans un git worktree séparé (`~/deploy/portfolio`, HEAD détachée sur `origin/main`) :
 le dossier de travail et sa branche ne sont jamais touchés par un déploiement. Son `.env.local` est un lien vers celui du dépôt.
 
 Une seule fois, sur le serveur :
