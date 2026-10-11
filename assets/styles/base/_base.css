@@ -17,11 +17,29 @@ body {
   flex-direction: column;
 }
 
+/* Arrivée sur la page (page_transition.js) : animée dès le premier affichage, sans transform qui reste ensuite
+   (il ferait défiler les éléments position: fixed de la page) ; html[data-arrivee] : effet de la page précédente */
 main {
   flex: 1 0 auto;
-  opacity: 1;
-  transform: translateY(0);
   padding-top: var(--navbar-height);
+  transform-origin: 50% 50vh;
+  animation: arrivee 0.6s ease backwards;
+}
+
+@keyframes arrivee { from { opacity: 0; transform: translateY(30px); } }
+@keyframes arrivee-trou-noir { from { opacity: 0; transform: scale(0.6) rotate(-6deg); } }
+@keyframes arrivee-teleportation { from { opacity: 0; transform: scaleX(1.2) scaleY(0.02); } }
+@keyframes arrivee-distorsion { from { opacity: 0; transform: skewX(-18deg) scale(0.96); } }
+@keyframes arrivee-lumiere { from { opacity: 0; transform: scale(0.35); } }
+@keyframes arrivee-fondu { from { opacity: 0; } }
+
+html[data-arrivee="trou-noir"] main { animation-name: arrivee-trou-noir; }
+html[data-arrivee="teleportation"] main { animation-name: arrivee-teleportation; }
+html[data-arrivee="distorsion"] main { animation-name: arrivee-distorsion; }
+html[data-arrivee="lumiere"] main { animation-name: arrivee-lumiere; }
+
+@media (prefers-reduced-motion: reduce) {
+  main, html[data-arrivee] main { animation-name: arrivee-fondu; }
 }
 
 span.gradient,
