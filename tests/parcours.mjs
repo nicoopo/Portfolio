@@ -70,12 +70,15 @@ const parcours = {
         await onglet.emulateMedia({ reducedMotion: 'no-preference' });
         await ouvrir(onglet, '/projects');
         await onglet.evaluate(() => {
-            const geste = (dx, dy) => {
+            // Un glissement sur deux est annulé (touchcancel) comme quand le navigateur fait défiler la page
+            const geste = ([dx, dy], i) => {
                 const toucher = (x, y) => [new Touch({ identifier: 1, target: document.body, clientX: x, clientY: y })];
+                const fin = dx || dy ? (i % 2 ? 'touchcancel' : 'touchend') : 'touchend';
                 document.body.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, touches: toucher(200, 300), changedTouches: toucher(200, 300) }));
-                document.body.dispatchEvent(new TouchEvent('touchend', { bubbles: true, touches: [], changedTouches: toucher(200 + dx, 300 + dy) }));
+                if (dx || dy) document.body.dispatchEvent(new TouchEvent('touchmove', { bubbles: true, touches: toucher(200 + dx / 5, 300 + dy / 5), changedTouches: toucher(200 + dx / 5, 300 + dy / 5) }));
+                document.body.dispatchEvent(new TouchEvent(fin, { bubbles: true, touches: [], changedTouches: toucher(200 + dx, 300 + dy) }));
             };
-            [[0, -100], [0, -100], [0, 100], [0, 100], [-100, 0], [100, 0], [-100, 0], [100, 0], [0, 0], [0, 0]].forEach(([dx, dy]) => geste(dx, dy));
+            [[0, -100], [0, -100], [0, 100], [0, 100], [-100, 0], [100, 0], [-100, 0], [100, 0], [0, 0], [0, 0]].forEach(geste);
         });
         await onglet.locator('canvas.pluie-meteores').waitFor({ state: 'attached' });
     },

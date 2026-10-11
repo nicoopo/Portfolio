@@ -26,26 +26,30 @@ function saisir(touche) {
     if (tapees.length > 10) tapees.shift();
     if (tapees.join() !== CODE) return;
     tapees.length = 0;
-    if (!lancable()) return;
-    pluie();
-    decouvrir('konami');
+    decouvrir('konami'); // même sans effets : la notification confirme que le code est bon
+    if (lancable()) pluie();
 }
 
 document.addEventListener('keydown', (e) => { if (!champ(e.target)) saisir(e.key.toLowerCase()); });
 
-// Tactile : un glissement de plus de 30 px vaut une flèche, un simple toucher vaut B puis A
-let depart = null;
+// Tactile : un glissement vaut une flèche, un simple toucher vaut B puis A
+let depart = null, dernier = null;
 document.addEventListener('touchstart', (e) => {
     depart = e.touches.length === 1 && !champ(e.target) ? [e.touches[0].clientX, e.touches[0].clientY] : null;
+    dernier = depart;
 }, { passive: true });
-document.addEventListener('touchend', (e) => {
-    if (!depart) return;
-    const dx = e.changedTouches[0].clientX - depart[0], dy = e.changedTouches[0].clientY - depart[1];
+document.addEventListener('touchmove', (e) => { if (depart) dernier = [e.touches[0].clientX, e.touches[0].clientY]; }, { passive: true });
+document.addEventListener('touchend', (e) => geste([e.changedTouches[0].clientX, e.changedTouches[0].clientY], false), { passive: true });
+// Certains navigateurs mobiles annulent le toucher dès que la page défile : c'est alors forcément un glissement
+document.addEventListener('touchcancel', () => geste(dernier, true), { passive: true });
+
+function geste(fin, glissement) {
+    if (!depart || !fin) return;
+    const dx = fin[0] - depart[0], dy = fin[1] - depart[1];
     depart = null;
-    if (Math.hypot(dx, dy) < 30) saisir(tapees.at(-1) === 'b' ? 'a' : 'b');
-    else if (Math.abs(dx) > Math.abs(dy)) saisir(dx > 0 ? 'arrowright' : 'arrowleft');
-    else saisir(dy > 0 ? 'arrowdown' : 'arrowup');
-}, { passive: true });
+    if (!glissement && Math.hypot(dx, dy) < 30) saisir(tapees.at(-1) === 'b' ? 'a' : 'b');
+    else if (dx || dy) saisir(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'arrowright' : 'arrowleft') : (dy > 0 ? 'arrowdown' : 'arrowup'));
+}
 
 // Récompense du carnet de découvertes : tout est trouvé
 document.addEventListener('decouvertes:toutes', () => { if (lancable()) pluie(); });
