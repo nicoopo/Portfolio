@@ -1,21 +1,28 @@
 /* stimulusFetch: 'lazy' */
 import { Controller } from '@hotwired/stimulus';
 import { createBlackHole, fitCanvas, reducedMotion } from '../scripts/black_hole.js';
+import { createBlackHoleGL } from '../scripts/black_hole_gl.js';
+import { basseQualite } from '../scripts/preferences.js';
 
 const SPEED = 0.1; // tour d'orbite, en radians par seconde
 
 /**
  * Page projets : les projets tournent autour d'un trou noir. Ceux de l'arrière passent
  * derrière l'ombre, ceux de devant par-dessus ; l'orbite s'arrête au survol.
+ * Trou noir en shader (black_hole_gl.js) ; en qualité basse ou sans WebGL, sa version 2D.
  */
 export default class extends Controller {
     static targets = ['canvas', 'projet'];
 
     connect() {
-        this.hole = createBlackHole({ particles: 1100 });
+        this.gl = basseQualite() ? null : createBlackHoleGL(this.canvasTarget);
+        this.hole = this.gl ? null : createBlackHole({ particles: 1100 });
         this.phase = 0;
         this.speed = SPEED;
-        this.resize = () => { this.ctx = fitCanvas(this.canvasTarget); this.draw(0); };
+        this.resize = () => {
+            if (this.gl) this.gl.resize(); else this.ctx = fitCanvas(this.canvasTarget);
+            this.draw(0);
+        };
         this.resize();
         window.addEventListener('resize', this.resize);
         // Survol : l'orbite s'arrête doucement, pour viser le projet
@@ -36,6 +43,7 @@ export default class extends Controller {
     disconnect() {
         cancelAnimationFrame(this.frame);
         window.removeEventListener('resize', this.resize);
+        this.gl?.destroy();
     }
 
     draw(dt) {
@@ -44,8 +52,13 @@ export default class extends Controller {
         this.speed += ((this.hovered ? 0 : SPEED) - this.speed) * Math.min(dt * 4, 1);
         this.phase += this.speed * dt;
 
-        this.ctx.clearRect(0, 0, w, h);
-        this.hole.draw(this.ctx, x, y, r, dt * (0.3 + 0.7 * this.speed / SPEED));
+        const holeDt = dt * (0.3 + 0.7 * this.speed / SPEED);
+        if (this.gl) {
+            this.gl.draw(x, y, r, holeDt);
+        } else {
+            this.ctx.clearRect(0, 0, w, h);
+            this.hole.draw(this.ctx, x, y, r, holeDt);
+        }
 
         // Deux anneaux en alternance, pour que les vignettes se chevauchent moins
         const n = this.projetTargets.length;
