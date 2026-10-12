@@ -95,6 +95,9 @@ let echecs = 0;
 for (const [nom, test] of Object.entries(parcours)) {
     // fr-FR : sinon / redirige vers /en/ ; mouvements réduits : pas d'attente d'animation
     const contexte = await navigateur.newContext({ locale: 'fr-FR', reducedMotion: 'reduce' });
+    // Pas de carte graphique en CI : qualité basse, comme le site la choisit pour un tel visiteur (preferences.js) ;
+    // sinon le shader du trou noir de /projects gèle la page au-delà des délais
+    await contexte.addInitScript(() => localStorage.setItem('preferences', JSON.stringify({ qualite: 'basse' })));
     const onglet = await contexte.newPage();
     onglet.setDefaultTimeout(10_000);
     onglet.on('pageerror', (e) => erreursJs.push(`${onglet.url()} : ${e.message}`));
