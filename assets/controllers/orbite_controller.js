@@ -5,6 +5,7 @@ import { createBlackHoleGL } from '../scripts/black_hole_gl.js';
 import { basseQualite } from '../scripts/preferences.js';
 
 const SPEED = 0.1; // tour d'orbite, en radians par seconde
+const TILT = 0.2;  // inclinaison de la vue sur le disque du trou noir (shader), en radians ; la souris la fait varier
 
 /**
  * Page projets : les projets tournent autour d'un trou noir. Ceux de l'arrière passent
@@ -28,7 +29,14 @@ export default class extends Controller {
         // Survol : l'orbite s'arrête doucement, pour viser le projet
         this.hovered = false;
         this.element.addEventListener('pointerover', (e) => { this.hovered = !!e.target.closest('.orbite-projet'); });
-        this.element.addEventListener('pointerleave', () => { this.hovered = false; });
+        this.element.addEventListener('pointerleave', () => { this.hovered = false; this.targetTilt = TILT; });
+        // Souris en haut : on voit le disque un peu plus par-dessus ; en bas, plus par la tranche
+        this.tilt = this.targetTilt = TILT;
+        this.element.addEventListener('pointermove', (e) => {
+            const box = this.element.getBoundingClientRect();
+            // Pas trop à plat : vus par la tranche, les grains s'étireraient en traits
+            this.targetTilt = Math.max(TILT + (0.5 - (e.clientY - box.top) / box.height) * 0.3, 0.1);
+        });
 
         if (reducedMotion()) return;
         let last = performance.now();
@@ -54,7 +62,8 @@ export default class extends Controller {
 
         const holeDt = dt * (0.3 + 0.7 * this.speed / SPEED);
         if (this.gl) {
-            this.gl.draw(x, y, r, holeDt);
+            this.tilt += (this.targetTilt - this.tilt) * Math.min(dt * 3, 1);
+            this.gl.draw(x, y, r, holeDt, this.tilt);
         } else {
             this.ctx.clearRect(0, 0, w, h);
             this.hole.draw(this.ctx, x, y, r, holeDt);

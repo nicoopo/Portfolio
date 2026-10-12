@@ -47,13 +47,13 @@ float shift(vec3 p, vec3 dir) {
 
 // Lumière du disque là où le rayon le traverse ; dir = sens du rayon (de la caméra vers le disque).
 // Comme la version 2D : des grains de couleur qui tournent (Kepler : l'intérieur plus vite), sur une bande pâle ;
-// grainy (0 → 1) : sous l'ombre, la bande seule, lisse et plus vive (les grains y faisaient artificiel)
+// grainy (0 → 1) : sous l'ombre, la bande seule, lisse (les grains y faisaient artificiel)
 vec4 disk(vec3 hit, vec3 dir, float grainy) {
     float r = length(hit.xz);
     if (r < INNER || r > OUTER) return vec4(0.0);
     float t = (r - INNER) / (OUTER - INNER);
     float profile = smoothstep(INNER, INNER + 0.3, r) * pow(INNER / r, 2.0) * (1.0 - smoothstep(0.6, 1.0, t));
-    vec3 colour = palette(t) * profile * mix(1.4, 0.5, grainy);
+    vec3 colour = palette(t) * profile * mix(1.0, 0.5, grainy);
     float cover = profile * mix(0.8, 0.3, grainy);
     if (grainy < 0.01) return vec4(colour * pow(shift(hit, dir), 2.0), cover);
 
@@ -73,8 +73,11 @@ vec4 disk(vec3 hit, vec3 dir, float grainy) {
         // Distance à peu près telle qu'on la voit (le disque est vu presque par la tranche) : des points presque ronds à l'écran
         vec2 delta = hit.xz - centre;
         float size = 0.03 + 0.035 * hash(id + 4.1);
-        float spot = 1.0 - smoothstep(0.3, 1.0, length(vec2(delta.x, delta.y * sin(uTilt) * 2.0)) / size);
-        colour += palette(clamp((length(centre) - INNER) / (OUTER - INNER) + (hash(id + 5.9) - 0.5) * 0.25, 0.0, 1.0)) * spot * 1.4 * grainy;
+        float seen = length(vec2(delta.x, delta.y * sin(uTilt) * 2.0)) / size;
+        // Cœur net et petite lueur autour ; chaque grain scintille à son rythme
+        float spot = 1.0 - smoothstep(0.3, 1.0, seen) + 0.3 * exp(-seen * 0.9);
+        float twinkle = 0.6 + 0.4 * sin(uTime * (1.5 + 3.0 * hash(id + 8.3)) + 6.28 * hash(id + 9.7));
+        colour += palette(clamp((length(centre) - INNER) / (OUTER - INNER) + (hash(id + 5.9) - 0.5) * 0.25, 0.0, 1.0)) * spot * twinkle * 1.4 * grainy;
         cover += spot * 0.8 * grainy;
     }
     return vec4(colour * pow(shift(hit, dir), 2.0), clamp(cover, 0.0, 1.0));
@@ -144,9 +147,10 @@ void main() {
 
 /**
  * Trou noir WebGL dans `canvas`, ou null si le navigateur n'a pas WebGL.
- * resize() suit la taille affichée ; draw(x, y, r, dt) : centre et rayon de l'ombre en pixels CSS ; destroy() à la fin.
+ * resize() suit la taille affichée ; draw(x, y, r, dt, tilt) : centre et rayon de l'ombre en pixels CSS, inclinaison
+ * de la vue en radians (au-dessus du disque) ; destroy() à la fin.
  */
-export function createBlackHoleGL(canvas, { tilt = 0.2 } = {}) {
+export function createBlackHoleGL(canvas) {
     const gl = canvas.getContext('webgl', { premultipliedAlpha: true, antialias: false });
     if (!gl) return null;
     const program = link(gl);
@@ -159,7 +163,6 @@ export function createBlackHoleGL(canvas, { tilt = 0.2 } = {}) {
     gl.enableVertexAttribArray(position);
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
     const u = Object.fromEntries(['uCenter', 'uRadius', 'uTime', 'uTilt'].map((n) => [n, gl.getUniformLocation(program, n)]));
-    gl.uniform1f(u.uTilt, tilt);
 
     // Le shader suit des centaines de pas par pixel : densité 1, net sans faire chauffer la carte
     let ratio = 1, time = 0;
@@ -170,11 +173,12 @@ export function createBlackHoleGL(canvas, { tilt = 0.2 } = {}) {
             canvas.height = Math.round(canvas.clientHeight * ratio);
             gl.viewport(0, 0, canvas.width, canvas.height);
         },
-        draw(x, y, r, dt = 0) {
+        draw(x, y, r, dt = 0, tilt = 0.2) {
             time += dt;
             gl.uniform2f(u.uCenter, x * ratio, canvas.height - y * ratio);
             gl.uniform1f(u.uRadius, r * ratio);
             gl.uniform1f(u.uTime, time);
+            gl.uniform1f(u.uTilt, tilt);
             gl.drawArrays(gl.TRIANGLES, 0, 3);
         },
         /** Rend le contexte WebGL au navigateur, qui n'en garde qu'une poignée à la fois */
