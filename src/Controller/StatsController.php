@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Arrivee;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,6 +31,8 @@ final class StatsController extends AbstractController
             'depuis' => $connection->fetchOne('SELECT MIN(jour) FROM visite_jour'),
             'pages' => array_map('intval', $connection->fetchAllKeyValue('SELECT chemin, SUM(nombre) AS total FROM visite_jour WHERE jour >= CURRENT_DATE - 29 GROUP BY chemin ORDER BY total DESC, chemin LIMIT 5')),
             'langues' => array_map('intval', $connection->fetchAllKeyValue('SELECT langue, SUM(nombre) AS total FROM visite_jour WHERE jour >= CURRENT_DATE - 29 GROUP BY langue ORDER BY total DESC, langue')),
+            // Globe des arrivées (ArriveeController) : les fuseaux horaires d'où l'on arrive le plus, en clair sous le globe
+            'fuseaux' => array_map('intval', $connection->fetchAllKeyValue("SELECT fuseau, COUNT(*) AS total FROM arrivee WHERE moment >= CURRENT_TIMESTAMP - INTERVAL '".Arrivee::JOURS." days' GROUP BY fuseau ORDER BY total DESC, fuseau LIMIT 5")),
         ]);
     }
 }

@@ -62,3 +62,21 @@
 .stats-listes a {
   color: var(--color-secondary);
 }
+
+/* Globe des arrivées (globe_controller.js) */
+.stats-globe {
+  position: relative;
+  margin-bottom: 2.5rem;
+}
+
+.stats-globe-aide {
+  color: var(--color-text-light);
+}
+
+.stats-globe-scene {
+  height: clamp(320px, 50vw, 520px);
+}
+
+.stats-globe-scene canvas {
+  display: block;
+}
