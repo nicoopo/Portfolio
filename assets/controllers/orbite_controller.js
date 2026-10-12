@@ -3,6 +3,7 @@ import { Controller } from '@hotwired/stimulus';
 import { createBlackHole, fitCanvas, reducedMotion } from '../scripts/black_hole.js';
 import { createBlackHoleGL } from '../scripts/black_hole_gl.js';
 import { basseQualite } from '../scripts/preferences.js';
+import { sons } from '../scripts/sons.js';
 
 const SPEED = 0.1; // tour d'orbite, en radians par seconde
 const TILT = 0.2;  // inclinaison de la vue sur le disque du trou noir (shader), en radians ; la souris la fait varier
@@ -10,7 +11,8 @@ const TILT = 0.2;  // inclinaison de la vue sur le disque du trou noir (shader),
 /**
  * Page projets : les projets tournent autour d'un trou noir. Ceux de l'arrière passent
  * derrière l'ombre, ceux de devant par-dessus ; l'orbite s'arrête au survol.
- * Trou noir en shader (black_hole_gl.js) ; en qualité basse ou sans WebGL, sa version 2D.
+ * Trou noir en shader (black_hole_gl.js) : un clic dessus lui fait aspirer son disque ;
+ * en qualité basse ou sans WebGL, sa version 2D.
  */
 export default class extends Controller {
     static targets = ['canvas', 'projet'];
@@ -39,6 +41,14 @@ export default class extends Controller {
         });
 
         if (reducedMotion()) return;
+        if (this.gl) {
+            this.element.addEventListener('pointermove', (e) => { this.element.style.cursor = this.onHole(e) ? 'pointer' : ''; });
+            this.element.addEventListener('click', (e) => {
+                if (!this.onHole(e)) return;
+                this.gl.burst();
+                sons.trouNoir();
+            });
+        }
         let last = performance.now();
         const loop = (now) => {
             if (this.element.offsetWidth) this.draw(Math.min((now - last) / 1000, 0.05));
@@ -54,9 +64,22 @@ export default class extends Controller {
         this.gl?.destroy();
     }
 
-    draw(dt) {
+    /** Centre et rayon de l'ombre du trou noir, en pixels dans l'orbite */
+    geometry() {
         const w = this.element.clientWidth, h = this.element.clientHeight;
-        const x = w / 2, y = h / 2, r = Math.min(w * 0.07, h * 0.12);
+        return { w, h, x: w / 2, y: h / 2, r: Math.min(w * 0.07, h * 0.12) };
+    }
+
+    /** Pointeur sur le trou noir (son disque, vu presque par la tranche), pas sur un projet */
+    onHole(e) {
+        if (e.target.closest('.orbite-projet')) return false;
+        const box = this.element.getBoundingClientRect();
+        const { x, y, r } = this.geometry();
+        return ((e.clientX - box.left - x) / (2.9 * r)) ** 2 + ((e.clientY - box.top - y) / (1.3 * r)) ** 2 <= 1;
+    }
+
+    draw(dt) {
+        const { w, h, x, y, r } = this.geometry();
         this.speed += ((this.hovered ? 0 : SPEED) - this.speed) * Math.min(dt * 4, 1);
         this.phase += this.speed * dt;
 

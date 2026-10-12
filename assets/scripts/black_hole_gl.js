@@ -19,6 +19,9 @@ uniform vec2 uCenter;   // centre du trou noir, en pixels du canvas (origine en 
 uniform float uRadius;  // rayon apparent de l'ombre, en pixels
 uniform float uTime;
 uniform float uTilt;    // élévation de la caméra au-dessus du disque, en radians
+uniform float uInflow;  // aspiration (clic) : de combien les grains sont descendus vers le trou
+uniform float uGrains;  // opacité des grains : 0 juste après l'aspiration, le temps que le disque se reforme
+uniform float uFlash;   // éclair de l'anneau quand le trou noir a tout avalé
 
 const float SHADOW = 2.598;  // rayon apparent de l'ombre : 3√3/2 rayons de Schwarzschild
 const float INNER = 3.0;     // bord intérieur du disque (dernière orbite stable)
@@ -53,23 +56,28 @@ vec4 disk(vec3 hit, vec3 dir, float grainy) {
     if (r < INNER || r > OUTER) return vec4(0.0);
     float t = (r - INNER) / (OUTER - INNER);
     float profile = smoothstep(INNER, INNER + 0.3, r) * pow(INNER / r, 2.0) * (1.0 - smoothstep(0.6, 1.0, t));
-    vec3 colour = palette(t) * profile * mix(1.0, 0.5, grainy);
+    vec3 colour = palette(t) * profile * mix(1.0, 0.5, grainy) * (0.4 + 0.6 * uGrains);
     float cover = profile * mix(0.8, 0.3, grainy);
     if (grainy < 0.01) return vec4(colour * pow(shift(hit, dir), 2.0), cover);
 
     // Trois grilles décalées d'anneaux découpés en cases ; au plus un grain par case
     for (int layer = 0; layer < 3; layer++) {
         float offset = float(layer) * GRAIN / 3.0;
-        float band = floor((r - INNER + offset) / GRAIN);
-        float ring = INNER - offset + (band + 0.5) * GRAIN;
-        float cells = floor(2.0 * PI * ring / GRAIN);
-        float turn = uTime * 0.25 * pow(ring / INNER, -1.5); // tour parcouru, l'anneau tourne d'un bloc
+        // Aspiration : la grille glisse vers l'intérieur ; chaque anneau garde son rayon d'origine (home),
+        // donc sa vitesse et ses grains, et s'enroule en spirale en descendant
+        float band = floor((r - INNER + offset + uInflow) / GRAIN);
+        float home = INNER - offset + (band + 0.5) * GRAIN;
+        if (home > OUTER + GRAIN) continue; // au-delà du disque d'origine : rien, le disque se vide
+        float ring = home - uInflow;
+        float cells = floor(2.0 * PI * home / GRAIN);
+        // Tour parcouru (l'anneau tourne d'un bloc, l'intérieur plus vite), plus la spirale de l'aspiration
+        float turn = uTime * 0.25 * pow(home / INNER, -1.5) + uInflow * 0.12 * INNER / max(ring, 1.0);
         float cell = floor((atan(hit.z, hit.x) / (2.0 * PI) + turn) * cells);
         vec2 id = vec2(mod(cell, cells), band + 37.0 * float(layer));
         if (hash(id) > mix(0.75, 0.25, t)) continue; // plus dense près du bord intérieur
 
         float angle = 2.0 * PI * ((cell + 0.3 + 0.4 * hash(id + 1.3)) / cells - turn);
-        vec2 centre = (INNER - offset + (band + 0.3 + 0.4 * hash(id + 2.7)) * GRAIN) * vec2(cos(angle), sin(angle));
+        vec2 centre = (INNER - offset - uInflow + (band + 0.3 + 0.4 * hash(id + 2.7)) * GRAIN) * vec2(cos(angle), sin(angle));
         // Distance à peu près telle qu'on la voit (le disque est vu presque par la tranche) : des points presque ronds à l'écran
         vec2 delta = hit.xz - centre;
         float size = 0.03 + 0.035 * hash(id + 4.1);
@@ -77,8 +85,8 @@ vec4 disk(vec3 hit, vec3 dir, float grainy) {
         // Cœur net et petite lueur autour ; chaque grain scintille à son rythme
         float spot = 1.0 - smoothstep(0.3, 1.0, seen) + 0.3 * exp(-seen * 0.9);
         float twinkle = 0.6 + 0.4 * sin(uTime * (1.5 + 3.0 * hash(id + 8.3)) + 6.28 * hash(id + 9.7));
-        colour += palette(clamp((length(centre) - INNER) / (OUTER - INNER) + (hash(id + 5.9) - 0.5) * 0.25, 0.0, 1.0)) * spot * twinkle * 1.4 * grainy;
-        cover += spot * 0.8 * grainy;
+        colour += palette(clamp((length(centre) - INNER) / (OUTER - INNER) + (hash(id + 5.9) - 0.5) * 0.25, 0.0, 1.0)) * spot * twinkle * 1.4 * grainy * uGrains;
+        cover += spot * 0.8 * grainy * uGrains;
     }
     return vec4(colour * pow(shift(hit, dir), 2.0), clamp(cover, 0.0, 1.0));
 }
@@ -128,12 +136,12 @@ void main() {
         pos = next;
     }
 
-    colour += glow * 0.15 * (1.0 - cover);
+    colour += glow * 0.15 * (0.4 + 0.6 * uGrains + 2.0 * uFlash) * (1.0 - cover);
     if (!captured) {
         // Anneau de photons qui borde l'ombre, plus vif à droite, et halo violet, comme la version 2D
         float edge = max(b - SHADOW, 0.0);
         vec3 ring = mix(vec3(1.0, 0.702, 0.278) * 0.5, vec3(1.0, 0.957, 0.839), clamp(screen.x / b * 0.5 + 0.5, 0.0, 1.0));
-        colour += ring * (exp(-edge * 14.0) * 0.9 + exp(-edge * 4.0) * 0.25) * (1.0 - cover);
+        colour += ring * (exp(-edge * 14.0) * 0.9 + exp(-edge * 4.0) * 0.25) * (1.0 + 3.0 * uFlash) * (1.0 - cover);
         colour += vec3(0.498, 0.353, 0.941) * 0.2 * (1.0 - smoothstep(SHADOW, ZONE, b));
     }
 
@@ -148,7 +156,7 @@ void main() {
 /**
  * Trou noir WebGL dans `canvas`, ou null si le navigateur n'a pas WebGL.
  * resize() suit la taille affichée ; draw(x, y, r, dt, tilt) : centre et rayon de l'ombre en pixels CSS, inclinaison
- * de la vue en radians (au-dessus du disque) ; destroy() à la fin.
+ * de la vue en radians (au-dessus du disque) ; burst() : le trou noir aspire tout son disque ; destroy() à la fin.
  */
 export function createBlackHoleGL(canvas) {
     const gl = canvas.getContext('webgl', { premultipliedAlpha: true, antialias: false });
@@ -162,10 +170,11 @@ export function createBlackHoleGL(canvas) {
     const position = gl.getAttribLocation(program, 'position');
     gl.enableVertexAttribArray(position);
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
-    const u = Object.fromEntries(['uCenter', 'uRadius', 'uTime', 'uTilt'].map((n) => [n, gl.getUniformLocation(program, n)]));
+    const u = Object.fromEntries(['uCenter', 'uRadius', 'uTime', 'uTilt', 'uInflow', 'uGrains', 'uFlash'].map((n) => [n, gl.getUniformLocation(program, n)]));
 
     // Le shader suit des centaines de pas par pixel : densité 1, net sans faire chauffer la carte
     let ratio = 1, time = 0;
+    let burst = null; // secondes écoulées depuis le clic, ou null
     return {
         resize() {
             ratio = Math.min(window.devicePixelRatio || 1, 1.25);
@@ -173,8 +182,16 @@ export function createBlackHoleGL(canvas) {
             canvas.height = Math.round(canvas.clientHeight * ratio);
             gl.viewport(0, 0, canvas.width, canvas.height);
         },
+        burst() {
+            if (burst === null) burst = 0;
+        },
         draw(x, y, r, dt = 0, tilt = 0.2) {
-            time += dt;
+            const { spin, inflow, grains, flash } = aspiration(burst);
+            if (burst !== null) burst = burst + dt < BURST_END ? burst + dt : null;
+            time += dt * spin;
+            gl.uniform1f(u.uInflow, inflow);
+            gl.uniform1f(u.uGrains, grains);
+            gl.uniform1f(u.uFlash, flash);
             gl.uniform2f(u.uCenter, x * ratio, canvas.height - y * ratio);
             gl.uniform1f(u.uRadius, r * ratio);
             gl.uniform1f(u.uTime, time);
@@ -186,6 +203,21 @@ export function createBlackHoleGL(canvas) {
             gl.getExtension('WEBGL_lose_context')?.loseContext();
         },
     };
+}
+
+// Aspiration au clic : le disque accélère et tombe en spirale (SUCK s), éclair, puis il se reforme
+const SUCK = 1.8, REFILL = 2.2, BURST_END = SUCK + REFILL;
+const INFLOW = 5.1; // un peu plus que la largeur du disque (OUTER - INNER) : tout est avalé
+
+function aspiration(s) {
+    if (s === null) return { spin: 1, inflow: 0, grains: 1, flash: 0 };
+    if (s < SUCK) {
+        const e = (s / SUCK) ** 2; // de plus en plus vite
+        return { spin: 1 + 8 * e, inflow: e * INFLOW, grains: 1, flash: Math.max(0, (s - SUCK + 0.3) / 0.3) };
+    }
+    // Disque vide : la grille revient à sa place sans qu'on le voie, les grains réapparaissent peu à peu
+    const e = (s - SUCK) / REFILL;
+    return { spin: 1 + 8 * (1 - e) ** 3, inflow: 0, grains: e * e, flash: Math.max(0, 1 - e * 4) };
 }
 
 function link(gl) {
