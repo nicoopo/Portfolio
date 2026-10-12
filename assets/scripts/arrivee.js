@@ -9,6 +9,8 @@ const depuisLeSite = (() => { try { return new URL(document.referrer).host === l
 const fuseau = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return null; } })();
 
 if (url && fuseau && !depuisLeSite && navigation?.type === 'navigate') {
+    // Une fois la page chargée, pour ne pas la ralentir ; sans keepalive : envoi au chargement, pas à la fermeture
     // Sans réseau, tant pis : ce n'est qu'une statistique
-    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fuseau }), keepalive: true }).catch(() => {});
+    const envoyer = () => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fuseau }) }).catch(() => {});
+    if (document.readyState === 'complete') envoyer(); else addEventListener('load', envoyer, { once: true });
 }

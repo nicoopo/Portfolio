@@ -22,7 +22,8 @@ function surface(lat, lon, r = 1) {
 /**
  * /stats : globe des arrivées des 30 derniers jours, placées d'après le fuseau horaire du navigateur
  * (ArriveeController). Une colonne de lumière par fuseau, plus haute s'il y a plus d'arrivées ; une nouvelle
- * arrivée allume une onde. Survol : ville du fuseau et nombre d'arrivées. Décor : la liste sous le globe dit tout.
+ * arrivée allume une onde. Un point bleu par lieu d'après l'IP, quand le serveur l'a trouvé (plus précis, mais
+ * souvent la ville de l'opérateur). Survol : ville du fuseau et nombre d'arrivées. Décor : la liste sous le globe dit tout.
  */
 export default class extends Controller {
     static targets = ['scene', 'label', 'total'];
@@ -54,6 +55,7 @@ export default class extends Controller {
 
         this.build();
         this.places = new Map(); // fuseau → { count, pillar, ... }
+        this.ipDots = new Set(); // lieux d'après l'IP déjà marqués (« lat,lon »)
         this.pulses = [];
         this.lastId = 0;
 
@@ -166,7 +168,7 @@ export default class extends Controller {
         }, POLL_MS);
     }
 
-    add({ fuseau, lat, lon }, live) {
+    add({ fuseau, lat, lon, ip }, live) {
         let place = this.places.get(fuseau);
         if (!place) {
             const base = surface(lat, lon);
@@ -187,8 +189,15 @@ export default class extends Controller {
         }
         place.count++;
         place.height = 0.06 + 0.06 * Math.log2(1 + place.count);
+        if (ip && !this.ipDots.has(`${ip.lat},${ip.lon}`)) {
+            this.ipDots.add(`${ip.lat},${ip.lon}`);
+            const dot = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.texture, color: 0x7fd8ff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+            dot.position.copy(surface(ip.lat, ip.lon, 1.004));
+            dot.scale.setScalar(0.04);
+            this.globe.add(dot);
+        }
         if (live && !this.reducedMotion) {
-            this.pulse(lat, lon);
+            this.pulse(ip?.lat ?? lat, ip?.lon ?? lon); // l'onde au lieu le plus précis
             // La caméra vient en face de l'arrivée, à la même distance du globe
             const at = this.globe.localToWorld(surface(lat, lon));
             this.focus = { camera: at.normalize().multiplyScalar(this.camera.position.length()), until: FOCUS_S };
