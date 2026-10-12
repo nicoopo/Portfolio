@@ -46,14 +46,16 @@ float shift(vec3 p, vec3 dir) {
 }
 
 // Lumière du disque là où le rayon le traverse ; dir = sens du rayon (de la caméra vers le disque).
-// Comme la version 2D : des grains de couleur qui tournent (Kepler : l'intérieur plus vite), sur une bande pâle
-vec4 disk(vec3 hit, vec3 dir) {
+// Comme la version 2D : des grains de couleur qui tournent (Kepler : l'intérieur plus vite), sur une bande pâle ;
+// grainy (0 → 1) : sous l'ombre, la bande seule, lisse et plus vive (les grains y faisaient artificiel)
+vec4 disk(vec3 hit, vec3 dir, float grainy) {
     float r = length(hit.xz);
     if (r < INNER || r > OUTER) return vec4(0.0);
     float t = (r - INNER) / (OUTER - INNER);
     float profile = smoothstep(INNER, INNER + 0.3, r) * pow(INNER / r, 2.0) * (1.0 - smoothstep(0.6, 1.0, t));
-    vec3 colour = palette(t) * profile * 0.5;
-    float cover = profile * 0.3;
+    vec3 colour = palette(t) * profile * mix(1.4, 0.5, grainy);
+    float cover = profile * mix(0.8, 0.3, grainy);
+    if (grainy < 0.01) return vec4(colour * pow(shift(hit, dir), 2.0), cover);
 
     // Trois grilles décalées d'anneaux découpés en cases ; au plus un grain par case
     for (int layer = 0; layer < 3; layer++) {
@@ -72,8 +74,8 @@ vec4 disk(vec3 hit, vec3 dir) {
         vec2 delta = hit.xz - centre;
         float size = 0.03 + 0.035 * hash(id + 4.1);
         float spot = 1.0 - smoothstep(0.3, 1.0, length(vec2(delta.x, delta.y * sin(uTilt) * 2.0)) / size);
-        colour += palette(clamp((length(centre) - INNER) / (OUTER - INNER) + (hash(id + 5.9) - 0.5) * 0.25, 0.0, 1.0)) * spot * 1.4;
-        cover += spot * 0.8;
+        colour += palette(clamp((length(centre) - INNER) / (OUTER - INNER) + (hash(id + 5.9) - 0.5) * 0.25, 0.0, 1.0)) * spot * 1.4 * grainy;
+        cover += spot * 0.8 * grainy;
     }
     return vec4(colour * pow(shift(hit, dir), 2.0), clamp(cover, 0.0, 1.0));
 }
@@ -85,6 +87,9 @@ void main() {
     vec3 eye = FAR * vec3(0.0, sin(uTilt), -cos(uTilt));
     vec3 forward = -normalize(eye), right = vec3(1.0, 0.0, 0.0), up = cross(forward, right);
     vec3 dir = normalize(forward * FAR + right * screen.x + up * screen.y);
+
+    // Sous l'ombre (avant du disque qui passe devant, image déviée du dessous) : pas de grains
+    float grainy = 1.0 - (1.0 - smoothstep(-0.3, 0.4, screen.y)) * (1.0 - smoothstep(SHADOW * 0.9, SHADOW * 1.5, abs(screen.x)));
 
     vec3 colour = vec3(0.0), glow = vec3(0.0);
     float cover = 0.0; // ce que le disque cache des images plus lointaines
@@ -106,7 +111,7 @@ void main() {
         vec3 next = pos + normalize(vel) * ds;
         if (pos.y * next.y < 0.0) {
             vec3 hit = mix(pos, next, pos.y / (pos.y - next.y));
-            vec4 d = disk(hit, normalize(vel));
+            vec4 d = disk(hit, normalize(vel), grainy);
             colour += d.rgb * (1.0 - cover);
             cover += d.a * (1.0 - cover);
         }
