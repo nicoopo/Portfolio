@@ -103,20 +103,24 @@ export function planetTexture(colour, kind, seed, width = 256) {
     return texture;
 }
 
-/** Atmosphère : un halo sur le bord de la planète, côté jour seulement (le soleil est à l'origine) ; plus fort quand intensity monte */
-export function atmosphereMaterial(colour) {
+/**
+ * Atmosphère : un halo sur le bord de la planète, côté jour seulement ; plus fort quand intensity monte.
+ * sun : position du soleil (le même vecteur, que l'appelant déplace quand le système voyage)
+ */
+export function atmosphereMaterial(colour, sun) {
     return new THREE.ShaderMaterial({
-        uniforms: { uColour: { value: new THREE.Color(colour) }, uIntensity: { value: 0.6 } },
+        uniforms: { uColour: { value: new THREE.Color(colour) }, uIntensity: { value: 0.6 }, uSun: { value: sun } },
         vertexShader: `
             varying vec3 vNormal;
             varying vec3 vView;
             varying float vDay;
+            uniform vec3 uSun;
             void main() {
                 vec4 world = modelMatrix * vec4(position, 1.0);
                 vec4 view = viewMatrix * world;
                 vNormal = normalize(normalMatrix * normal);
                 vView = normalize(-view.xyz);
-                vDay = dot(normalize(mat3(modelMatrix) * normal), normalize(-world.xyz)); // > 0 : tourné vers le soleil
+                vDay = dot(normalize(mat3(modelMatrix) * normal), normalize(uSun - world.xyz)); // > 0 : tourné vers le soleil
                 gl_Position = projectionMatrix * view;
             }`,
         fragmentShader: `
