@@ -65,6 +65,8 @@ export const sons = {
     menu: (ouvert) => ton(ouvert ? 440 : 660, ouvert ? 660 : 440, 0.15, 0.04),
     /** Trou noir qui s'ouvre : grondement qui plonge */
     trouNoir: () => ton(160, 35, 1.4, 0.15),
+    /** Supernova : grondement très grave et long, souffle de l'explosion */
+    supernova: () => { ton(90, 25, 2.5, 0.16); ton(55, 30, 3, 0.1, 0.05); bruit(0.5, 0.14, 1500); },
     /** Météore qui s'écrase : choc grave et souffle */
     impact: () => { ton(110, 35, 0.4, 0.12); bruit(0.35, 0.1, 700); },
     /** Étoile reliée : une note de plus en plus aiguë à chaque étape */
