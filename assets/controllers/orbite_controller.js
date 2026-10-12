@@ -11,8 +11,8 @@ const TILT = 0.2;  // inclinaison de la vue sur le disque du trou noir (shader),
 /**
  * Page projets : les projets tournent autour d'un trou noir. Ceux de l'arrière passent
  * derrière l'ombre, ceux de devant par-dessus ; l'orbite s'arrête au survol.
- * Trou noir en shader (black_hole_gl.js) : un clic dessus lui fait aspirer son disque ;
- * en qualité basse ou sans WebGL, sa version 2D.
+ * Trou noir en shader (black_hole_gl.js) : un clic dessus le fait imploser en supernova, qui avale puis souffle
+ * les projets et laisse un soleil ; un clic sur le soleil le refait trou noir. En qualité basse ou sans WebGL, sa version 2D.
  */
 export default class extends Controller {
     static targets = ['canvas', 'projet'];
@@ -44,7 +44,7 @@ export default class extends Controller {
         if (this.gl) {
             this.element.addEventListener('pointermove', (e) => { this.element.style.cursor = this.onHole(e) ? 'pointer' : ''; });
             this.element.addEventListener('click', (e) => {
-                if (!this.onHole(e)) return;
+                if (!this.onHole(e) || this.gl.busy) return;
                 this.gl.burst();
                 sons.trouNoir();
             });
@@ -80,13 +80,18 @@ export default class extends Controller {
 
     draw(dt) {
         const { w, h, x, y, r } = this.geometry();
-        this.speed += ((this.hovered ? 0 : SPEED) - this.speed) * Math.min(dt * 4, 1);
+        // Pendant la supernova, les projets filent sous le pointeur : on ne s'arrête pas pour autant
+        const stop = this.hovered && !this.gl?.busy;
+        this.speed += ((stop ? 0 : SPEED) - this.speed) * Math.min(dt * 4, 1);
         this.phase += this.speed * dt;
 
         const holeDt = dt * (0.3 + 0.7 * this.speed / SPEED);
+        let pull = 1; // rayon de l'orbite : 0 quand le trou noir a tout avalé, plus de 1 quand l'explosion souffle
         if (this.gl) {
             this.tilt += (this.targetTilt - this.tilt) * Math.min(dt * 3, 1);
-            this.gl.draw(x, y, r, holeDt, this.tilt);
+            const fx = this.gl.draw(x, y, r, holeDt, this.tilt);
+            pull = fx.pull;
+            fx.events.forEach((event) => ({ boom: sons.supernova, birth: sons.constellation, reborn: sons.impact })[event]());
         } else {
             this.ctx.clearRect(0, 0, w, h);
             this.hole.draw(this.ctx, x, y, r, holeDt);
@@ -99,8 +104,9 @@ export default class extends Controller {
             const ring = i % 2 ? 0.72 : 1;
             const rx = (w / 2 - 60) * ring, ry = (h / 2 - 50) * ring * 0.8;
             const depth = Math.sin(angle); // 1 = devant, -1 = derrière
-            el.style.transform = `translate(${x + rx * Math.cos(angle)}px, ${y + ry * depth}px) translate(-50%, -50%) scale(${0.82 + 0.18 * depth})`;
-            el.style.opacity = 0.55 + 0.45 * (depth + 1) / 2;
+            const shrink = 0.3 + 0.7 * Math.min(pull, 1);
+            el.style.transform = `translate(${x + rx * Math.cos(angle) * pull}px, ${y + ry * depth * pull}px) translate(-50%, -50%) scale(${(0.82 + 0.18 * depth) * shrink})`;
+            el.style.opacity = (0.55 + 0.45 * (depth + 1) / 2) * Math.min(pull * 4, 1);
             el.style.zIndex = 50 + Math.round(depth * 49); // canvas (ombre du trou noir) à 50 : l'arrière passe dessous
         });
     }

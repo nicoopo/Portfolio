@@ -4,6 +4,8 @@
  * un rayon qui traverse le plan du disque d'accrétion en prend la lumière (plusieurs fois s'il fait le tour :
  * ce sont les images du disque repliées au-dessus et en dessous de l'ombre) ; une lueur suit le disque et un
  * mince anneau de photons borde l'ombre. Le côté droit du disque vient vers nous : plus vif et plus blanc (Doppler).
+ * Au clic, il aspire son disque, implose, explose en supernova et laisse naître un soleil ; un clic sur le soleil
+ * le fait s'effondrer en trou noir.
  * Unités : rayon de Schwarzschild = 1. Utilisé par la page projets ; à défaut de WebGL, black_hole.js (2D).
  */
 
@@ -22,6 +24,10 @@ uniform float uTilt;    // élévation de la caméra au-dessus du disque, en rad
 uniform float uInflow;  // aspiration (clic) : de combien les grains sont descendus vers le trou
 uniform float uGrains;  // opacité des grains : 0 juste après l'aspiration, le temps que le disque se reforme
 uniform float uFlash;   // éclair de l'anneau quand le trou noir a tout avalé
+uniform float uHole;    // taille du trou noir (0 → 1) : il implose, puis renaît de l'effondrement du soleil
+uniform float uSpark;   // point brillant au centre, au moment de l'implosion et de l'effondrement
+uniform float uNova;    // secondes depuis l'explosion de la supernova, négatif hors explosion
+uniform float uSun;     // taille du soleil (0 → 1)
 
 const float SHADOW = 2.598;  // rayon apparent de l'ombre : 3√3/2 rayons de Schwarzschild
 const float INNER = 3.0;     // bord intérieur du disque (dernière orbite stable)
@@ -32,6 +38,15 @@ const float ZONE = 10.0;     // au-delà, la lumière va presque droit : pas bes
 const float PI = 3.14159265;
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+
+// Bruit lisse, périodique en x (période entière) : pas de couture à l'angle ±π
+float noise(vec2 p, float period) {
+    vec2 i = floor(p), f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    float x0 = mod(i.x, period), x1 = mod(i.x + 1.0, period);
+    return mix(mix(hash(vec2(x0, i.y)), hash(vec2(x1, i.y)), u.x),
+               mix(hash(vec2(x0, i.y + 1.0)), hash(vec2(x1, i.y + 1.0)), u.x), u.y);
+}
 
 // Couleurs du site, du bord intérieur (chaud) au bord extérieur (froid)
 vec3 palette(float t) {
@@ -91,13 +106,19 @@ vec4 disk(vec3 hit, vec3 dir, float grainy) {
     return vec4(colour * pow(shift(hit, dir), 2.0), clamp(cover, 0.0, 1.0));
 }
 
-void main() {
-    vec2 screen = (gl_FragCoord.xy - uCenter) / uRadius * SHADOW; // paramètre d'impact, en rayons de Schwarzschild
+// Trou noir de rayon apparent radius (pixels) ; px = position par rapport au centre. Couleur prémultipliée.
+vec4 blackHole(vec2 px, float radius) {
+    vec2 screen = px / radius * SHADOW; // paramètre d'impact, en rayons de Schwarzschild
     float b = length(screen);
 
     vec3 eye = FAR * vec3(0.0, sin(uTilt), -cos(uTilt));
     vec3 forward = -normalize(eye), right = vec3(1.0, 0.0, 0.0), up = cross(forward, right);
     vec3 dir = normalize(forward * FAR + right * screen.x + up * screen.y);
+
+    // Avance en ligne droite jusqu'à la zone où la gravité compte ; au-delà, rien à dessiner
+    float along = -dot(eye, dir);
+    float gap = ZONE * ZONE - (dot(eye, eye) - along * along);
+    if (gap < 0.0) return vec4(0.0);
 
     // Sous l'ombre (avant du disque qui passe devant, image déviée du dessous) : pas de grains
     float grainy = 1.0 - (1.0 - smoothstep(-0.3, 0.4, screen.y)) * (1.0 - smoothstep(SHADOW * 0.9, SHADOW * 1.5, abs(screen.x)));
@@ -105,11 +126,6 @@ void main() {
     vec3 colour = vec3(0.0), glow = vec3(0.0);
     float cover = 0.0; // ce que le disque cache des images plus lointaines
     bool captured = false;
-
-    // Avance en ligne droite jusqu'à la zone où la gravité compte ; au-delà, rien à dessiner
-    float along = -dot(eye, dir);
-    float gap = ZONE * ZONE - (dot(eye, eye) - along * along);
-    if (gap < 0.0) discard;
     vec3 pos = eye + dir * (along - sqrt(gap));
     vec3 vel = dir;
     float h2 = dot(cross(pos, vel), cross(pos, vel)); // moment cinétique, constant
@@ -147,16 +163,82 @@ void main() {
 
     colour = 1.0 - exp(-colour * 2.0); // les zones très vives saturent en douceur
     // Seule l'ombre est opaque (elle cache les projets de l'arrière) ; le reste n'est que lumière, ajoutée à la page
-    // (canvas en alpha prémultiplié : opacité = couleur la plus vive)
-    float alpha = captured ? 1.0 : max(colour.r, max(colour.g, colour.b));
-    gl_FragColor = vec4(colour, alpha);
+    return vec4(colour, captured ? 1.0 : max(colour.r, max(colour.g, colour.b)));
+}
+
+// Soleil de rayon radius (pixels) : surface qui bouillonne, assombrie au bord, et couronne qui ondule.
+// Plus petit (naissance, effondrement), il est plus rose. Couleur prémultipliée ; le disque est opaque.
+vec4 sun(vec2 px, float radius) {
+    float d = length(px) / radius;
+    float young = 1.0 - uSun;
+    vec2 uv = px / radius;
+
+    float mu = sqrt(max(1.0 - d * d, 0.0)); // 1 au centre du disque, 0 au bord
+    vec2 flow = vec2(uTime * 0.08, uTime * 0.05);
+    float cells = noise(uv * 5.0 + flow, 289.0) * 0.55 + noise(uv * 11.0 - flow * 1.7, 289.0) * 0.3 + noise(uv * 23.0 + flow * 2.3, 289.0) * 0.15;
+    // Cellules chaudes (crème) sur fond orange, plus rose vers le bord
+    vec3 base = palette(clamp(0.3 + (1.0 - mu) * 0.3 + young * 0.3, 0.0, 1.0));
+    vec3 surface = mix(base, palette(0.0), cells * cells * mu) * (0.55 + 0.45 * mu) * 1.1;
+
+    float angle = atan(px.y, px.x) / (2.0 * PI);
+    float rays = noise(vec2(angle * 24.0, uTime * 0.35), 24.0) * noise(vec2(angle * 7.0, uTime * 0.2 + 3.0), 7.0);
+    float beyond = max(d - 1.0, 0.0);
+    vec3 corona = palette(clamp(0.38 + beyond * 0.35 + young * 0.3, 0.0, 1.0))
+                * (exp(-beyond * 3.0) * 1.0 + exp(-beyond * 0.9) * 0.35 * (0.4 + 1.6 * rays));
+
+    float inside = 1.0 - smoothstep(1.0 - 1.5 / radius, 1.0, d); // bord net, sans crénelage
+    vec3 colour = 1.0 - exp(-(surface * inside + corona * (1.0 - inside)) * 1.6);
+    return vec4(colour, max(inside, max(colour.r, max(colour.g, colour.b))));
+}
+
+// Supernova, s secondes après l'explosion : éclair, onde de choc, filaments de débris, puis nébuleuse qui s'éteint.
+// Lumière seule (non saturée), ajoutée par-dessus
+vec3 supernova(vec2 px, float s) {
+    float d = length(px);
+    float front = uRadius * (0.3 + s * 6.0);    // rayon de l'onde de choc
+    float width = uRadius * (0.15 + s * 0.35);
+    float angle = atan(px.y, px.x) / (2.0 * PI);
+    float fade = exp(-s * 0.8);
+    float tint = clamp(s * 0.3 + 0.25 * d / front, 0.0, 1.0); // blanc au début, puis orange, rose, violet
+
+    float debris = noise(vec2(angle * 64.0, d / uRadius * 0.6 - s * 2.0), 64.0);
+    float shell = exp(-pow((d - front) / width, 2.0)) * (0.5 + debris);
+    float filaments = pow(noise(vec2(angle * 90.0, s * 0.5), 90.0), 4.0) * 3.0 * exp(-s * 0.9) * (1.0 - smoothstep(front * 0.2, front * 1.05, d));
+    float core = exp(-d / (uRadius * (0.5 + s * 1.5))) * exp(-s * 1.8) * 3.0;
+    float cloud = noise(px / uRadius * 0.8 + s * 0.1, 289.0) * (1.0 - smoothstep(0.0, front, d))
+                * smoothstep(0.3, 1.5, s) * (1.0 - smoothstep(3.5, 5.5, s)) * 0.35;
+
+    // S'éteint avant les bords du canvas, qu'on ne doit jamais voir
+    float margin = min(uCenter.x - abs(px.x), uCenter.y - abs(px.y));
+    float edges = smoothstep(0.0, uCenter.y * 0.6, margin);
+    return (palette(tint) * (shell * 1.6 + filaments) * fade + vec3(1.0, 0.957, 0.839) * core + palette(0.75) * cloud) * edges;
+}
+
+void main() {
+    vec2 px = gl_FragCoord.xy - uCenter;
+    vec4 result = vec4(0.0);
+    if (uHole > 0.01) result = blackHole(px, uRadius * uHole);
+    if (uSun > 0.01) {
+        vec4 star = sun(px, uRadius * 1.05 * uSun);
+        result = star + result * (1.0 - star.a);
+    }
+
+    // Lumières de passage : point brillant (implosion, effondrement) et supernova
+    float d = length(px);
+    vec3 light = vec3(1.0, 0.957, 0.839) * uSpark * (exp(-d / (uRadius * 0.12)) * 4.0 + exp(-d / (uRadius * 0.6)) * 0.6);
+    if (uNova >= 0.0) light += supernova(px, uNova);
+    light = 1.0 - exp(-light * 2.0);
+    float glare = max(light.r, max(light.g, light.b));
+    gl_FragColor = vec4(light + result.rgb * (1.0 - glare), max(result.a, glare));
 }
 `;
 
 /**
  * Trou noir WebGL dans `canvas`, ou null si le navigateur n'a pas WebGL.
  * resize() suit la taille affichée ; draw(x, y, r, dt, tilt) : centre et rayon de l'ombre en pixels CSS, inclinaison
- * de la vue en radians (au-dessus du disque) ; burst() : le trou noir aspire tout son disque ; destroy() à la fin.
+ * de la vue en radians (au-dessus du disque) ; il renvoie { pull, events } : pull = rayon de l'orbite des projets
+ * (1 au repos, 0 quand tout est avalé, plus de 1 quand l'explosion les souffle), events = étapes franchies
+ * ('boom', 'birth', 'reborn'), pour les sons. burst() : supernova (trou noir) ou effondrement (soleil). destroy() à la fin.
  */
 export function createBlackHoleGL(canvas) {
     const gl = canvas.getContext('webgl', { premultipliedAlpha: true, antialias: false });
@@ -170,11 +252,13 @@ export function createBlackHoleGL(canvas) {
     const position = gl.getAttribLocation(program, 'position');
     gl.enableVertexAttribArray(position);
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
-    const u = Object.fromEntries(['uCenter', 'uRadius', 'uTime', 'uTilt', 'uInflow', 'uGrains', 'uFlash'].map((n) => [n, gl.getUniformLocation(program, n)]));
+    const names = ['uCenter', 'uRadius', 'uTime', 'uTilt', 'uInflow', 'uGrains', 'uFlash', 'uHole', 'uSpark', 'uNova', 'uSun'];
+    const u = Object.fromEntries(names.map((n) => [n, gl.getUniformLocation(program, n)]));
 
     // Le shader suit des centaines de pas par pixel : densité 1, net sans faire chauffer la carte
     let ratio = 1, time = 0;
-    let burst = null; // secondes écoulées depuis le clic, ou null
+    let state = 'hole';  // 'hole' ou 'sun', entre deux séquences
+    let sequence = null; // { scenario, s } : séquence en cours, s secondes depuis le clic
     return {
         resize() {
             ratio = Math.min(window.devicePixelRatio || 1, 1.25);
@@ -182,21 +266,35 @@ export function createBlackHoleGL(canvas) {
             canvas.height = Math.round(canvas.clientHeight * ratio);
             gl.viewport(0, 0, canvas.width, canvas.height);
         },
+        /** Une séquence (supernova, effondrement) est en cours */
+        get busy() {
+            return sequence !== null;
+        },
         burst() {
-            if (burst === null) burst = 0;
+            if (!sequence) sequence = { scenario: state === 'hole' ? SUPERNOVA : COLLAPSE, s: 0 };
         },
         draw(x, y, r, dt = 0, tilt = 0.2) {
-            const { spin, inflow, grains, flash } = aspiration(burst);
-            if (burst !== null) burst = burst + dt < BURST_END ? burst + dt : null;
-            time += dt * spin;
-            gl.uniform1f(u.uInflow, inflow);
-            gl.uniform1f(u.uGrains, grains);
-            gl.uniform1f(u.uFlash, flash);
+            let fx = REST[state], events = [];
+            if (sequence) {
+                const { scenario } = sequence, before = sequence.s;
+                sequence.s += dt;
+                fx = { ...REST.hole, ...scenario.at(sequence.s) };
+                events = scenario.events.filter(([at]) => before < at && sequence.s >= at).map(([, name]) => name);
+                if (sequence.s >= scenario.end) {
+                    state = scenario.then;
+                    sequence = null;
+                }
+            }
+            time += dt * fx.spin;
             gl.uniform2f(u.uCenter, x * ratio, canvas.height - y * ratio);
             gl.uniform1f(u.uRadius, r * ratio);
             gl.uniform1f(u.uTime, time);
             gl.uniform1f(u.uTilt, tilt);
+            for (const name of ['inflow', 'grains', 'flash', 'hole', 'spark', 'nova', 'sun']) {
+                gl.uniform1f(u[`u${name[0].toUpperCase()}${name.slice(1)}`], fx[name]);
+            }
             gl.drawArrays(gl.TRIANGLES, 0, 3);
+            return { pull: fx.pull, events };
         },
         /** Rend le contexte WebGL au navigateur, qui n'en garde qu'une poignée à la fois */
         destroy() {
@@ -205,20 +303,58 @@ export function createBlackHoleGL(canvas) {
     };
 }
 
-// Aspiration au clic : le disque accélère et tombe en spirale (SUCK s), éclair, puis il se reforme
-const SUCK = 1.8, REFILL = 2.2, BURST_END = SUCK + REFILL;
-const INFLOW = 5.1; // un peu plus que la largeur du disque (OUTER - INNER) : tout est avalé
+// Au repos : le trou noir et son disque, ou le soleil
+const REST = {
+    hole: { spin: 1, inflow: 0, grains: 1, flash: 0, hole: 1, spark: 0, nova: -1, sun: 0, pull: 1 },
+    sun: { spin: 1, inflow: 0, grains: 0, flash: 0, hole: 0, spark: 0, nova: -1, sun: 1, pull: 1 },
+};
 
-function aspiration(s) {
-    if (s === null) return { spin: 1, inflow: 0, grains: 1, flash: 0 };
-    if (s < SUCK) {
-        const e = (s / SUCK) ** 2; // de plus en plus vite
-        return { spin: 1 + 8 * e, inflow: e * INFLOW, grains: 1, flash: Math.max(0, (s - SUCK + 0.3) / 0.3) };
-    }
-    // Disque vide : la grille revient à sa place sans qu'on le voie, les grains réapparaissent peu à peu
-    const e = (s - SUCK) / REFILL;
-    return { spin: 1 + 8 * (1 - e) ** 3, inflow: 0, grains: e * e, flash: Math.max(0, 1 - e * 4) };
-}
+const SUCK = 1.8;   // aspiration du disque, de plus en plus vite
+const IMPLODE = 0.7; // le trou noir se contracte en un point et avale les projets
+const BOOM = SUCK + IMPLODE;
+const INFLOW = 5.1; // un peu plus que la largeur du disque (OUTER - INNER) : tout est avalé
+const smooth = (a, b, x) => { const t = Math.min(Math.max((x - a) / (b - a), 0), 1); return t * t * (3 - 2 * t); };
+
+const SUPERNOVA = {
+    end: BOOM + 5.5,
+    then: 'sun',
+    events: [[BOOM, 'boom'], [BOOM + 1, 'birth']],
+    at(s) {
+        if (s < SUCK) {
+            const e = (s / SUCK) ** 2;
+            return { spin: 1 + 8 * e, inflow: e * INFLOW, flash: Math.max(0, (s - SUCK + 0.3) / 0.3), pull: 1 - 0.25 * e };
+        }
+        if (s < BOOM) {
+            const k = (s - SUCK) / IMPLODE;
+            return { spin: 9, grains: 0, flash: 1, hole: 1 - k * k, spark: 1.5 * k * k, pull: 0.75 * (1 - k) ** 2 };
+        }
+        // Explosion : les projets, partis du centre, sont soufflés au-delà de leur orbite puis y reviennent (ressort amorti)
+        const p = s - BOOM;
+        return {
+            grains: 0, hole: 0, nova: p, spark: Math.max(0, 1.5 * (1 - p * 4)), sun: smooth(0.8, 3.0, p),
+            pull: 1 + Math.exp(-1.3 * p) * (-0.98 * Math.cos(3 * p) + 0.9 * Math.sin(3 * p)),
+        };
+    },
+};
+
+const SHRINK = 1.4; // le soleil s'effondre
+const COLLAPSE = {
+    end: SHRINK + 2.4,
+    then: 'hole',
+    events: [[SHRINK, 'reborn']],
+    at(s) {
+        if (s < SHRINK) {
+            const k = s / SHRINK;
+            return { grains: 0, hole: 0, sun: 1 - k * k, spark: 1.2 * k * k, pull: 1 - 0.3 * k };
+        }
+        // Le trou noir renaît : il grandit, son disque se reforme
+        const q = s - SHRINK, refill = Math.min(q / 2.4, 1);
+        return {
+            spin: 1 + 4 * (1 - refill) ** 2, grains: refill * refill, hole: 1 - (1 - Math.min(q / 1.2, 1)) ** 3,
+            flash: Math.max(0, 1 - q * 1.5), spark: Math.max(0, 1.2 * (1 - q * 4)), pull: 1 - 0.3 * Math.exp(-3 * q),
+        };
+    },
+};
 
 function link(gl) {
     const program = gl.createProgram();
