@@ -22,21 +22,13 @@ uniform float uTilt;    // élévation de la caméra au-dessus du disque, en rad
 
 const float SHADOW = 2.598;  // rayon apparent de l'ombre : 3√3/2 rayons de Schwarzschild
 const float INNER = 3.0;     // bord intérieur du disque (dernière orbite stable)
-const float OUTER = 6.5;
+const float OUTER = 7.5;
+const float GRAIN = 0.45;    // taille des cases où se placent les grains du disque
 const float FAR = 60.0;      // distance de la caméra
 const float ZONE = 10.0;     // au-delà, la lumière va presque droit : pas besoin de suivre le rayon
 const float PI = 3.14159265;
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-
-// Bruit lisse, périodique en x (période entière) : le disque n'a pas de couture à l'angle ±π
-float noise(vec2 p, float period) {
-    vec2 i = floor(p), f = fract(p);
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    float x0 = mod(i.x, period), x1 = mod(i.x + 1.0, period);
-    return mix(mix(hash(vec2(x0, i.y)), hash(vec2(x1, i.y)), u.x),
-               mix(hash(vec2(x0, i.y + 1.0)), hash(vec2(x1, i.y + 1.0)), u.x), u.y);
-}
 
 // Couleurs du site, du bord intérieur (chaud) au bord extérieur (froid)
 vec3 palette(float t) {
@@ -53,25 +45,37 @@ float shift(vec3 p, vec3 dir) {
     return doppler * sqrt(1.0 - 1.0 / r); // et le décalage gravitationnel
 }
 
-// Lumière du disque là où le rayon le traverse ; dir = sens du rayon (de la caméra vers le disque)
+// Lumière du disque là où le rayon le traverse ; dir = sens du rayon (de la caméra vers le disque).
+// Comme la version 2D : des grains de couleur qui tournent (Kepler : l'intérieur plus vite), sur une bande pâle
 vec4 disk(vec3 hit, vec3 dir) {
     float r = length(hit.xz);
     if (r < INNER || r > OUTER) return vec4(0.0);
-    float g = shift(hit, dir);
     float t = (r - INNER) / (OUTER - INNER);
+    float profile = smoothstep(INNER, INNER + 0.3, r) * pow(INNER / r, 2.0) * (1.0 - smoothstep(0.6, 1.0, t));
+    vec3 colour = palette(t) * profile * 0.5;
+    float cover = profile * 0.3;
 
-    // Bord intérieur net et brillant, puis décroissance
-    float profile = smoothstep(INNER, INNER + 0.1, r) * pow(INNER / r, 2.2) * (1.0 - smoothstep(0.55, 1.0, t));
-    // Fins filaments étirés le long de l'orbite, l'intérieur tourne plus vite
-    float angle = atan(hit.z, hit.x) / (2.0 * PI) + uTime * 0.35 * pow(r, -1.5);
-    float fine = noise(vec2(angle * 64.0, r * 16.0), 64.0);
-    float broad = noise(vec2(angle * 16.0, r * 5.0), 16.0);
-    float filaments = 0.12 + 2.4 * pow(0.55 * fine + 0.45 * broad, 2.5);
+    // Trois grilles décalées d'anneaux découpés en cases ; au plus un grain par case
+    for (int layer = 0; layer < 3; layer++) {
+        float offset = float(layer) * GRAIN / 3.0;
+        float band = floor((r - INNER + offset) / GRAIN);
+        float ring = INNER - offset + (band + 0.5) * GRAIN;
+        float cells = floor(2.0 * PI * ring / GRAIN);
+        float turn = uTime * 0.25 * pow(ring / INNER, -1.5); // tour parcouru, l'anneau tourne d'un bloc
+        float cell = floor((atan(hit.z, hit.x) / (2.0 * PI) + turn) * cells);
+        vec2 id = vec2(mod(cell, cells), band + 37.0 * float(layer));
+        if (hash(id) > mix(0.75, 0.25, t)) continue; // plus dense près du bord intérieur
 
-    float light = profile * filaments * pow(g, 3.0) * 3.5;
-    vec3 colour = palette(clamp(t * 1.4 + (1.0 - g) * 0.7, 0.0, 1.0));
-    colour = mix(colour, vec3(1.0), clamp((g - 1.0) * 1.5 + pow(1.0 - t, 8.0) * 0.6, 0.0, 0.75));
-    return vec4(colour * light, clamp(light * 2.5, 0.0, 1.0));
+        float angle = 2.0 * PI * ((cell + 0.3 + 0.4 * hash(id + 1.3)) / cells - turn);
+        vec2 centre = (INNER - offset + (band + 0.3 + 0.4 * hash(id + 2.7)) * GRAIN) * vec2(cos(angle), sin(angle));
+        // Distance à peu près telle qu'on la voit (le disque est vu presque par la tranche) : des points presque ronds à l'écran
+        vec2 delta = hit.xz - centre;
+        float size = 0.03 + 0.035 * hash(id + 4.1);
+        float spot = 1.0 - smoothstep(0.3, 1.0, length(vec2(delta.x, delta.y * sin(uTilt) * 2.0)) / size);
+        colour += palette(clamp((length(centre) - INNER) / (OUTER - INNER) + (hash(id + 5.9) - 0.5) * 0.25, 0.0, 1.0)) * spot * 1.4;
+        cover += spot * 0.8;
+    }
+    return vec4(colour * pow(shift(hit, dir), 2.0), clamp(cover, 0.0, 1.0));
 }
 
 void main() {
@@ -110,15 +114,20 @@ void main() {
         float rd = length(pos.xz);
         if (rd > INNER && rd < OUTER + 1.5) {
             float t = (rd - INNER) / (OUTER - INNER);
-            glow += palette(clamp(t, 0.0, 1.0)) * pow(INNER / rd, 3.0) * pow(shift(pos, normalize(vel)), 3.0)
+            glow += palette(clamp(t, 0.0, 1.0)) * pow(INNER / rd, 3.0) * pow(shift(pos, normalize(vel)), 2.0)
                   * exp(-abs(pos.y) * 3.5) * ds;
         }
         pos = next;
     }
 
-    colour += glow * 0.22 * (1.0 - cover);
-    // Anneau de photons : un mince trait de lumière qui borde l'ombre
-    if (!captured) colour += vec3(1.0, 0.86, 0.66) * exp(-max(b - SHADOW, 0.0) * 14.0) * 0.9 * (1.0 - cover);
+    colour += glow * 0.15 * (1.0 - cover);
+    if (!captured) {
+        // Anneau de photons qui borde l'ombre, plus vif à droite, et halo violet, comme la version 2D
+        float edge = max(b - SHADOW, 0.0);
+        vec3 ring = mix(vec3(1.0, 0.702, 0.278) * 0.5, vec3(1.0, 0.957, 0.839), clamp(screen.x / b * 0.5 + 0.5, 0.0, 1.0));
+        colour += ring * (exp(-edge * 14.0) * 0.9 + exp(-edge * 4.0) * 0.25) * (1.0 - cover);
+        colour += vec3(0.498, 0.353, 0.941) * 0.2 * (1.0 - smoothstep(SHADOW, ZONE, b));
+    }
 
     colour = 1.0 - exp(-colour * 2.0); // les zones très vives saturent en douceur
     // Seule l'ombre est opaque (elle cache les projets de l'arrière) ; le reste n'est que lumière, ajoutée à la page

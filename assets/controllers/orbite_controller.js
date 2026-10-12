@@ -54,7 +54,7 @@ export default class extends Controller {
 
         const holeDt = dt * (0.3 + 0.7 * this.speed / SPEED);
         if (this.gl) {
-            this.gl.draw(x, y, r * 0.8, holeDt); // sa lueur déborde plus loin que le disque 2D
+            this.gl.draw(x, y, r, holeDt);
         } else {
             this.ctx.clearRect(0, 0, w, h);
             this.hole.draw(this.ctx, x, y, r, holeDt);
