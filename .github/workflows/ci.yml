@@ -134,8 +134,10 @@ jobs:
 
       # variables_order=EGPCS : sans « E », le serveur intégré ne passe pas l'environnement du job (DATABASE_URL)
       # à l'application, qui retombe sur la base du poste de dev (.env) : toute page lisant la base répondait 500
+      # Plusieurs workers : seul, le serveur intégré traite une requête à la fois, et l'envoi de l'arrivée
+      # (POST /arrivees, à chaque nouvel onglet) faisait caler les pages suivantes au-delà des délais des parcours
       - name: Démarrer le site
-        run: php -d variables_order=EGPCS -S 127.0.0.1:8000 -t public > /tmp/serveur.log 2>&1 &
+        run: PHP_CLI_SERVER_WORKERS=4 php -d variables_order=EGPCS -S 127.0.0.1:8000 -t public > /tmp/serveur.log 2>&1 &
 
       - name: Installer Playwright et axe-core
         run: |
