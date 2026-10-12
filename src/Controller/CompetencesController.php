@@ -32,10 +32,29 @@ final class CompetencesController extends AbstractController
     ];
 
     #[Route('/competences', name: 'app_competences')]
-    public function index(CategorieCompetenceRepository $categories): Response
+    public function index(CategorieCompetenceRepository $categories, Traduction $traduction): Response
     {
+        $categories = $categories->findAllWithCompetences();
+
+        // Système solaire en 3D (systeme_controller.js) : une orbite par catégorie, une planète par compétence,
+        // une lune par projet qui l'utilise
+        $systeme = array_map(fn ($categorie) => [
+            'nom' => $traduction->loc($categorie, 'nom'),
+            'couleur' => $categorie->getCouleur(),
+            'competences' => array_map(fn ($competence) => [
+                'id' => $competence->getId(),
+                'nom' => $traduction->loc($competence, 'nom'),
+                'cerveau' => $this->generateUrl('app_cerveau').'#'.rawurlencode($traduction->loc($competence, 'nom')),
+                'projets' => array_map(fn ($projet) => [
+                    'titre' => $traduction->loc($projet, 'titre'),
+                    'url' => $this->generateUrl('app_project', ['slug' => $projet->getSlug()]),
+                ], $competence->getProjets()->toArray()),
+            ], $categorie->getCompetences()->toArray()),
+        ], $categories);
+
         return $this->render('competences/index.html.twig', [
-            'categories' => $categories->findAllWithCompetences(),
+            'categories' => $categories,
+            'systeme' => $systeme,
         ]);
     }
 

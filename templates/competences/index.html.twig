@@ -13,6 +13,22 @@
     <a href="{{ path('app_comparateur') }}" class="btn btn-galactic btn-galactic-outline-light mt-3">{{ 'Comparer avec votre offre'|trans }}</a>
   </section>
 
+  {# Système solaire en 3D (systeme_controller.js). Décor : tout ce qu'il montre est dans la liste en dessous #}
+  <section class="systeme-solaire" data-controller="systeme" aria-hidden="true" hidden
+           data-systeme-categories-value="{{ systeme|json_encode }}"
+           data-systeme-texts-value="{{ {projets: 'Projets'|trans, aucun: 'Pas encore utilisée dans un projet'|trans, cerveau: 'Voir ce neurone dans mon cerveau'|trans}|json_encode }}">
+    <p class="systeme-aide">{{ 'Chaque planète est une compétence, ses lunes sont les projets qui l’utilisent. Clique dessus pour les visiter.'|trans }}</p>
+    <div class="systeme-scene" data-systeme-target="scene"></div>
+    <span class="systeme-etiquette" data-systeme-target="label" hidden></span>
+    <div class="systeme-fiche" data-systeme-target="card" hidden>
+      <button type="button" class="systeme-fermer" data-action="systeme#close" tabindex="-1" title="{{ 'Fermer'|trans }}">×</button>
+      <p class="systeme-categorie" data-systeme-target="category"></p>
+      <p class="systeme-nom" data-systeme-target="name"></p>
+      <ul data-systeme-target="projects"></ul>
+      <a data-systeme-target="brain" tabindex="-1"></a>
+    </div>
+  </section>
+
   <section class="skills-grid" data-controller="constellation">
     {% for categorie in categories %}
     {% set competences = categorie.competences %}
