@@ -16,6 +16,7 @@ import './scripts/sons.js';
 import './scripts/ambiance_page.js';
 import './scripts/palette.js';
 import './scripts/visite.js';
+import './scripts/arrivee.js';
 
 // Application installable : page hors ligne quand le réseau manque (public/sw.js)
 if ('serviceWorker' in navigator) {

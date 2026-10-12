@@ -322,6 +322,48 @@ final class SmokeTest extends WebTestCase
         $connection->executeStatement("UPDATE decouverte SET nombre = :n WHERE id = 'terminal'", ['n' => $avant]);
     }
 
+    /**
+     * Globe des visites : une arrivée = un fuseau horaire vérifié, ramené à son nom actuel, placé par PHP ;
+     * rien d'autre n'est gardé. Robots, fuseaux inconnus ou sans lieu, autres sites : refusés ou ignorés.
+     */
+    public function testLesArriveesSontPlaceesSurLeGlobe(): void
+    {
+        $client = static::createClient(server: self::NAVIGATEUR_FRANCAIS);
+        $connection = self::getContainer()->get(Connection::class);
+        $depuis = (int) $connection->fetchOne('SELECT COALESCE(MAX(id), 0) FROM arrivee');
+        $fuseaux = fn () => $connection->fetchFirstColumn('SELECT fuseau FROM arrivee WHERE id > :depuis ORDER BY id', ['depuis' => $depuis]);
+        $envoyer = fn (string $fuseau, array $server = []) => $client->request('POST', '/arrivees', server: $server + ['CONTENT_TYPE' => 'application/json'], content: json_encode(['fuseau' => $fuseau]));
+
+        $envoyer('Europe/Paris');
+        self::assertResponseStatusCodeSame(204);
+        $envoyer('Asia/Calcutta'); // ancien nom, encore donné par certains navigateurs
+        self::assertResponseStatusCodeSame(204);
+        self::assertSame(['Europe/Paris', 'Asia/Kolkata'], $fuseaux());
+
+        foreach (['Pas/Un_Fuseau', 'UTC', ''] as $fuseau) {
+            $envoyer($fuseau);
+            self::assertResponseStatusCodeSame(400, $fuseau);
+        }
+        $envoyer('Europe/Paris', ['HTTP_SEC_FETCH_SITE' => 'cross-site']);
+        self::assertResponseStatusCodeSame(403);
+        $envoyer('Europe/Paris', ['HTTP_USER_AGENT' => 'Googlebot/2.1']);
+        self::assertResponseStatusCodeSame(204);
+        self::assertCount(2, $fuseaux(), 'ni autre site, ni robot');
+
+        // Le globe ne reçoit que l'ordre, le fuseau et sa position : pas l'heure
+        $client->request('GET', '/arrivees?depuis='.$depuis);
+        $arrivees = json_decode($client->getResponse()->getContent(), true);
+        self::assertSame(['id', 'fuseau', 'lat', 'lon'], array_keys($arrivees[0]));
+        self::assertSame(['Europe/Paris', 48.87, 2.33], [$arrivees[0]['fuseau'], $arrivees[0]['lat'], $arrivees[0]['lon']]);
+
+        // En clair sous le globe, sur /stats
+        $client->request('GET', '/stats');
+        self::assertSelectorExists('.stats-globe[data-globe-url-value="/arrivees"]');
+        self::assertAnySelectorTextContains('.stats-listes li', 'Kolkata');
+
+        $connection->executeStatement('DELETE FROM arrivee WHERE id > :depuis', ['depuis' => $depuis]);
+    }
+
     /** Thème : posé dans <head> avant l'affichage (choix du visiteur, sinon le système), choix Système / Sombre / Clair dans les Réglages */
     public function testLeThemeSeChoisitDansLesReglages(): void
     {

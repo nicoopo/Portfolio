@@ -132,7 +132,9 @@ export function atmosphereMaterial(colour, sun) {
             void main() {
                 float rim = pow(1.0 - max(dot(vNormal, vView), 0.0), 3.0);
                 float day = 0.1 + 0.9 * smoothstep(-0.3, 0.5, vDay);
-                gl_FragColor = vec4(uColour * rim * day * uIntensity, 1.0);
+                vec3 glow = uColour * rim * day * uIntensity;
+                // Opacité = lueur : sur un canvas transparent, une opacité de 1 ferait un anneau sombre opaque
+                gl_FragColor = vec4(glow, clamp(max(glow.r, max(glow.g, glow.b)), 0.0, 1.0));
             }`,
         blending: THREE.AdditiveBlending,
         transparent: true,
