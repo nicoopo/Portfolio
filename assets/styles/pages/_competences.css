@@ -175,3 +175,101 @@
     padding-bottom: 40px;
   }
 }
+
+/* Système solaire en 3D (systeme_controller.js) : affiché seulement si WebGL marche */
+.systeme-solaire {
+  position: relative;
+  width: min(1100px, 92%);
+  margin: 0 auto var(--spacing-lg);
+}
+
+.systeme-aide {
+  text-align: center;
+  color: var(--texte-doux);
+}
+
+.systeme-scene {
+  /* Toute la largeur de la fenêtre, fond transparent : le système flotte dans le ciel de la page, sans cadre */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  height: clamp(420px, 60vw, 720px);
+}
+
+.systeme-scene canvas {
+  display: block;
+}
+
+.systeme-etiquette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  background: rgb(var(--surface-rgb) / 0.8);
+  border: 1px solid rgba(127, 90, 240, 0.45);
+  border-radius: 999px;
+}
+
+.systeme-fiche {
+  position: absolute;
+  top: 3rem;
+  right: 0;
+  width: min(300px, 90%);
+  padding: 1rem 1.2rem;
+  background: rgb(var(--surface-rgb) / 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(127, 90, 240, 0.45);
+  border-radius: 14px;
+  box-shadow: 0 0 25px rgba(127, 90, 240, 0.25);
+}
+
+.systeme-fiche[hidden] {
+  display: none;
+}
+
+.systeme-categorie {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.systeme-nom {
+  margin: 0.2rem 0 0.6rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.systeme-fiche ul {
+  padding-left: 1.1rem;
+}
+
+.systeme-aucun {
+  color: var(--texte-doux);
+  list-style: none;
+  margin-left: -1.1rem;
+}
+
+.systeme-fermer {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.6rem;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--color-text);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+/* Sur téléphone, la fiche passe sous la scène, sur toute la largeur */
+@media (max-width: 576px) {
+  .systeme-fiche {
+    position: static;
+    width: auto;
+  }
+}

@@ -13,7 +13,7 @@ set +a
 : "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env.local}"
 
 echo "==> Build de l'image prod"
-$COMPOSE build php
+$COMPOSE build --build-arg DBIP_MOIS="$(date +%Y-%m)" php # base DB-IP du mois (Dockerfile.prod)
 
 # Avant la recréation : le nouveau code ne tourne jamais sur l'ancienne base (migrations additives :
 # l'ancien container, encore en service, s'accommode d'une table ou d'une colonne en plus)

@@ -15,6 +15,12 @@ framework:
             policy: sliding_window
             limit: 5
             interval: '1 hour'
+        # Arrivées pour le globe de /stats (ArriveeController) : une seule limite pour tout le monde (sans IP),
+        # bien au-dessus du trafic du site, juste pour qu'un script ne remplisse pas la table
+        arrivees:
+            policy: sliding_window
+            limit: 60
+            interval: '1 minute'
 
 when@test:
     framework:
@@ -24,4 +30,6 @@ when@test:
             livre_or:
                 policy: no_limit
             contact:
+                policy: no_limit
+            arrivees:
                 policy: no_limit

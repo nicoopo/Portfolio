@@ -11,7 +11,9 @@
     <a href="{{ path('app_projects_frise') }}">{{ 'Voir mes projets dans le temps'|trans }} →</a></p>
 
   {# Les projets en orbite autour d'un trou noir. Décor : les mêmes liens sont dans la liste en dessous #}
-  <div class="projets-orbite" data-controller="orbite" aria-hidden="true">
+  {# Au clic sur le trou noir, la supernova avale puis souffle ces morceaux de la page #}
+  <div class="projets-orbite" data-controller="orbite" aria-hidden="true"
+       data-orbite-pieces-value=".navbar-galactic, .site-footer, .projets > h1, .projets-intro, .projets-groupe-titre, .projet-carte">
     <canvas data-orbite-target="canvas"></canvas>
     {% for projets in categories %}{% for projet in projets %}
     <a class="orbite-projet" href="{{ path('app_project', {slug: projet.slug}) }}" tabindex="-1" data-orbite-target="projet">

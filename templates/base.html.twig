@@ -16,6 +16,8 @@
     <script nonce="{{ csp_nonce('script') }}">try { document.documentElement.dataset.theme = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); } catch { document.documentElement.dataset.theme = 'dark'; }</script>
     {# Effet de transition de la page précédente (page_transition.js) : l'arrivée s'anime en CSS dès le premier affichage #}
     <script nonce="{{ csp_nonce('script') }}">try { const e = sessionStorage.getItem('trou-noir'); if (e) { document.documentElement.dataset.arrivee = e; sessionStorage.removeItem('trou-noir'); } } catch {}</script>
+    {# Arrivée d'un visiteur, pour le globe de /stats (assets/scripts/arrivee.js) #}
+    <meta name="arrivee" content="{{ path('app_arrivee') }}">
     <title>{% block title %}{{ 'Univers de Nico'|trans }}{% endblock %}</title>
     <meta name="description" content="{% block description %}{{ 'Portfolio de Nicolas Cataluna, développeur fullstack PHP / Symfony : compétences, projets, parcours, et un cerveau 3D interactif pour tout explorer.'|trans }}{% endblock %}">
     {# Aperçu des liens partagés (LinkedIn, Discord, Slack…) #}

@@ -397,6 +397,14 @@
   pointer-events: none;
 }
 
+/* Supernova (orbite_controller.js) : le trou noir avale toute la page, son canvas couvre l'écran (barre comprise) */
+.projets-orbite canvas.orbite-plein-ecran {
+  position: fixed;
+  z-index: 1100;
+  width: 100vw;
+  height: 100vh;
+}
+
 .orbite-projet {
   position: absolute;
   top: 0;
