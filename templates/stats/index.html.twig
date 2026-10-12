@@ -31,10 +31,12 @@
   {# Globe des arrivées (globe_controller.js) : décor, la liste « D'où l'on arrive » dit la même chose #}
   <section class="stats-globe" data-controller="globe" data-globe-url-value="{{ path('app_arrivees') }}" aria-hidden="true" hidden>
     <h2 class="stats-titre">{{ 'Arrivées sur le site'|trans }} · <span data-globe-target="total">0</span></h2>
-    <p class="stats-globe-aide">{{ 'Chaque colonne est un fuseau horaire : celui du navigateur des visiteurs arrivés ces 30 derniers jours. Une onde s’allume à chaque nouvelle arrivée.'|trans }}</p>
+    <p class="stats-globe-aide">{{ 'Chaque colonne est un fuseau horaire : celui du navigateur des visiteurs arrivés ces 30 derniers jours. Une onde s’allume à chaque nouvelle arrivée.'|trans }} {{ 'Les points bleus : le lieu approché d’après l’adresse IP, souvent la ville de l’opérateur.'|trans }}</p>
     <div class="stats-globe-scene" data-globe-target="scene"></div>
     <span class="systeme-etiquette" data-globe-target="label" hidden></span>
   </section>
+  {# Licence CC BY 4.0 de la base DB-IP Lite ; hors de la section aria-hidden, pour que le lien reste accessible #}
+  <p class="stats-globe-aide"><a href="https://db-ip.com" rel="noopener">IP Geolocation by DB-IP</a></p>
 
   <div class="stats-listes">
     <section>

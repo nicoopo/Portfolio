@@ -323,8 +323,8 @@ final class SmokeTest extends WebTestCase
     }
 
     /**
-     * Globe des visites : une arrivée = un fuseau horaire vérifié, ramené à son nom actuel, placé par PHP ;
-     * rien d'autre n'est gardé. Robots, fuseaux inconnus ou sans lieu, autres sites : refusés ou ignorés.
+     * Globe des visites : une arrivée = un fuseau horaire vérifié, ramené à son nom actuel, placé par PHP, et le lieu
+     * arrondi de l'IP (base d'essai de MaxMind) ; rien d'autre n'est gardé, pas l'IP. Robots, fuseaux inconnus ou sans lieu, autres sites : refusés ou ignorés.
      */
     public function testLesArriveesSontPlaceesSurLeGlobe(): void
     {
@@ -339,6 +339,9 @@ final class SmokeTest extends WebTestCase
         $envoyer('Asia/Calcutta'); // ancien nom, encore donné par certains navigateurs
         self::assertResponseStatusCodeSame(204);
         self::assertSame(['Europe/Paris', 'Asia/Kolkata'], $fuseaux());
+        $envoyer('Europe/London', ['REMOTE_ADDR' => '81.2.69.142']); // Londres dans la base d'essai
+        self::assertResponseStatusCodeSame(204);
+        self::assertSame([51.5, -0.1], array_map('floatval', $connection->fetchNumeric('SELECT ip_lat, ip_lon FROM arrivee ORDER BY id DESC LIMIT 1')));
 
         foreach (['Pas/Un_Fuseau', 'UTC', ''] as $fuseau) {
             $envoyer($fuseau);
@@ -348,13 +351,14 @@ final class SmokeTest extends WebTestCase
         self::assertResponseStatusCodeSame(403);
         $envoyer('Europe/Paris', ['HTTP_USER_AGENT' => 'Googlebot/2.1']);
         self::assertResponseStatusCodeSame(204);
-        self::assertCount(2, $fuseaux(), 'ni autre site, ni robot');
+        self::assertCount(3, $fuseaux(), 'ni autre site, ni robot');
 
-        // Le globe ne reçoit que l'ordre, le fuseau et sa position : pas l'heure
+        // Le globe ne reçoit que l'ordre, le fuseau, sa position et le lieu de l'IP : pas l'heure
         $client->request('GET', '/arrivees?depuis='.$depuis);
         $arrivees = json_decode($client->getResponse()->getContent(), true);
-        self::assertSame(['id', 'fuseau', 'lat', 'lon'], array_keys($arrivees[0]));
-        self::assertSame(['Europe/Paris', 48.87, 2.33], [$arrivees[0]['fuseau'], $arrivees[0]['lat'], $arrivees[0]['lon']]);
+        self::assertSame(['id', 'fuseau', 'lat', 'lon', 'ip'], array_keys($arrivees[0]));
+        self::assertSame(['Europe/Paris', 48.87, 2.33, null], [$arrivees[0]['fuseau'], $arrivees[0]['lat'], $arrivees[0]['lon'], $arrivees[0]['ip']]);
+        self::assertSame(['lat' => 51.5, 'lon' => -0.1], $arrivees[2]['ip']);
 
         // En clair sous le globe, sur /stats
         $client->request('GET', '/stats');

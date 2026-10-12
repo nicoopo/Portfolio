@@ -55,6 +55,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # ------------------------------------------------
 COPY docker/apache/vhost.conf /etc/apache2/sites-available/000-default.conf
 
+# ------------------------------------------------
+# Base DB-IP Lite des villes (globe de /stats, CC BY 4.0) : celle du mois,
+# retéléchargée quand DBIP_MOIS change (scripts/deploy-prod.sh), sinon en cache.
+# Échec du téléchargement = pas de lieu par IP, le site part quand même.
+# ------------------------------------------------
+ARG DBIP_MOIS
+RUN mkdir -p /usr/share/dbip     && { curl -fsSL "https://download.db-ip.com/free/dbip-city-lite-${DBIP_MOIS}.mmdb.gz" | gunzip > /usr/share/dbip/villes.mmdb          || { echo "Base DB-IP ${DBIP_MOIS} introuvable : pas de lieu par IP"; rm -f /usr/share/dbip/villes.mmdb; }; }
+
 WORKDIR /var/www/symfony
 
 # ------------------------------------------------

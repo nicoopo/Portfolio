@@ -330,4 +330,5 @@
 "Pas encore utilisée dans un projet": "Not used in a project yet"
 "Arrivées sur le site": "Arrivals on the site"
 "Chaque colonne est un fuseau horaire : celui du navigateur des visiteurs arrivés ces 30 derniers jours. Une onde s’allume à chaque nouvelle arrivée.": "Each column is a time zone: that of the browser of visitors who arrived in the last 30 days. A wave lights up with each new arrival."
+"Les points bleus : le lieu approché d’après l’adresse IP, souvent la ville de l’opérateur.": "The blue dots: the approximate place according to the IP address, often the provider's city."
 "D’où l’on arrive": "Where people arrive from"

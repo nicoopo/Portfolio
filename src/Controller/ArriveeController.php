@@ -5,11 +5,13 @@ namespace App\Controller;
 use App\Entity\Arrivee;
 use App\EventListener\StatistiquesListener;
 use Doctrine\DBAL\Connection;
+use MaxMind\Db\Reader;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -17,6 +19,8 @@ use Symfony\Component\Routing\Attribute\Route;
  * Globe des visites (/stats, globe_controller.js) : arrivee.js signale l'arrivée d'un visiteur avec le fuseau horaire
  * de son navigateur ; le globe lit les arrivées des 30 derniers jours, puis les nouvelles au fil de l'eau.
  * Le fuseau est placé sur le globe par PHP (DateTimeZone::getLocation) : la ville de référence du fuseau.
+ * En plus, un lieu approché d'après l'IP (base DB-IP Lite, sur le serveur) : seules ses coordonnées arrondies sont
+ * gardées, jamais l'IP.
  */
 final class ArriveeController extends AbstractController
 {
@@ -25,7 +29,7 @@ final class ArriveeController extends AbstractController
      * (config/packages/rate_limiter.yaml), sans IP : contre un flot de fausses arrivées, pas contre une personne.
      */
     #[Route('/arrivees', name: 'app_arrivee', methods: ['POST'])]
-    public function signaler(Request $request, Connection $connection, Security $security, RateLimiterFactoryInterface $arriveesLimiter): Response
+    public function signaler(Request $request, Connection $connection, Security $security, RateLimiterFactoryInterface $arriveesLimiter, #[Autowire(param: 'app.dbip_villes')] string $dbip): Response
     {
         if ('same-origin' !== $request->headers->get('Sec-Fetch-Site', 'same-origin')) {
             return new Response(null, Response::HTTP_FORBIDDEN);
@@ -42,7 +46,11 @@ final class ArriveeController extends AbstractController
             return new Response(null, Response::HTTP_TOO_MANY_REQUESTS);
         }
 
-        $connection->executeStatement('INSERT INTO arrivee (moment, fuseau) VALUES (CURRENT_TIMESTAMP(0), :fuseau)', ['fuseau' => $fuseau]);
+        $ip = self::lieuIp($request->getClientIp(), $dbip);
+        $connection->executeStatement(
+            'INSERT INTO arrivee (moment, fuseau, ip_lat, ip_lon) VALUES (CURRENT_TIMESTAMP(0), :fuseau, :lat, :lon)',
+            ['fuseau' => $fuseau, 'lat' => $ip['lat'] ?? null, 'lon' => $ip['lon'] ?? null],
+        );
         $connection->executeStatement("DELETE FROM arrivee WHERE moment < CURRENT_TIMESTAMP - INTERVAL '".Arrivee::JOURS." days'");
 
         return new Response(null, Response::HTTP_NO_CONTENT);
@@ -50,19 +58,20 @@ final class ArriveeController extends AbstractController
 
     /**
      * Arrivées postérieures à ?depuis= (identifiant de la dernière reçue), ou celles des 30 derniers jours.
-     * Pas l'heure exacte : seulement l'ordre, la position et le fuseau.
+     * Pas l'heure exacte : seulement l'ordre, la position, le fuseau et le lieu d'après l'IP (ou null).
      */
     #[Route('/arrivees', name: 'app_arrivees', methods: ['GET'])]
     public function lister(Request $request, Connection $connection): JsonResponse
     {
         $lignes = $connection->fetchAllAssociative(
-            "SELECT id, fuseau FROM arrivee WHERE id > :depuis AND moment >= CURRENT_TIMESTAMP - INTERVAL '".Arrivee::JOURS." days' ORDER BY id LIMIT 2000",
+            "SELECT id, fuseau, ip_lat, ip_lon FROM arrivee WHERE id > :depuis AND moment >= CURRENT_TIMESTAMP - INTERVAL '".Arrivee::JOURS." days' ORDER BY id LIMIT 2000",
             ['depuis' => $request->query->getInt('depuis')],
         );
         $arrivees = [];
         foreach ($lignes as $ligne) {
             if ($position = self::position($ligne['fuseau'])) {
-                $arrivees[] = ['id' => (int) $ligne['id'], 'fuseau' => $ligne['fuseau'], ...$position];
+                $ip = null !== $ligne['ip_lat'] ? ['lat' => (float) $ligne['ip_lat'], 'lon' => (float) $ligne['ip_lon']] : null;
+                $arrivees[] = ['id' => (int) $ligne['id'], 'fuseau' => $ligne['fuseau'], ...$position, 'ip' => $ip];
             }
         }
 
@@ -104,5 +113,23 @@ final class ArriveeController extends AbstractController
         }
 
         return ['lat' => round($lieu['latitude'], 2), 'lon' => round($lieu['longitude'], 2)];
+    }
+
+    /**
+     * Lieu approché de l'IP (souvent la ville de l'opérateur), arrondi au dixième de degré (~10 km) ; null sans base,
+     * pour une IP locale ou inconnue. L'IP ne sort pas d'ici.
+     */
+    public static function lieuIp(?string $ip, string $base): ?array
+    {
+        if (!$ip || !is_file($base)) {
+            return null;
+        }
+        try {
+            $lieu = (new Reader($base))->get($ip)['location'] ?? null;
+        } catch (\Exception) { // base illisible, IP mal formée : pas de lieu, l'arrivée compte quand même
+            return null;
+        }
+
+        return isset($lieu['latitude'], $lieu['longitude']) ? ['lat' => round($lieu['latitude'], 1), 'lon' => round($lieu['longitude'], 1)] : null;
     }
 }
