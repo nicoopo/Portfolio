@@ -190,6 +190,10 @@
 
 .systeme-scene {
   height: clamp(360px, 55vw, 620px);
+  overflow: hidden;
+  border: 1px solid rgba(127, 90, 240, 0.35);
+  border-radius: 20px;
+  box-shadow: 0 0 40px rgba(127, 90, 240, 0.2);
 }
 
 .systeme-scene canvas {
