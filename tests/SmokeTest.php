@@ -73,6 +73,10 @@ final class SmokeTest extends WebTestCase
         self::assertSame($crawler->filter('.skill-card')->count(), $crawler->filter('svg.ciel-competences a.etoile')->count());
         self::assertSame($crawler->filter('.skill-card a.skill-nom')->extract(['href']), $crawler->filter('svg.ciel-competences a.etoile')->extract(['href']));
         self::assertGreaterThan(0, $crawler->filter('.skill-projets a[href^="/projects/"]')->count());
+        // Système solaire : une planète par compétence, avec le même lien vers le cerveau que sa carte
+        $systeme = json_decode($crawler->filter('.systeme-solaire')->attr('data-systeme-categories-value'), true);
+        $planetes = array_merge(...array_column($systeme, 'competences'));
+        self::assertSame($crawler->filter('.skill-card a.skill-nom')->extract(['href']), array_column($planetes, 'cerveau'));
     }
 
     /** Chaque carte de la liste mène à la page de son projet ; texte long, liens et compétences y sont */
