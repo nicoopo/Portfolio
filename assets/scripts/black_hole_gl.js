@@ -18,6 +18,7 @@ const FRAGMENT = `
 precision highp float;
 
 uniform vec2 uCenter;   // centre du trou noir, en pixels du canvas (origine en bas à gauche)
+uniform vec2 uSize;     // taille du canvas, en pixels
 uniform float uRadius;  // rayon apparent de l'ombre, en pixels
 uniform float uTime;
 uniform float uTilt;    // élévation de la caméra au-dessus du disque, en radians
@@ -209,8 +210,9 @@ vec3 supernova(vec2 px, float s) {
                 * smoothstep(0.3, 1.5, s) * (1.0 - smoothstep(3.5, 5.5, s)) * 0.35;
 
     // S'éteint avant les bords du canvas, qu'on ne doit jamais voir
-    float margin = min(uCenter.x - abs(px.x), uCenter.y - abs(px.y));
-    float edges = smoothstep(0.0, uCenter.y * 0.6, margin);
+    vec2 pos = gl_FragCoord.xy;
+    float margin = min(min(pos.x, uSize.x - pos.x), min(pos.y, uSize.y - pos.y));
+    float edges = smoothstep(0.0, min(uSize.x, uSize.y) * 0.3, margin);
     return (palette(tint) * (shell * 1.6 + filaments) * fade + vec3(1.0, 0.957, 0.839) * core + palette(0.75) * cloud) * edges;
 }
 
@@ -236,8 +238,9 @@ void main() {
 /**
  * Trou noir WebGL dans `canvas`, ou null si le navigateur n'a pas WebGL.
  * resize() suit la taille affichée ; draw(x, y, r, dt, tilt) : centre et rayon de l'ombre en pixels CSS, inclinaison
- * de la vue en radians (au-dessus du disque) ; il renvoie { pull, events } : pull = rayon de l'orbite des projets
- * (1 au repos, 0 quand tout est avalé, plus de 1 quand l'explosion les souffle), events = étapes franchies
+ * de la vue en radians (au-dessus du disque) ; il renvoie { pull, suck, events } : pull = rayon de l'orbite des projets
+ * (1 au repos, 0 quand tout est avalé, plus de 1 quand l'explosion les souffle), suck = avancée de l'aspiration
+ * avant l'explosion (0 → 1, pour avaler la page morceau par morceau ; 0 sinon), events = étapes franchies
  * ('boom', 'birth', 'reborn'), pour les sons. burst() : supernova (trou noir) ou effondrement (soleil). destroy() à la fin.
  */
 export function createBlackHoleGL(canvas) {
@@ -252,7 +255,7 @@ export function createBlackHoleGL(canvas) {
     const position = gl.getAttribLocation(program, 'position');
     gl.enableVertexAttribArray(position);
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
-    const names = ['uCenter', 'uRadius', 'uTime', 'uTilt', 'uInflow', 'uGrains', 'uFlash', 'uHole', 'uSpark', 'uNova', 'uSun'];
+    const names = ['uCenter', 'uSize', 'uRadius', 'uTime', 'uTilt', 'uInflow', 'uGrains', 'uFlash', 'uHole', 'uSpark', 'uNova', 'uSun'];
     const u = Object.fromEntries(names.map((n) => [n, gl.getUniformLocation(program, n)]));
 
     // Le shader suit des centaines de pas par pixel : densité 1, net sans faire chauffer la carte
@@ -287,6 +290,7 @@ export function createBlackHoleGL(canvas) {
             }
             time += dt * fx.spin;
             gl.uniform2f(u.uCenter, x * ratio, canvas.height - y * ratio);
+            gl.uniform2f(u.uSize, canvas.width, canvas.height);
             gl.uniform1f(u.uRadius, r * ratio);
             gl.uniform1f(u.uTime, time);
             gl.uniform1f(u.uTilt, tilt);
@@ -294,7 +298,7 @@ export function createBlackHoleGL(canvas) {
                 gl.uniform1f(u[`u${name[0].toUpperCase()}${name.slice(1)}`], fx[name]);
             }
             gl.drawArrays(gl.TRIANGLES, 0, 3);
-            return { pull: fx.pull, events };
+            return { pull: fx.pull, suck: fx.suck, events };
         },
         /** Rend le contexte WebGL au navigateur, qui n'en garde qu'une poignée à la fois */
         destroy() {
@@ -305,8 +309,8 @@ export function createBlackHoleGL(canvas) {
 
 // Au repos : le trou noir et son disque, ou le soleil
 const REST = {
-    hole: { spin: 1, inflow: 0, grains: 1, flash: 0, hole: 1, spark: 0, nova: -1, sun: 0, pull: 1 },
-    sun: { spin: 1, inflow: 0, grains: 0, flash: 0, hole: 0, spark: 0, nova: -1, sun: 1, pull: 1 },
+    hole: { spin: 1, inflow: 0, grains: 1, flash: 0, hole: 1, spark: 0, nova: -1, sun: 0, pull: 1, suck: 0 },
+    sun: { spin: 1, inflow: 0, grains: 0, flash: 0, hole: 0, spark: 0, nova: -1, sun: 1, pull: 1, suck: 0 },
 };
 
 const SUCK = 1.8;   // aspiration du disque, de plus en plus vite
@@ -322,11 +326,11 @@ const SUPERNOVA = {
     at(s) {
         if (s < SUCK) {
             const e = (s / SUCK) ** 2;
-            return { spin: 1 + 8 * e, inflow: e * INFLOW, flash: Math.max(0, (s - SUCK + 0.3) / 0.3), pull: 1 - 0.25 * e };
+            return { spin: 1 + 8 * e, inflow: e * INFLOW, flash: Math.max(0, (s - SUCK + 0.3) / 0.3), pull: 1 - 0.25 * e, suck: 0.3 * e };
         }
         if (s < BOOM) {
             const k = (s - SUCK) / IMPLODE;
-            return { spin: 9, grains: 0, flash: 1, hole: 1 - k * k, spark: 1.5 * k * k, pull: 0.75 * (1 - k) ** 2 };
+            return { spin: 9, grains: 0, flash: 1, hole: 1 - k * k, spark: 1.5 * k * k, pull: 0.75 * (1 - k) ** 2, suck: 0.3 + 0.7 * k };
         }
         // Explosion : les projets, partis du centre, sont soufflés au-delà de leur orbite puis y reviennent (ressort amorti)
         const p = s - BOOM;

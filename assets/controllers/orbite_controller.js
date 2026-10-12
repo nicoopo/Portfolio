@@ -11,11 +11,14 @@ const TILT = 0.2;  // inclinaison de la vue sur le disque du trou noir (shader),
 /**
  * Page projets : les projets tournent autour d'un trou noir. Ceux de l'arrière passent
  * derrière l'ombre, ceux de devant par-dessus ; l'orbite s'arrête au survol.
- * Trou noir en shader (black_hole_gl.js) : un clic dessus le fait imploser en supernova, qui avale puis souffle
- * les projets et laisse un soleil ; un clic sur le soleil le refait trou noir. En qualité basse ou sans WebGL, sa version 2D.
+ * Trou noir en shader (black_hole_gl.js) : un clic dessus le fait imploser en supernova, qui avale toute la page
+ * (les morceaux désignés par pieces, un sélecteur CSS) puis la souffle et laisse un soleil ; un clic sur le soleil
+ * le refait trou noir. Pendant ces séquences, le canvas couvre tout l'écran.
+ * En qualité basse ou sans WebGL, sa version 2D.
  */
 export default class extends Controller {
     static targets = ['canvas', 'projet'];
+    static values = { pieces: String };
 
     connect() {
         this.gl = basseQualite() ? null : createBlackHoleGL(this.canvasTarget);
@@ -46,6 +49,7 @@ export default class extends Controller {
             this.element.addEventListener('click', (e) => {
                 if (!this.onHole(e) || this.gl.busy) return;
                 this.gl.burst();
+                this.unleash();
                 sons.trouNoir();
             });
         }
@@ -61,7 +65,50 @@ export default class extends Controller {
     disconnect() {
         cancelAnimationFrame(this.frame);
         window.removeEventListener('resize', this.resize);
+        if (this.pieces) this.settle();
         this.gl?.destroy();
+    }
+
+    /** Début d'une séquence : le canvas couvre l'écran, les morceaux de la page sont repérés autour du trou noir */
+    unleash() {
+        this.canvasTarget.classList.add('orbite-plein-ecran');
+        this.gl.resize();
+        const box = this.element.getBoundingClientRect();
+        const holeX = box.left + box.width / 2, holeY = box.top + box.height / 2;
+        this.pieces = [...document.querySelectorAll(this.piecesValue || ':not(*)')]
+            .filter((el) => !this.element.contains(el) && el.getClientRects().length)
+            .map((el) => {
+                const rect = el.getBoundingClientRect();
+                const dx = holeX - (rect.left + rect.width / 2), dy = holeY - (rect.top + rect.height / 2);
+                el.style.transition = 'none'; // pas de retard sur les effets de survol
+                el.style.animation = 'none'; // une animation CSS (flottement de la barre) l'emporterait sur transform
+                el.style.willChange = 'transform, opacity';
+                return { el, dx, dy, distance: Math.hypot(dx, dy), twist: (Math.random() < 0.5 ? -1 : 1) * (90 + Math.random() * 180) };
+            });
+        const farthest = Math.max(1, ...this.pieces.map((piece) => piece.distance));
+        this.pieces.forEach((piece) => { piece.delay = 0.6 * piece.distance / farthest; }); // les plus proches partent d'abord
+    }
+
+    /** Fin de la séquence : la page et le canvas reprennent leur place */
+    settle() {
+        this.pieces.forEach(({ el }) => { ['transform', 'opacity', 'transition', 'animation', 'willChange'].forEach((p) => { el.style[p] = ''; }); });
+        this.pieces = null;
+        this.canvasTarget.classList.remove('orbite-plein-ecran');
+        this.gl.resize();
+    }
+
+    /**
+     * Morceaux de la page : avant l'explosion, chacun est aspiré à son tour (suck, de 0 à 1) en tournoyant ;
+     * ensuite, ils suivent tous pull (0 = dans le trou, plus de 1 = soufflés au-delà de leur place)
+     */
+    movePieces({ suck, pull }) {
+        this.pieces.forEach(({ el, dx, dy, twist, delay }) => {
+            const a = Math.min(Math.max((suck - delay) / (1 - delay), 0), 1);
+            const t = suck > 0 ? a * a : 1 - pull; // part du chemin vers le trou
+            const inside = Math.min(Math.max(t, 0), 1);
+            el.style.transform = `translate(${dx * t}px, ${dy * t}px) rotate(${twist * inside}deg) scale(${1 - 0.95 * inside})`;
+            el.style.opacity = Math.min(Math.max((1 - t) * 5, 0), 1);
+        });
     }
 
     /** Centre et rayon de l'ombre du trou noir, en pixels dans l'orbite */
@@ -89,9 +136,14 @@ export default class extends Controller {
         let pull = 1; // rayon de l'orbite : 0 quand le trou noir a tout avalé, plus de 1 quand l'explosion souffle
         if (this.gl) {
             this.tilt += (this.targetTilt - this.tilt) * Math.min(dt * 3, 1);
-            const fx = this.gl.draw(x, y, r, holeDt, this.tilt);
+            // En plein écran, le trou noir reste au centre de l'orbite, là où elle est dans la fenêtre
+            const box = this.pieces ? this.element.getBoundingClientRect() : { left: 0, top: 0 };
+            const fx = this.gl.draw(box.left + x, box.top + y, r, holeDt, this.tilt);
             pull = fx.pull;
             fx.events.forEach((event) => ({ boom: sons.supernova, birth: sons.constellation, reborn: sons.impact })[event]());
+            if (this.pieces) {
+                if (this.gl.busy) this.movePieces(fx); else this.settle();
+            }
         } else {
             this.ctx.clearRect(0, 0, w, h);
             this.hole.draw(this.ctx, x, y, r, holeDt);
