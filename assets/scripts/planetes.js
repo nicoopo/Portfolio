@@ -1,7 +1,7 @@
 /*
  * Planètes du système solaire des compétences (systeme_controller.js) : textures dessinées au chargement
  * (géante gazeuse à bandes et tempêtes, planète rocheuse à cratères, planète de glace), atmosphère qui
- * s'allume sur le bord, anneaux, soleil en shader qui bouillonne et ciel étoilé avec sa Voie lactée.
+ * s'allume sur le bord, anneaux et soleil en shader qui bouillonne.
  */
 import * as THREE from 'three';
 
@@ -207,25 +207,4 @@ export function sunMaterial() {
                 gl_FragColor = vec4(colour * 1.6, 1.0);
             }`,
     });
-}
-
-/** Ciel : étoiles de couleurs et d'éclats variés, plus denses le long d'une bande (la Voie lactée) */
-export function starField(count, radius, seed) {
-    const rand = random(seed);
-    const positions = new Float32Array(count * 3), colours = new Float32Array(count * 3);
-    const tints = [new THREE.Color(0xffffff), new THREE.Color(0xcfd8ff), new THREE.Color(0xfff1d6), new THREE.Color(0xffd2c2)];
-    const band = new THREE.Euler(0.5, 0, 0.35); // inclinaison de la Voie lactée
-    for (let i = 0; i < count; i++) {
-        const milky = rand() < 0.55;
-        const theta = rand() * Math.PI * 2;
-        // Dans la bande : latitude resserrée autour de 0 ; ailleurs : uniforme sur la sphère
-        const lat = milky ? (rand() + rand() + rand() - 1.5) * 0.25 : Math.asin(rand() * 2 - 1);
-        const v = new THREE.Vector3(Math.cos(lat) * Math.cos(theta), Math.sin(lat), Math.cos(lat) * Math.sin(theta)).applyEuler(band);
-        v.multiplyScalar(radius).toArray(positions, i * 3);
-        tints[Math.floor(rand() * tints.length)].clone().multiplyScalar(0.35 + rand() ** 3 * 0.9).toArray(colours, i * 3);
-    }
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colours, 3));
-    return geometry;
 }

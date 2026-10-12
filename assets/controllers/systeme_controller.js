@@ -2,12 +2,8 @@
 import { Controller } from '@hotwired/stimulus';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { dotTexture, glowSprite } from '../cerveau/textures.js';
-import { atmosphereMaterial, planetTexture, random, ringMesh, starField, sunMaterial } from '../scripts/planetes.js';
+import { atmosphereMaterial, planetTexture, random, ringMesh, sunMaterial } from '../scripts/planetes.js';
 import { basseQualite } from '../scripts/preferences.js';
 import { reducedMotion } from '../scripts/black_hole.js';
 
@@ -15,6 +11,10 @@ const SUN_RADIUS = 2;
 const FIRST_ORBIT = 5.5, ORBIT_GAP = 3.2; // rayon de l'orbite de chaque catégorie
 const ORBIT_SPEED = 4;        // vitesse angulaire = ORBIT_SPEED / rayon^1,5 (Kepler) : un tour en 20 s au plus près, 2 min au plus loin
 const BELT = 13.5;            // ceinture d'astéroïdes, entre la 3e et la 4e orbite
+// Le système file dans la galaxie, en biais par rapport au plan des orbites (60°) : chaque planète trace une hélice
+const DRIFT = new THREE.Vector3(0.5, 0.866, 0).multiplyScalar(1.6);
+const TRAIL_S = 7, TRAIL_STEP = 0.06; // durée des traînées, en secondes, et intervalle entre deux points
+const DUST_BOX = 70;          // poussière qui défile en sens inverse, dans un cube de ce côté autour du soleil
 const HOME = new THREE.Vector3(0, 17, 36);  // caméra au repos : tout le système, vu un peu d'en haut
 const ORIGIN = new THREE.Vector3();
 const FLIGHT_SPEED = 3;       // vitesse des vols de caméra (plus grand = plus rapide)
@@ -23,7 +23,8 @@ const CLICK_TOLERANCE_PX = 5; // au-delà, c'est un glisser (rotation de la vue)
 /**
  * Page Compétences : système solaire en 3D. Une orbite par catégorie (sa couleur), une planète par compétence
  * (plus grosse si elle sert dans plus de projets : géante gazeuse, souvent avec des anneaux), une lune par projet.
- * Tout tourne : les planètes autour du soleil et sur elles-mêmes, les lunes autour de leur planète.
+ * Tout tourne : les planètes autour du soleil et sur elles-mêmes, les lunes autour de leur planète ; et le système
+ * file dans l'espace : les planètes laissent des traînées en hélice, la poussière défile.
  * Survol : nom ; clic sur une planète : la caméra la rejoint et la suit, sa fiche s'ouvre (Échap ou clic dans
  * le vide pour revenir) ; clic sur une lune : page du projet. Survoler une compétence de la liste allume sa planète.
  * Sans WebGL, la section reste cachée : la liste en dessous dit tout.
@@ -34,7 +35,8 @@ export default class extends Controller {
 
     connect() {
         try {
-            this.renderer = new THREE.WebGLRenderer({ antialias: !basseQualite() });
+            // Transparent : le fond de la page (et ses étoiles) sert d'espace, sans cadre autour du système
+            this.renderer = new THREE.WebGLRenderer({ antialias: !basseQualite(), alpha: true });
         } catch {
             return;
         }
@@ -44,7 +46,6 @@ export default class extends Controller {
         this.sceneTarget.appendChild(this.renderer.domElement);
 
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x030208); // l'espace profond, même sur le thème clair
         this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 300);
         this.camera.position.copy(HOME);
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -63,14 +64,6 @@ export default class extends Controller {
             this.renderer.domElement.style.touchAction = 'pan-y';
         }
         this.controls.addEventListener('start', () => { this.flight = null; });
-
-        // Lueur autour du soleil et des atmosphères ; coupée en qualité basse et sur petit écran (GPU modestes)
-        this.composer = new EffectComposer(this.renderer);
-        this.composer.addPass(new RenderPass(this.scene, this.camera));
-        if (!basseQualite() && !window.matchMedia('(max-width: 576px)').matches) {
-            this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(1, 1), 0.55, 0.4, 0.7) /* force, rayon, seuil */);
-        }
-        this.composer.addPass(new OutputPass());
 
         this.build();
         this.bind();
@@ -91,7 +84,7 @@ export default class extends Controller {
             if (!this.visible) return;
             this.animate(Math.min(this.timer.getDelta(), 0.1));
             this.controls.update();
-            this.composer.render();
+            this.renderer.render(this.scene, this.camera);
             this.placeLabel();
         };
         loop();
@@ -111,8 +104,6 @@ export default class extends Controller {
             object.material?.dispose();
         });
         this.texture.dispose();
-        this.composer.passes.forEach((pass) => pass.dispose());
-        this.composer.dispose();
         this.renderer.dispose();
         this.renderer.domElement.remove();
     }
@@ -124,17 +115,16 @@ export default class extends Controller {
     build() {
         const low = basseQualite();
         this.texture = dotTexture();
-        this.scene.add(new THREE.AmbientLight(0xffffff, 0.06)); // face nuit presque noire
+        // Face nuit presque noire sur le ciel sombre ; sur le thème clair, une tache noire : on l'éclaire (animate)
+        this.ambient = new THREE.AmbientLight(0xffffff, 0.06);
+        this.scene.add(this.ambient);
         this.scene.add(new THREE.PointLight(0xfff1dc, 2.6, 0, 0)); // le soleil éclaire tout le système, sans atténuation
 
-        this.scene.add(new THREE.Points(starField(low ? 1500 : 4000, 120, 7), new THREE.PointsMaterial({
-            size: 1.6, sizeAttenuation: false, map: this.texture, vertexColors: true, transparent: true, depthWrite: false,
-        })));
-
         this.sun = new THREE.Mesh(new THREE.SphereGeometry(SUN_RADIUS, 64, 48), sunMaterial());
-        this.sun.add(glowSprite(this.texture, 0xff8a2a, SUN_RADIUS * 6));
-        const corona = glowSprite(this.texture, 0xffb347, SUN_RADIUS * 9);
-        corona.material.opacity = 0.12;
+        // Lueur du soleil : un halo serré et vif, une couronne large et pâle
+        this.sun.add(glowSprite(this.texture, 0xff8a2a, SUN_RADIUS * 5));
+        const corona = glowSprite(this.texture, 0xffb347, SUN_RADIUS * 10);
+        corona.material.opacity = 0.3;
         this.sun.add(corona);
         this.scene.add(this.sun);
 
@@ -153,7 +143,7 @@ export default class extends Controller {
             // Chaque orbite légèrement inclinée : on sent le volume quand la vue tourne
             const plane = new THREE.Group();
             plane.rotation.set((i % 2 ? 1 : -1) * 0.04 * i, 0, 0.03 * i);
-            plane.add(new THREE.LineLoop(circle(radius), new THREE.LineBasicMaterial({ color: colour, transparent: true, opacity: 0.16 })));
+            plane.add(new THREE.LineLoop(circle(radius), new THREE.LineBasicMaterial({ color: colour, transparent: true, opacity: 0.1 })));
             this.scene.add(plane);
 
             categorie.competences.forEach((competence, j) => {
@@ -197,6 +187,86 @@ export default class extends Controller {
             });
         });
         this.pickable = [...this.planets.map(({ body }) => body), ...this.moons.map(({ moon }) => moon)];
+
+        // Traînées : où était chaque planète, reculé d'autant que le système a avancé depuis
+        const points = Math.ceil(TRAIL_S / TRAIL_STEP) + 2;
+        this.trails = this.planets.map(({ body }) => {
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(points * 3), 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(points * 4), 4)); // l'alpha fait le fondu
+            geometry.setDrawRange(0, 0);
+            const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false }));
+            line.frustumCulled = false; // ses points changent à chaque image
+            this.scene.add(line);
+            return { line, holder: body.userData.holder, colour: new THREE.Color(body.userData.categorie.couleur), samples: [] };
+        });
+        this.scene.add(this.sunTrail());
+        this.dust = this.spaceDust(low ? 250 : 600);
+        this.scene.add(this.dust);
+        this.elapsed = 0;
+        this.lastSample = -Infinity;
+    }
+
+    /** Sillage du soleil : un trait lumineux droit, qui s'efface en arrière */
+    sunTrail() {
+        const count = 24, positions = [], colours = [];
+        for (let i = 0; i < count; i++) {
+            const age = (i / (count - 1)) * TRAIL_S;
+            positions.push(...DRIFT.clone().multiplyScalar(-age).toArray());
+            colours.push(...new THREE.Color(0xffb347).toArray(), (1 - age / TRAIL_S) ** 2);
+        }
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colours, 4));
+        return new THREE.Line(geometry, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false }));
+    }
+
+    /** Poussière proche, qui défile à l'opposé du mouvement : on sent la vitesse */
+    spaceDust(count) {
+        const rand = random(9);
+        const positions = new Float32Array(count * 3);
+        for (let i = 0; i < positions.length; i++) positions[i] = (rand() - 0.5) * DUST_BOX;
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const dust = new THREE.Points(geometry, new THREE.PointsMaterial({
+            size: 0.08, color: 0x9fa8da, map: this.texture, transparent: true, opacity: 0.6, depthWrite: false,
+        }));
+        dust.frustumCulled = false;
+        return dust;
+    }
+
+    /** Avance d'un pas le voyage du système : nouveaux points des traînées, poussière qui défile */
+    travel(delta) {
+        this.elapsed += delta;
+        const now = this.elapsed;
+        if (now - this.lastSample >= TRAIL_STEP) {
+            this.lastSample = now;
+            this.trails.forEach((trail) => {
+                trail.samples.unshift({ at: trail.holder.getWorldPosition(new THREE.Vector3()), t: now });
+                while (trail.samples.length && now - trail.samples[trail.samples.length - 1].t > TRAIL_S) trail.samples.pop();
+            });
+        }
+        this.trails.forEach(({ line, holder, colour, samples }) => {
+            const position = line.geometry.attributes.position, color = line.geometry.attributes.color;
+            const write = (i, point, age) => {
+                position.setXYZ(i, point.x - DRIFT.x * age, point.y - DRIFT.y * age, point.z - DRIFT.z * age);
+                color.setXYZW(i, colour.r, colour.g, colour.b, (1 - age / TRAIL_S) ** 1.5 * 0.8);
+            };
+            write(0, holder.getWorldPosition(new THREE.Vector3()), 0); // part de la planète, sans à-coup
+            samples.forEach((sample, i) => write(i + 1, sample.at, now - sample.t));
+            line.geometry.setDrawRange(0, samples.length + 1);
+            position.needsUpdate = true;
+            color.needsUpdate = true;
+        });
+        const dust = this.dust.geometry.attributes.position;
+        for (let i = 0; i < dust.count; i++) {
+            for (let axis = 0; axis < 3; axis++) {
+                let v = dust.array[i * 3 + axis] - DRIFT.getComponent(axis) * delta;
+                if (v < -DUST_BOX / 2) v += DUST_BOX; // ressort de l'autre côté du cube
+                dust.array[i * 3 + axis] = v;
+            }
+        }
+        dust.needsUpdate = true;
     }
 
     /** Ceinture de petits cailloux gris-brun, en anneau épais */
@@ -243,7 +313,6 @@ export default class extends Controller {
     resize() {
         const { clientWidth: w, clientHeight: h } = this.sceneTarget;
         this.renderer.setSize(w, h);
-        this.composer.setSize(w, h);
         this.camera.aspect = w / h;
         this.camera.fov = w < h ? 70 : 45; // écran vertical : champ plus large pour garder tout le système
         this.camera.updateProjectionMatrix();
@@ -317,6 +386,7 @@ export default class extends Controller {
     // ------------------------------------------------
 
     animate(delta) {
+        this.ambient.intensity = document.documentElement.dataset.theme === 'light' ? 0.9 : 0.06;
         if (!this.reducedMotion) {
             this.planets.forEach(({ pivot, body, speed, spin }) => {
                 pivot.rotation.y += speed * delta;
@@ -326,6 +396,7 @@ export default class extends Controller {
             this.belt.rotation.y += 0.015 * delta;
             this.sun.rotation.y += 0.03 * delta;
             this.sun.material.uniforms.uTime.value += delta;
+            this.travel(delta);
         }
         // Planète survolée, choisie ou allumée depuis la liste : son atmosphère s'illumine
         this.planets.forEach(({ body }) => {
@@ -361,7 +432,9 @@ export default class extends Controller {
         const { kind } = object.userData;
         this.labelTarget.textContent = kind === 'moon' ? object.userData.projet.titre : object.userData.competence.nom;
         const at = object.getWorldPosition(new THREE.Vector3()).project(this.camera);
-        const x = (at.x + 1) / 2 * this.sceneTarget.clientWidth, y = (1 - at.y) / 2 * this.sceneTarget.clientHeight;
+        // Repère de la section : la scène y est décalée (texte d'aide au-dessus, pleine largeur de la fenêtre)
+        const x = this.sceneTarget.offsetLeft + (at.x + 1) / 2 * this.sceneTarget.clientWidth;
+        const y = this.sceneTarget.offsetTop + (1 - at.y) / 2 * this.sceneTarget.clientHeight;
         this.labelTarget.style.transform = `translate(${x}px, ${y}px) translate(-50%, -150%)`;
     }
 }
