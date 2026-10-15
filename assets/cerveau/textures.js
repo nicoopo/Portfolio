@@ -36,10 +36,28 @@ export function fadingPointsMaterial(texture, size, options = {}) {
  * sinon, en traversant une nébuleuse, chaque point devient une énorme tache à l'écran.
  */
 export function fadeNearCamera(material) {
+    return fadeShader(material, 'smoothstep(1.0, 4.0, -mvPosition.z)');
+}
+
+/** Mode exploration : distance à la caméra sous laquelle neurones et souvenirs s'effacent ; 0 = jamais (hors exploration). */
+export const exploreFade = { value: 0 };
+
+/**
+ * Comme fadeNearCamera, mais seulement en exploration et de bien plus près : le vaisseau frôle
+ * les points pour les ramasser, la caméra derrière lui finit dedans et la lueur remplirait l'écran.
+ */
+export function fadeWhenExploring(material) {
+    return fadeShader(material, 'exploreFade > 0.0 ? smoothstep(0.3 * exploreFade, exploreFade, -mvPosition.z) : 1.0', { exploreFade });
+}
+
+/** Multiplie l'opacité de ce que dessine le matériau par `fade` (GLSL calculé par sommet, mvPosition connu). */
+function fadeShader(material, fade, uniforms = {}) {
+    const declarations = Object.keys(uniforms).map((name) => `uniform float ${name};\n`).join('');
     material.onBeforeCompile = (shader) => {
+        Object.assign(shader.uniforms, uniforms);
         shader.vertexShader = shader.vertexShader
-            .replace('#include <common>', '#include <common>\nvarying float vNearFade;')
-            .replace('#include <fog_vertex>', '#include <fog_vertex>\nvNearFade = smoothstep(1.0, 4.0, -mvPosition.z);');
+            .replace('#include <common>', `#include <common>\n${declarations}varying float vNearFade;`)
+            .replace('#include <fog_vertex>', `#include <fog_vertex>\nvNearFade = ${fade};`);
         shader.fragmentShader = shader.fragmentShader
             .replace('#include <common>', '#include <common>\nvarying float vNearFade;')
             .replace('#include <opaque_fragment>', 'diffuseColor.a *= vNearFade;\n#include <opaque_fragment>');
