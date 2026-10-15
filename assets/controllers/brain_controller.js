@@ -29,12 +29,14 @@ const TOUR_LIFT = 0.6;      // la caméra prend du recul à mi-vol (part de la d
 const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
 // Mode exploration : vitesse max (unités/s) lente près du cerveau, rapide au large (entre near et far du centre),
 // virage et tangage (rad/s), nez levé au plus (rad), zone de vol, distance pour « ramasser » un élément,
-// zone morte de la souris (part du demi-écran), multiplicateur du boost (clic maintenu)
+// zone morte de la souris (part du demi-écran), multiplicateur du boost (clic maintenu),
+// glissé du doigt pour braquer à fond (px)
 const SHIP = {
     slow: 0.6, fast: 3, near: 1.5, far: 8,
     turn: 1.3, pitch: 1, maxPitch: 1.2, maxDistance: 45, boost: 3,
     pickup: { neuron: 0.15, souvenir: 0.15, nebula: 0.6 },
     deadZone: 0.15,
+    touchRange: 60,
 };
 // Touches physiques (e.code) : ZQSD sur AZERTY = WASD sur QWERTY
 const SHIP_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'ShiftLeft', 'ShiftRight']);
@@ -67,8 +69,7 @@ export default class extends Controller {
         this.shareButtonTarget.hidden = false;
         this.soundButtonTarget.hidden = !window.AudioContext;
         this.diveButtonTarget.hidden = false;
-        // shortcut: pas encore de commandes tactiles (#286) : bouton masqué sur écran tactile
-        this.exploreButtonTarget.hidden = window.matchMedia('(pointer: coarse)').matches;
+        this.exploreButtonTarget.hidden = false;
 
         this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -120,12 +121,20 @@ export default class extends Controller {
         this.listen(this.renderer.domElement, 'pointermove', (e) => this.onPointerMove(e));
         this.listen(this.renderer.domElement, 'pointerdown', (e) => {
             this.downAt = [e.clientX, e.clientY];
-            if (this.ship && e.button === 0) this.boosting = true; // clic maintenu : le vaisseau fonce
+            if (!this.ship) return;
+            if (e.pointerType !== 'mouse') this.touchDown(e);
+            else if (e.button === 0) this.boosting = true; // clic maintenu : le vaisseau fonce
         });
-        this.listen(window, 'pointerup', () => { this.boosting = false; });
+        const pointerUp = (e) => {
+            if (e.pointerType !== 'mouse') this.touchUp(e);
+            else this.boosting = false;
+        };
+        this.listen(window, 'pointerup', pointerUp);
+        this.listen(window, 'pointercancel', pointerUp);
         this.listen(this.renderer.domElement, 'pointerup', (e) => this.onPointerUp(e));
-        this.listen(this.renderer.domElement, 'pointerleave', () => {
+        this.listen(this.renderer.domElement, 'pointerleave', (e) => {
             this.hover(null);
+            if (e.pointerType !== 'mouse') return;
             this.steer = null; // la souris quitte la scène (ex. vers un bouton) : le vaisseau ne tourne plus
             this.boosting = false;
         });
@@ -341,7 +350,11 @@ export default class extends Controller {
     }
 
     onPointerMove(event) {
-        if (this.ship && event.pointerType === 'mouse') this.steerTowards(event);
+        if (this.ship && event.pointerType !== 'mouse') {
+            this.touchMove(event); // le doigt pilote : pas de bulle de survol
+            return;
+        }
+        if (this.ship) this.steerTowards(event);
         const target = this.pick(event);
         this.hover(target);
         if (target) {
@@ -610,7 +623,7 @@ export default class extends Controller {
 
         this.exploreButtonTarget.textContent = this.textsValue.stopExplore;
         this.exploreButtonTarget.setAttribute('aria-pressed', 'true');
-        this.hintTarget.textContent = this.textsValue.hintExplore;
+        this.hintTarget.textContent = window.matchMedia('(pointer: coarse)').matches ? this.textsValue.hintExploreTouch : this.textsValue.hintExplore;
     }
 
     stopExplore() {
@@ -619,6 +632,7 @@ export default class extends Controller {
         this.stars.geometry.dispose();
         this.stars.material.dispose();
         this.boosting = false;
+        this.touches?.clear();
         this.ship.traverse((child) => {
             child.geometry?.dispose();
             child.material?.dispose(); // pas sa texture : c'est celle de toute la scène
@@ -641,17 +655,38 @@ export default class extends Controller {
     /** Souris : écart du pointeur au centre de la scène, de -1 à 1, sans la zone morte */
     steerTowards(event) {
         const rect = this.renderer.domElement.getBoundingClientRect();
-        const dead = (v) => Math.sign(v) * Math.max(Math.abs(v) - SHIP.deadZone, 0) / (1 - SHIP.deadZone);
         this.steer = {
-            x: dead(((event.clientX - rect.left) / rect.width) * 2 - 1),
-            y: dead(-(((event.clientY - rect.top) / rect.height) * 2 - 1)),
+            x: deadZone(((event.clientX - rect.left) / rect.width) * 2 - 1),
+            y: deadZone(-(((event.clientY - rect.top) / rect.height) * 2 - 1)),
         };
+    }
+
+    // Tactile : le premier doigt est une manette (posé = avance, glissé depuis son point de départ = dirige) ;
+    // un deuxième doigt posé = boost
+
+    touchDown(event) {
+        (this.touches ??= new Map()).set(event.pointerId, [event.clientX, event.clientY]);
+        this.boosting = this.touches.size > 1;
+    }
+
+    touchMove(event) {
+        const [first] = this.touches?.keys() ?? [];
+        if (event.pointerId !== first) return;
+        const [x0, y0] = this.touches.get(first);
+        const range = (v) => deadZone(THREE.MathUtils.clamp(v / SHIP.touchRange, -1, 1));
+        this.steer = { x: range(event.clientX - x0), y: range(y0 - event.clientY) };
+    }
+
+    touchUp(event) {
+        if (!this.touches?.delete(event.pointerId)) return;
+        this.boosting = this.touches.size > 1;
+        if (this.touches.size === 0) this.steer = null;
     }
 
     updateShip(delta) {
         const axis = (plus, minus) => (plus.some((c) => this.keys.has(c)) ? 1 : 0) - (minus.some((c) => this.keys.has(c)) ? 1 : 0);
         const clamp = (v) => THREE.MathUtils.clamp(v, -1, 1);
-        const thrust = this.boosting ? 1 : axis(['ArrowUp', 'KeyW'], ['ArrowDown', 'KeyS']);
+        const thrust = this.boosting || this.touches?.size ? 1 : axis(['ArrowUp', 'KeyW'], ['ArrowDown', 'KeyS']);
         // Clavier et souris s'additionnent
         const turn = clamp(axis(['ArrowLeft', 'KeyA'], ['ArrowRight', 'KeyD']) - (this.steer?.x ?? 0));
         const climb = clamp(axis(['Space'], ['ShiftLeft', 'ShiftRight']) + (this.steer?.y ?? 0));
@@ -763,6 +798,11 @@ function petitEcran() {
 
 function normalize(text) {
     return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+}
+
+/** Pilotage (souris, doigt) : valeur de -1 à 1 sans la zone morte du centre, puis remise de 0 à 1. */
+function deadZone(v) {
+    return Math.sign(v) * Math.max(Math.abs(v) - SHIP.deadZone, 0) / (1 - SHIP.deadZone);
 }
 
 /** Petit utilitaire DOM : element('a', { href, textContent }, ...enfants). */
