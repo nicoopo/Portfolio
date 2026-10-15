@@ -183,8 +183,14 @@ final class AdminTest extends WebTestCase
             'LienRecruteur[projets]' => [$pendu->getId()],
         ]);
         self::assertResponseRedirects();
-        // Relu à chaque fois : le noyau redémarre entre deux requêtes
-        $relire = fn () => self::getContainer()->get(EntityManagerInterface::class)->getRepository(LienRecruteur::class)->findOneBy(['entreprise' => 'Acme']);
+        // Relu en base à chaque fois : le noyau redémarre entre deux requêtes, et les visites sont comptées en SQL
+        // (HomeController), sans toucher l'objet déjà chargé par Doctrine
+        $relire = function () {
+            $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+            $entityManager->clear();
+
+            return $entityManager->getRepository(LienRecruteur::class)->findOneBy(['entreprise' => 'Acme']);
+        };
         $code = $relire()->getCode();
         self::assertMatchesRegularExpression('/^[0-9a-f]{10}$/', $code);
 

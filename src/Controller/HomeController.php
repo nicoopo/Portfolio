@@ -27,9 +27,13 @@ final class HomeController extends AbstractController
         $code = $request->query->getString('pour');
         $recruteur = '' !== $code ? $entityManager->getRepository(LienRecruteur::class)->findOneBy(['code' => $code]) : null;
         if ($recruteur && !$this->isGranted('ROLE_ADMIN') && !preg_match(StatistiquesListener::ROBOTS, $request->headers->get('User-Agent', ''))) {
-            $recruteur->visiter();
-            $entityManager->flush();
-            if (1 === $recruteur->getVisites()) { // la première ouverture seulement : de quoi relancer au bon moment
+            // En base, en une requête : deux ouvertures à la même seconde comptent bien deux visites, et une seule alerte
+            $visites = (int) $entityManager->getConnection()->fetchOne(
+                'UPDATE lien_recruteur SET visites = visites + 1, derniere_visite = CURRENT_TIMESTAMP(0), premiere_visite = COALESCE(premiere_visite, CURRENT_TIMESTAMP(0))
+                 WHERE id = :id RETURNING visites',
+                ['id' => $recruteur->getId()],
+            );
+            if (1 === $visites) { // la première ouverture seulement : de quoi relancer au bon moment
                 $notificateur->prevenir('Lien recruteur ouvert', $recruteur->getEntreprise().' vient d’ouvrir ton portfolio'.($recruteur->getPoste() ? ' ('.$recruteur->getPoste().')' : ''), 'eyes');
             }
         }
