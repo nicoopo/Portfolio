@@ -27,8 +27,9 @@ const TOUR_PAUSE_MS = 9000; // temps passé sur chaque neurone (vol compris)
 const TOUR_FLIGHT_S = 3.5;  // durée du vol d'un neurone à l'autre
 const TOUR_LIFT = 0.6;      // la caméra prend du recul à mi-vol (part de la distance parcourue)
 const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
-// Mode exploration : vitesse (unités/s), virage (rad/s), zone de vol, distance pour « ramasser » un élément
-const SHIP = { speed: 0.8, turn: 2, maxDistance: 15, pickup: { neuron: 0.15, souvenir: 0.15, nebula: 0.6 } };
+// Mode exploration : vitesse max (unités/s), virage et tangage (rad/s), nez levé au plus (rad),
+// zone de vol, distance pour « ramasser » un élément
+const SHIP = { speed: 1.6, turn: 1.8, pitch: 1.2, maxPitch: 1.2, maxDistance: 15, pickup: { neuron: 0.15, souvenir: 0.15, nebula: 0.6 } };
 // Touches physiques (e.code) : ZQSD sur AZERTY = WASD sur QWERTY
 const SHIP_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'ShiftLeft', 'ShiftRight']);
 
@@ -580,9 +581,13 @@ export default class extends Controller {
 
         // Posé devant la caméra, dans son orientation
         this.ship = createShip(this.texture);
+        // Cap et tangage gardés à part (pas de roulis qui s'accumule)
+        const { x: pitch, y: yaw } = new THREE.Euler().setFromQuaternion(this.camera.quaternion, 'YXZ');
+        this.shipFlight = { speed: 0, turn: 0, yaw, pitch };
+        this.ship.rotation.set(pitch, yaw, 0, 'YXZ');
         this.ship.position.copy(this.camera.position);
-        this.ship.quaternion.copy(this.camera.quaternion);
         this.ship.translateZ(-0.6);
+        this.baseFov = this.camera.fov;
         this.scene.add(this.ship);
         this.keys = new Set();
 
@@ -600,6 +605,7 @@ export default class extends Controller {
         });
         this.ship = null;
         this.keys.clear();
+        this.resize(); // champ de vision normal
 
         // On reprend l'orbite autour du centre en partant de là où était le vaisseau
         this.controls.enabled = true;
@@ -614,19 +620,30 @@ export default class extends Controller {
 
     updateShip(delta) {
         const axis = (plus, minus) => (plus.some((c) => this.keys.has(c)) ? 1 : 0) - (minus.some((c) => this.keys.has(c)) ? 1 : 0);
-        const turn = axis(['ArrowLeft', 'KeyA'], ['ArrowRight', 'KeyD']);
         const thrust = axis(['ArrowUp', 'KeyW'], ['ArrowDown', 'KeyS']);
-        this.ship.rotateY(SHIP.turn * delta * turn);
-        this.ship.translateZ(-SHIP.speed * delta * thrust);
-        this.ship.userData.update(thrust, turn, this.reducedMotion);
-        this.ship.translateY(SHIP.speed * delta * axis(['Space'], ['ShiftLeft', 'ShiftRight']));
+        const climb = axis(['Space'], ['ShiftLeft', 'ShiftRight']);
+        const smooth = (rate) => (this.reducedMotion ? 1 : 1 - Math.exp(-rate * delta));
+        const f = this.shipFlight;
+
+        // Inertie : accélère et ralentit progressivement ; freiner (↓) est plus franc, la marche arrière plus lente
+        const wanted = thrust > 0 ? SHIP.speed : thrust < 0 ? -0.4 * SHIP.speed : 0;
+        f.speed += (wanted - f.speed) * smooth(thrust < 0 ? 4 : 1.5);
+        f.turn += (axis(['ArrowLeft', 'KeyA'], ['ArrowRight', 'KeyD']) - f.turn) * smooth(6);
+        f.yaw += SHIP.turn * f.turn * delta;
+        f.pitch = THREE.MathUtils.clamp(f.pitch + SHIP.pitch * climb * delta, -SHIP.maxPitch, SHIP.maxPitch);
+        this.ship.rotation.set(f.pitch, f.yaw, 0, 'YXZ');
+        this.ship.translateZ(-f.speed * delta);
         // shortcut: seule collision = le bord de la zone de vol ; on traverse les neurones (#286)
         this.ship.position.clampLength(0, SHIP.maxDistance);
+        this.ship.userData.update(Math.max(f.speed, 0) / SHIP.speed, f.turn, climb, this.reducedMotion);
 
-        // Caméra derrière et un peu au-dessus du vaisseau
-        const behind = this.ship.localToWorld(new THREE.Vector3(0, 0.16, 0.38));
-        this.camera.position.lerp(behind, this.reducedMotion ? 1 : 1 - Math.exp(-6 * delta));
-        this.camera.lookAt(this.ship.position);
+        // Caméra derrière et au-dessus, qui regarde un peu devant le vaisseau ; champ élargi avec la vitesse
+        this.camera.position.lerp(this.ship.localToWorld(new THREE.Vector3(0, 0.16, 0.38)), smooth(6));
+        this.camera.lookAt(this.ship.localToWorld(new THREE.Vector3(0, 0, -0.3)));
+        if (!this.reducedMotion) {
+            this.camera.fov = this.baseFov + 12 * Math.abs(f.speed) / SHIP.speed;
+            this.camera.updateProjectionMatrix();
+        }
 
         // Toucher un neurone, un souvenir ou une nébuleuse ouvre son panneau (projets liés, parcours…)
         const at = new THREE.Vector3();

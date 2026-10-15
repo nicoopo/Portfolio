@@ -13,7 +13,7 @@ function triangles(...points) {
 /**
  * Vaisseau du mode exploration, dans le style hologramme du cerveau :
  * coque sombre translucide, arêtes lumineuses, réacteur qui s'allume avec la poussée.
- * Pointe vers -z. Retourne un Group ; userData.update(thrust, turn, still) l'anime.
+ * Pointe vers -z. Retourne un Group ; userData.update(power, turn, climb, still) l'anime.
  */
 export function createShip(texture) {
     const ship = new THREE.Group();
@@ -51,11 +51,13 @@ export function createShip(texture) {
         if (child.material) child.material.depthTest = false;
     });
 
-    /** thrust, turn : -1 à 1 (touches) ; still : mouvements réduits, pas de scintillement */
-    ship.userData.update = (thrust, turn, still) => {
-        model.rotation.z += (turn * 0.5 - model.rotation.z) * 0.15;
+    /** power : 0 à 1 (vitesse) ; turn, climb : -1 à 1 ; still : mouvements réduits, pas de scintillement */
+    ship.userData.update = (power, turn, climb, still) => {
+        // S'incline dans les virages, lève ou baisse un peu le nez
+        model.rotation.z += (turn * 0.6 - model.rotation.z) * 0.15;
+        model.rotation.x += (climb * 0.25 - model.rotation.x) * 0.15;
         const flicker = still ? 1 : 0.85 + 0.3 * Math.random();
-        engine.scale.setScalar((0.02 + 0.03 * Math.max(thrust, 0)) * flicker);
+        engine.scale.setScalar((0.02 + 0.035 * power) * flicker);
     };
 
     return ship;
