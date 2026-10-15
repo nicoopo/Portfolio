@@ -54,7 +54,7 @@ export function createShip(texture) {
     /** power : 0 à 1 (vitesse) ; turn, climb : -1 à 1 ; still : mouvements réduits, pas de scintillement */
     ship.userData.update = (power, turn, climb, still) => {
         // S'incline dans les virages, lève ou baisse un peu le nez
-        model.rotation.z += (turn * 0.6 - model.rotation.z) * 0.15;
+        model.rotation.z += (turn * 0.45 - model.rotation.z) * 0.15;
         model.rotation.x += (climb * 0.25 - model.rotation.x) * 0.15;
         const flicker = still ? 1 : 0.85 + 0.3 * Math.random();
         engine.scale.setScalar((0.02 + 0.035 * power) * flicker);

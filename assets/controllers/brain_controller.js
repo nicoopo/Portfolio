@@ -27,9 +27,15 @@ const TOUR_PAUSE_MS = 9000; // temps passé sur chaque neurone (vol compris)
 const TOUR_FLIGHT_S = 3.5;  // durée du vol d'un neurone à l'autre
 const TOUR_LIFT = 0.6;      // la caméra prend du recul à mi-vol (part de la distance parcourue)
 const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
-// Mode exploration : vitesse max (unités/s), virage et tangage (rad/s), nez levé au plus (rad),
-// zone de vol, distance pour « ramasser » un élément
-const SHIP = { speed: 1.6, turn: 1.8, pitch: 1.2, maxPitch: 1.2, maxDistance: 15, pickup: { neuron: 0.15, souvenir: 0.15, nebula: 0.6 } };
+// Mode exploration : vitesse max (unités/s) lente près du cerveau, rapide au large (entre near et far du centre),
+// virage et tangage (rad/s), nez levé au plus (rad), zone de vol, distance pour « ramasser » un élément,
+// zone morte de la souris (part du demi-écran)
+const SHIP = {
+    slow: 0.6, fast: 3, near: 1.5, far: 8,
+    turn: 1.3, pitch: 1, maxPitch: 1.2, maxDistance: 15,
+    pickup: { neuron: 0.15, souvenir: 0.15, nebula: 0.6 },
+    deadZone: 0.15,
+};
 // Touches physiques (e.code) : ZQSD sur AZERTY = WASD sur QWERTY
 const SHIP_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'ShiftLeft', 'ShiftRight']);
 
@@ -114,7 +120,10 @@ export default class extends Controller {
         this.listen(this.renderer.domElement, 'pointermove', (e) => this.onPointerMove(e));
         this.listen(this.renderer.domElement, 'pointerdown', (e) => { this.downAt = [e.clientX, e.clientY]; });
         this.listen(this.renderer.domElement, 'pointerup', (e) => this.onPointerUp(e));
-        this.listen(this.renderer.domElement, 'pointerleave', () => this.hover(null));
+        this.listen(this.renderer.domElement, 'pointerleave', () => {
+            this.hover(null);
+            this.steer = null; // la souris quitte la scène (ex. vers un bouton) : le vaisseau ne tourne plus
+        });
         // Pilotage du vaisseau (hors champ de saisie)
         this.listen(document, 'keydown', (e) => {
             if (!this.ship || !SHIP_KEYS.has(e.code) || e.target.closest?.('input, textarea')) return;
@@ -327,6 +336,7 @@ export default class extends Controller {
     }
 
     onPointerMove(event) {
+        if (this.ship && event.pointerType === 'mouse') this.steerTowards(event);
         const target = this.pick(event);
         this.hover(target);
         if (target) {
@@ -583,7 +593,8 @@ export default class extends Controller {
         this.ship = createShip(this.texture);
         // Cap et tangage gardés à part (pas de roulis qui s'accumule)
         const { x: pitch, y: yaw } = new THREE.Euler().setFromQuaternion(this.camera.quaternion, 'YXZ');
-        this.shipFlight = { speed: 0, turn: 0, yaw, pitch };
+        this.shipFlight = { speed: 0, turn: 0, climb: 0, yaw, pitch, look: null };
+        this.steer = null;
         this.ship.rotation.set(pitch, yaw, 0, 'YXZ');
         this.ship.position.copy(this.camera.position);
         this.ship.translateZ(-0.6);
@@ -618,30 +629,49 @@ export default class extends Controller {
         this.hintTarget.textContent = this.inside ? this.textsValue.hintInside : this.textsValue.hintOutside;
     }
 
+    /** Souris : écart du pointeur au centre de la scène, de -1 à 1, sans la zone morte */
+    steerTowards(event) {
+        const rect = this.renderer.domElement.getBoundingClientRect();
+        const dead = (v) => Math.sign(v) * Math.max(Math.abs(v) - SHIP.deadZone, 0) / (1 - SHIP.deadZone);
+        this.steer = {
+            x: dead(((event.clientX - rect.left) / rect.width) * 2 - 1),
+            y: dead(-(((event.clientY - rect.top) / rect.height) * 2 - 1)),
+        };
+    }
+
     updateShip(delta) {
         const axis = (plus, minus) => (plus.some((c) => this.keys.has(c)) ? 1 : 0) - (minus.some((c) => this.keys.has(c)) ? 1 : 0);
+        const clamp = (v) => THREE.MathUtils.clamp(v, -1, 1);
         const thrust = axis(['ArrowUp', 'KeyW'], ['ArrowDown', 'KeyS']);
-        const climb = axis(['Space'], ['ShiftLeft', 'ShiftRight']);
+        // Clavier et souris s'additionnent
+        const turn = clamp(axis(['ArrowLeft', 'KeyA'], ['ArrowRight', 'KeyD']) - (this.steer?.x ?? 0));
+        const climb = clamp(axis(['Space'], ['ShiftLeft', 'ShiftRight']) + (this.steer?.y ?? 0));
         const smooth = (rate) => (this.reducedMotion ? 1 : 1 - Math.exp(-rate * delta));
         const f = this.shipFlight;
 
-        // Inertie : accélère et ralentit progressivement ; freiner (↓) est plus franc, la marche arrière plus lente
-        const wanted = thrust > 0 ? SHIP.speed : thrust < 0 ? -0.4 * SHIP.speed : 0;
-        f.speed += (wanted - f.speed) * smooth(thrust < 0 ? 4 : 1.5);
-        f.turn += (axis(['ArrowLeft', 'KeyA'], ['ArrowRight', 'KeyD']) - f.turn) * smooth(6);
+        // Lent près du cerveau (pour viser), rapide au large (pour rejoindre les nébuleuses)
+        const max = THREE.MathUtils.lerp(SHIP.slow, SHIP.fast, THREE.MathUtils.smoothstep(this.ship.position.length(), SHIP.near, SHIP.far));
+        // Inertie courte : on part et on s'arrête vite ; freiner (↓) est encore plus franc, la marche arrière lente
+        const wanted = thrust > 0 ? max : thrust < 0 ? -0.4 * max : 0;
+        f.speed += (wanted - f.speed) * smooth(thrust < 0 ? 6 : thrust > 0 ? 2 : 3);
+        f.turn += (turn - f.turn) * smooth(4);
+        f.climb += (climb - f.climb) * smooth(4);
         f.yaw += SHIP.turn * f.turn * delta;
-        f.pitch = THREE.MathUtils.clamp(f.pitch + SHIP.pitch * climb * delta, -SHIP.maxPitch, SHIP.maxPitch);
+        f.pitch = THREE.MathUtils.clamp(f.pitch + SHIP.pitch * f.climb * delta, -SHIP.maxPitch, SHIP.maxPitch);
         this.ship.rotation.set(f.pitch, f.yaw, 0, 'YXZ');
         this.ship.translateZ(-f.speed * delta);
         // shortcut: seule collision = le bord de la zone de vol ; on traverse les neurones (#286)
         this.ship.position.clampLength(0, SHIP.maxDistance);
-        this.ship.userData.update(Math.max(f.speed, 0) / SHIP.speed, f.turn, climb, this.reducedMotion);
+        this.ship.userData.update(Math.max(f.speed, 0) / max, f.turn, f.climb, this.reducedMotion);
 
-        // Caméra derrière et au-dessus, qui regarde un peu devant le vaisseau ; champ élargi avec la vitesse
-        this.camera.position.lerp(this.ship.localToWorld(new THREE.Vector3(0, 0.16, 0.38)), smooth(6));
-        this.camera.lookAt(this.ship.localToWorld(new THREE.Vector3(0, 0, -0.3)));
+        // Caméra derrière et au-dessus ; son regard rejoint en douceur un point devant le vaisseau
+        this.camera.position.lerp(this.ship.localToWorld(new THREE.Vector3(0, 0.14, 0.5)), smooth(5));
+        const look = this.ship.localToWorld(new THREE.Vector3(0, 0, -0.4));
+        f.look = f.look ? f.look.lerp(look, smooth(8)) : look;
+        this.camera.lookAt(f.look);
+        // Champ un peu élargi à grande vitesse
         if (!this.reducedMotion) {
-            this.camera.fov = this.baseFov + 12 * Math.abs(f.speed) / SHIP.speed;
+            this.camera.fov = this.baseFov + 6 * Math.abs(f.speed) / SHIP.fast;
             this.camera.updateProjectionMatrix();
         }
 
