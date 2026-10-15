@@ -83,6 +83,27 @@ const parcours = {
         await onglet.locator('canvas.pluie-meteores').waitFor({ state: 'attached' });
     },
 
+    'Cerveau : piloter le vaisseau, puis Échap rend la caméra': async (onglet) => {
+        await ouvrir(onglet, '/cerveau');
+        const bouton = onglet.locator('[data-brain-target="exploreButton"]');
+        await bouton.click();
+        await onglet.locator('[data-brain-target="hint"]', { hasText: 'ZQSD' }).waitFor();
+        await onglet.keyboard.down('ArrowUp');
+        await onglet.waitForTimeout(300);
+        await onglet.keyboard.up('ArrowUp');
+        await onglet.keyboard.press('Escape');
+        assert.equal(await bouton.getAttribute('aria-pressed'), 'false');
+        assert.equal(await bouton.textContent(), 'Explorer en vaisseau');
+    },
+
+    'Cerveau au doigt : poser le doigt fait avancer le vaisseau jusqu\'à un souvenir': async (onglet) => {
+        // Vue alignée sur le fil des souvenirs : tout droit, on en touche un
+        await ouvrir(onglet, '/cerveau#vue=0,-0.28,3;0,-0.28,0');
+        await onglet.locator('[data-brain-target="exploreButton"]').click();
+        await onglet.locator('.brain-canvas canvas').dispatchEvent('pointerdown', { pointerType: 'touch', pointerId: 1, clientX: 200, clientY: 300 });
+        await onglet.locator('[data-brain-target="panel"]').waitFor();
+    },
+
     'Aucune erreur JavaScript sur les pages principales': async (onglet) => {
         for (const chemin of ['/', '/cerveau', '/projects', '/projects/frise', '/univers', '/competences', '/CV', '/livre-d-or', '/now', '/terminal', '/nexiste-pas']) {
             await onglet.goto(base + chemin);

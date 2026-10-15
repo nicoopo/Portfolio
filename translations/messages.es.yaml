@@ -98,7 +98,6 @@
 # CV
 "CV en ligne de Nicolas Cataluna, développeur fullstack, téléchargeable en PDF (thème clair ou sombre).": "CV en línea de Nicolas Cataluna, desarrollador full-stack, descargable en PDF (tema claro u oscuro)."
 "Télécharger le CV": "Descargar el CV"
-"Changer le thème": "Cambiar el tema"
 "Mode Clair": "Modo claro"
 "Mode Sombre": "Modo oscuro"
 "Génération…": "Generando…"
@@ -109,6 +108,10 @@
 "Centres d'Intérêt": "Intereses"
 "Plonger dans mon cerveau": "Sumergirse en mi cerebro"
 "Ressortir": "Salir"
+"Explorer en vaisseau": "Explorar en nave"
+"Quitter l'exploration": "Salir de la exploración"
+"Pose le doigt pour avancer, glisse pour diriger · Deux doigts pour foncer · Touche un point pour l’ouvrir": "Apoya el dedo para avanzar, desliza para dirigir · Dos dedos para acelerar · Toca un punto para abrirlo"
+"Souris, flèches ou ZQSD pour piloter · ↑ / Z pour avancer · Clic maintenu pour foncer · Espace / Maj pour monter ou descendre · Touche un point pour l’ouvrir · Échap pour sortir": "Ratón, flechas o WASD para pilotar · ↑ / W para avanzar · Mantén pulsado el clic para acelerar · Espacio / Mayús para subir o bajar · Toca un punto para abrirlo · Esc para salir"
 "Tu es dans mon cerveau · Clique sur un souvenir de mon parcours": "Estás dentro de mi cerebro · Haz clic en un recuerdo de mi trayectoria"
 "Aperçu PDF": "Vista previa del PDF"
 "Clique sur un projet pour le découvrir en détail.": "Haz clic en un proyecto para descubrirlo en detalle."
