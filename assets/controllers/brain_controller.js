@@ -6,7 +6,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { dotTexture } from '../cerveau/textures.js';
+import { dotTexture, exploreFade } from '../cerveau/textures.js';
 import { BODY_OPACITY, createBrain } from '../cerveau/brain.js';
 import { createNeurons } from '../cerveau/neurons.js';
 import { Synapses } from '../cerveau/synapses.js';
@@ -30,13 +30,14 @@ const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
 // Mode exploration : vitesse max (unités/s) lente près du cerveau, rapide au large (entre near et far du centre),
 // virage et tangage (rad/s), nez levé au plus (rad), zone de vol, distance pour « ramasser » un élément,
 // zone morte de la souris (part du demi-écran), multiplicateur du boost (clic maintenu),
-// glissé du doigt pour braquer à fond (px)
+// glissé du doigt pour braquer à fond (px), distance à la caméra sous laquelle les halos s'effacent
 const SHIP = {
     slow: 0.6, fast: 3, near: 1.5, far: 8,
     turn: 1.3, pitch: 1, maxPitch: 1.2, maxDistance: 45, boost: 3,
     pickup: { neuron: 0.15, souvenir: 0.15, nebula: 0.6 },
     deadZone: 0.15,
     touchRange: 60,
+    fadeNear: 0.9,
 };
 // Touches physiques (e.code) : ZQSD sur AZERTY = WASD sur QWERTY
 const SHIP_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'ShiftLeft', 'ShiftRight']);
@@ -235,6 +236,7 @@ export default class extends Controller {
     disconnect() {
         if (!this.renderer) return;
         cancelAnimationFrame(this.frame);
+        exploreFade.value = 0; // état du module : la prochaine visite ne doit pas démarrer en exploration
         this.stopTour();
         clearTimeout(this.shareTimeout);
         this.ambiance?.close();
@@ -619,6 +621,7 @@ export default class extends Controller {
         this.baseFov = this.camera.fov;
         this.stars = createStarfield(this.texture);
         this.scene.add(this.ship, this.stars);
+        exploreFade.value = SHIP.fadeNear;
         this.keys = new Set();
 
         this.exploreButtonTarget.textContent = this.textsValue.stopExplore;
@@ -633,6 +636,7 @@ export default class extends Controller {
         this.stars.material.dispose();
         this.boosting = false;
         this.touches?.clear();
+        exploreFade.value = 0;
         this.ship.traverse((child) => {
             child.geometry?.dispose();
             child.material?.dispose(); // pas sa texture : c'est celle de toute la scène

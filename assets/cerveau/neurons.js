@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { glowSprite } from './textures.js';
+import { fadeWhenExploring, glowSprite } from './textures.js';
 
 /**
  * Lobes du cerveau où sont placés les neurones (champ `zone` de l'entité CategorieCompetence).
@@ -30,6 +30,7 @@ export function createNeurons(neurons, texture) {
         anchor.position.copy(neuronPosition(ZONES[data.zone], siblings.indexOf(data), siblings.length));
 
         const halo = glowSprite(texture, color, 0.22);
+        fadeWhenExploring(halo.material);
         anchor.add(halo);
         halo.userData = { kind: 'neuron', data, anchor, phase: i * 1.7 };
         return halo;
