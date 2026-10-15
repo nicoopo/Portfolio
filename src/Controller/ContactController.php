@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\DemandeContact;
 use App\Entity\Journal;
 use App\Form\ContactType;
+use App\Security\BlocIp;
 use App\Service\Journaliste;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -39,8 +40,8 @@ final class ContactController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            // Limite par IP (config/packages/rate_limiter.yaml) : chaque message part par e-mail
-            if (!$data['website'] && !$contactLimiter->create($request->getClientIp())->consume()->isAccepted()) {
+            // Limite par IP, par bloc /64 en IPv6 (BlocIp, config/packages/rate_limiter.yaml) : chaque message part par e-mail
+            if (!$data['website'] && !$contactLimiter->create(BlocIp::de($request))->consume()->isAccepted()) {
                 $this->addFlash('error', $translator->trans('Beaucoup de messages d’un coup : réessayez dans une heure.'));
 
                 return $this->redirectToRoute('app_contact', ['_fragment' => 'formulaire']);
