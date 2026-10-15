@@ -83,13 +83,6 @@ class LienRecruteur
     public function addProjet(Projet $projet): static { if (!$this->projets->contains($projet)) { $this->projets->add($projet); } return $this; }
     public function removeProjet(Projet $projet): static { $this->projets->removeElement($projet); return $this; }
 
-    public function visiter(): void
-    {
-        ++$this->visites;
-        $this->derniereVisite = new \DateTimeImmutable();
-        $this->premiereVisite ??= $this->derniereVisite;
-    }
-
     public function getId(): ?int { return $this->id; }
     public function getCode(): string { return $this->code; }
     public function getEntreprise(): string { return $this->entreprise; }

@@ -63,4 +63,37 @@ final class RendezVousTest extends WebTestCase
             $entityManager->flush();
         }
     }
+
+    /**
+     * Créneau pris par un autre recruteur entre l'affichage de la page et l'envoi : refusé, il reste à l'autre.
+     * (Deux envois à la même fraction de seconde passent par l'UPDATE conditionné du contrôleur : pas reproductible ici.)
+     */
+    public function testUnCreneauDejaPrisNeSeReservePasDeuxFois(): void
+    {
+        $client = static::createClient();
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $moi = (new LienRecruteur())->setEntreprise('RDV Moi SA');
+        $autre = (new LienRecruteur())->setEntreprise('RDV Autre SA');
+        $creneau = (new Creneau())->setDebut(new \DateTimeImmutable('+4 days 10:00'));
+        foreach ([$moi, $autre, $creneau] as $entite) {
+            $entityManager->persist($entite);
+        }
+        $entityManager->flush();
+        [$code, $idAutre, $idCreneau] = [$moi->getCode(), $autre->getId(), $creneau->getId()];
+        $connection = $entityManager->getConnection();
+
+        try {
+            $client->request('GET', '/rendez-vous?pour='.$code);
+            self::assertSelectorExists('input[name="form[creneau]"][value="'.$idCreneau.'"]');
+
+            $connection->executeStatement('UPDATE creneau SET lien_id = :autre WHERE id = :id', ['autre' => $idAutre, 'id' => $idCreneau]);
+            $client->submitForm('Réserver ce créneau', ['form[creneau]' => $idCreneau, 'form[nom]' => 'Ada', 'form[email]' => 'ada@rdv.example']);
+
+            self::assertResponseStatusCodeSame(422); // formulaire refusé : ce créneau n'est plus proposé
+            self::assertSame($idAutre, (int) $connection->fetchOne('SELECT lien_id FROM creneau WHERE id = :id', ['id' => $idCreneau]));
+        } finally {
+            $connection->executeStatement('DELETE FROM creneau WHERE id = :id', ['id' => $idCreneau]);
+            $connection->executeStatement('DELETE FROM lien_recruteur WHERE id IN (:a, :b)', ['a' => $moi->getId(), 'b' => $idAutre]);
+        }
+    }
 }
