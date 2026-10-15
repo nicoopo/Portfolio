@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { glowSprite } from './textures.js';
+import { glowPointsMaterial, glowSprite } from './textures.js';
 
 const EDGE = new THREE.Color('#8be9ff');
 const HULL = new THREE.Color('#0b3a4a');
@@ -51,14 +51,34 @@ export function createShip(texture) {
         if (child.material) child.material.depthTest = false;
     });
 
-    /** power : 0 à 1 (vitesse) ; turn, climb : -1 à 1 ; still : mouvements réduits, pas de scintillement */
+    /** power : 0 à 1 en croisière, jusqu'à 3 en boost ; turn, climb : -1 à 1 ; still : mouvements réduits, pas de scintillement */
     ship.userData.update = (power, turn, climb, still) => {
         // S'incline dans les virages, lève ou baisse un peu le nez
         model.rotation.z += (turn * 0.45 - model.rotation.z) * 0.15;
         model.rotation.x += (climb * 0.25 - model.rotation.x) * 0.15;
         const flicker = still ? 1 : 0.85 + 0.3 * Math.random();
-        engine.scale.setScalar((0.02 + 0.035 * power) * flicker);
+        engine.scale.setScalar((0.02 + 0.03 * power) * flicker);
     };
 
     return ship;
+}
+
+/**
+ * Champ d'étoiles du mode exploration : des repères dans le grand vide, pour sentir la vitesse.
+ * Points de taille fixe à l'écran, répartis dans une coquille autour du cerveau.
+ */
+export function createStarfield(texture, count = 1500, inner = 20, outer = 70) {
+    const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
+    const point = new THREE.Vector3();
+    const color = new THREE.Color();
+    for (let i = 0; i < count; i++) {
+        point.randomDirection().multiplyScalar(THREE.MathUtils.lerp(inner, outer, Math.random()));
+        point.toArray(positions, i * 3);
+        color.setHSL(0.55 + 0.1 * Math.random(), 0.5, 0.5 + 0.4 * Math.random()).toArray(colors, i * 3);
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    return new THREE.Points(geometry, glowPointsMaterial(texture, 3, { sizeAttenuation: false }));
 }

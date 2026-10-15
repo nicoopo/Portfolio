@@ -13,7 +13,7 @@ import { Synapses } from '../cerveau/synapses.js';
 import { createNebulae } from '../cerveau/nebulae.js';
 import { createSouvenirs } from '../cerveau/souvenirs.js';
 import { Ambiance } from '../cerveau/ambiance.js';
-import { createShip } from '../cerveau/vaisseau.js';
+import { createShip, createStarfield } from '../cerveau/vaisseau.js';
 import { basseQualite, preferences, setPreference } from '../scripts/preferences.js';
 
 const HOME_TARGET = new THREE.Vector3(0, 0, 0);
@@ -29,10 +29,10 @@ const TOUR_LIFT = 0.6;      // la caméra prend du recul à mi-vol (part de la d
 const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
 // Mode exploration : vitesse max (unités/s) lente près du cerveau, rapide au large (entre near et far du centre),
 // virage et tangage (rad/s), nez levé au plus (rad), zone de vol, distance pour « ramasser » un élément,
-// zone morte de la souris (part du demi-écran)
+// zone morte de la souris (part du demi-écran), multiplicateur du boost (clic maintenu)
 const SHIP = {
     slow: 0.6, fast: 3, near: 1.5, far: 8,
-    turn: 1.3, pitch: 1, maxPitch: 1.2, maxDistance: 15,
+    turn: 1.3, pitch: 1, maxPitch: 1.2, maxDistance: 45, boost: 3,
     pickup: { neuron: 0.15, souvenir: 0.15, nebula: 0.6 },
     deadZone: 0.15,
 };
@@ -118,11 +118,16 @@ export default class extends Controller {
         this.raycaster = new THREE.Raycaster();
         this.pointer = new THREE.Vector2();
         this.listen(this.renderer.domElement, 'pointermove', (e) => this.onPointerMove(e));
-        this.listen(this.renderer.domElement, 'pointerdown', (e) => { this.downAt = [e.clientX, e.clientY]; });
+        this.listen(this.renderer.domElement, 'pointerdown', (e) => {
+            this.downAt = [e.clientX, e.clientY];
+            if (this.ship && e.button === 0) this.boosting = true; // clic maintenu : le vaisseau fonce
+        });
+        this.listen(window, 'pointerup', () => { this.boosting = false; });
         this.listen(this.renderer.domElement, 'pointerup', (e) => this.onPointerUp(e));
         this.listen(this.renderer.domElement, 'pointerleave', () => {
             this.hover(null);
             this.steer = null; // la souris quitte la scène (ex. vers un bouton) : le vaisseau ne tourne plus
+            this.boosting = false;
         });
         // Pilotage du vaisseau (hors champ de saisie)
         this.listen(document, 'keydown', (e) => {
@@ -354,8 +359,8 @@ export default class extends Controller {
     }
 
     onPointerUp(event) {
-        // Un glisser (rotation) n'est pas un clic
-        if (!this.downAt) return;
+        // Un glisser (rotation) n'est pas un clic ; en exploration, le clic sert au boost (on ouvre en touchant)
+        if (!this.downAt || this.ship) return;
         const moved = Math.hypot(event.clientX - this.downAt[0], event.clientY - this.downAt[1]);
         this.downAt = null;
         if (moved > CLICK_TOLERANCE_PX) return;
@@ -599,7 +604,8 @@ export default class extends Controller {
         this.ship.position.copy(this.camera.position);
         this.ship.translateZ(-0.6);
         this.baseFov = this.camera.fov;
-        this.scene.add(this.ship);
+        this.stars = createStarfield(this.texture);
+        this.scene.add(this.ship, this.stars);
         this.keys = new Set();
 
         this.exploreButtonTarget.textContent = this.textsValue.stopExplore;
@@ -609,7 +615,10 @@ export default class extends Controller {
 
     stopExplore() {
         const position = this.ship.position.clone();
-        this.scene.remove(this.ship);
+        this.scene.remove(this.ship, this.stars);
+        this.stars.geometry.dispose();
+        this.stars.material.dispose();
+        this.boosting = false;
         this.ship.traverse((child) => {
             child.geometry?.dispose();
             child.material?.dispose(); // pas sa texture : c'est celle de toute la scène
@@ -642,7 +651,7 @@ export default class extends Controller {
     updateShip(delta) {
         const axis = (plus, minus) => (plus.some((c) => this.keys.has(c)) ? 1 : 0) - (minus.some((c) => this.keys.has(c)) ? 1 : 0);
         const clamp = (v) => THREE.MathUtils.clamp(v, -1, 1);
-        const thrust = axis(['ArrowUp', 'KeyW'], ['ArrowDown', 'KeyS']);
+        const thrust = this.boosting ? 1 : axis(['ArrowUp', 'KeyW'], ['ArrowDown', 'KeyS']);
         // Clavier et souris s'additionnent
         const turn = clamp(axis(['ArrowLeft', 'KeyA'], ['ArrowRight', 'KeyD']) - (this.steer?.x ?? 0));
         const climb = clamp(axis(['Space'], ['ShiftLeft', 'ShiftRight']) + (this.steer?.y ?? 0));
@@ -650,7 +659,8 @@ export default class extends Controller {
         const f = this.shipFlight;
 
         // Lent près du cerveau (pour viser), rapide au large (pour rejoindre les nébuleuses)
-        const max = THREE.MathUtils.lerp(SHIP.slow, SHIP.fast, THREE.MathUtils.smoothstep(this.ship.position.length(), SHIP.near, SHIP.far));
+        const cruise = THREE.MathUtils.lerp(SHIP.slow, SHIP.fast, THREE.MathUtils.smoothstep(this.ship.position.length(), SHIP.near, SHIP.far));
+        const max = this.boosting ? cruise * SHIP.boost : cruise;
         // Inertie courte : on part et on s'arrête vite ; freiner (↓) est encore plus franc, la marche arrière lente
         const wanted = thrust > 0 ? max : thrust < 0 ? -0.4 * max : 0;
         f.speed += (wanted - f.speed) * smooth(thrust < 0 ? 6 : thrust > 0 ? 2 : 3);
@@ -659,10 +669,12 @@ export default class extends Controller {
         f.yaw += SHIP.turn * f.turn * delta;
         f.pitch = THREE.MathUtils.clamp(f.pitch + SHIP.pitch * f.climb * delta, -SHIP.maxPitch, SHIP.maxPitch);
         this.ship.rotation.set(f.pitch, f.yaw, 0, 'YXZ');
+        const from = this.ship.position.clone();
         this.ship.translateZ(-f.speed * delta);
         // shortcut: seule collision = le bord de la zone de vol ; on traverse les neurones (#286)
         this.ship.position.clampLength(0, SHIP.maxDistance);
-        this.ship.userData.update(Math.max(f.speed, 0) / max, f.turn, f.climb, this.reducedMotion);
+        // Puissance du réacteur : 1 en croisière, jusqu'à 3 en boost
+        this.ship.userData.update(Math.max(f.speed, 0) / cruise, f.turn, f.climb, this.reducedMotion);
 
         // Caméra derrière et au-dessus ; son regard rejoint en douceur un point devant le vaisseau
         this.camera.position.lerp(this.ship.localToWorld(new THREE.Vector3(0, 0.14, 0.5)), smooth(5));
@@ -671,13 +683,18 @@ export default class extends Controller {
         this.camera.lookAt(f.look);
         // Champ un peu élargi à grande vitesse
         if (!this.reducedMotion) {
-            this.camera.fov = this.baseFov + 6 * Math.abs(f.speed) / SHIP.fast;
+            this.camera.fov = this.baseFov + Math.min(6 * Math.abs(f.speed) / SHIP.fast, 18);
             this.camera.updateProjectionMatrix();
         }
 
         // Toucher un neurone, un souvenir ou une nébuleuse ouvre son panneau (projets liés, parcours…)
+        // Sur tout le trajet de l'image : en boost, on avance de plus que la distance de ramassage
+        const path = new THREE.Line3(from, this.ship.position);
         const at = new THREE.Vector3();
-        const touched = this.clickables.find((t) => t.userData.anchor.getWorldPosition(at).distanceTo(this.ship.position) < SHIP.pickup[t.userData.kind]);
+        const touched = this.clickables.find((t) => {
+            t.userData.anchor.getWorldPosition(at);
+            return path.closestPointToPoint(at, true, new THREE.Vector3()).distanceTo(at) < SHIP.pickup[t.userData.kind];
+        });
         if (touched && touched !== this.selected) {
             this.select(touched);
             this.flight = null; // la caméra reste derrière le vaisseau
