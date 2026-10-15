@@ -83,6 +83,19 @@ const parcours = {
         await onglet.locator('canvas.pluie-meteores').waitFor({ state: 'attached' });
     },
 
+    'Cerveau : piloter le vaisseau, puis Échap rend la caméra': async (onglet) => {
+        await ouvrir(onglet, '/cerveau');
+        const bouton = onglet.locator('[data-brain-target="exploreButton"]');
+        await bouton.click();
+        await onglet.locator('[data-brain-target="hint"]', { hasText: 'ZQSD' }).waitFor();
+        await onglet.keyboard.down('ArrowUp');
+        await onglet.waitForTimeout(300);
+        await onglet.keyboard.up('ArrowUp');
+        await onglet.keyboard.press('Escape');
+        assert.equal(await bouton.getAttribute('aria-pressed'), 'false');
+        assert.equal(await bouton.textContent(), 'Explorer en vaisseau');
+    },
+
     'Aucune erreur JavaScript sur les pages principales': async (onglet) => {
         for (const chemin of ['/', '/cerveau', '/projects', '/projects/frise', '/univers', '/competences', '/CV', '/livre-d-or', '/now', '/terminal', '/nexiste-pas']) {
             await onglet.goto(base + chemin);
