@@ -63,7 +63,7 @@
 
             <div class="navbar-actions">
                 {# Langues : la même page dans chaque langue, chaque nom écrit dans sa propre langue #}
-                <button type="button" class="lang-switch" popovertarget="langues" aria-label="{{ 'Langue'|trans }} : {{ noms_langues[locale] }}">{{ locale|upper }}</button>
+                <button type="button" class="lang-switch" popovertarget="langues" aria-label="{{ locale|upper }} · {{ 'Langue'|trans }} : {{ noms_langues[locale] }}">{{ locale|upper }}</button>
                 <ul id="langues" class="langues" popover>
                     {% for langue in langues_site %}
                     <li><a href="{{ _self.url_in(langue, canonical_route, route_params) }}" hreflang="{{ langue }}" lang="{{ langue }}"
