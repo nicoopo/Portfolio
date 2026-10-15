@@ -26,6 +26,10 @@ const TOUR_PAUSE_MS = 9000; // temps passé sur chaque neurone (vol compris)
 const TOUR_FLIGHT_S = 3.5;  // durée du vol d'un neurone à l'autre
 const TOUR_LIFT = 0.6;      // la caméra prend du recul à mi-vol (part de la distance parcourue)
 const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
+// Mode exploration : vitesse (unités/s), virage (rad/s), zone de vol, distance pour « ramasser » un élément
+const SHIP = { speed: 0.8, turn: 2, maxDistance: 15, pickup: { neuron: 0.15, souvenir: 0.15, nebula: 0.6 } };
+// Touches physiques (e.code) : ZQSD sur AZERTY = WASD sur QWERTY
+const SHIP_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'ShiftLeft', 'ShiftRight']);
 
 /**
  * Scène du cerveau : interaction (caméra, survol, clic, panneau).
@@ -33,7 +37,7 @@ const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
  * Chargé uniquement sur les pages qui l'utilisent (lazy).
  */
 export default class extends Controller {
-    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search', 'legendMenu', 'shareButton', 'soundButton', 'diveButton', 'hint'];
+    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search', 'legendMenu', 'shareButton', 'soundButton', 'diveButton', 'exploreButton', 'hint'];
     // texts : libellés traduits par le template (home/cerveau.html.twig)
     static values = { neurons: Array, passions: Array, souvenirs: Array, texts: Object };
 
@@ -55,6 +59,8 @@ export default class extends Controller {
         this.shareButtonTarget.hidden = false;
         this.soundButtonTarget.hidden = !window.AudioContext;
         this.diveButtonTarget.hidden = false;
+        // shortcut: pas encore de commandes tactiles (#286) : bouton masqué sur écran tactile
+        this.exploreButtonTarget.hidden = window.matchMedia('(pointer: coarse)').matches;
 
         this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -107,6 +113,14 @@ export default class extends Controller {
         this.listen(this.renderer.domElement, 'pointerdown', (e) => { this.downAt = [e.clientX, e.clientY]; });
         this.listen(this.renderer.domElement, 'pointerup', (e) => this.onPointerUp(e));
         this.listen(this.renderer.domElement, 'pointerleave', () => this.hover(null));
+        // Pilotage du vaisseau (hors champ de saisie)
+        this.listen(document, 'keydown', (e) => {
+            if (!this.ship || !SHIP_KEYS.has(e.code) || e.target.closest?.('input, textarea')) return;
+            e.preventDefault(); // pas de défilement de la page
+            this.keys.add(e.code);
+        });
+        this.listen(document, 'keyup', (e) => this.keys?.delete(e.code));
+        this.listen(window, 'blur', () => this.keys?.clear()); // touche relâchée hors de la fenêtre
         // Onglet caché : plus de son ni de calcul audio
         this.listen(document, 'visibilitychange', () => this.ambiance?.setVisible(!document.hidden));
         // Son : préférence du site (panneau ⚙ ou bouton « Son »)
@@ -144,7 +158,7 @@ export default class extends Controller {
             this.frame = requestAnimationFrame(loop);
             this.timer.update(); // sans l'horodatage de rAF : il peut précéder la création du timer (temps négatif)
             this.animate(this.reducedMotion ? 0 : this.timer.getElapsed(), this.timer.getDelta());
-            this.controls.update();
+            if (!this.ship) this.controls.update(); // en exploration, la caméra suit le vaisseau
             this.composer.render();
         };
         loop();
@@ -276,7 +290,9 @@ export default class extends Controller {
         this.souvenirs.update(time);
 
         // Vol de caméra vers l'élément sélectionné (ou retour à la vue d'ensemble)
-        if (this.flight?.duration && !this.reducedMotion) {
+        if (this.ship) {
+            this.updateShip(delta);
+        } else if (this.flight?.duration && !this.reducedMotion) {
             // Vol de la visite : durée fixe, départ et arrivée en douceur, en arc par l'extérieur du cerveau
             const f = this.flight;
             f.t = Math.min(f.t + delta / f.duration, 1);
@@ -364,6 +380,7 @@ export default class extends Controller {
 
     /** Bouton « Visite guidée » : lance ou arrête la visite */
     toggleTour() {
+        if (this.ship) this.stopExplore();
         if (this.tourTimeout) {
             this.stopTour();
             return;
@@ -497,6 +514,7 @@ export default class extends Controller {
     }
 
     close() {
+        if (this.ship) this.stopExplore();
         this.stopTour();
         if (!this.selected) return;
         this.deselect();
@@ -524,6 +542,7 @@ export default class extends Controller {
 
     /** Bouton « Plonger » / « Ressortir » */
     dive() {
+        if (this.ship) this.stopExplore();
         const goingIn = !this.inside;
         this.stopTour();
         this.deselect();
@@ -536,7 +555,85 @@ export default class extends Controller {
         this.inside = inside;
         this.diveButtonTarget.textContent = inside ? this.textsValue.surface : this.textsValue.dive;
         this.diveButtonTarget.setAttribute('aria-pressed', String(inside));
-        this.hintTarget.textContent = inside ? this.textsValue.hintInside : this.textsValue.hintOutside;
+        if (!this.ship) this.hintTarget.textContent = inside ? this.textsValue.hintInside : this.textsValue.hintOutside;
+    }
+
+    // ------------------------------------------------
+    // Mode exploration : piloter un vaisseau
+    // ------------------------------------------------
+
+    /** Bouton « Explorer en vaisseau » / « Quitter l'exploration » */
+    toggleExplore() {
+        if (this.ship) this.stopExplore();
+        else this.startExplore();
+    }
+
+    startExplore() {
+        this.stopTour();
+        this.deselect();
+        this.flight = null;
+        this.controls.enabled = false;
+        this.controls.autoRotate = false;
+        // Sinon Espace « clique » sur le bouton et quitte aussitôt
+        document.activeElement?.blur();
+
+        // Petit cône, assez sombre pour ne pas éblouir avec la lueur (bloom), pointe vers l'avant (-z), posé devant la caméra
+        this.ship = new THREE.Mesh(
+            new THREE.ConeGeometry(0.03, 0.1, 12).rotateX(-Math.PI / 2),
+            // Toujours visible, même à travers la paroi du cerveau (comme les neurones)
+            new THREE.MeshBasicMaterial({ color: '#2f8fae', depthTest: false }),
+        );
+        this.ship.renderOrder = 2;
+        this.ship.position.copy(this.camera.position);
+        this.ship.quaternion.copy(this.camera.quaternion);
+        this.ship.translateZ(-0.6);
+        this.scene.add(this.ship);
+        this.keys = new Set();
+
+        this.exploreButtonTarget.textContent = this.textsValue.stopExplore;
+        this.exploreButtonTarget.setAttribute('aria-pressed', 'true');
+        this.hintTarget.textContent = this.textsValue.hintExplore;
+    }
+
+    stopExplore() {
+        const position = this.ship.position.clone();
+        this.scene.remove(this.ship);
+        this.ship.geometry.dispose();
+        this.ship.material.dispose();
+        this.ship = null;
+        this.keys.clear();
+
+        // On reprend l'orbite autour du centre en partant de là où était le vaisseau
+        this.controls.enabled = true;
+        this.controls.target.copy(position);
+        this.controls.autoRotate = !this.selected && !this.reducedMotion;
+        this.flyHome(this.inside ? DIVE.cameraDistance : this.homeDistance);
+
+        this.exploreButtonTarget.textContent = this.textsValue.explore;
+        this.exploreButtonTarget.setAttribute('aria-pressed', 'false');
+        this.hintTarget.textContent = this.inside ? this.textsValue.hintInside : this.textsValue.hintOutside;
+    }
+
+    updateShip(delta) {
+        const axis = (plus, minus) => (plus.some((c) => this.keys.has(c)) ? 1 : 0) - (minus.some((c) => this.keys.has(c)) ? 1 : 0);
+        this.ship.rotateY(SHIP.turn * delta * axis(['ArrowLeft', 'KeyA'], ['ArrowRight', 'KeyD']));
+        this.ship.translateZ(-SHIP.speed * delta * axis(['ArrowUp', 'KeyW'], ['ArrowDown', 'KeyS']));
+        this.ship.translateY(SHIP.speed * delta * axis(['Space'], ['ShiftLeft', 'ShiftRight']));
+        // shortcut: seule collision = le bord de la zone de vol ; on traverse les neurones (#286)
+        this.ship.position.clampLength(0, SHIP.maxDistance);
+
+        // Caméra derrière et un peu au-dessus du vaisseau
+        const behind = this.ship.localToWorld(new THREE.Vector3(0, 0.1, 0.45));
+        this.camera.position.lerp(behind, this.reducedMotion ? 1 : 1 - Math.exp(-6 * delta));
+        this.camera.lookAt(this.ship.position);
+
+        // Toucher un neurone, un souvenir ou une nébuleuse ouvre son panneau (projets liés, parcours…)
+        const at = new THREE.Vector3();
+        const touched = this.clickables.find((t) => t.userData.anchor.getWorldPosition(at).distanceTo(this.ship.position) < SHIP.pickup[t.userData.kind]);
+        if (touched && touched !== this.selected) {
+            this.select(touched);
+            this.flight = null; // la caméra reste derrière le vaisseau
+        }
     }
 
     fillNeuronPanel(halo) {
