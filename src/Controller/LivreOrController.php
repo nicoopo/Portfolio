@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Journal;
 use App\Entity\MessageLivreOr;
 use App\Form\LivreOrType;
+use App\Security\BlocIp;
 use App\Service\Journaliste;
 use App\Service\Notificateur;
 use Doctrine\ORM\EntityManagerInterface;
@@ -40,7 +41,7 @@ final class LivreOrController extends AbstractController
             $data = $form->getData();
             if ($data['website']) {
                 $journaliste->noter(Journal::SPAM_BLOQUE, 'Robot bloqué par le champ piège du livre d’or');
-            } elseif (!$livreOrLimiter->create($request->getClientIp())->consume()->isAccepted()) {
+            } elseif (!$livreOrLimiter->create(BlocIp::de($request))->consume()->isAccepted()) {
                 $this->addFlash('error', $translator->trans('Beaucoup de messages d’un coup : réessayez dans une heure.'));
 
                 return $this->redirectToRoute('app_livre_or', ['_fragment' => 'signer']);

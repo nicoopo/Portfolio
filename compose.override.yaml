@@ -11,7 +11,8 @@ services:
       - symfony_vendor:/var/www/symfony/vendor
       - assets_vendor:/var/www/symfony/assets/vendor
     ports:
-      - "8082:80" # 8080 = Cabin Access, 8081 = prod (compose.prod.yaml) : dev et prod tournent en même temps
+      - "127.0.0.1:8082:80" # 8080 = Cabin Access, 8081 = prod (compose.prod.yaml) : dev et prod tournent en même temps ;
+        # 127.0.0.1 : le site de dev (profiler, qui affiche les secrets de .env.local) n'est jamais exposé au réseau
     environment:
       APP_ENV: dev # en dur : `.env` contient APP_ENV=prod, que Compose lirait via ${APP_ENV}
 
