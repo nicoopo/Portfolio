@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Decouverte;
+use App\Security\BlocIp;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,7 +27,7 @@ final class DecouverteController extends AbstractController
         if (!\in_array($id, Decouverte::IDS, true)) {
             return new Response(null, Response::HTTP_BAD_REQUEST);
         }
-        if (!$decouvertesLimiter->create($request->getClientIp())->consume()->isAccepted()) {
+        if (!$decouvertesLimiter->create(BlocIp::de($request))->consume()->isAccepted()) {
             return new Response(null, Response::HTTP_TOO_MANY_REQUESTS);
         }
 
