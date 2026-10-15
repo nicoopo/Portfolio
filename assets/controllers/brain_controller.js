@@ -13,6 +13,7 @@ import { Synapses } from '../cerveau/synapses.js';
 import { createNebulae } from '../cerveau/nebulae.js';
 import { createSouvenirs } from '../cerveau/souvenirs.js';
 import { Ambiance } from '../cerveau/ambiance.js';
+import { createShip } from '../cerveau/vaisseau.js';
 import { basseQualite, preferences, setPreference } from '../scripts/preferences.js';
 
 const HOME_TARGET = new THREE.Vector3(0, 0, 0);
@@ -577,13 +578,8 @@ export default class extends Controller {
         // Sinon Espace « clique » sur le bouton et quitte aussitôt
         document.activeElement?.blur();
 
-        // Petit cône, assez sombre pour ne pas éblouir avec la lueur (bloom), pointe vers l'avant (-z), posé devant la caméra
-        this.ship = new THREE.Mesh(
-            new THREE.ConeGeometry(0.03, 0.1, 12).rotateX(-Math.PI / 2),
-            // Toujours visible, même à travers la paroi du cerveau (comme les neurones)
-            new THREE.MeshBasicMaterial({ color: '#2f8fae', depthTest: false }),
-        );
-        this.ship.renderOrder = 2;
+        // Posé devant la caméra, dans son orientation
+        this.ship = createShip(this.texture);
         this.ship.position.copy(this.camera.position);
         this.ship.quaternion.copy(this.camera.quaternion);
         this.ship.translateZ(-0.6);
@@ -598,8 +594,10 @@ export default class extends Controller {
     stopExplore() {
         const position = this.ship.position.clone();
         this.scene.remove(this.ship);
-        this.ship.geometry.dispose();
-        this.ship.material.dispose();
+        this.ship.traverse((child) => {
+            child.geometry?.dispose();
+            child.material?.dispose(); // pas sa texture : c'est celle de toute la scène
+        });
         this.ship = null;
         this.keys.clear();
 
@@ -616,14 +614,17 @@ export default class extends Controller {
 
     updateShip(delta) {
         const axis = (plus, minus) => (plus.some((c) => this.keys.has(c)) ? 1 : 0) - (minus.some((c) => this.keys.has(c)) ? 1 : 0);
-        this.ship.rotateY(SHIP.turn * delta * axis(['ArrowLeft', 'KeyA'], ['ArrowRight', 'KeyD']));
-        this.ship.translateZ(-SHIP.speed * delta * axis(['ArrowUp', 'KeyW'], ['ArrowDown', 'KeyS']));
+        const turn = axis(['ArrowLeft', 'KeyA'], ['ArrowRight', 'KeyD']);
+        const thrust = axis(['ArrowUp', 'KeyW'], ['ArrowDown', 'KeyS']);
+        this.ship.rotateY(SHIP.turn * delta * turn);
+        this.ship.translateZ(-SHIP.speed * delta * thrust);
+        this.ship.userData.update(thrust, turn, this.reducedMotion);
         this.ship.translateY(SHIP.speed * delta * axis(['Space'], ['ShiftLeft', 'ShiftRight']));
         // shortcut: seule collision = le bord de la zone de vol ; on traverse les neurones (#286)
         this.ship.position.clampLength(0, SHIP.maxDistance);
 
         // Caméra derrière et un peu au-dessus du vaisseau
-        const behind = this.ship.localToWorld(new THREE.Vector3(0, 0.1, 0.45));
+        const behind = this.ship.localToWorld(new THREE.Vector3(0, 0.16, 0.38));
         this.camera.position.lerp(behind, this.reducedMotion ? 1 : 1 - Math.exp(-6 * delta));
         this.camera.lookAt(this.ship.position);
 
