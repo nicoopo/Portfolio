@@ -12,6 +12,25 @@ final class ArriveeRepository
     {
     }
 
+    /** Enregistre une arrivée et efface celles de plus de Arrivee::JOURS jours */
+    public function ajouter(string $fuseau, ?float $lat, ?float $lon): void
+    {
+        $this->connection->executeStatement(
+            'INSERT INTO arrivee (moment, fuseau, ip_lat, ip_lon) VALUES (CURRENT_TIMESTAMP(0), :fuseau, :lat, :lon)',
+            ['fuseau' => $fuseau, 'lat' => $lat, 'lon' => $lon],
+        );
+        $this->connection->executeStatement("DELETE FROM arrivee WHERE moment < CURRENT_TIMESTAMP - INTERVAL '".Arrivee::JOURS." days'");
+    }
+
+    /** @return list<array{id: int|string, fuseau: string, ip_lat: ?string, ip_lon: ?string}> arrivées d'identifiant > $depuis sur Arrivee::JOURS jours (2000 au plus) */
+    public function depuis(int $depuis): array
+    {
+        return $this->connection->fetchAllAssociative(
+            "SELECT id, fuseau, ip_lat, ip_lon FROM arrivee WHERE id > :depuis AND moment >= CURRENT_TIMESTAMP - INTERVAL '".Arrivee::JOURS." days' ORDER BY id LIMIT 2000",
+            ['depuis' => $depuis],
+        );
+    }
+
     /** @return array<string, int> les 5 fuseaux horaires d'où l'on arrive le plus sur 30 jours => nombre d'arrivées */
     public function fuseaux(): array
     {

@@ -2,14 +2,13 @@
 
 namespace App\Controller;
 
-use App\Entity\LienRecruteur;
 use App\Repository\CentreInteretRepository;
 use App\Repository\CvCompetenceRepository;
 use App\Repository\CvProfilRepository;
 use App\Repository\EtapeParcoursRepository;
 use App\Repository\ExperienceRepository;
 use App\Repository\LangueRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\LienRecruteurRepository;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,7 +26,7 @@ final class CVController extends AbstractController
         private readonly EtapeParcoursRepository $parcours,
         private readonly LangueRepository $langues,
         private readonly CentreInteretRepository $interets,
-        private readonly EntityManagerInterface $entityManager,
+        private readonly LienRecruteurRepository $liens,
     ) {
     }
 
@@ -78,10 +77,9 @@ final class CVController extends AbstractController
     private function contenu(Request $request): array
     {
         $ordre = ['position' => 'ASC'];
-        $code = $request->query->getString('pour');
 
         return [
-            'recruteur' => '' !== $code ? $this->entityManager->getRepository(LienRecruteur::class)->findOneBy(['code' => $code]) : null,
+            'recruteur' => $this->liens->parCode($request->query->getString('pour')),
             'profil' => $this->profil->findOneBy([]) ?? throw $this->createNotFoundException('Profil du CV absent : lancer les migrations.'),
             'experiences' => $this->experiences->findBy([], $ordre),
             'competences' => $this->competences->findBy([], $ordre),
