@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Candidature;
 use App\Entity\StatutCandidature;
+use App\Repository\CandidatureRepository;
 use App\Repository\CvProfilRepository;
 use App\Service\Agenda;
 use Doctrine\ORM\EntityManagerInterface;
@@ -100,13 +101,13 @@ final class CandidatureCrudController extends AbstractCrudController
 
     /** Toutes les candidatures, pour un tableur : séparateur « ; » et BOM UTF-8, comme Excel les attend en français */
     #[AdminRoute('/export')]
-    public function exporter(EntityManagerInterface $entityManager): Response
+    public function exporter(CandidatureRepository $candidatures): Response
     {
         $csv = fopen('php://temp', 'r+');
         fwrite($csv, "\u{FEFF}");
         fputcsv($csv, ['Entreprise', 'Poste', 'Statut', 'Envoyée le', 'Réponse le', 'À relancer le', 'Site ouvert', 'Annonce', 'Notes'], ';', escape: '');
         $date = fn (?\DateTimeImmutable $d) => $d?->format('d/m/Y') ?? '';
-        foreach ($entityManager->getRepository(Candidature::class)->findBy([], ['envoyeeLe' => 'DESC']) as $c) {
+        foreach ($candidatures->findBy([], ['envoyeeLe' => 'DESC']) as $c) {
             fputcsv($csv, [
                 $c->getEntreprise(), $c->getPoste(), $c->getStatut()->libelle(), $date($c->getEnvoyeeLe()), $date($c->getReponseLe()),
                 $date($c->getRelancerLe()), $c->getLien() ? $c->getLien()->getVisites() : '', $c->getAnnonce(), $c->getNotes(),

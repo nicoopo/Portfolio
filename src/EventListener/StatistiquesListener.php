@@ -2,7 +2,7 @@
 
 namespace App\EventListener;
 
-use Doctrine\DBAL\Connection;
+use App\Repository\VisiteJourRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -18,7 +18,7 @@ final class StatistiquesListener
     public const ROBOTS = '/bot|crawl|spider|slurp|preview|facebookexternalhit|headless|lighthouse|curl|wget|python|axe-core/i';
 
     public function __construct(
-        private readonly Connection $connection,
+        private readonly VisiteJourRepository $visites,
         private readonly Security $security,
     ) {
     }
@@ -46,10 +46,6 @@ final class StatistiquesListener
             default => substr(preg_replace('/^www\./', '', $provenance), 0, 100),
         };
 
-        $this->connection->executeStatement(
-            'INSERT INTO visite_jour (jour, chemin, langue, source, nombre) VALUES (CURRENT_DATE, :chemin, :langue, :source, 1)
-             ON CONFLICT (jour, chemin, langue, source) DO UPDATE SET nombre = visite_jour.nombre + 1',
-            ['chemin' => $chemin, 'langue' => $langue, 'source' => $source],
-        );
+        $this->visites->compter($chemin, $langue, $source);
     }
 }
