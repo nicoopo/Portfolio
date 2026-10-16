@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Repository\LienRecruteurRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -13,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Lien personnalisé envoyé à un recruteur : /?pour=code. L'accueil salue l'entreprise et met en avant CV et contact ;
  * l'administration voit si le lien a été ouvert (visites hors administrateur connecté).
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: LienRecruteurRepository::class)]
 #[UniqueEntity('code')]
 class LienRecruteur
 {

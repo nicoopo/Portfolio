@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Repository\CandidatureRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -10,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Candidature d'alternance, suivie dans l'administration (privée : rien sur le site public).
  * Tant qu'elle attend une réponse, une date de relance est calculée : RELANCE_JOURS après l'envoi ou la dernière relance.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: CandidatureRepository::class)]
 class Candidature
 {
     public const RELANCE_JOURS = 7;
