@@ -93,7 +93,7 @@ final class RendezVousController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        return new Response($agenda->ics('creneau-'.$id, $creneau->getDebut(), 'Entretien avec Nicolas Cataluna', 'https://nicolascataluna.fr — nicolas.cataluna@proton.me'), Response::HTTP_OK, [
+        return new Response($agenda->ics('creneau-'.$id, $creneau->getDebut(), 'Entretien avec Nicolas Cataluna', 'https://nicolascataluna.fr — '.$this->getParameter('app.contact_email')), Response::HTTP_OK, [
             'Content-Type' => 'text/calendar; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="entretien-nicolas-cataluna.ics"',
         ]);
