@@ -2,13 +2,14 @@
 
 namespace App\Entity;
 
+use App\Repository\MessageLivreOrRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Message du livre d'or (/livre-d-or) : une étoile du ciel de la page, une fois approuvé dans l'administration.
  * Ni e-mail ni adresse IP enregistrés : un prénom et un texte court.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: MessageLivreOrRepository::class)]
 class MessageLivreOr
 {
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]

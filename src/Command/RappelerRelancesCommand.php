@@ -3,8 +3,8 @@
 namespace App\Command;
 
 use App\Entity\Candidature;
+use App\Repository\CandidatureRepository;
 use App\Service\Notificateur;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -17,22 +17,15 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class RappelerRelancesCommand
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
+        private readonly CandidatureRepository $candidatures,
         private readonly Notificateur $notificateur,
     ) {
     }
 
     public function __invoke(SymfonyStyle $io): int
     {
-        /** @var list<Candidature> $entretiens */
-        $entretiens = $this->entityManager->createQuery('SELECT c FROM '.Candidature::class.' c WHERE c.entretienLe >= :aujourdhui AND c.entretienLe < :apresDemain ORDER BY c.entretienLe')
-            ->setParameter('aujourdhui', new \DateTimeImmutable('today'))
-            ->setParameter('apresDemain', new \DateTimeImmutable('today +2 days'))
-            ->getResult();
-        /** @var list<Candidature> $relances */
-        $relances = $this->entityManager->createQuery('SELECT c FROM '.Candidature::class.' c WHERE c.relancerLe <= :aujourdhui ORDER BY c.relancerLe')
-            ->setParameter('aujourdhui', new \DateTimeImmutable('today'))
-            ->getResult();
+        $entretiens = $this->candidatures->entretiensProches();
+        $relances = $this->candidatures->aRelancer();
 
         $lignesEntretiens = array_map(fn (Candidature $c) => '• '.$c.' : '
             .($c->getEntretienLe() < new \DateTimeImmutable('tomorrow') ? 'aujourd’hui' : 'demain').' à '.$c->getEntretienLe()->format('H:i'), $entretiens);

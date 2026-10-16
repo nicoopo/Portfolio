@@ -2,11 +2,10 @@
 
 namespace App\Controller;
 
-use App\Entity\CvProfil;
 use App\Repository\CategorieCompetenceRepository;
+use App\Repository\CvProfilRepository;
 use App\Repository\ProjetRepository;
 use App\Twig\Traduction;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -15,9 +14,9 @@ use Symfony\Component\Routing\Attribute\Route;
 final class TerminalController extends AbstractController
 {
     #[Route('/terminal', name: 'app_terminal')]
-    public function __invoke(EntityManagerInterface $entityManager, ProjetRepository $projets, CategorieCompetenceRepository $categories, Traduction $traduction): Response
+    public function __invoke(CvProfilRepository $profils, ProjetRepository $projets, CategorieCompetenceRepository $categories, Traduction $traduction): Response
     {
-        $profil = $entityManager->getRepository(CvProfil::class)->findOneBy([]);
+        $profil = $profils->findOneBy([]);
 
         return $this->render('terminal/index.html.twig', ['donnees' => [
             'titre' => $profil ? $traduction->loc($profil, 'titre') : '',

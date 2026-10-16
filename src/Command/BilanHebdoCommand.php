@@ -2,8 +2,12 @@
 
 namespace App\Command;
 
+use App\Repository\CandidatureRepository;
+use App\Repository\DemandeContactRepository;
+use App\Repository\LienRecruteurRepository;
+use App\Repository\MessageLivreOrRepository;
+use App\Repository\VisiteJourRepository;
 use App\Service\Notificateur;
-use Doctrine\DBAL\Connection;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -13,21 +17,26 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class BilanHebdoCommand
 {
     public function __construct(
-        private readonly Connection $connection,
+        private readonly VisiteJourRepository $visites,
+        private readonly LienRecruteurRepository $liens,
+        private readonly DemandeContactRepository $demandes,
+        private readonly MessageLivreOrRepository $livreOr,
+        private readonly CandidatureRepository $candidatures,
         private readonly Notificateur $notificateur,
     ) {
     }
 
     public function __invoke(SymfonyStyle $io): int
     {
-        $vues = (int) $this->connection->fetchOne('SELECT COALESCE(SUM(nombre), 0) FROM visite_jour WHERE jour >= CURRENT_DATE - 6');
-        $avant = (int) $this->connection->fetchOne('SELECT COALESCE(SUM(nombre), 0) FROM visite_jour WHERE jour BETWEEN CURRENT_DATE - 13 AND CURRENT_DATE - 7');
-        $pages = $this->classement('chemin');
-        $sources = $this->classement('source', "AND source NOT IN ('site', 'direct')");
-        $liens = $this->connection->fetchFirstColumn("SELECT entreprise FROM lien_recruteur WHERE derniere_visite >= CURRENT_DATE - 6 ORDER BY derniere_visite DESC");
-        $contacts = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM demande_contact WHERE recu_le >= CURRENT_DATE - 6');
-        $livreOr = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM message_livre_or WHERE NOT approuve');
-        $relances = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM candidature WHERE relancer_le <= CURRENT_DATE');
+        $debut = new \DateTimeImmutable('today -6 days');
+        $vues = $this->visites->vuesEntre(6, 0);
+        $avant = $this->visites->vuesEntre(13, 7);
+        $pages = self::enLigne($this->visites->classement('chemin', 7, 3));
+        $sources = self::enLigne($this->visites->classement('source', 7, 3, ['site', 'direct']));
+        $liens = $this->liens->entreprisesOuvertesDepuis($debut);
+        $contacts = $this->demandes->compterDepuis($debut);
+        $livreOr = $this->livreOr->count(['approuve' => false]);
+        $relances = $this->candidatures->compterARelancer();
 
         $lignes = array_filter([
             "👀 $vues pages vues".($avant ? ' ('.($vues >= $avant ? '+' : '').round(100 * ($vues - $avant) / $avant).' %)' : ''),
@@ -47,13 +56,9 @@ final class BilanHebdoCommand
         return Command::SUCCESS;
     }
 
-    /** Les 3 premières valeurs d'une colonne de visite_jour sur 7 jours : « /cerveau 12, /projects 8… » */
-    private function classement(string $colonne, string $filtre = ''): string
+    /** Un classement en une ligne : « /cerveau 12, /projects 8… » */
+    private static function enLigne(array $lignes): string
     {
-        $lignes = $this->connection->fetchAllKeyValue(
-            "SELECT $colonne, SUM(nombre) AS total FROM visite_jour WHERE jour >= CURRENT_DATE - 6 $filtre GROUP BY $colonne ORDER BY total DESC LIMIT 3",
-        );
-
         return implode(', ', array_map(fn ($valeur, $total) => "$valeur $total", array_keys($lignes), $lignes));
     }
 }

@@ -3,8 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Decouverte;
+use App\Repository\DecouverteRepository;
 use App\Security\BlocIp;
-use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class DecouverteController extends AbstractController
 {
     #[Route('/decouvertes', name: 'app_decouverte', methods: ['POST'])]
-    public function __invoke(Request $request, Connection $connection, RateLimiterFactoryInterface $decouvertesLimiter): Response
+    public function __invoke(Request $request, DecouverteRepository $decouvertes,RateLimiterFactoryInterface $decouvertesLimiter): Response
     {
         if ('same-origin' !== $request->headers->get('Sec-Fetch-Site', 'same-origin')) {
             return new Response(null, Response::HTTP_FORBIDDEN);
@@ -31,10 +31,7 @@ final class DecouverteController extends AbstractController
             return new Response(null, Response::HTTP_TOO_MANY_REQUESTS);
         }
 
-        $connection->executeStatement(
-            'INSERT INTO decouverte (id, nombre) VALUES (:id, 1) ON CONFLICT (id) DO UPDATE SET nombre = decouverte.nombre + 1',
-            ['id' => $id],
-        );
+        $decouvertes->compter($id);
 
         return new Response(null, Response::HTTP_NO_CONTENT);
     }

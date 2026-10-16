@@ -8,7 +8,7 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     # Destinataire du formulaire de contact (déjà publique sur la page Contact)
-    app.contact_email: 'nicolas.cataluna@proton.me'
+    app.contact_email: 'contact@nicolascataluna.fr'
     # Compte GitHub dont la page Projets montre les derniers dépôts (App\Service\ActiviteGithub) ; vide = section masquée
     app.github_utilisateur: 'nicoopo'
     # Base DB-IP Lite des villes (globe de /stats, ArriveeController), téléchargée au build de l'image prod ; absente = pas de lieu par IP

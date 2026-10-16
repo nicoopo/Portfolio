@@ -2,17 +2,16 @@
 
 namespace App\Controller;
 
-use App\Entity\Creneau;
 use App\Entity\EtapeParcours;
-use App\Entity\LienRecruteur;
 use App\Entity\Passion;
 use App\EventListener\StatistiquesListener;
 use App\Repository\CategorieCompetenceRepository;
+use App\Repository\CreneauRepository;
+use App\Repository\LienRecruteurRepository;
 use App\Service\Notificateur;
 use App\Repository\EtapeParcoursRepository;
 use App\Repository\PassionRepository;
 use App\Twig\Traduction;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,27 +21,18 @@ final class HomeController extends AbstractController
 {
     /** Lien recruteur (/?pour=code) : accueil personnalisé, visite comptée sauf pour l'administrateur connecté et les robots d'aperçu (LinkedIn, Slack…), notification à la première */
     #[Route('/', name: 'app_home')]
-    public function index(Request $request, EntityManagerInterface $entityManager, Notificateur $notificateur): Response
+    public function index(Request $request, LienRecruteurRepository $liens, CreneauRepository $creneaux, Notificateur $notificateur): Response
     {
-        $code = $request->query->getString('pour');
-        $recruteur = '' !== $code ? $entityManager->getRepository(LienRecruteur::class)->findOneBy(['code' => $code]) : null;
+        $recruteur = $liens->parCode($request->query->getString('pour'));
         if ($recruteur && !$this->isGranted('ROLE_ADMIN') && !preg_match(StatistiquesListener::ROBOTS, $request->headers->get('User-Agent', ''))) {
-            // En base, en une requête : deux ouvertures à la même seconde comptent bien deux visites, et une seule alerte
-            $visites = (int) $entityManager->getConnection()->fetchOne(
-                'UPDATE lien_recruteur SET visites = visites + 1, derniere_visite = CURRENT_TIMESTAMP(0), premiere_visite = COALESCE(premiere_visite, CURRENT_TIMESTAMP(0))
-                 WHERE id = :id RETURNING visites',
-                ['id' => $recruteur->getId()],
-            );
-            if (1 === $visites) { // la première ouverture seulement : de quoi relancer au bon moment
+            if (1 === $liens->compterVisite($recruteur)) { // la première ouverture seulement (une seule alerte) : de quoi relancer au bon moment
                 $notificateur->prevenir('Lien recruteur ouvert', $recruteur->getEntreprise().' vient d’ouvrir ton portfolio'.($recruteur->getPoste() ? ' ('.$recruteur->getPoste().')' : ''), 'eyes');
             }
         }
 
         return $this->render('home/index.html.twig', [
             'recruteur' => $recruteur,
-            // Bouton « Choisir un créneau » : un créneau libre à plus de 12 heures, ou déjà réservé par ce lien
-            'rendez_vous' => $recruteur && (int) $entityManager->createQuery('SELECT COUNT(c) FROM '.Creneau::class.' c WHERE (c.lien IS NULL AND c.debut > :limite) OR c.lien = :lien')
-                ->setParameter('limite', new \DateTimeImmutable('+12 hours'))->setParameter('lien', $recruteur)->getSingleScalarResult() > 0,
+            'rendez_vous' => $recruteur && $creneaux->proposablesA($recruteur),
         ]);
     }
 

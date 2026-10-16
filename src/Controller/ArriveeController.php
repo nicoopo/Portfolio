@@ -2,9 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Arrivee;
 use App\EventListener\StatistiquesListener;
-use Doctrine\DBAL\Connection;
+use App\Repository\ArriveeRepository;
 use MaxMind\Db\Reader;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,7 +28,7 @@ final class ArriveeController extends AbstractController
      * (config/packages/rate_limiter.yaml), sans IP : contre un flot de fausses arrivées, pas contre une personne.
      */
     #[Route('/arrivees', name: 'app_arrivee', methods: ['POST'])]
-    public function signaler(Request $request, Connection $connection, Security $security, RateLimiterFactoryInterface $arriveesLimiter, #[Autowire(param: 'app.dbip_villes')] string $dbip): Response
+    public function signaler(Request $request, ArriveeRepository $arrivees,Security $security, RateLimiterFactoryInterface $arriveesLimiter, #[Autowire(param: 'app.dbip_villes')] string $dbip): Response
     {
         if ('same-origin' !== $request->headers->get('Sec-Fetch-Site', 'same-origin')) {
             return new Response(null, Response::HTTP_FORBIDDEN);
@@ -47,11 +46,7 @@ final class ArriveeController extends AbstractController
         }
 
         $ip = self::lieuIp($request->getClientIp(), $dbip);
-        $connection->executeStatement(
-            'INSERT INTO arrivee (moment, fuseau, ip_lat, ip_lon) VALUES (CURRENT_TIMESTAMP(0), :fuseau, :lat, :lon)',
-            ['fuseau' => $fuseau, 'lat' => $ip['lat'] ?? null, 'lon' => $ip['lon'] ?? null],
-        );
-        $connection->executeStatement("DELETE FROM arrivee WHERE moment < CURRENT_TIMESTAMP - INTERVAL '".Arrivee::JOURS." days'");
+        $arrivees->ajouter($fuseau, $ip['lat'] ?? null, $ip['lon'] ?? null);
 
         return new Response(null, Response::HTTP_NO_CONTENT);
     }
@@ -61,14 +56,10 @@ final class ArriveeController extends AbstractController
      * Pas l'heure exacte : seulement l'ordre, la position, le fuseau et le lieu d'après l'IP (ou null).
      */
     #[Route('/arrivees', name: 'app_arrivees', methods: ['GET'])]
-    public function lister(Request $request, Connection $connection): JsonResponse
+    public function lister(Request $request, ArriveeRepository $repository): JsonResponse
     {
-        $lignes = $connection->fetchAllAssociative(
-            "SELECT id, fuseau, ip_lat, ip_lon FROM arrivee WHERE id > :depuis AND moment >= CURRENT_TIMESTAMP - INTERVAL '".Arrivee::JOURS." days' ORDER BY id LIMIT 2000",
-            ['depuis' => $request->query->getInt('depuis')],
-        );
         $arrivees = [];
-        foreach ($lignes as $ligne) {
+        foreach ($repository->depuis($request->query->getInt('depuis')) as $ligne) {
             if ($position = self::position($ligne['fuseau'])) {
                 $ip = null !== $ligne['ip_lat'] ? ['lat' => (float) $ligne['ip_lat'], 'lon' => (float) $ligne['ip_lon']] : null;
                 $arrivees[] = ['id' => (int) $ligne['id'], 'fuseau' => $ligne['fuseau'], ...$position, 'ip' => $ip];

@@ -2,14 +2,14 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Candidature;
-use App\Entity\Competence;
 use App\Entity\DemandeContact;
 use App\Entity\Journal;
+use App\Repository\CandidatureRepository;
+use App\Repository\CompetenceRepository;
 use App\Repository\DemandeContactRepository;
 use App\Repository\JournalRepository;
 use App\Repository\ProjetRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\VisiteJourRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -23,8 +23,10 @@ final class DashboardController extends AbstractDashboardController
     public function __construct(
         private readonly DemandeContactRepository $demandes,
         private readonly JournalRepository $journal,
-        private readonly EntityManagerInterface $entityManager,
+        private readonly CompetenceRepository $competences,
         private readonly ProjetRepository $projets,
+        private readonly CandidatureRepository $candidatures,
+        private readonly VisiteJourRepository $visites,
     ) {
     }
 
@@ -38,28 +40,19 @@ final class DashboardController extends AbstractDashboardController
             'demandes_mois' => $this->demandes->compterDepuis($debutDuMois),
             'demandes_echec' => $this->demandes->count(['statut' => DemandeContact::STATUT_ECHEC]),
             'connexions_refusees' => $this->journal->compterDepuis(Journal::CONNEXION_REFUSEE, new \DateTimeImmutable('-7 days')),
-            'nb_competences' => $this->entityManager->getRepository(Competence::class)->count([]),
+            'nb_competences' => $this->competences->count([]),
             'nb_projets' => $this->projets->count([]),
-            'a_relancer' => (int) $this->entityManager->createQuery('SELECT COUNT(c) FROM '.Candidature::class.' c WHERE c.relancerLe <= :aujourdhui')
-                ->setParameter('aujourdhui', new \DateTimeImmutable('today'))->getSingleScalarResult(),
-            'candidatures' => $this->entityManager->getConnection()->fetchAssociative(
-                "SELECT COUNT(*) AS total,
-                        COUNT(*) FILTER (WHERE c.statut NOT IN ('envoyee', 'relancee')) AS reponses,
-                        COUNT(*) FILTER (WHERE c.statut IN ('entretien', 'acceptee')) AS entretiens,
-                        ROUND(AVG(c.reponse_le - c.envoyee_le)) AS delai,
-                        COUNT(c.lien_id) AS avec_lien,
-                        COUNT(*) FILTER (WHERE l.visites > 0) AS liens_ouverts
-                 FROM candidature c LEFT JOIN lien_recruteur l ON l.id = c.lien_id",
-            ),
+            'a_relancer' => $this->candidatures->compterARelancer(),
+            'candidatures' => $this->candidatures->resume(),
             'dernieres_demandes' => $this->demandes->findBy([], ['recuLe' => 'DESC'], 5),
             'dernier_journal' => $this->journal->findBy([], ['date' => 'DESC'], 8),
             'activite' => $this->activite(),
             'contacts_par_mois' => $this->contactsParMois(),
             'visites' => $this->visitesParJour(),
             'visites_classements' => [
-                'Pages' => $this->classementVisites('chemin'),
-                'Provenance' => $this->classementVisites('source'),
-                'Langues' => $this->classementVisites('langue'),
+                'Pages' => $this->visites->classement('chemin', 30, 8),
+                'Provenance' => $this->visites->classement('source', 30, 8, ['site']), // « site » : navigation interne
+                'Langues' => $this->visites->classement('langue', 30, 8),
             ],
         ]);
     }
@@ -98,31 +91,12 @@ final class DashboardController extends AbstractDashboardController
     /** Graphique : pages vues par jour sur 30 jours (App\EventListener\StatistiquesListener) */
     private function visitesParJour(): array
     {
-        $jours = [];
-        for ($i = 29; $i >= 0; --$i) {
-            $jours[(new \DateTimeImmutable("-$i days"))->format('Y-m-d')] = 0;
-        }
-        $lignes = $this->entityManager->getConnection()->fetchAllKeyValue(
-            "SELECT to_char(jour, 'YYYY-MM-DD'), SUM(nombre) FROM visite_jour WHERE jour >= CURRENT_DATE - 29 GROUP BY jour",
-        );
-        foreach ($lignes as $jour => $nombre) {
-            $jours[$jour] = (int) $nombre;
-        }
+        $jours = $this->visites->vuesParJour();
 
         return [
             'labels' => array_map(static fn (string $jour) => (new \DateTimeImmutable($jour))->format('d/m'), array_keys($jours)),
             'series' => [['label' => 'Pages vues', 'data' => array_values($jours)]],
         ];
-    }
-
-    /** Les 8 premières valeurs d'une colonne de visite_jour sur 30 jours (« site » exclu des provenances : c'est de la navigation interne) */
-    private function classementVisites(string $colonne): array
-    {
-        return array_map('intval', $this->entityManager->getConnection()->fetchAllKeyValue(
-            "SELECT $colonne, SUM(nombre) AS total FROM visite_jour WHERE jour >= CURRENT_DATE - 29"
-            .('source' === $colonne ? " AND source <> 'site'" : '')
-            ." GROUP BY $colonne ORDER BY total DESC LIMIT 8",
-        ));
     }
 
     /** Graphique : demandes de contact par mois sur 12 mois */

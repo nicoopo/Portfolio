@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Arrivee;
-use Doctrine\DBAL\Connection;
+use App\Repository\ArriveeRepository;
+use App\Repository\VisiteJourRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -15,24 +15,16 @@ use Symfony\Component\Routing\Attribute\Route;
 final class StatsController extends AbstractController
 {
     #[Route('/stats', name: 'app_stats')]
-    public function __invoke(Connection $connection): Response
+    public function __invoke(VisiteJourRepository $visites, ArriveeRepository $arrivees): Response
     {
-        $jours = [];
-        for ($i = 29; $i >= 0; --$i) {
-            $jours[(new \DateTimeImmutable("-$i days"))->format('Y-m-d')] = 0;
-        }
-        foreach ($connection->fetchAllKeyValue("SELECT to_char(jour, 'YYYY-MM-DD'), SUM(nombre) FROM visite_jour WHERE jour >= CURRENT_DATE - 29 GROUP BY jour") as $jour => $nombre) {
-            $jours[$jour] = (int) $nombre;
-        }
-
         return $this->render('stats/index.html.twig', [
-            'jours' => $jours,
-            'total' => (int) $connection->fetchOne('SELECT COALESCE(SUM(nombre), 0) FROM visite_jour'),
-            'depuis' => $connection->fetchOne('SELECT MIN(jour) FROM visite_jour'),
-            'pages' => array_map('intval', $connection->fetchAllKeyValue('SELECT chemin, SUM(nombre) AS total FROM visite_jour WHERE jour >= CURRENT_DATE - 29 GROUP BY chemin ORDER BY total DESC, chemin LIMIT 5')),
-            'langues' => array_map('intval', $connection->fetchAllKeyValue('SELECT langue, SUM(nombre) AS total FROM visite_jour WHERE jour >= CURRENT_DATE - 29 GROUP BY langue ORDER BY total DESC, langue')),
+            'jours' => $visites->vuesParJour(),
+            'total' => $visites->total(),
+            'depuis' => $visites->depuis(),
+            'pages' => $visites->classement('chemin', 30, 5),
+            'langues' => $visites->classement('langue', 30),
             // Globe des arrivées (ArriveeController) : les fuseaux horaires d'où l'on arrive le plus, en clair sous le globe
-            'fuseaux' => array_map('intval', $connection->fetchAllKeyValue("SELECT fuseau, COUNT(*) AS total FROM arrivee WHERE moment >= CURRENT_TIMESTAMP - INTERVAL '".Arrivee::JOURS." days' GROUP BY fuseau ORDER BY total DESC, fuseau LIMIT 5")),
+            'fuseaux' => $arrivees->fuseaux(),
         ]);
     }
 }
