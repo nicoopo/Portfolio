@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Repository\CreneauRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -10,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Créneau d'entretien ouvert dans l'administration, réservable par un recruteur depuis son lien (/rendez-vous?pour=code).
  * Heure de Paris telle que saisie (comme Candidature::$entretienLe), une heure.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: CreneauRepository::class)]
 #[ORM\Index(columns: ['debut'])]
 class Creneau
 {
@@ -21,7 +22,7 @@ class Creneau
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeImmutable $debut = null;
 
-    /** Réservé par ce lien (null : libre) ; la réservation se fait en une requête conditionnelle (RendezVousController) */
+    /** Réservé par ce lien (null : libre) ; la réservation se fait en une requête conditionnelle (CreneauRepository::reserver) */
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?LienRecruteur $lien = null;
