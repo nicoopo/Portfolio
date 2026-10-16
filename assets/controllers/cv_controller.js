@@ -72,7 +72,10 @@ export default class extends Controller {
         label.textContent = this.textsValue.generating;
 
         const link = document.createElement('a');
-        link.href = `${this.downloadUrlValue}?theme=${this.theme}`;
+        // L'adresse peut déjà porter ?pour= (CV adapté à un lien recruteur)
+        const url = new URL(this.downloadUrlValue, window.location.href);
+        url.searchParams.set('theme', this.theme);
+        link.href = url;
         link.download = '';
         document.body.appendChild(link);
         link.click();

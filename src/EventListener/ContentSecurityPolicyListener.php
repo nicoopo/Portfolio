@@ -16,9 +16,9 @@ use Twig\Attribute\AsTwigFunction;
 #[AsEventListener]
 final class ContentSecurityPolicyListener implements ResetInterface
 {
-    // ponytail: d'abord en « Report-Only » (rien n'est bloqué, les violations sont seulement signalées) ;
-    // passer à 'Content-Security-Policy' quand les logs « csp » de la prod restent vides (issue #55).
-    private const EN_TETE = 'Content-Security-Policy-Report-Only';
+    // Bloquante depuis l'issue #55, après une période en « Report-Only » sans violation en prod.
+    // En cas de casse, revenir temporairement à 'Content-Security-Policy-Report-Only'.
+    private const EN_TETE = 'Content-Security-Policy';
 
     private ?string $nonce = null;
 
@@ -45,6 +45,7 @@ final class ContentSecurityPolicyListener implements ResetInterface
             // Attributs style="" (couleurs de la légende du cerveau, EasyAdmin) : risque faible, contrairement aux scripts
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data:",
+            "worker-src 'self'",         // service worker (public/sw.js) : 'strict-dynamic' ne couvre pas les workers
             "frame-src 'self'",          // visionneuse PDF de /univers
             "frame-ancestors 'self'",
             "object-src 'none'",

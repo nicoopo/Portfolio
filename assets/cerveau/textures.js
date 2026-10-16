@@ -1,15 +1,13 @@
 import * as THREE from 'three';
 
-/** Point lumineux rond et flou, dessiné une fois dans un canvas. */
-export function dotTexture() {
+/** Point lumineux rond et flou, dessiné une fois dans un canvas ; stops = [position, opacité]. */
+export function dotTexture(stops = [[0, 1], [0.3, 0.6], [1, 0]]) {
     const size = 64;
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = size;
     const ctx = canvas.getContext('2d');
     const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-    g.addColorStop(0, 'rgba(255,255,255,1)');
-    g.addColorStop(0.3, 'rgba(255,255,255,0.6)');
-    g.addColorStop(1, 'rgba(255,255,255,0)');
+    for (const [at, alpha] of stops) g.addColorStop(at, `rgba(255,255,255,${alpha})`);
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, size, size);
     return new THREE.CanvasTexture(canvas);
@@ -38,10 +36,28 @@ export function fadingPointsMaterial(texture, size, options = {}) {
  * sinon, en traversant une nébuleuse, chaque point devient une énorme tache à l'écran.
  */
 export function fadeNearCamera(material) {
+    return fadeShader(material, 'smoothstep(1.0, 4.0, -mvPosition.z)');
+}
+
+/** Mode exploration : distance à la caméra sous laquelle neurones et souvenirs s'effacent ; 0 = jamais (hors exploration). */
+export const exploreFade = { value: 0 };
+
+/**
+ * Comme fadeNearCamera, mais seulement en exploration et de bien plus près : le vaisseau frôle
+ * les points pour les ramasser, la caméra derrière lui finit dedans et la lueur remplirait l'écran.
+ */
+export function fadeWhenExploring(material) {
+    return fadeShader(material, 'exploreFade > 0.0 ? smoothstep(0.3 * exploreFade, exploreFade, -mvPosition.z) : 1.0', { exploreFade });
+}
+
+/** Multiplie l'opacité de ce que dessine le matériau par `fade` (GLSL calculé par sommet, mvPosition connu). */
+function fadeShader(material, fade, uniforms = {}) {
+    const declarations = Object.keys(uniforms).map((name) => `uniform float ${name};\n`).join('');
     material.onBeforeCompile = (shader) => {
+        Object.assign(shader.uniforms, uniforms);
         shader.vertexShader = shader.vertexShader
-            .replace('#include <common>', '#include <common>\nvarying float vNearFade;')
-            .replace('#include <fog_vertex>', '#include <fog_vertex>\nvNearFade = smoothstep(1.0, 4.0, -mvPosition.z);');
+            .replace('#include <common>', `#include <common>\n${declarations}varying float vNearFade;`)
+            .replace('#include <fog_vertex>', `#include <fog_vertex>\nvNearFade = ${fade};`);
         shader.fragmentShader = shader.fragmentShader
             .replace('#include <common>', '#include <common>\nvarying float vNearFade;')
             .replace('#include <opaque_fragment>', 'diffuseColor.a *= vNearFade;\n#include <opaque_fragment>');

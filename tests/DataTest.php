@@ -13,12 +13,13 @@ final class DataTest extends KernelTestCase
 {
     /**
      * La légende du cerveau sélectionne neurones, nébuleuses et souvenirs par leur nom, à travers
-     * trois tables (un index unique ne suffit pas), dans chaque langue : en anglais, le nom
-     * affiché est nom_en, ou nom s'il est vide.
+     * trois tables (un index unique ne suffit pas), dans chaque langue : le nom traduit
+     * (colonne traductions), ou le français s'il n'y en a pas.
      */
     public function testLesNomsDuCerveauSontUniquesDansChaqueLangue(): void
     {
-        foreach (['nom', 'COALESCE(nom_en, nom)'] as $nom) {
+        foreach (self::getContainer()->getParameter('kernel.enabled_locales') as $langue) {
+            $nom = "COALESCE(traductions::jsonb -> '$langue' ->> 'nom', nom)";
             $noms = self::getContainer()->get(Connection::class)->fetchFirstColumn(
                 "SELECT $nom FROM competence UNION ALL SELECT $nom FROM passion UNION ALL SELECT $nom FROM etape_parcours",
             );

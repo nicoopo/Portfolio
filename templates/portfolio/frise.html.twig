@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Mes projets dans le temps'|trans }} · {{ 'Univers de Nico'|trans }}{% endblock %}
+
+{% block description %}{{ 'Mes projets dans le temps, de la plus ancienne année à la plus récente, et ce que chacun m’a appris.'|trans }}{% endblock %}
+
+{% block body %}
+<section class="frise-projets container py-5" data-controller="filtre-techno">
+  <a class="projet-retour" href="{{ path('app_projects') }}">← {{ 'Tous les projets'|trans }}</a>
+  <h1 class="text-center gradient fw-bold display-6">{{ 'Mes projets dans le temps'|trans }}</h1>
+  <p class="projets-intro">{{ 'Mes projets dans le temps, de la plus ancienne année à la plus récente, et ce que chacun m’a appris.'|trans }}</p>
+
+  {% if annees is empty %}
+    <p class="projets-intro">{{ 'La frise se remplit : revenez bientôt.'|trans }}</p>
+  {% else %}
+    {# Filtre (filtre_techno_controller.js) : boutons à bascule, un seul actif à la fois #}
+    <div class="frise-filtres" role="group" aria-label="{{ 'Filtrer par techno'|trans }}">
+      <button type="button" aria-pressed="true" data-action="filtre-techno#filtrer" data-techno="">{{ 'Toutes'|trans }}</button>
+      {% for tech in techs %}
+        <button type="button" aria-pressed="false" data-action="filtre-techno#filtrer" data-techno="{{ tech }}">{{ tech }}</button>
+      {% endfor %}
+    </div>
+
+    {% for annee, projets in annees %}
+    <section class="frise-projets-annee" aria-labelledby="annee-{{ annee }}" data-filtre-techno-target="annee">
+      <h2 id="annee-{{ annee }}">{{ annee }}</h2>
+      <ul>
+        {% for projet in projets %}
+        {% set techs_projet = projet.tech|split(',')|map(t => t|trim) %}
+        <li class="frise-projet" data-filtre-techno-target="projet" data-technos="{{ techs_projet|json_encode }}">
+          <h3><a href="{{ path('app_project', {slug: projet.slug}) }}">{{ projet|loc('titre') }}</a></h3>
+          <p>{{ projet|loc('description') }}</p>
+          <ul class="projet-techs" aria-label="{{ 'Technologies'|trans }}">
+            {% for tech in techs_projet %}
+              {% if tech in nouvelles[projet.id] %}
+                <li class="frise-projet-nouveau" title="{{ 'Première fois que j’utilise'|trans }} {{ tech }}">{{ tech }} <span>{{ 'Nouveau'|trans }}</span></li>
+              {% else %}
+                <li>{{ tech }}</li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endfor %}
+  {% endif %}
+</section>
+{% endblock %}

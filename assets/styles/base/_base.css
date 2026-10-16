@@ -8,13 +8,38 @@ body {
   overflow-x: hidden;
   color: var(--color-text);
   font-family: 'Inter', sans-serif;
-  background: radial-gradient(ellipse at bottom, #0a0a12 0%, #000 100%);
+  background: var(--fond);
 }
 
+/* Pied de page en bas de l'écran, même quand la page est courte */
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Arrivée sur la page (page_transition.js) : animée dès le premier affichage, sans transform qui reste ensuite
+   (il ferait défiler les éléments position: fixed de la page) ; html[data-arrivee] : effet de la page précédente */
 main {
-  opacity: 1;
-  transform: translateY(0);
+  flex: 1 0 auto;
   padding-top: var(--navbar-height);
+  transform-origin: 50% 50vh;
+  animation: arrivee 0.6s ease backwards;
+}
+
+@keyframes arrivee { from { opacity: 0; transform: translateY(30px); } }
+@keyframes arrivee-trou-noir { from { opacity: 0; transform: scale(0.6) rotate(-6deg); } }
+@keyframes arrivee-teleportation { from { opacity: 0; transform: scaleX(1.2) scaleY(0.02); } }
+@keyframes arrivee-distorsion { from { opacity: 0; transform: skewX(-18deg) scale(0.96); } }
+@keyframes arrivee-lumiere { from { opacity: 0; transform: scale(0.35); } }
+@keyframes arrivee-fondu { from { opacity: 0; } }
+
+html[data-arrivee="trou-noir"] main { animation-name: arrivee-trou-noir; }
+html[data-arrivee="teleportation"] main { animation-name: arrivee-teleportation; }
+html[data-arrivee="distorsion"] main { animation-name: arrivee-distorsion; }
+html[data-arrivee="lumiere"] main { animation-name: arrivee-lumiere; }
+
+@media (prefers-reduced-motion: reduce) {
+  main, html[data-arrivee] main { animation-name: arrivee-fondu; }
 }
 
 span.gradient,
@@ -26,7 +51,7 @@ h2.gradient {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: 2px;
-  animation: glowText 3s ease-in-out infinite alternate;
+  text-shadow: 0 0 18px #9a66ff; /* lueur fixe : animer text-shadow redessine le titre à chaque image */
 }
 
 #stars {
@@ -72,4 +97,195 @@ h2.gradient {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
   }
+}
+
+/* Trou noir des transitions de page (scripts/page_transition.js) : à pleine taille, son
+   ombre couvre tout l'écran ; il grandit au départ et rétrécit à l'arrivée */
+/* Voiles plein écran des transitions de page (page_transition.js) : repliés, puis .visible les déploie */
+.transition-voile {
+  position: fixed;
+  z-index: 2000;
+  pointer-events: none;
+  transition: transform 0.6s cubic-bezier(0.6, 0, 0.9, 0.4), opacity 0.6s ease;
+}
+
+/* Trou noir : grandit depuis le centre jusqu'à remplir l'écran */
+.transition-voile--trou-noir {
+  top: 50%;
+  left: 50%;
+  width: 300vmax;
+  height: 300vmax;
+  margin: -150vmax 0 0 -150vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle closest-side,
+      #000 0 40%,
+      #fff4d6 40.6%,
+      #ffb347 41.5%,
+      rgba(255, 95, 162, 0.55) 44%,
+      rgba(127, 90, 240, 0.3) 50%,
+      rgba(127, 90, 240, 0) 65%);
+  transform: scale(0);
+}
+
+.transition-voile--trou-noir.visible {
+  transform: scale(1);
+}
+
+/* Téléportation : un trait de lumière horizontal qui s'ouvre en éclair */
+.transition-voile--teleportation {
+  inset: 0;
+  background: linear-gradient(transparent 0 40%, rgba(0, 212, 255, 0.9) 49%, #fff 50%, rgba(0, 212, 255, 0.9) 51%, transparent 60% 100%);
+  opacity: 0;
+  transform: scaleY(0.05);
+}
+
+.transition-voile--teleportation.visible {
+  opacity: 1;
+  transform: scaleY(3);
+}
+
+/* Distorsion : voile irisé qui ondule */
+.transition-voile--distorsion {
+  inset: 0;
+  background: conic-gradient(from 0deg, #7f5af0, #00d4ff, #f25f8c, #ffb347, #7f5af0);
+  mix-blend-mode: hard-light;
+  opacity: 0;
+  transform: scale(1.4) rotate(-20deg);
+}
+
+.transition-voile--distorsion.visible {
+  opacity: 0.9;
+  transform: scale(1) rotate(0deg);
+}
+
+/* Vitesse lumière : tunnel d'étoiles étirées qui s'ouvre depuis le centre */
+.transition-voile--lumiere {
+  top: 50%;
+  left: 50%;
+  width: 300vmax;
+  height: 300vmax;
+  margin: -150vmax 0 0 -150vmax;
+  background:
+    radial-gradient(circle closest-side, #fff 0 1%, rgba(255, 255, 255, 0) 12%),
+    repeating-conic-gradient(rgba(255, 255, 255, 0.85) 0 0.35deg, transparent 0.35deg 5deg),
+    radial-gradient(circle closest-side, #05050f 0 45%, rgba(5, 5, 15, 0) 60%);
+  -webkit-mask-image: radial-gradient(circle closest-side, #000 45%, transparent 60%);
+  mask-image: radial-gradient(circle closest-side, #000 45%, transparent 60%);
+  transform: scale(0) rotate(0deg);
+}
+
+.transition-voile--lumiere.visible {
+  transform: scale(1) rotate(15deg);
+}
+
+/* Easter egg : constellation cachée (scripts/constellation.js) */
+.constellation {
+  position: fixed;
+  top: calc(var(--navbar-height) + 8vh);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.constellation-n {
+  right: 5vw;
+  width: 160px;
+  height: 160px;
+}
+
+.constellation-lion {
+  left: 4vw;
+  width: 220px;
+  height: 120px;
+}
+
+/* Nouvelle découverte d'un easter egg (scripts/decouvertes.js) */
+.decouverte-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 2rem;
+  z-index: 1001;
+  margin: 0;
+  padding: 0.6rem 1.2rem;
+  color: var(--color-text);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  text-align: center;
+  background: rgb(var(--surface-rgb) / 0.9);
+  border: 1px solid rgba(127, 90, 240, 0.6);
+  border-radius: 999px;
+  box-shadow: 0 0 25px rgba(127, 90, 240, 0.5);
+  transform: translateX(-50%);
+  animation: decouverte-toast 0.5s ease-out;
+}
+
+.decouverte-toast[hidden] {
+  display: none;
+}
+
+@keyframes decouverte-toast {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .decouverte-toast {
+    animation: none;
+  }
+}
+
+/* Easter egg : pluie de météores du code Konami (scripts/konami.js) */
+.pluie-meteores {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1001;
+  pointer-events: none;
+}
+
+/* Easter egg : mini trou noir sous le curseur (scripts/stars.js) */
+.trou-noir-curseur {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Curseur animé (curseur.js) : dessiné sur un canvas, le curseur du navigateur est caché */
+.curseur {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.curseur-perso,
+.curseur-perso * {
+  cursor: none !important;
+}
+
+.curseur-perso :is(input:not([type="checkbox"], [type="radio"]), textarea, [contenteditable]) {
+  cursor: text !important;
+}
+
+/* Easter egg ouvert : le trou noir remplace le curseur */
+.trou-noir-ouvert,
+.trou-noir-ouvert * {
+  cursor: none !important;
+}
+
+/* Appui long de l'easter egg (stars.js) : pas de sélection ni de menu « Copier » sur mobile */
+.trou-noir-maintenu {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }

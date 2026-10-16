@@ -8,18 +8,35 @@
   padding: 0.8rem 2.2rem;
   transition: all 0.3s ease-in-out;
   border-radius: 50px;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 15px rgb(var(--voile-rgb) / 0.15);
+}
+
+/* Lueur qui pulse autour du bouton */
+.btn-galactic::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 20px rgba(162, 194, 255, 0.7), 0 0 40px rgb(var(--voile-rgb) / 0.3);
+  pointer-events: none;
   animation: pulse-glow 3s infinite ease-in-out;
+}
+
+/* Mouvements réduits (réglage du système) : le décor ne bouge plus en boucle */
+@media (prefers-reduced-motion: reduce) {
+  .btn-galactic::before {
+    animation: none;
+  }
 }
 
 .btn-galactic:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 25px rgba(162, 194, 255, 0.6), 0 0 50px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 25px rgba(162, 194, 255, 0.6), 0 0 50px rgb(var(--voile-rgb) / 0.3);
 }
 
 .btn-galactic-outline-light {
-  border: 2px solid #fff;
-  color: #fff;
+  border: 2px solid var(--color-text);
+  color: var(--color-text);
   background: transparent;
 }
 
@@ -31,7 +48,7 @@
 .btn-galactic-primary {
   background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
   border: none;
-  color: #fff;
+  color: #fff; /* sur le dégradé d'accent, dans les deux thèmes */
 }
 
 .btn-galactic-primary:hover {
@@ -42,21 +59,17 @@
 .btn-galactic {
     transition: all 0.3s ease;
     position: relative;
-    overflow: hidden;
 }
 
+/* Onde au survol : un halo qui part du centre, sans dépasser du bouton (la lueur, elle, doit dépasser) */
 .btn-galactic::after {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 5px;
-    height: 5px;
-    background: rgba(255, 255, 255, 0.5);
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgb(var(--voile-rgb) / 0.5), transparent 70%);
     opacity: 0;
-    border-radius: 100%;
-    transform: scale(1, 1) translate(-50%, -50%);
-    transform-origin: 50% 50%;
+    pointer-events: none;
 }
 
 .btn-galactic:hover::after {

@@ -3,12 +3,14 @@
 namespace App\Controller\Admin;
 
 use App\Entity\CvCompetence;
+use App\Form\TraductionsField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 
 final class CvCompetenceCrudController extends AbstractCrudController
 {
@@ -32,9 +34,8 @@ final class CvCompetenceCrudController extends AbstractCrudController
         yield TextareaField::new('elements', 'Éléments')->setHelp('Séparés par des virgules');
         yield IntegerField::new('position')->setHelp("Ordre d'affichage (croissant)");
 
-        // Version anglaise du site : vide = le français s'affiche
-        yield FormField::addFieldset('Anglais (facultatif)')->collapsible()->renderCollapsed();
-        yield TextField::new('titreEn', 'Titre')->hideOnIndex();
-        yield TextareaField::new('elementsEn', 'Éléments')->hideOnIndex();
+        // Autres langues du site (framework.enabled_locales) : vide = le français s'affiche
+        yield FormField::addFieldset('Traductions (facultatif)')->collapsible()->renderCollapsed();
+        yield TraductionsField::new()->champs(['titre' => 'Titre', 'elements' => 'Éléments'], ['elements']);
     }
 }

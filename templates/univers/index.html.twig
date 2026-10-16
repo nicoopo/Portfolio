@@ -27,26 +27,36 @@
             {{ ux_icon('bi:file-earmark-pdf', {height: '20px', width: '20px', 'aria-hidden': 'true'}) }} {{ 'Aperçu PDF'|trans }}
         </button>
 
-        <a href="{{ path('app_cv_download', {theme: 'light'}) }}" class="btn btn-galactic btn-galactic-primary">
+        <a href="{{ path('app_cv_download', {theme: 'light'}) }}" download class="btn btn-galactic btn-galactic-primary">
             {{ ux_icon('bi:download', {height: '20px', width: '20px', 'aria-hidden': 'true'}) }} {{ 'Télécharger'|trans }}
         </a>
     </div>
 
     <h2 class="gradient mb-4">{{ 'Ma lettre de motivation'|trans }}</h2>
+    {# Lettre dans la langue de la page (assets/docs) ; une langue sans lettre aurait la version anglaise #}
+    {% set lettres = {
+        fr: {pdf: 'docs/lettre de motivation.pdf', nom: 'Lettre_Motivation_Nicolas_Cataluna.pdf'},
+        en: {pdf: 'docs/cover-letter.pdf', nom: 'Cover_Letter_Nicolas_Cataluna.pdf'},
+        es: {pdf: 'docs/carta-de-presentacion.pdf', nom: 'Carta_Presentacion_Nicolas_Cataluna.pdf'},
+        de: {pdf: 'docs/anschreiben.pdf', nom: 'Anschreiben_Nicolas_Cataluna.pdf'},
+        it: {pdf: 'docs/lettera-di-presentazione.pdf', nom: 'Lettera_Presentazione_Nicolas_Cataluna.pdf'},
+        pt: {pdf: 'docs/carta-de-apresentacao.pdf', nom: 'Carta_Apresentacao_Nicolas_Cataluna.pdf'},
+    } %}
+    {% set lettre = lettres[app.request.locale] ?? lettres.en %}
 
     <div class="d-flex justify-content-center gap-3 flex-wrap">
         <!-- Voir la lettre - Ouvre dans un iframe sur la même page -->
         <button type="button"
             class="btn btn-galactic btn-galactic-outline-light"
             data-action="pdf#show"
-            data-pdf-url-param="{{ asset('docs/lettre de motivation.pdf') }}"
+            data-pdf-url-param="{{ asset(lettre.pdf) }}"
             data-pdf-title-param="{{ 'Ma lettre de motivation'|trans }}">
             {{ ux_icon('bi:eye', {height: '20px', width: '20px', 'aria-hidden': 'true'}) }} {{ 'Voir la lettre'|trans }}
         </button>
 
         <!-- Télécharger la lettre -->
-        <a href="{{ asset('docs/lettre de motivation.pdf') }}"
-           download="Lettre_Motivation_Nicolas_Cataluna.pdf"
+        <a href="{{ asset(lettre.pdf) }}"
+           download="{{ lettre.nom }}"
            class="btn btn-galactic btn-galactic-primary">
             {{ ux_icon('bi:download', {height: '20px', width: '20px', 'aria-hidden': 'true'}) }} {{ 'Télécharger'|trans }}
         </a>

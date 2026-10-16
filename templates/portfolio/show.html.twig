@@ -4,8 +4,11 @@
 
 {% block description %}{{ projet|loc('description') }}{% endblock %}
 
+{# Aperçu de partage généré (PartageController) : titre et technos, lisible même en petit #}
 {% block og_image %}
-    <meta property="og:image" content="{{ absolute_url(asset('images/projets/' ~ projet.image)) }}">
+    <meta property="og:image" content="{{ url('app_partage_projet', {slug: projet.slug}) }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
 {% endblock %}
 
 {% block body %}
@@ -20,11 +23,13 @@
 
   <div class="projet-corps">
     <div>
+      {% if projet.imageChemin %}
       <figure class="projet-image">
-        <a href="{{ asset('images/projets/' ~ projet.image) }}" target="_blank" title="{{ 'Voir l’image en grand'|trans }}">
-          <img src="{{ asset('images/projets/' ~ projet.image) }}" alt="{{ 'Capture du projet'|trans }} {{ projet|loc('titre') }}">
+        <a href="{{ asset(projet.imageChemin) }}" target="_blank" title="{{ 'Voir l’image en grand'|trans }}">
+          <img src="{{ asset(projet.imageChemin) }}" alt="{{ 'Capture du projet'|trans }} {{ projet|loc('titre') }}">
         </a>
       </figure>
+      {% endif %}
 
       {# Texte long : un paragraphe par bloc séparé d'une ligne vide ; sans texte long, la description suffit #}
       {% if projet|loc('details') %}

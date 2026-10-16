@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { glowSprite } from './textures.js';
+import { fadeWhenExploring, glowSprite } from './textures.js';
 
 const COLOR = new THREE.Color('#ffe8a3');
 
@@ -36,6 +36,7 @@ export function createSouvenirs(parcours, texture) {
         anchor.position.copy(PATH.getPoint(t));
 
         const halo = glowSprite(texture, COLOR, 0.2);
+        fadeWhenExploring(halo.material);
         halo.userData = { kind: 'souvenir', data, anchor, phase: i * 2.3 };
         anchor.add(halo);
         object.add(anchor);

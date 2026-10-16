@@ -1,0 +1,23 @@
+# Sonde de disponibilité : lancée par GitHub, donc hors de la machine qui héberge le site.
+# Un échec (site injoignable, erreur 5xx, certificat invalide ou bientôt expiré) = e-mail de GitHub
+# (notifications Actions de qui a modifié ce fichier en dernier ; réglable dans Settings → Notifications).
+name: Disponibilité
+
+on:
+  schedule:
+    - cron: '*/15 * * * *' # GitHub peut retarder un passage de quelques minutes
+  workflow_dispatch:
+
+jobs:
+  sonde:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Le site répond
+        # 3 nouvelles tentatives à 20 s d'intervalle : pas d'alerte pour un simple raté réseau
+        run: curl --fail --silent --show-error --retry 3 --retry-delay 20 --retry-all-errors --max-time 20 -o /dev/null https://nicolascataluna.fr/
+
+      - name: Le certificat est valide encore 14 jours
+        run: |
+          echo | openssl s_client -connect nicolascataluna.fr:443 -servername nicolascataluna.fr 2>/dev/null \
+            | openssl x509 -noout -enddate -checkend $((14 * 24 * 3600))

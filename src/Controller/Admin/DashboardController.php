@@ -2,13 +2,14 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Competence;
 use App\Entity\DemandeContact;
 use App\Entity\Journal;
+use App\Repository\CandidatureRepository;
+use App\Repository\CompetenceRepository;
 use App\Repository\DemandeContactRepository;
 use App\Repository\JournalRepository;
 use App\Repository\ProjetRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\VisiteJourRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -22,8 +23,10 @@ final class DashboardController extends AbstractDashboardController
     public function __construct(
         private readonly DemandeContactRepository $demandes,
         private readonly JournalRepository $journal,
-        private readonly EntityManagerInterface $entityManager,
+        private readonly CompetenceRepository $competences,
         private readonly ProjetRepository $projets,
+        private readonly CandidatureRepository $candidatures,
+        private readonly VisiteJourRepository $visites,
     ) {
     }
 
@@ -37,11 +40,80 @@ final class DashboardController extends AbstractDashboardController
             'demandes_mois' => $this->demandes->compterDepuis($debutDuMois),
             'demandes_echec' => $this->demandes->count(['statut' => DemandeContact::STATUT_ECHEC]),
             'connexions_refusees' => $this->journal->compterDepuis(Journal::CONNEXION_REFUSEE, new \DateTimeImmutable('-7 days')),
-            'nb_competences' => $this->entityManager->getRepository(Competence::class)->count([]),
+            'nb_competences' => $this->competences->count([]),
             'nb_projets' => $this->projets->count([]),
+            'a_relancer' => $this->candidatures->compterARelancer(),
+            'candidatures' => $this->candidatures->resume(),
             'dernieres_demandes' => $this->demandes->findBy([], ['recuLe' => 'DESC'], 5),
             'dernier_journal' => $this->journal->findBy([], ['date' => 'DESC'], 8),
+            'activite' => $this->activite(),
+            'contacts_par_mois' => $this->contactsParMois(),
+            'visites' => $this->visitesParJour(),
+            'visites_classements' => [
+                'Pages' => $this->visites->classement('chemin', 30, 8),
+                'Provenance' => $this->visites->classement('source', 30, 8, ['site']), // « site » : navigation interne
+                'Langues' => $this->visites->classement('langue', 30, 8),
+            ],
         ]);
+    }
+
+    /** Types du journal regroupés en séries ; l'ordre fixe la couleur (assets/admin_graphiques.js) */
+    private const SERIES_JOURNAL = [
+        'Connexions' => [Journal::CONNEXION, Journal::DECONNEXION],
+        'Modifications' => [Journal::CREATION, Journal::MODIFICATION, Journal::SUPPRESSION],
+        'Contacts' => [Journal::CONTACT_ENVOYE, Journal::CONTACT_ECHEC],
+        'Spam bloqué' => [Journal::SPAM_BLOQUE],
+        'Connexions refusées' => [Journal::CONNEXION_REFUSEE],
+    ];
+
+    /** Graphique : entrées du journal par jour sur 30 jours, par série */
+    private function activite(): array
+    {
+        $jours = [];
+        for ($i = 29; $i >= 0; --$i) {
+            $jours[(new \DateTimeImmutable("-$i days"))->format('Y-m-d')] = 0;
+        }
+        $series = array_fill_keys(array_keys(self::SERIES_JOURNAL), $jours);
+        foreach ($this->journal->typesDepuis(new \DateTimeImmutable('-29 days midnight')) as $entree) {
+            foreach (self::SERIES_JOURNAL as $serie => $types) {
+                if (\in_array($entree['type'], $types, true)) {
+                    ++$series[$serie][$entree['date']->format('Y-m-d')];
+                }
+            }
+        }
+
+        return [
+            'labels' => array_map(static fn (string $jour) => (new \DateTimeImmutable($jour))->format('d/m'), array_keys($jours)),
+            'series' => array_map(static fn (string $serie, array $parJour) => ['label' => $serie, 'data' => array_values($parJour)], array_keys($series), $series),
+        ];
+    }
+
+    /** Graphique : pages vues par jour sur 30 jours (App\EventListener\StatistiquesListener) */
+    private function visitesParJour(): array
+    {
+        $jours = $this->visites->vuesParJour();
+
+        return [
+            'labels' => array_map(static fn (string $jour) => (new \DateTimeImmutable($jour))->format('d/m'), array_keys($jours)),
+            'series' => [['label' => 'Pages vues', 'data' => array_values($jours)]],
+        ];
+    }
+
+    /** Graphique : demandes de contact par mois sur 12 mois */
+    private function contactsParMois(): array
+    {
+        $mois = [];
+        for ($i = 11; $i >= 0; --$i) {
+            $mois[(new \DateTimeImmutable("first day of -$i months"))->format('Y-m')] = 0;
+        }
+        foreach ($this->demandes->datesDepuis(new \DateTimeImmutable('first day of -11 months midnight')) as $date) {
+            ++$mois[$date->format('Y-m')];
+        }
+
+        return [
+            'labels' => array_map(static fn (string $m) => \IntlDateFormatter::formatObject(new \DateTimeImmutable($m.'-01'), 'MMM yy', 'fr'), array_keys($mois)),
+            'series' => [['label' => 'Demandes', 'data' => array_values($mois)]],
+        ];
     }
 
     public function configureDashboard(): Dashboard
@@ -59,14 +131,23 @@ final class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(ProjetCrudController::class, 'Projets', 'fa fa-diagram-project');
         yield MenuItem::linkTo(PassionCrudController::class, 'Passions', 'fa fa-star');
         yield MenuItem::linkTo(EtapeParcoursCrudController::class, 'Parcours', 'fa fa-graduation-cap');
+        yield MenuItem::section('Blog');
+        yield MenuItem::linkTo(ArticleCrudController::class, 'Articles', 'fa fa-newspaper');
+        yield MenuItem::linkTo(MaintenantCrudController::class, 'En ce moment (/now)', 'fa fa-clock');
+        yield MenuItem::linkTo(OutilsCrudController::class, 'Mes outils (/uses)', 'fa fa-toolbox');
         yield MenuItem::section('CV');
         yield MenuItem::linkTo(CvProfilCrudController::class, 'Profil', 'fa fa-id-card');
         yield MenuItem::linkTo(ExperienceCrudController::class, 'Expériences', 'fa fa-briefcase');
         yield MenuItem::linkTo(CvCompetenceCrudController::class, 'Compétences du CV', 'fa fa-code');
         yield MenuItem::linkTo(LangueCrudController::class, 'Langues', 'fa fa-language');
         yield MenuItem::linkTo(CentreInteretCrudController::class, "Centres d'intérêt", 'fa fa-heart');
+        yield MenuItem::section('Alternance');
+        yield MenuItem::linkTo(CandidatureCrudController::class, 'Candidatures', 'fa fa-paper-plane');
+        yield MenuItem::linkTo(LienRecruteurCrudController::class, 'Liens recruteur', 'fa fa-link');
+        yield MenuItem::linkTo(CreneauCrudController::class, 'Créneaux d’entretien', 'fa fa-calendar-days');
         yield MenuItem::section('Visiteurs');
         yield MenuItem::linkTo(DemandeContactCrudController::class, 'Demandes de contact', 'fa fa-envelope');
+        yield MenuItem::linkTo(MessageLivreOrCrudController::class, 'Livre d’or', 'fa fa-star-half-stroke');
         yield MenuItem::section('Administration');
         yield MenuItem::linkTo(UtilisateurCrudController::class, 'Comptes', 'fa fa-user-shield');
         yield MenuItem::linkTo(JournalCrudController::class, 'Journal', 'fa fa-list-check');

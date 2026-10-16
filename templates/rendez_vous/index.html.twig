@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Choisir un créneau d’entretien'|trans }} · {{ 'Univers de Nico'|trans }}{% endblock %}
+
+{% block body %}
+    <section class="contact-section">
+        <div class="contact-container">
+            <h1>{{ 'Choisir un créneau d’entretien'|trans }}</h1>
+            <p class="contact-subtitle">{{ 'Bonjour l’équipe de %entreprise% !'|trans({'%entreprise%': lien.entreprise}) }}</p>
+
+            {% for type, messages in app.flashes(['error']) %}
+                {% for message in messages %}<p class="contact-flash contact-flash--{{ type }}" role="alert">{{ message }}</p>{% endfor %}
+            {% endfor %}
+
+            {% if reserve %}
+                <p class="contact-flash contact-flash--success" role="status">{{ 'Entretien prévu le %date%. À très vite !'|trans({'%date%': reserve_le}) }}</p>
+                <p><a class="btn btn-galactic btn-galactic-primary" href="{{ path('app_rendez_vous_ics', {id: reserve.id, pour: lien.code}) }}">{{ 'Ajouter à mon agenda'|trans }}</a></p>
+            {% elseif libres is empty %}
+                <p>{{ 'Aucun créneau libre pour l’instant : écrivez-moi, je m’adapte.'|trans }}</p>
+                <p><a class="btn btn-galactic btn-galactic-primary" href="{{ path('app_contact') }}">{{ 'Me contacter'|trans }}</a></p>
+            {% else %}
+                <p>{{ 'Choisissez un créneau d’une heure (heure de Paris) :'|trans }}</p>
+                {{ form_start(form, {attr: {class: 'contact-form', novalidate: 'novalidate'}}) }}
+                    {{ form_row(form.creneau) }}
+                    {{ form_row(form.nom) }}
+                    {{ form_row(form.email) }}
+                    <button type="submit" class="btn btn-galactic btn-galactic-primary">{{ 'Réserver ce créneau'|trans }}</button>
+                {{ form_end(form) }}
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

@@ -26,8 +26,14 @@
 /.vscode/
 ###< ide ###
 
+# Images envoyées depuis l'admin (volume Docker en prod)
+/public/uploads/
+
 # Images de référence (design), à ne pas publier
 /assets/images/exemple/
 
 # Export de debug du conteneur de services (debug:container --format=json), jamais à versionner
 /container.json
+
+# Captures et logs des tests navigateur (Playwright MCP)
+/.playwright-mcp/

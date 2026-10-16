@@ -8,6 +8,7 @@ use App\Repository\CvProfilRepository;
 use App\Repository\EtapeParcoursRepository;
 use App\Repository\ExperienceRepository;
 use App\Repository\LangueRepository;
+use App\Repository\LienRecruteurRepository;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,13 +26,14 @@ final class CVController extends AbstractController
         private readonly EtapeParcoursRepository $parcours,
         private readonly LangueRepository $langues,
         private readonly CentreInteretRepository $interets,
+        private readonly LienRecruteurRepository $liens,
     ) {
     }
 
     #[Route('/CV', name: 'app_cv')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        return $this->render('cv/index.html.twig', $this->contenu());
+        return $this->render('cv/index.html.twig', $this->contenu($request));
     }
 
     #[Route('/CV/download', name: 'app_cv_download')]
@@ -52,19 +54,18 @@ final class CVController extends AbstractController
         $theme = 'light' === $request->query->get('theme') ? 'light' : 'dark';
 
         $options = new Options();
-        $options->set('isRemoteEnabled', true);
         $options->set('isHtml5ParserEnabled', true);
         $options->set('defaultFont', 'DejaVu Sans');
 
         $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($this->renderView('cv/pdf.html.twig', ['theme' => $theme] + $this->contenu()));
+        $dompdf->loadHtml($this->renderView('cv/pdf.html.twig', ['theme' => $theme] + $this->contenu($request)));
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
-        // Ex. CV_Nicolas_Cataluna_clair.pdf, CV_Nicolas_Cataluna_en_light.pdf
-        $filename = 'en' === $request->getLocale()
-            ? 'CV_Nicolas_Cataluna_en_'.$theme.'.pdf'
-            : 'CV_Nicolas_Cataluna_'.('dark' === $theme ? 'sombre' : 'clair').'.pdf';
+        // Ex. CV_Nicolas_Cataluna_clair.pdf, CV_Nicolas_Cataluna_en_light.pdf, CV_Nicolas_Cataluna_es_dark.pdf
+        $filename = 'fr' === $request->getLocale()
+            ? 'CV_Nicolas_Cataluna_'.('dark' === $theme ? 'sombre' : 'clair').'.pdf'
+            : 'CV_Nicolas_Cataluna_'.$request->getLocale().'_'.$theme.'.pdf';
 
         return new Response($dompdf->output(), Response::HTTP_OK, [
             'Content-Type' => 'application/pdf',
@@ -72,12 +73,13 @@ final class CVController extends AbstractController
         ]);
     }
 
-    /** Les données du CV, communes à la page et au PDF */
-    private function contenu(): array
+    /** Les données du CV, communes à la page et au PDF ; ?pour=code : CV adapté au lien recruteur (accroche, points forts) */
+    private function contenu(Request $request): array
     {
         $ordre = ['position' => 'ASC'];
 
         return [
+            'recruteur' => $this->liens->parCode($request->query->getString('pour')),
             'profil' => $this->profil->findOneBy([]) ?? throw $this->createNotFoundException('Profil du CV absent : lancer les migrations.'),
             'experiences' => $this->experiences->findBy([], $ordre),
             'competences' => $this->competences->findBy([], $ordre),

@@ -2,13 +2,13 @@ name: Deploy prod
 
 on:
   push:
-    branches: [master]
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: [self-hosted, portfolio]
     # Pas de actions/checkout : le code de prod vit dans un git worktree du dépôt
-    # de travail (DEPLOY_DIR), en HEAD détachée sur origin/master. Le dossier de
+    # de travail (DEPLOY_DIR), en HEAD détachée sur origin/main. Le dossier de
     # travail (REPO_DIR) et sa branche ne sont jamais touchés par un déploiement.
     # .env.local (secrets réels, ignoré par git) est un lien vers celui de REPO_DIR.
     env:
@@ -21,13 +21,13 @@ jobs:
         run: |
           cd "$REPO_DIR"
           AUTH=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
-          git -c http.extraheader="AUTHORIZATION: basic $AUTH" fetch origin master
+          git -c http.extraheader="AUTHORIZATION: basic $AUTH" fetch origin main
           if [ ! -e "$DEPLOY_DIR/.git" ]; then
             git worktree prune
-            git worktree add --detach "$DEPLOY_DIR" origin/master
+            git worktree add --detach "$DEPLOY_DIR" origin/main
             ln -s "$REPO_DIR/.env.local" "$DEPLOY_DIR/.env.local"
           fi
-          git -C "$DEPLOY_DIR" checkout --detach --force origin/master
+          git -C "$DEPLOY_DIR" checkout --detach --force origin/main
 
       - name: Déployer en prod
         run: |

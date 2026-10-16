@@ -4,20 +4,36 @@ namespace App\Controller;
 
 use App\Entity\EtapeParcours;
 use App\Entity\Passion;
+use App\EventListener\StatistiquesListener;
 use App\Repository\CategorieCompetenceRepository;
+use App\Repository\CreneauRepository;
+use App\Repository\LienRecruteurRepository;
+use App\Service\Notificateur;
 use App\Repository\EtapeParcoursRepository;
 use App\Repository\PassionRepository;
 use App\Twig\Traduction;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class HomeController extends AbstractController
 {
+    /** Lien recruteur (/?pour=code) : accueil personnalisé, visite comptée sauf pour l'administrateur connecté et les robots d'aperçu (LinkedIn, Slack…), notification à la première */
     #[Route('/', name: 'app_home')]
-    public function index(): Response
+    public function index(Request $request, LienRecruteurRepository $liens, CreneauRepository $creneaux, Notificateur $notificateur): Response
     {
-        return $this->render('home/index.html.twig');
+        $recruteur = $liens->parCode($request->query->getString('pour'));
+        if ($recruteur && !$this->isGranted('ROLE_ADMIN') && !preg_match(StatistiquesListener::ROBOTS, $request->headers->get('User-Agent', ''))) {
+            if (1 === $liens->compterVisite($recruteur)) { // la première ouverture seulement (une seule alerte) : de quoi relancer au bon moment
+                $notificateur->prevenir('Lien recruteur ouvert', $recruteur->getEntreprise().' vient d’ouvrir ton portfolio'.($recruteur->getPoste() ? ' ('.$recruteur->getPoste().')' : ''), 'eyes');
+            }
+        }
+
+        return $this->render('home/index.html.twig', [
+            'recruteur' => $recruteur,
+            'rendez_vous' => $recruteur && $creneaux->proposablesA($recruteur),
+        ]);
     }
 
     #[Route('/cerveau', name: 'app_cerveau')]

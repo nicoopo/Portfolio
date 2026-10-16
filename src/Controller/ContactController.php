@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\DemandeContact;
 use App\Entity\Journal;
 use App\Form\ContactType;
+use App\Security\BlocIp;
 use App\Service\Journaliste;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -16,6 +17,7 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -29,6 +31,7 @@ final class ContactController extends AbstractController
         LoggerInterface $logger,
         TranslatorInterface $translator,
         Journaliste $journaliste,
+        RateLimiterFactoryInterface $contactLimiter,
         #[Autowire('%app.contact_email%')] string $contactEmail,
     ): Response {
         $form = $this->createForm(ContactType::class);
@@ -36,6 +39,13 @@ final class ContactController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
+
+            // Limite par IP, par bloc /64 en IPv6 (BlocIp, config/packages/rate_limiter.yaml) : chaque message part par e-mail
+            if (!$data['website'] && !$contactLimiter->create(BlocIp::de($request))->consume()->isAccepted()) {
+                $this->addFlash('error', $translator->trans('Beaucoup de messages d’un coup : réessayez dans une heure.'));
+
+                return $this->redirectToRoute('app_contact', ['_fragment' => 'formulaire']);
+            }
 
             // Piège rempli : un robot. On fait comme si l'envoi avait réussi, sans rien enregistrer ni envoyer.
             if (!$data['website']) {

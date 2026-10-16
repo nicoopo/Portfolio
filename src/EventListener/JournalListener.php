@@ -31,6 +31,12 @@ final class JournalListener
         'CvCompetence' => 'Compétences du CV',
         'Langue' => 'Langue',
         'CentreInteret' => "Centre d'intérêt",
+        'Article' => 'Article',
+        'Maintenant' => 'En ce moment',
+        'LienRecruteur' => 'Lien recruteur',
+        'MessageLivreOr' => "Message du livre d'or",
+        'Candidature' => 'Candidature',
+        'Outils' => 'Mes outils',
     ];
 
     public function __construct(private readonly Journaliste $journaliste)

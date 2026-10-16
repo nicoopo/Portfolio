@@ -27,6 +27,17 @@ class JournalRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /** @return list<array{date: \DateTimeImmutable, type: string}> entrées depuis $date (graphique du tableau de bord) */
+    public function typesDepuis(\DateTimeImmutable $date): array
+    {
+        return $this->createQueryBuilder('journal')
+            ->select('journal.date, journal.type')
+            ->where('journal.date >= :date')
+            ->setParameter('date', $date)
+            ->getQuery()
+            ->getArrayResult();
+    }
+
     /** Supprime les entrées antérieures à $limite ; renvoie leur nombre */
     public function purgerAvant(\DateTimeImmutable $limite): int
     {

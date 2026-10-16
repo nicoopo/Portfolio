@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-{% for page in pages %}{% set route, params = page[0], page[1] %}{% for langue in langues %}
+{% for page in pages %}{% set route, params = page[0], page[1] %}{% for langue in langues_site %}
     <url>
         <loc>{{ url(route, params|merge({_locale: langue})) }}</loc>
-{% for autre in langues %}
+{% for autre in langues_site %}
         <xhtml:link rel="alternate" hreflang="{{ autre }}" href="{{ url(route, params|merge({_locale: autre})) }}"/>
 {% endfor %}
     </url>

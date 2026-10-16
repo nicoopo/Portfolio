@@ -16,7 +16,7 @@ help: ## Affiche cette aide
 
 # --- DEV ---
 up: ## Démarre les conteneurs (dev) → http://localhost:8082
-	$(DC) up -d
+	$(DC) up -d --build
 	$(PHP) composer install
 	$(PHP) php bin/console importmap:install
 	$(CONSOLE) doctrine:migrations:migrate --no-interaction
@@ -63,8 +63,15 @@ prod-logs: ## Logs en temps réel (prod)
 prod-admin-create: ## Crée le compte « admin » de /admin, ou change son mot de passe (prod)
 	$(DC_PROD) exec php php bin/console app:admin:create
 
-prod-journal-purge: ## Supprime les entrées du journal de plus de 12 mois (prod ; à planifier, ex. cron mensuel)
+prod-purge: ## Supprime le journal et les demandes de contact de plus de 12 mois (prod ; cron quotidien, voir README)
 	$(DC_PROD) exec -T php php bin/console app:journal:purge
+	$(DC_PROD) exec -T php php bin/console app:contact:purge
+
+prod-relances: ## Alerte ntfy des candidatures à relancer (prod ; cron chaque matin, voir README)
+	$(DC_PROD) exec -T php php bin/console app:candidatures:relances
+
+prod-bilan: ## Bilan de la semaine sur ntfy (prod ; cron le dimanche soir, voir README)
+	$(DC_PROD) exec -T php php bin/console app:bilan:hebdo
 
 prod-bash: ## Shell dans le conteneur (prod)
 	$(DC_PROD) exec php bash

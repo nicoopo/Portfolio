@@ -11,11 +11,16 @@ services:
       context: .
       dockerfile: docker/php/Dockerfile.prod
     container_name: portfolio_php_prod
+    logging: # sans rotation, un flot de requêtes (ex. /csp-report) remplirait le disque
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
     ports:
       - "127.0.0.1:8081:80" # joignable seulement par Caddy, jamais directement depuis Internet
     environment:
       APP_ENV: prod
       APP_DEBUG: "0"
+    volumes:
+      - uploads_prod:/var/www/symfony/public/uploads # images envoyées depuis l'admin : survivent aux déploiements
     env_file:
       - .env.local                   # ← APP_SECRET, POSTGRES_PASSWORD, MAILER_DSN, SENTRY_DSN
     networks:
@@ -29,6 +34,7 @@ services:
 
 volumes:
   db_data_prod:
+  uploads_prod:
 
 networks:
   outils:

@@ -13,6 +13,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: CvProfilRepository::class)]
 class CvProfil
 {
+    use Traduisible;
+
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
     private ?int $id = null;
 
@@ -46,21 +48,6 @@ class CvProfil
     #[ORM\Column(length: 180)]
     private string $email = '';
 
-    // Traductions anglaises (facultatives : vides, le français s'affiche ; voir App\Twig\Traduction)
-    #[Assert\Length(max: 100)]
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $titreEn = null;
-
-    #[Assert\Length(max: 150)]
-    #[ORM\Column(length: 150, nullable: true)]
-    private ?string $qualitesEn = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $resumeEn = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $accrocheEn = null;
-
     public function getId(): ?int { return $this->id; }
     public function getTitre(): string { return $this->titre; }
     public function setTitre(?string $titre): static { $this->titre = $titre ?? ''; return $this; }
@@ -74,15 +61,6 @@ class CvProfil
     public function setTelephone(?string $telephone): static { $this->telephone = $telephone ?? ''; return $this; }
     public function getEmail(): string { return $this->email; }
     public function setEmail(?string $email): static { $this->email = $email ?? ''; return $this; }
-
-    public function getTitreEn(): ?string { return $this->titreEn; }
-    public function setTitreEn(?string $titreEn): static { $this->titreEn = $titreEn ?: null; return $this; }
-    public function getQualitesEn(): ?string { return $this->qualitesEn; }
-    public function setQualitesEn(?string $qualitesEn): static { $this->qualitesEn = $qualitesEn ?: null; return $this; }
-    public function getResumeEn(): ?string { return $this->resumeEn; }
-    public function setResumeEn(?string $resumeEn): static { $this->resumeEn = $resumeEn ?: null; return $this; }
-    public function getAccrocheEn(): ?string { return $this->accrocheEn; }
-    public function setAccrocheEn(?string $accrocheEn): static { $this->accrocheEn = $accrocheEn ?: null; return $this; }
 
     public function __toString(): string { return $this->titre; }
 }

@@ -1,0 +1,98 @@
+/* /terminal (terminal/index.html.twig) : toujours un terminal sombre, quel que soit le thème */
+
+.terminal {
+  max-width: 900px;
+  margin: 2rem auto 0;
+  overflow: hidden;
+  font-family: ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
+  font-size: 0.95rem;
+  color: #d8f5e6;
+  background: #07070f;
+  border: 1px solid rgba(127, 90, 240, 0.6);
+  border-radius: 12px;
+  box-shadow: 0 0 40px rgba(127, 90, 240, 0.35);
+  cursor: text;
+}
+
+.terminal-barre {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.8rem;
+  color: #9a96b8;
+  background: #14142a;
+}
+
+.terminal-barre span {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: #f25f8c;
+}
+
+.terminal-barre span:nth-child(2) { background: #ffb347; }
+.terminal-barre span:nth-child(3) { background: #2cb67d; margin-right: 0.6rem; }
+
+.terminal-sortie {
+  height: min(55vh, 460px);
+  padding: 1rem 1rem 0;
+  overflow-y: auto;
+}
+
+.terminal-sortie pre {
+  margin: 0 0 0.35rem;
+  font: inherit;
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.terminal-sortie .terminal-commande {
+  color: #00d4ff;
+}
+
+.terminal-ligne {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.6rem 1rem 1rem;
+}
+
+.terminal-invite {
+  flex: none;
+  color: #2cb67d;
+}
+
+.terminal-ligne input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  color: #fff;
+  background: transparent;
+  border: none;
+  outline: none;
+  caret-color: #00d4ff;
+}
+
+.terminal:focus-within {
+  border-color: #00d4ff;
+}
+
+.terminal-note {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  text-align: center;
+  color: var(--texte-doux);
+}
+
+@media (max-width: 576px) {
+  /* Place pour la commande sur petit écran ; l'invite reste l'étiquette du champ pour les lecteurs d'écran */
+  .terminal-invite {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}

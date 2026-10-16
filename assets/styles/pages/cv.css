@@ -341,6 +341,14 @@ h1 {
     margin-top: 5px;
 }
 
+/* Lien vers le site auquel j'ai contribué (sous l'entreprise) */
+.experience-site {
+    display: inline-block;
+    margin-top: 3px;
+    color: var(--accent-primary);
+    font-size: 0.85em;
+}
+
 .experience-period {
     color: var(--text-secondary);
     font-size: 0.9em;

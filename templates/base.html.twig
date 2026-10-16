@@ -1,6 +1,6 @@
-{# Langue de la page et version dans l'autre langue (même route, même paramètres) #}
+{# Langue de la page ; les autres langues (global « langues_site » = framework.enabled_locales) : même route, mêmes paramètres #}
 {% set locale = app.request.locale %}
-{% set other_locale = locale == 'en' ? 'fr' : 'en' %}
+{% set noms_langues = {fr: 'Français', en: 'English', es: 'Español', de: 'Deutsch', it: 'Italiano', pt: 'Português'} %}
 {# _route est déjà le nom sans suffixe de langue (app_contact, pas app_contact.en) ; absent sur une page d'erreur #}
 {% set canonical_route = app.request.attributes.get('_route') %}
 {% set route_params = app.request.attributes.get('_route_params', {}) %}
@@ -12,17 +12,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    {# Thème posé avant l'affichage (pas de flash) : choix du visiteur (Réglages, bouton du CV), sinon celui du système #}
+    <script nonce="{{ csp_nonce('script') }}">try { document.documentElement.dataset.theme = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); } catch { document.documentElement.dataset.theme = 'dark'; }</script>
+    {# Effet de transition de la page précédente (page_transition.js) : l'arrivée s'anime en CSS dès le premier affichage #}
+    <script nonce="{{ csp_nonce('script') }}">try { const e = sessionStorage.getItem('trou-noir'); if (e) { document.documentElement.dataset.arrivee = e; sessionStorage.removeItem('trou-noir'); } } catch {}</script>
+    {# Arrivée d'un visiteur, pour le globe de /stats (assets/scripts/arrivee.js) #}
+    <meta name="arrivee" content="{{ path('app_arrivee') }}">
     <title>{% block title %}{{ 'Univers de Nico'|trans }}{% endblock %}</title>
     <meta name="description" content="{% block description %}{{ 'Portfolio de Nicolas Cataluna, développeur fullstack PHP / Symfony : compétences, projets, parcours, et un cerveau 3D interactif pour tout explorer.'|trans }}{% endblock %}">
     {# Aperçu des liens partagés (LinkedIn, Discord, Slack…) #}
     {% set page_url = app.request.schemeAndHttpHost ~ app.request.pathInfo %}
     <link rel="canonical" href="{{ page_url }}">
     {# Les deux versions de la page, pour les moteurs de recherche #}
-    <link rel="alternate" hreflang="fr" href="{{ _self.url_in('fr', canonical_route, route_params) }}">
-    <link rel="alternate" hreflang="en" href="{{ _self.url_in('en', canonical_route, route_params) }}">
+    {% for langue in langues_site %}
+    <link rel="alternate" hreflang="{{ langue }}" href="{{ _self.url_in(langue, canonical_route, route_params) }}">
+    {% endfor %}
+    <link rel="alternate" hreflang="x-default" href="{{ _self.url_in('fr', canonical_route, route_params) }}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="{{ 'Univers de Nico'|trans }}">
-    <meta property="og:locale" content="{{ locale == 'en' ? 'en_GB' : 'fr_FR' }}">
+    <meta property="og:locale" content="{{ {fr: 'fr_FR', en: 'en_GB', es: 'es_ES', de: 'de_DE', it: 'it_IT', pt: 'pt_PT'}[locale] }}">
     <meta property="og:title" content="{{ block('title')|trim }}">
     <meta property="og:description" content="{{ block('description')|trim }}">
     <meta property="og:url" content="{{ page_url }}">
@@ -33,6 +41,11 @@
     {% endblock %}
     <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" href="{{ asset('images/nico-symbol.svg') }}">
+    {# Application installable : manifeste, icônes et service worker dans public/ (adresses fixes, hors AssetMapper) #}
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/icone-180.png">
+    <meta name="theme-color" content="#0a0a19">
+    <link rel="alternate" type="application/rss+xml" title="{{ 'Articles'|trans }} · {{ 'Univers de Nico'|trans }}" href="{{ path('app_articles_rss') }}">
     {% block javascripts %}
         {# Charge aussi app.js → bootstrap.css + styles/app.css #}
         {% block importmap %}{{ importmap('app', {nonce: csp_nonce('script')}) }}{% endblock %}
@@ -41,42 +54,185 @@
     {% block stylesheets %}{% endblock %}
 </head>
 
-<body>
+<body data-page="{{ canonical_route }}">
     <nav class="navbar-galactic">
         <div class="navbar-container">
             <a href="{{ path('app_home') }}" class="logo gradient" aria-label="{{ 'Accueil'|trans }}">
-                <img src="{{ asset('images/nico-symbol.svg') }}" class="logo-sm" alt="">
+                <img src="{{ asset('images/nico-symbol.svg') }}" class="logo-sm" width="40" height="40" alt="">
             </a>
 
             <div class="navbar-actions">
-                {# Bascule de langue : la même page dans l'autre langue #}
-                <a href="{{ _self.url_in(other_locale, canonical_route, route_params) }}" class="lang-switch"
-                   hreflang="{{ other_locale }}" lang="{{ other_locale }}"
-                   title="{{ other_locale == 'en' ? 'Read in English' : 'Lire en français' }}">{{ other_locale|upper }}</a>
+                {# Langues : la même page dans chaque langue, chaque nom écrit dans sa propre langue #}
+                <button type="button" class="lang-switch" popovertarget="langues" aria-label="{{ locale|upper }} · {{ 'Langue'|trans }} : {{ noms_langues[locale] }}">{{ locale|upper }}</button>
+                <ul id="langues" class="langues" popover>
+                    {% for langue in langues_site %}
+                    <li><a href="{{ _self.url_in(langue, canonical_route, route_params) }}" hreflang="{{ langue }}" lang="{{ langue }}"
+                           {% if langue == locale %}aria-current="true"{% endif %}>{{ noms_langues[langue] }}</a></li>
+                    {% endfor %}
+                </ul>
 
-                <!-- 🌌 Menu icon -->
-                <div class="dropdown">
-                    <button type="button" class="menu-button" id="menuToggle" aria-label="{{ 'Menu'|trans }}">
-                        {{ ux_icon('bi:menu-app-fill', {'height': '32px', 'width': '32px', 'color': '#cfe9ff'}) }}
-                    </button>
+                {# Palette de commandes (palette.js) : aussi Ctrl+K / ⌘K ou « / » #}
+                <button type="button" class="menu-button" id="paletteOuvrir" aria-label="{{ 'Rechercher'|trans }}" aria-keyshortcuts="Control+K Meta+K" title="{{ 'Rechercher'|trans }} (Ctrl+K)">
+                    {{ ux_icon('bi:search') }}
+                </button>
 
-                    <!-- Menu déroulant -->
-                    <ul class="dropdown-menu-galactic" id="menuDropdown">
-                        <li><a href="{{ path('app_home') }}">{{ 'Accueil'|trans }}</a></li>
-                        <li><a href="{{ path('app_cerveau') }}">{{ 'Mon Cerveau'|trans }}</a></li>
-                        <li><a href="{{ path('app_projects') }}">{{ 'Projets'|trans }}</a></li>
-                        <li><a href="{{ path('app_univers') }}">{{ 'Mon Univers'|trans }}</a></li>
-                        <li><a href="{{ path('app_competences') }}">{{ 'Compétences'|trans }}</a></li>
-                        <li><a href="{{ path('app_contact') }}">{{ 'Contact'|trans }}</a></li>
-                    </ul>
+                {# Réglages : panneau natif (popover), fermé par Échap ou un clic ailleurs #}
+                <button type="button" class="menu-button" popovertarget="reglages" aria-label="{{ 'Réglages'|trans }}">
+                    {{ ux_icon('bi:gear-fill') }}
+                </button>
+                <div id="reglages" class="reglages" popover>
+                    <p class="reglages-titre">{{ 'Réglages'|trans }}</p>
+                    <label class="interrupteur">
+                        <span>{{ 'Effets spéciaux'|trans }}<small>{{ 'Transitions entre les pages, easter eggs'|trans }}</small></span>
+                        <input type="checkbox" role="switch" id="prefTransitions">
+                    </label>
+                    <label class="interrupteur">
+                        <span>{{ 'Haute qualité'|trans }}<small>{{ 'À couper si le site rame'|trans }}</small></span>
+                        <input type="checkbox" role="switch" id="prefQualite">
+                    </label>
+                    <label class="interrupteur">
+                        <span>{{ 'Son'|trans }}<small>{{ 'Ambiance sonore de chaque page'|trans }}</small></span>
+                        <input type="checkbox" role="switch" id="prefSon">
+                    </label>
+                    <fieldset class="choix-curseur">
+                        <legend>{{ 'Transition entre les pages'|trans }}</legend>
+                        {% for valeur, label in {hasard: 'Au hasard', 'trou-noir': 'Trou noir', teleportation: 'Téléportation', distorsion: 'Distorsion', lumiere: 'Vitesse lumière'} %}
+                            <label><input type="radio" name="effet" value="{{ valeur }}"> {{ label|trans }}</label>
+                        {% endfor %}
+                    </fieldset>
+                    <fieldset class="choix-curseur">
+                        <legend>{{ 'Thème'|trans }}</legend>
+                        {% for valeur, label in {systeme: 'Système', dark: 'Sombre', light: 'Clair'} %}
+                            <label><input type="radio" name="theme" value="{{ valeur }}"> {{ label|trans }}</label>
+                        {% endfor %}
+                    </fieldset>
+                    <fieldset class="choix-curseur">
+                        <legend>{{ 'Curseur'|trans }}</legend>
+                        {% for valeur, label in {comete: 'Comète', orbite: 'Orbite', 'trou-noir': 'Trou noir', systeme: 'Classique'} %}
+                            <label><input type="radio" name="curseur" value="{{ valeur }}"> {{ label|trans }}</label>
+                        {% endfor %}
+                    </fieldset>
+                    {# Carnet des easter eggs (decouvertes.js) : un indice tant qu'ils ne sont pas trouvés #}
+                    {% set trouvees = decouvertes_trouvees() %}
+                    <div class="decouvertes" data-url="{{ path('app_decouverte') }}">
+                        <p class="decouvertes-titre">{{ 'Découvertes'|trans }} <span id="decouvertesCompte"></span></p>
+                        <ul>
+                            {% for id, decouverte in {
+                                'trou-noir': {nom: 'Le trou noir de poche', indice: 'Reste appuyé dans le vide…'},
+                                'konami': {nom: 'La pluie de météores', indice: 'Un vieux code de jeu vidéo, au clavier ou du bout du doigt sur la barre du haut…'},
+                                'constellation-n': {nom: 'La constellation N', indice: 'Une initiale cachée dans le ciel…'},
+                                'constellation-lion': {nom: 'La constellation du Lion', indice: 'Un signe du zodiaque dans le ciel…'},
+                                'terminal': {nom: 'Le terminal secret', indice: 'Un mot magique d’administrateur, dans la recherche…'},
+                            } %}
+                                <li data-decouverte="{{ id }}">
+                                    <span class="decouverte-nom">{{ decouverte.nom|trans }}</span>
+                                    <span class="decouverte-indice">{{ decouverte.indice|trans }}</span>
+                                    {# Compteur commun à tous les visiteurs (DecouverteController) #}
+                                    <small class="decouverte-stat">{{ '{0} Personne ne l’a encore trouvée|{1} Trouvée par un visiteur|]1,Inf[ Trouvée par %count% visiteurs'|trans({'%count%': trouvees[id] ?? 0}) }}</small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <p id="decouvertesBravo" class="decouvertes-bravo" hidden>✦ {{ 'Explorateur de l’univers : tout est trouvé !'|trans }} ✦</p>
+                    </div>
                 </div>
+
+                <button type="button" class="menu-button" popovertarget="menu" aria-label="{{ 'Menu'|trans }}">
+                    {{ ux_icon('bi:menu-app-fill') }}
+                </button>
             </div>
+
+            {# Menu plein écran #}
+            <nav id="menu" class="menu-galactic" popover aria-label="{{ 'Menu'|trans }}">
+                <button type="button" class="menu-button menu-fermer" popovertarget="menu" popovertargetaction="hide" aria-label="{{ 'Fermer le menu'|trans }}">
+                    {{ ux_icon('bi:x-lg') }}
+                </button>
+                <ul>
+                    {% for route, label in {
+                        app_home: 'Accueil',
+                        app_cerveau: 'Mon Cerveau',
+                        app_projects: 'Projets',
+                        app_articles: 'Articles',
+                        app_univers: 'Mon Univers',
+                        app_competences: 'Compétences',
+                        app_contact: 'Contact',
+                    } %}
+                        <li style="--i: {{ loop.index0 }}">
+                            <a href="{{ path(route) }}" {% if canonical_route == route %}aria-current="page"{% endif %}>{{ label|trans }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </nav>
         </div>
     </nav>
+
+    {# Palette de commandes (palette.js) : résultats remplis depuis /recherche.json #}
+    <dialog id="palette" class="palette" aria-label="{{ 'Rechercher'|trans }}" data-url="{{ path('app_recherche') }}"
+            data-textes="{{ {
+                page: 'Page'|trans, competence: 'Compétence'|trans, projet: 'Projet'|trans, article: 'Article'|trans, commande: 'Commande'|trans,
+                meteores: 'La pluie de météores'|trans, visite: 'Visite en 1 minute'|trans, vide: 'Aucun résultat'|trans,
+                sudo: 'Bien essayé. Ici, c’est l’univers qui a les droits root.'|trans,
+            }|json_encode }}">
+        <input type="text" class="palette-champ" role="combobox" aria-expanded="true" aria-controls="palette-resultats" aria-autocomplete="list"
+               aria-label="{{ 'Rechercher'|trans }}" placeholder="{{ 'Une page, une compétence, un projet…'|trans }}" autocomplete="off" spellcheck="false">
+        <ul id="palette-resultats" class="palette-resultats" role="listbox" aria-label="{{ 'Résultats'|trans }}"></ul>
+        <p class="palette-message" role="status" hidden></p>
+        <p class="palette-aide" aria-hidden="true"><kbd>↑</kbd><kbd>↓</kbd> {{ 'choisir'|trans }} · <kbd>↵</kbd> {{ 'ouvrir'|trans }} · <kbd>{{ 'Échap'|trans }}</kbd> {{ 'fermer'|trans }}</p>
+    </dialog>
+
+    {# Visite guidée (visite.js) : une étape par page, environ 12 s chacune #}
+    <section id="visite" class="visite" aria-label="{{ 'Visite guidée'|trans }}" hidden
+             data-etapes="{{ [
+                 {url: path('app_home'), texte: 'Bienvenue ! Je suis Nicolas, développeur fullstack PHP / Symfony. Voici mon univers en une minute.'|trans},
+                 {url: path('app_cerveau'), texte: 'Mon cerveau en 3D : chaque neurone est une compétence, chaque souvenir une étape de mon parcours. Clique dessus pour explorer.'|trans},
+                 {url: path('app_projects'), texte: 'Mes projets, en orbite autour d’un trou noir : chacun a sa page, avec le code et ce que j’en retiens.'|trans},
+                 {url: path('app_univers'), texte: 'Mon parcours, du brevet au bachelor, et mon CV à télécharger.'|trans},
+                 {url: path('app_contact'), texte: 'Un projet, une alternance, une question ? Écris-moi ici.'|trans},
+             ]|json_encode }}"
+             data-textes="{{ {pause: 'Pause'|trans, reprendre: 'Reprendre'|trans, suivant: 'Suivant'|trans, terminer: 'Terminer'|trans}|json_encode }}">
+        <p class="visite-texte" aria-live="polite"><span class="visite-numero" data-numero></span> <span data-texte></span></p>
+        <div class="visite-actions">
+            <button type="button" class="visite-bouton" data-pause></button>
+            <button type="button" class="visite-bouton visite-bouton--principal" data-suivant></button>
+            <button type="button" class="visite-fermer" data-quitter aria-label="{{ 'Quitter la visite'|trans }}">{{ ux_icon('bi:x-lg') }}</button>
+        </div>
+        <div class="visite-progression" aria-hidden="true"></div>
+    </section>
+
+    {# Nouvelle découverte d'un easter egg (decouvertes.js) #}
+    <p id="decouverte" class="decouverte-toast" role="status" hidden>
+        ✦ {{ 'Nouvelle découverte'|trans }} : <strong data-nom></strong> (<span data-compte></span>)
+        <span data-bravo hidden>— {{ 'tout est trouvé, bravo !'|trans }}</span> ✦
+    </p>
+
+    {# Code Konami reconnu alors que les effets sont coupés (konami.js) #}
+    <p id="effetsCoupes" class="decouverte-toast" role="status" hidden>
+        {{ 'Code reconnu ! Mais les effets sont coupés : activez-les dans les réglages ⚙, ou désactivez « Réduire les animations » sur votre appareil.'|trans }}
+    </p>
+
+    {# Proposé par qualite_auto.js quand le site rame #}
+    <div id="qualiteAuto" class="qualite-auto" role="status" hidden>
+        <p>{{ "Le site a l'air de ramer sur cet appareil. Passer en qualité basse ?"|trans }}</p>
+        <div class="qualite-auto-actions">
+            <button type="button" data-qualite="basse">{{ 'Passer en qualité basse'|trans }}</button>
+            <button type="button" data-qualite="garder">{{ 'Non merci'|trans }}</button>
+        </div>
+        <small>{{ 'Modifiable à tout moment dans les réglages ⚙'|trans }}</small>
+    </div>
 
     <main>
         {% block body %}
         {% endblock %}
     </main>
+
+    <footer class="site-footer">
+        <span>© {{ 'now'|date('Y') }} Nicolas Cataluna</span>
+        <a href="{{ path('app_now') }}">{{ 'En ce moment'|trans }}</a>
+        <a href="{{ path('app_uses') }}">{{ 'Mes outils'|trans }}</a>
+        <a href="{{ path('app_stats') }}">{{ 'Statistiques'|trans }}</a>
+        <a href="{{ path('app_livre_or') }}">{{ 'Livre d’or'|trans }}</a>
+        <a href="{{ path('app_terminal') }}">Terminal</a>
+        <a href="{{ path('app_mentions_legales') }}">{{ 'Mentions légales'|trans }}</a>
+        <a href="{{ path('app_confidentialite') }}">{{ 'Confidentialité'|trans }}</a>
+    </footer>
 </body>
 </html>

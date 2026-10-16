@@ -20,6 +20,10 @@ final class CvTest extends WebTestCase
         self::assertSelectorTextContains('.subtitle', 'Full-stack Developer');
         self::assertAnySelectorTextContains('.section-title', 'Work Experience');
         self::assertAnySelectorTextContains('.experience-title', 'IT Technician Intern');
+
+        $client->request('GET', '/de/CV');
+        self::assertSelectorTextContains('.subtitle', 'Full-Stack-Entwickler');
+        self::assertAnySelectorTextContains('.section-title', 'Berufserfahrung');
     }
 
     public function testLeCvAnglaisSeTelechargeEnPdf(): void
@@ -29,6 +33,9 @@ final class CvTest extends WebTestCase
 
         self::assertResponseHeaderSame('Content-Type', 'application/pdf');
         self::assertStringContainsString('CV_Nicolas_Cataluna_en_light.pdf', $client->getResponse()->headers->get('Content-Disposition'));
+
+        $client->request('GET', '/es/CV/download?theme=dark');
+        self::assertStringContainsString('CV_Nicolas_Cataluna_es_dark.pdf', $client->getResponse()->headers->get('Content-Disposition'));
     }
 
     public function testLApercuAfficheLePdfSansLeTelecharger(): void
@@ -56,5 +63,17 @@ final class CvTest extends WebTestCase
         self::assertSame('Voyages : Portugal', $filtre->retirer('✈️ Voyages : Portugal'));
         self::assertSame('Musique', $filtre->retirer('🎵 Musique'));
         self::assertSame('Café — été', $filtre->retirer('Café — été')); // accents et tirets intacts
+    }
+
+    /** Lien « site auquel j'ai contribué » sous l'expérience HabitatPresto, en français et en anglais */
+    public function testLeSiteDUneExperienceEstEnLien(): void
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/CV');
+        self::assertSelectorTextContains('a.experience-site[href="https://www.habitatpresto.com/"]', 'Site auquel j’ai contribué : habitatpresto.com');
+
+        $client->request('GET', '/en/CV');
+        self::assertSelectorTextContains('a.experience-site[href="https://www.habitatpresto.com/"]', 'Website I contributed to: habitatpresto.com');
     }
 }

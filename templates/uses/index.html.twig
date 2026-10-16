@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Mes outils'|trans }} · {{ 'Univers de Nico'|trans }}{% endblock %}
+
+{% block description %}{{ 'Le matériel, les logiciels et la stack avec lesquels je travaille.'|trans }}{% endblock %}
+
+{% block body %}
+<article class="projet container py-5">
+  <header class="projet-entete">
+    <p class="projet-groupe">{{ 'Mis à jour le'|trans }} <time datetime="{{ outils.majLe|date('Y-m-d') }}">{{ outils.majLe|format_date('long', locale: app.request.locale) }}</time></p>
+    <h1 class="gradient fw-bold">{{ 'Mes outils'|trans }}</h1>
+    <p class="projet-chapo">{{ 'Le matériel, les logiciels et la stack avec lesquels je travaille.'|trans }}</p>
+  </header>
+
+  <div class="projet-texte article-texte">
+    {{ outils|loc('contenu')|markdown }}
+  </div>
+</article>
+{% endblock %}

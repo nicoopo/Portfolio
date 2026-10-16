@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ article|loc('titre') }} · {{ 'Articles'|trans }}{% endblock %}
+
+{% block description %}{{ article|loc('resume') }}{% endblock %}
+
+{% block og_image %}
+    {% if article.image %}<meta property="og:image" content="{{ absolute_url(asset('uploads/articles/' ~ article.image)) }}">{% else %}{# généré : PartageController #}
+    <meta property="og:image" content="{{ url('app_partage_article', {slug: article.slug}) }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">{% endif %}
+{% endblock %}
+
+{% block body %}
+{% set contenu = article|loc('contenu')|markdown %}
+{% set titres = sommaire(contenu) %}
+{% set minutes = max(1, ((article|loc('contenu')|replace({"\n": ' '})|split(' ')|filter(mot => mot)|length) / 200)|round(0, 'ceil')) %}{# 200 mots par minute #}
+<article class="projet container py-5">
+  <a class="projet-retour" href="{{ path('app_articles') }}">← {{ 'Tous les articles'|trans }}</a>
+
+  {% if apercu ?? false %}
+  <p class="article-apercu" role="status">
+    Aperçu depuis l’administration :
+    {% if article.publieLe is null %}brouillon, invisible sur le site.
+    {% elseif article.publieLe > date() %}publication programmée le {{ article.publieLe|format_datetime('long', 'short', locale: 'fr') }}.
+    {% else %}article publié.{% endif %}
+  </p>
+  {% endif %}
+
+  <header class="projet-entete">
+    <p class="projet-groupe"><time datetime="{{ article.publieLe|date('Y-m-d') }}">{{ article.publieLe|format_date('long', locale: app.request.locale) }}</time> · {{ '%minutes% min de lecture'|trans({'%minutes%': minutes}) }}</p>
+    <h1 class="gradient fw-bold">{{ article|loc('titre') }}</h1>
+    <p class="projet-chapo">{{ article|loc('resume') }}</p>
+  </header>
+
+  {% if article.image %}
+  <figure class="projet-image">
+    <img src="{{ asset('uploads/articles/' ~ article.image) }}" alt="">
+  </figure>
+  {% endif %}
+
+  {% if titres|length >= 3 %}
+  <nav class="article-sommaire" aria-labelledby="sommaire-titre">
+    <p id="sommaire-titre" class="article-sommaire-titre">{{ 'Sommaire'|trans }}</p>
+    <ol>
+      {% for id, titre in titres %}<li><a href="#{{ id }}">{{ titre }}</a></li>{% endfor %}
+    </ol>
+  </nav>
+  {% endif %}
+
+  <div class="projet-texte article-texte">
+    {{ contenu|raw }}{# déjà assaini par |markdown, qui échappe le HTML brut #}
+  </div>
+
+  {% if precedent or suivant %}
+  <nav class="article-voisins" aria-label="{{ 'Autres articles'|trans }}">
+    {% if precedent %}<a class="article-voisin" href="{{ path('app_article', {slug: precedent.slug}) }}" rel="prev"><small>← {{ 'Article précédent'|trans }}</small>{{ precedent|loc('titre') }}</a>{% endif %}
+    {% if suivant %}<a class="article-voisin article-voisin--suivant" href="{{ path('app_article', {slug: suivant.slug}) }}" rel="next"><small>{{ 'Article suivant'|trans }} →</small>{{ suivant|loc('titre') }}</a>{% endif %}
+  </nav>
+  {% endif %}
+</article>
+{% endblock %}

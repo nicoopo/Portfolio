@@ -1,0 +1,126 @@
+<?php
+
+namespace App\Controller;
+
+use App\EventListener\StatistiquesListener;
+use App\Repository\ArriveeRepository;
+use MaxMind\Db\Reader;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
+use Symfony\Component\Routing\Attribute\Route;
+
+/**
+ * Globe des visites (/stats, globe_controller.js) : arrivee.js signale l'arrivée d'un visiteur avec le fuseau horaire
+ * de son navigateur ; le globe lit les arrivées des 30 derniers jours, puis les nouvelles au fil de l'eau.
+ * Le fuseau est placé sur le globe par PHP (DateTimeZone::getLocation) : la ville de référence du fuseau.
+ * En plus, un lieu approché d'après l'IP (base DB-IP Lite, sur le serveur) : seules ses coordonnées arrondies sont
+ * gardées, jamais l'IP.
+ */
+final class ArriveeController extends AbstractController
+{
+    /**
+     * Seulement depuis le site (Sec-Fetch-Site), ni robot ni administrateur. Limite commune à tous les visiteurs
+     * (config/packages/rate_limiter.yaml), sans IP : contre un flot de fausses arrivées, pas contre une personne.
+     */
+    #[Route('/arrivees', name: 'app_arrivee', methods: ['POST'])]
+    public function signaler(Request $request, ArriveeRepository $arrivees,Security $security, RateLimiterFactoryInterface $arriveesLimiter, #[Autowire(param: 'app.dbip_villes')] string $dbip): Response
+    {
+        if ('same-origin' !== $request->headers->get('Sec-Fetch-Site', 'same-origin')) {
+            return new Response(null, Response::HTTP_FORBIDDEN);
+        }
+        $fuseau = self::actuel($request->getPayload()->getString('fuseau'));
+        if (null === $fuseau || null === self::position($fuseau)) {
+            return new Response(null, Response::HTTP_BAD_REQUEST);
+        }
+        $agent = $request->headers->get('User-Agent', '');
+        if ('' === $agent || preg_match(StatistiquesListener::ROBOTS, $agent) || $security->isGranted('ROLE_ADMIN')) {
+            return new Response(null, Response::HTTP_NO_CONTENT);
+        }
+        if (!$arriveesLimiter->create('tous')->consume()->isAccepted()) {
+            return new Response(null, Response::HTTP_TOO_MANY_REQUESTS);
+        }
+
+        $ip = self::lieuIp($request->getClientIp(), $dbip);
+        $arrivees->ajouter($fuseau, $ip['lat'] ?? null, $ip['lon'] ?? null);
+
+        return new Response(null, Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Arrivées postérieures à ?depuis= (identifiant de la dernière reçue), ou celles des 30 derniers jours.
+     * Pas l'heure exacte : seulement l'ordre, la position, le fuseau et le lieu d'après l'IP (ou null).
+     */
+    #[Route('/arrivees', name: 'app_arrivees', methods: ['GET'])]
+    public function lister(Request $request, ArriveeRepository $repository): JsonResponse
+    {
+        $arrivees = [];
+        foreach ($repository->depuis($request->query->getInt('depuis')) as $ligne) {
+            if ($position = self::position($ligne['fuseau'])) {
+                $ip = null !== $ligne['ip_lat'] ? ['lat' => (float) $ligne['ip_lat'], 'lon' => (float) $ligne['ip_lon']] : null;
+                $arrivees[] = ['id' => (int) $ligne['id'], 'fuseau' => $ligne['fuseau'], ...$position, 'ip' => $ip];
+            }
+        }
+
+        return new JsonResponse($arrivees);
+    }
+
+    /**
+     * Nom actuel du fuseau, ou null s'il n'existe pas. Certains navigateurs donnent encore un ancien nom
+     * (« Asia/Calcutta », « America/Montreal ») que PHP ne sait pas placer : on prend le fuseau actuel équivalent.
+     */
+    public static function actuel(string $fuseau): ?string
+    {
+        static $actuels = null;
+        if (\in_array($fuseau, \DateTimeZone::listIdentifiers(), true)) {
+            return $fuseau;
+        }
+        if (!\in_array($fuseau, \DateTimeZone::listIdentifiers(\DateTimeZone::ALL_WITH_BC), true)) {
+            return null;
+        }
+        // Forme canonique (ICU) → fuseau actuel, calculé la première fois seulement
+        $actuels ??= array_reduce(\DateTimeZone::listIdentifiers(), function (array $carte, string $nom) {
+            $carte[\IntlTimeZone::getCanonicalID($nom)] ??= $nom;
+
+            return $carte;
+        }, []);
+
+        return $actuels[\IntlTimeZone::getCanonicalID($fuseau)] ?? null;
+    }
+
+    /** Latitude et longitude du fuseau, ou null s'il n'existe pas (ou n'a pas de lieu, comme UTC) */
+    public static function position(string $fuseau): ?array
+    {
+        if (!\in_array($fuseau, \DateTimeZone::listIdentifiers(), true)) {
+            return null;
+        }
+        $lieu = (new \DateTimeZone($fuseau))->getLocation();
+        if (!$lieu || '??' === $lieu['country_code']) {
+            return null;
+        }
+
+        return ['lat' => round($lieu['latitude'], 2), 'lon' => round($lieu['longitude'], 2)];
+    }
+
+    /**
+     * Lieu approché de l'IP (souvent la ville de l'opérateur), arrondi au dixième de degré (~10 km) ; null sans base,
+     * pour une IP locale ou inconnue. L'IP ne sort pas d'ici.
+     */
+    public static function lieuIp(?string $ip, string $base): ?array
+    {
+        if (!$ip || !is_file($base)) {
+            return null;
+        }
+        try {
+            $lieu = (new Reader($base))->get($ip)['location'] ?? null;
+        } catch (\Exception) { // base illisible, IP mal formée : pas de lieu, l'arrivée compte quand même
+            return null;
+        }
+
+        return isset($lieu['latitude'], $lieu['longitude']) ? ['lat' => round($lieu['latitude'], 1), 'lon' => round($lieu['longitude'], 1)] : null;
+    }
+}

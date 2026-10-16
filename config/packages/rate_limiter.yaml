@@ -1,0 +1,45 @@
+framework:
+    rate_limiter:
+        # Compteur des easter eggs (DecouverteController) : il n'y en a que cinq à trouver
+        decouvertes:
+            policy: sliding_window
+            limit: 10
+            interval: '1 hour'
+        # Livre d'or (LivreOrController) : un mot ou deux par visiteur, pas un roman en dix envois
+        livre_or:
+            policy: sliding_window
+            limit: 3
+            interval: '1 hour'
+        # Formulaire de contact (ContactController) : chaque envoi part par e-mail, un flot ferait bloquer le SMTP
+        contact:
+            policy: sliding_window
+            limit: 5
+            interval: '1 hour'
+        # Connexion à l'administration (App\Security\LimiteurConnexion) : mêmes valeurs que le limiteur par défaut
+        # de Symfony pour 5 essais ; par identifiant + IP, et par IP seule pour borner le nombre de comptes essayés
+        connexion_compte:
+            policy: fixed_window
+            limit: 5
+            interval: '15 minutes'
+        connexion_ip:
+            policy: fixed_window
+            limit: 25
+            interval: '15 minutes'
+        # Arrivées pour le globe de /stats (ArriveeController) : une seule limite pour tout le monde (sans IP),
+        # bien au-dessus du trafic du site, juste pour qu'un script ne remplisse pas la table
+        arrivees:
+            policy: sliding_window
+            limit: 60
+            interval: '1 minute'
+
+when@test:
+    framework:
+        rate_limiter:
+            decouvertes:
+                policy: no_limit # l'état du limiteur survit entre deux lancements des tests (cache sur disque)
+            livre_or:
+                policy: no_limit
+            contact:
+                policy: no_limit
+            arrivees:
+                policy: no_limit

@@ -24,10 +24,14 @@
     seeInTimeline: 'Voir dans mon parcours'|trans,
     dive: 'Plonger dans mon cerveau'|trans,
     surface: 'Ressortir'|trans,
+    explore: 'Explorer en vaisseau'|trans,
+    stopExplore: "Quitter l'exploration"|trans,
+    hintExploreTouch: 'Pose le doigt pour avancer, glisse pour diriger · Deux doigts pour foncer · Touche un point pour l’ouvrir'|trans,
+    hintExplore: 'Souris, flèches ou ZQSD pour piloter · ↑ / Z pour avancer · Clic maintenu pour foncer · Espace / Maj pour monter ou descendre · Touche un point pour l’ouvrir · Échap pour sortir'|trans,
     hintOutside: 'Glisse pour tourner · Clic droit ou flèches pour te déplacer · Dézoome pour voir mes passions'|trans,
     hintInside: 'Tu es dans mon cerveau · Clique sur un souvenir de mon parcours'|trans,
 } %}
-<section class="brain-stage"
+<section class="brain-stage theme-sombre"
          data-controller="brain"
          data-brain-neurons-value="{{ neurones|json_encode }}"
          data-brain-passions-value="{{ passions_3d|json_encode }}"
@@ -47,16 +51,14 @@
 
     {# Légende des lobes ; les boutons servent aussi au clavier et aux lecteurs d'écran #}
     <nav class="brain-legend" aria-label="{{ 'Compétences'|trans }}">
-        {# Recherche : suggestions natives (datalist), Entrée ou choix d'une suggestion = vol vers l'élément #}
+        {# Ouverte sur grand écran (titre masqué) ; sur mobile, repliée derrière son titre (brain_controller) #}
+        <details class="brain-legend-menu" data-brain-target="legendMenu" open>
+        <summary class="brain-legend-titre">{{ 'Compétences'|trans }}</summary>
+        {# Recherche : filtre la légende à chaque lettre ; Entrée = vol vers le premier résultat #}
         <form class="brain-search" role="search" data-action="brain#search">
-            <input type="search" list="brain-names" class="brain-search-input" data-brain-target="search"
-                   data-action="change->brain#search keydown->brain#clearSearchError:stop"
+            <input type="search" class="brain-search-input" data-brain-target="search"
+                   data-action="input->brain#filter keydown->brain#clearSearchError:stop"
                    placeholder="{{ 'Chercher…'|trans }}" aria-label="{{ 'Chercher une compétence, une passion ou une étape du parcours'|trans }}">
-            <datalist id="brain-names">
-                {% for categorie in categories %}{% for competence in categorie.competences %}<option value="{{ competence|loc('nom') }}">{% endfor %}{% endfor %}
-                {% for passion in passions %}<option value="{{ passion|loc('nom') }}">{% endfor %}
-                {% for etape in parcours %}<option value="{{ etape|loc('nom') }}">{% endfor %}
-            </datalist>
         </form>
         {% for categorie in categories %}
         <details class="brain-legend-group">
@@ -102,6 +104,7 @@
                 {% endfor %}
             </ul>
         </details>
+        </details>
     </nav>
 
     <p class="brain-tooltip" data-brain-target="tooltip" hidden></p>
@@ -117,6 +120,7 @@
     <button type="button" class="brain-tour" data-brain-target="tourButton" data-action="brain#toggleTour" aria-pressed="false" hidden>{{ textes.tour }}</button>
     <div class="brain-actions">
         <button type="button" class="brain-tour" data-brain-target="diveButton" data-action="brain#dive" aria-pressed="false" hidden>{{ textes.dive }}</button>
+        <button type="button" class="brain-tour" data-brain-target="exploreButton" data-action="brain#toggleExplore" aria-pressed="false" hidden>{{ textes.explore }}</button>
         <button type="button" class="brain-tour" data-brain-target="soundButton" data-action="brain#toggleSound" aria-pressed="false" hidden>{{ textes.sound }}</button>
         <button type="button" class="brain-tour" data-brain-target="shareButton" data-action="brain#share" hidden>{{ textes.share }}</button>
         <button type="button" class="brain-tour" data-brain-target="fullscreenButton" data-action="brain#toggleFullscreen" aria-pressed="false" hidden>{{ textes.fullscreen }}</button>

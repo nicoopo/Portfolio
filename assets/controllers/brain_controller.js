@@ -6,13 +6,15 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { dotTexture } from '../cerveau/textures.js';
+import { dotTexture, exploreFade } from '../cerveau/textures.js';
 import { BODY_OPACITY, createBrain } from '../cerveau/brain.js';
 import { createNeurons } from '../cerveau/neurons.js';
 import { Synapses } from '../cerveau/synapses.js';
 import { createNebulae } from '../cerveau/nebulae.js';
 import { createSouvenirs } from '../cerveau/souvenirs.js';
 import { Ambiance } from '../cerveau/ambiance.js';
+import { createShip, createStarfield } from '../cerveau/vaisseau.js';
+import { basseQualite, preferences, setPreference } from '../scripts/preferences.js';
 
 const HOME_TARGET = new THREE.Vector3(0, 0, 0);
 const CLICK_TOLERANCE_PX = 5;
@@ -21,8 +23,24 @@ const FOCUS_DISTANCE = { neuron: 1.8, nebula: 5, souvenir: 1.8 }; // distance ca
 // Plongée : en dessous de outside la caméra commence à entrer, en dessous de inside elle est dedans
 const DIVE = { outside: 1.3, inside: 0.75, cameraDistance: 0.45, souvenirDistance: 0.7 };
 const TOUR_STOPS = 6;       // neurones visités : ceux qui ont le plus de projets
-const TOUR_PAUSE_MS = 6000; // temps passé sur chaque neurone
+const TOUR_PAUSE_MS = 9000; // temps passé sur chaque neurone (vol compris)
+const TOUR_FLIGHT_S = 3.5;  // durée du vol d'un neurone à l'autre
+const TOUR_LIFT = 0.6;      // la caméra prend du recul à mi-vol (part de la distance parcourue)
 const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
+// Mode exploration : vitesse max (unités/s) lente près du cerveau, rapide au large (entre near et far du centre),
+// virage et tangage (rad/s), nez levé au plus (rad), zone de vol, distance pour « ramasser » un élément,
+// zone morte de la souris (part du demi-écran), multiplicateur du boost (clic maintenu),
+// glissé du doigt pour braquer à fond (px), distance à la caméra sous laquelle les halos s'effacent
+const SHIP = {
+    slow: 0.6, fast: 3, near: 1.5, far: 8,
+    turn: 1.3, pitch: 1, maxPitch: 1.2, maxDistance: 45, boost: 3,
+    pickup: { neuron: 0.15, souvenir: 0.15, nebula: 0.6 },
+    deadZone: 0.15,
+    touchRange: 60,
+    fadeNear: 0.9,
+};
+// Touches physiques (e.code) : ZQSD sur AZERTY = WASD sur QWERTY
+const SHIP_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'ShiftLeft', 'ShiftRight']);
 
 /**
  * Scène du cerveau : interaction (caméra, survol, clic, panneau).
@@ -30,11 +48,14 @@ const VIEW_PREFIX = 'vue='; // lien vers une vue : /cerveau#vue=x,y,z;x,y,z
  * Chargé uniquement sur les pages qui l'utilisent (lazy).
  */
 export default class extends Controller {
-    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search', 'shareButton', 'soundButton', 'diveButton', 'hint'];
+    static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search', 'legendMenu', 'shareButton', 'soundButton', 'diveButton', 'exploreButton', 'hint'];
     // texts : libellés traduits par le template (home/cerveau.html.twig)
     static values = { neurons: Array, passions: Array, souvenirs: Array, texts: Object };
 
     connect() {
+        // Mobile : légende repliée, le cerveau reste visible
+        if (petitEcran()) this.legendMenuTarget.open = false;
+
         try {
             // Pas d'anticrénelage : la scène passe par le composer (cibles sans MSAA), il ne lisserait que le quad final
             this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
@@ -49,10 +70,11 @@ export default class extends Controller {
         this.shareButtonTarget.hidden = false;
         this.soundButtonTarget.hidden = !window.AudioContext;
         this.diveButtonTarget.hidden = false;
+        this.exploreButtonTarget.hidden = false;
 
         this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.setPixelRatio(basseQualite() ? 1 : Math.min(window.devicePixelRatio, 2));
         this.canvasTarget.appendChild(this.renderer.domElement);
 
         this.scene = new THREE.Scene();
@@ -86,19 +108,54 @@ export default class extends Controller {
         this.clickables = [...this.neurons, ...this.nebulae.targets, ...this.souvenirs.targets];
 
         this.scene.add(this.brain, this.synapses.object, this.nebulae.object, this.souvenirs.object, ...this.neurons.map((h) => h.userData.anchor));
-        // Neurones, synapses et souvenirs toujours dessinés après le corps sombre du cerveau
+        // Neurones, synapses et souvenirs toujours dessinés après le corps du cerveau, sans test
+        // de profondeur : ils sont dedans, l'écran qui cache ce qui passe derrière ne doit pas les masquer
         for (const object of [this.synapses.object, this.souvenirs.object, ...this.neurons.map((h) => h.userData.anchor)]) {
-            object.traverse((child) => { child.renderOrder = 1; });
+            object.traverse((child) => {
+                child.renderOrder = 1;
+                if (child.material) child.material.depthTest = false;
+            });
         }
 
         this.raycaster = new THREE.Raycaster();
         this.pointer = new THREE.Vector2();
         this.listen(this.renderer.domElement, 'pointermove', (e) => this.onPointerMove(e));
-        this.listen(this.renderer.domElement, 'pointerdown', (e) => { this.downAt = [e.clientX, e.clientY]; });
+        this.listen(this.renderer.domElement, 'pointerdown', (e) => {
+            this.downAt = [e.clientX, e.clientY];
+            if (!this.ship) return;
+            if (e.pointerType !== 'mouse') this.touchDown(e);
+            else if (e.button === 0) this.boosting = true; // clic maintenu : le vaisseau fonce
+        });
+        const pointerUp = (e) => {
+            if (e.pointerType !== 'mouse') this.touchUp(e);
+            else this.boosting = false;
+        };
+        this.listen(window, 'pointerup', pointerUp);
+        this.listen(window, 'pointercancel', pointerUp);
         this.listen(this.renderer.domElement, 'pointerup', (e) => this.onPointerUp(e));
-        this.listen(this.renderer.domElement, 'pointerleave', () => this.hover(null));
+        this.listen(this.renderer.domElement, 'pointerleave', (e) => {
+            this.hover(null);
+            if (e.pointerType !== 'mouse') return;
+            this.steer = null; // la souris quitte la scène (ex. vers un bouton) : le vaisseau ne tourne plus
+            this.boosting = false;
+        });
+        // Pilotage du vaisseau (hors champ de saisie)
+        this.listen(document, 'keydown', (e) => {
+            if (!this.ship || !SHIP_KEYS.has(e.code) || e.target.closest?.('input, textarea')) return;
+            e.preventDefault(); // pas de défilement de la page
+            this.keys.add(e.code);
+        });
+        this.listen(document, 'keyup', (e) => this.keys?.delete(e.code));
+        this.listen(window, 'blur', () => this.keys?.clear()); // touche relâchée hors de la fenêtre
         // Onglet caché : plus de son ni de calcul audio
         this.listen(document, 'visibilitychange', () => this.ambiance?.setVisible(!document.hidden));
+        // Son : préférence du site (panneau ⚙ ou bouton « Son »)
+        this.listen(document, 'preference', (e) => { if (e.detail.name === 'son') this.setSound(e.detail.value); });
+        // Déjà activé : le navigateur n'autorise le son qu'après un geste, on démarre au premier clic ou à la première touche
+        // (sauf sur le bouton « Son » et le panneau ⚙, qui changent eux-mêmes la préférence)
+        const startSound = (e) => { if (!e.target.closest?.('#reglages, [data-brain-target="soundButton"]')) this.setSound(preferences.son); };
+        this.listen(document, 'pointerdown', startSound);
+        this.listen(document, 'keydown', startSound);
         // Échap fait aussi sortir du plein écran : le bouton suit l'état réel
         this.listen(document, 'fullscreenchange', () => {
             const on = document.fullscreenElement === this.element;
@@ -112,7 +169,7 @@ export default class extends Controller {
         this.composer.addPass(new RenderPass(this.scene, this.camera));
         // Lueur (bloom) autour des points lumineux.
         // ponytail: coupée sur petit écran comme approximation des GPU faibles ; à affiner si besoin (mesure du FPS)
-        if (!window.matchMedia('(max-width: 576px)').matches) {
+        if (!basseQualite() && !window.matchMedia('(max-width: 576px)').matches) {
             this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(1, 1), 0.35, 0.3, 0.4) /* force, rayon, seuil */);
         }
         this.composer.addPass(new OutputPass());
@@ -127,7 +184,7 @@ export default class extends Controller {
             this.frame = requestAnimationFrame(loop);
             this.timer.update(); // sans l'horodatage de rAF : il peut précéder la création du timer (temps négatif)
             this.animate(this.reducedMotion ? 0 : this.timer.getElapsed(), this.timer.getDelta());
-            this.controls.update();
+            if (!this.ship) this.controls.update(); // en exploration, la caméra suit le vaisseau
             this.composer.render();
         };
         loop();
@@ -179,6 +236,7 @@ export default class extends Controller {
     disconnect() {
         if (!this.renderer) return;
         cancelAnimationFrame(this.frame);
+        exploreFade.value = 0; // état du module : la prochaine visite ne doit pas démarrer en exploration
         this.stopTour();
         clearTimeout(this.shareTimeout);
         this.ambiance?.close();
@@ -259,7 +317,18 @@ export default class extends Controller {
         this.souvenirs.update(time);
 
         // Vol de caméra vers l'élément sélectionné (ou retour à la vue d'ensemble)
-        if (this.flight) {
+        if (this.ship) {
+            this.updateShip(delta);
+        } else if (this.flight?.duration && !this.reducedMotion) {
+            // Vol de la visite : durée fixe, départ et arrivée en douceur, en arc par l'extérieur du cerveau
+            const f = this.flight;
+            f.t = Math.min(f.t + delta / f.duration, 1);
+            const e = f.t < 0.5 ? 4 * f.t ** 3 : 1 - (-2 * f.t + 2) ** 3 / 2; // easeInOutCubic
+            this.controls.target.lerpVectors(f.from.target, f.target, e);
+            this.camera.position.lerpVectors(f.from.camera, f.camera, e);
+            this.camera.position.setLength(this.camera.position.length() + f.lift * Math.sin(Math.PI * e));
+            if (f.t === 1) this.flight = null;
+        } else if (this.flight) {
             // Rapprochement selon le temps écoulé, pas par image : même durée à 30 ou 144 images/s
             const k = this.reducedMotion ? 1 : 1 - Math.exp(-FLIGHT_SPEED * delta);
             this.controls.target.lerp(this.flight.target, k);
@@ -283,6 +352,11 @@ export default class extends Controller {
     }
 
     onPointerMove(event) {
+        if (this.ship && event.pointerType !== 'mouse') {
+            this.touchMove(event); // le doigt pilote : pas de bulle de survol
+            return;
+        }
+        if (this.ship) this.steerTowards(event);
         const target = this.pick(event);
         this.hover(target);
         if (target) {
@@ -300,8 +374,8 @@ export default class extends Controller {
     }
 
     onPointerUp(event) {
-        // Un glisser (rotation) n'est pas un clic
-        if (!this.downAt) return;
+        // Un glisser (rotation) n'est pas un clic ; en exploration, le clic sert au boost (on ouvre en touchant)
+        if (!this.downAt || this.ship) return;
         const moved = Math.hypot(event.clientX - this.downAt[0], event.clientY - this.downAt[1]);
         this.downAt = null;
         if (moved > CLICK_TOLERANCE_PX) return;
@@ -313,10 +387,16 @@ export default class extends Controller {
         }
     }
 
-    /** Bouton « Son » : l'audio n'est créé qu'au premier clic (les navigateurs l'exigent) */
+    /** Bouton « Son » : change la préférence, qui revient par l'événement « preference » */
     toggleSound() {
+        setPreference('son', !this.ambiance?.on);
+    }
+
+    /** L'audio n'est créé qu'au premier geste (les navigateurs l'exigent) */
+    setSound(on) {
+        if (!window.AudioContext || on === !!this.ambiance?.on) return;
         this.ambiance ??= new Ambiance();
-        const on = this.ambiance.toggle();
+        this.ambiance.toggle();
         this.soundButtonTarget.textContent = on ? this.textsValue.mute : this.textsValue.sound;
         this.soundButtonTarget.setAttribute('aria-pressed', String(on));
     }
@@ -332,6 +412,7 @@ export default class extends Controller {
 
     /** Bouton « Visite guidée » : lance ou arrête la visite */
     toggleTour() {
+        if (this.ship) this.stopExplore();
         if (this.tourTimeout) {
             this.stopTour();
             return;
@@ -348,7 +429,9 @@ export default class extends Controller {
                 this.close();
                 return;
             }
-            this.select(stops[i]);
+            this.select(stops[i], TOUR_FLIGHT_S);
+            // Pendant la pause, la caméra tourne lentement autour du neurone
+            this.controls.autoRotate = !this.reducedMotion;
             this.tourTimeout = setTimeout(() => next(i + 1), TOUR_PAUSE_MS);
         };
         next(0);
@@ -359,6 +442,7 @@ export default class extends Controller {
         if (!this.tourTimeout) return;
         clearTimeout(this.tourTimeout);
         this.tourTimeout = null;
+        this.controls.autoRotate = !this.selected && !this.reducedMotion;
         this.tourButtonTarget.textContent = this.textsValue.tour;
         this.tourButtonTarget.setAttribute('aria-pressed', 'false');
     }
@@ -382,6 +466,24 @@ export default class extends Controller {
         this.stopTour();
         this.select(found);
         this.searchTarget.value = found.userData.data.nom;
+        if (petitEcran()) {
+            this.searchTarget.blur(); // ferme le clavier
+            this.legendMenuTarget.open = false;
+        }
+    }
+
+    /** Recherche en direct : la légende ne montre que les noms qui contiennent la saisie, groupes concernés dépliés */
+    filter() {
+        const query = normalize(this.searchTarget.value.trim());
+        for (const groupe of this.legendMenuTarget.querySelectorAll('.brain-legend-group')) {
+            let trouves = 0;
+            for (const li of groupe.querySelectorAll('li')) {
+                li.hidden = query !== '' && !normalize(li.textContent).includes(query);
+                if (!li.hidden) trouves++;
+            }
+            groupe.hidden = query !== '' && trouves === 0;
+            groupe.open = query !== '' && trouves > 0;
+        }
     }
 
     /** À chaque touche dans le champ (propagation arrêtée : les flèches ne déplacent pas la caméra) */
@@ -389,20 +491,18 @@ export default class extends Controller {
         this.searchTarget.removeAttribute('aria-invalid');
     }
 
-    selectByName({ params: { name }, target }) {
+    selectByName({ params: { name } }) {
         const found = this.clickables?.find((t) => t.userData.data.nom === name);
         if (!found) return;
         this.stopTour();
         this.select(found);
         this.panelTarget.focus();
         // Mobile : la légende ouverte masquerait le cerveau
-        if (window.matchMedia('(max-width: 576px)').matches) {
-            const details = target.closest('details');
-            if (details) details.open = false;
-        }
+        if (petitEcran()) this.legendMenuTarget.open = false;
     }
 
-    select(target) {
+    /** duration (secondes) : vol lent et en arc (visite guidée) ; sans : vol direct */
+    select(target, duration = 0) {
         this.selected = target;
         this.ambiance?.ping(target.userData.kind);
         this.controls.autoRotate = false;
@@ -412,22 +512,41 @@ export default class extends Controller {
         // un souvenir visé de l'intérieur se regarde depuis le centre (on reste dedans)
         const position = target.userData.anchor.getWorldPosition(new THREE.Vector3());
         const fromInside = this.inside && target.userData.kind === 'souvenir';
+        // Visite : on regarde chaque neurone depuis l'extérieur du cerveau (centre → neurone)
         const direction = fromInside
             ? position.clone().negate().normalize()
-            : this.camera.position.clone().sub(this.controls.target).normalize();
+            : duration
+                ? position.clone().normalize()
+                : this.camera.position.clone().sub(this.controls.target).normalize();
         this.flight = {
             target: position,
             camera: position.clone().addScaledVector(direction, fromInside ? DIVE.souvenirDistance : FOCUS_DISTANCE[target.userData.kind]),
         };
+        if (duration) {
+            Object.assign(this.flight, {
+                duration,
+                t: 0,
+                from: { target: this.controls.target.clone(), camera: this.camera.position.clone() },
+                lift: TOUR_LIFT * this.camera.position.distanceTo(this.flight.camera),
+            });
+        }
 
         if (target.userData.kind === 'neuron') this.fillNeuronPanel(target);
         else if (target.userData.kind === 'souvenir') this.fillSouvenirPanel(target.userData.data);
         else this.fillNebulaPanel(target.userData.data);
         this.panelTarget.hidden = false;
+        // Le nouveau contenu apparaît en fondu plutôt que de remplacer l'ancien d'un coup
+        if (!this.reducedMotion) {
+            this.panelTarget.animate(
+                [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }],
+                { duration: duration ? 900 : 350, easing: 'ease-out' },
+            );
+        }
         history.replaceState(null, '', `#${encodeURIComponent(target.userData.data.nom)}`);
     }
 
     close() {
+        if (this.ship) this.stopExplore();
         this.stopTour();
         if (!this.selected) return;
         this.deselect();
@@ -455,6 +574,7 @@ export default class extends Controller {
 
     /** Bouton « Plonger » / « Ressortir » */
     dive() {
+        if (this.ship) this.stopExplore();
         const goingIn = !this.inside;
         this.stopTour();
         this.deselect();
@@ -467,7 +587,157 @@ export default class extends Controller {
         this.inside = inside;
         this.diveButtonTarget.textContent = inside ? this.textsValue.surface : this.textsValue.dive;
         this.diveButtonTarget.setAttribute('aria-pressed', String(inside));
-        this.hintTarget.textContent = inside ? this.textsValue.hintInside : this.textsValue.hintOutside;
+        if (!this.ship) this.hintTarget.textContent = inside ? this.textsValue.hintInside : this.textsValue.hintOutside;
+    }
+
+    // ------------------------------------------------
+    // Mode exploration : piloter un vaisseau
+    // ------------------------------------------------
+
+    /** Bouton « Explorer en vaisseau » / « Quitter l'exploration » */
+    toggleExplore() {
+        if (this.ship) this.stopExplore();
+        else this.startExplore();
+    }
+
+    startExplore() {
+        this.stopTour();
+        this.deselect();
+        this.flight = null;
+        this.controls.enabled = false;
+        this.controls.autoRotate = false;
+        // Sinon Espace « clique » sur le bouton et quitte aussitôt
+        document.activeElement?.blur();
+
+        // Posé devant la caméra, dans son orientation
+        this.ship = createShip(this.texture);
+        // Cap et tangage gardés à part (pas de roulis qui s'accumule)
+        const { x: pitch, y: yaw } = new THREE.Euler().setFromQuaternion(this.camera.quaternion, 'YXZ');
+        this.shipFlight = { speed: 0, turn: 0, climb: 0, yaw, pitch, look: null };
+        this.steer = null;
+        this.ship.rotation.set(pitch, yaw, 0, 'YXZ');
+        this.ship.position.copy(this.camera.position);
+        this.ship.translateZ(-0.6);
+        this.baseFov = this.camera.fov;
+        this.stars = createStarfield(this.texture);
+        this.scene.add(this.ship, this.stars);
+        exploreFade.value = SHIP.fadeNear;
+        this.keys = new Set();
+
+        this.exploreButtonTarget.textContent = this.textsValue.stopExplore;
+        this.exploreButtonTarget.setAttribute('aria-pressed', 'true');
+        this.hintTarget.textContent = window.matchMedia('(pointer: coarse)').matches ? this.textsValue.hintExploreTouch : this.textsValue.hintExplore;
+    }
+
+    stopExplore() {
+        const position = this.ship.position.clone();
+        this.scene.remove(this.ship, this.stars);
+        this.stars.geometry.dispose();
+        this.stars.material.dispose();
+        this.boosting = false;
+        this.touches?.clear();
+        exploreFade.value = 0;
+        this.ship.traverse((child) => {
+            child.geometry?.dispose();
+            child.material?.dispose(); // pas sa texture : c'est celle de toute la scène
+        });
+        this.ship = null;
+        this.keys.clear();
+        this.resize(); // champ de vision normal
+
+        // On reprend l'orbite autour du centre en partant de là où était le vaisseau
+        this.controls.enabled = true;
+        this.controls.target.copy(position);
+        this.controls.autoRotate = !this.selected && !this.reducedMotion;
+        this.flyHome(this.inside ? DIVE.cameraDistance : this.homeDistance);
+
+        this.exploreButtonTarget.textContent = this.textsValue.explore;
+        this.exploreButtonTarget.setAttribute('aria-pressed', 'false');
+        this.hintTarget.textContent = this.inside ? this.textsValue.hintInside : this.textsValue.hintOutside;
+    }
+
+    /** Souris : écart du pointeur au centre de la scène, de -1 à 1, sans la zone morte */
+    steerTowards(event) {
+        const rect = this.renderer.domElement.getBoundingClientRect();
+        this.steer = {
+            x: deadZone(((event.clientX - rect.left) / rect.width) * 2 - 1),
+            y: deadZone(-(((event.clientY - rect.top) / rect.height) * 2 - 1)),
+        };
+    }
+
+    // Tactile : le premier doigt est une manette (posé = avance, glissé depuis son point de départ = dirige) ;
+    // un deuxième doigt posé = boost
+
+    touchDown(event) {
+        (this.touches ??= new Map()).set(event.pointerId, [event.clientX, event.clientY]);
+        this.boosting = this.touches.size > 1;
+    }
+
+    touchMove(event) {
+        const [first] = this.touches?.keys() ?? [];
+        if (event.pointerId !== first) return;
+        const [x0, y0] = this.touches.get(first);
+        const range = (v) => deadZone(THREE.MathUtils.clamp(v / SHIP.touchRange, -1, 1));
+        this.steer = { x: range(event.clientX - x0), y: range(y0 - event.clientY) };
+    }
+
+    touchUp(event) {
+        if (!this.touches?.delete(event.pointerId)) return;
+        this.boosting = this.touches.size > 1;
+        if (this.touches.size === 0) this.steer = null;
+    }
+
+    updateShip(delta) {
+        const axis = (plus, minus) => (plus.some((c) => this.keys.has(c)) ? 1 : 0) - (minus.some((c) => this.keys.has(c)) ? 1 : 0);
+        const clamp = (v) => THREE.MathUtils.clamp(v, -1, 1);
+        const thrust = this.boosting || this.touches?.size ? 1 : axis(['ArrowUp', 'KeyW'], ['ArrowDown', 'KeyS']);
+        // Clavier et souris s'additionnent
+        const turn = clamp(axis(['ArrowLeft', 'KeyA'], ['ArrowRight', 'KeyD']) - (this.steer?.x ?? 0));
+        const climb = clamp(axis(['Space'], ['ShiftLeft', 'ShiftRight']) + (this.steer?.y ?? 0));
+        const smooth = (rate) => (this.reducedMotion ? 1 : 1 - Math.exp(-rate * delta));
+        const f = this.shipFlight;
+
+        // Lent près du cerveau (pour viser), rapide au large (pour rejoindre les nébuleuses)
+        const cruise = THREE.MathUtils.lerp(SHIP.slow, SHIP.fast, THREE.MathUtils.smoothstep(this.ship.position.length(), SHIP.near, SHIP.far));
+        const max = this.boosting ? cruise * SHIP.boost : cruise;
+        // Inertie courte : on part et on s'arrête vite ; freiner (↓) est encore plus franc, la marche arrière lente
+        const wanted = thrust > 0 ? max : thrust < 0 ? -0.4 * max : 0;
+        f.speed += (wanted - f.speed) * smooth(thrust < 0 ? 6 : thrust > 0 ? 2 : 3);
+        f.turn += (turn - f.turn) * smooth(4);
+        f.climb += (climb - f.climb) * smooth(4);
+        f.yaw += SHIP.turn * f.turn * delta;
+        f.pitch = THREE.MathUtils.clamp(f.pitch + SHIP.pitch * f.climb * delta, -SHIP.maxPitch, SHIP.maxPitch);
+        this.ship.rotation.set(f.pitch, f.yaw, 0, 'YXZ');
+        const from = this.ship.position.clone();
+        this.ship.translateZ(-f.speed * delta);
+        // shortcut: seule collision = le bord de la zone de vol ; on traverse les neurones (#286)
+        this.ship.position.clampLength(0, SHIP.maxDistance);
+        // Puissance du réacteur : 1 en croisière, jusqu'à 3 en boost
+        this.ship.userData.update(Math.max(f.speed, 0) / cruise, f.turn, f.climb, this.reducedMotion);
+
+        // Caméra derrière et au-dessus ; son regard rejoint en douceur un point devant le vaisseau
+        this.camera.position.lerp(this.ship.localToWorld(new THREE.Vector3(0, 0.14, 0.5)), smooth(5));
+        const look = this.ship.localToWorld(new THREE.Vector3(0, 0, -0.4));
+        f.look = f.look ? f.look.lerp(look, smooth(8)) : look;
+        this.camera.lookAt(f.look);
+        // Champ un peu élargi à grande vitesse
+        if (!this.reducedMotion) {
+            this.camera.fov = this.baseFov + Math.min(6 * Math.abs(f.speed) / SHIP.fast, 18);
+            this.camera.updateProjectionMatrix();
+        }
+
+        // Toucher un neurone, un souvenir ou une nébuleuse ouvre son panneau (projets liés, parcours…)
+        // Sur tout le trajet de l'image : en boost, on avance de plus que la distance de ramassage
+        const path = new THREE.Line3(from, this.ship.position);
+        const at = new THREE.Vector3();
+        const touched = this.clickables.find((t) => {
+            t.userData.anchor.getWorldPosition(at);
+            return path.closestPointToPoint(at, true, new THREE.Vector3()).distanceTo(at) < SHIP.pickup[t.userData.kind];
+        });
+        if (touched && touched !== this.selected) {
+            this.select(touched);
+            this.flight = null; // la caméra reste derrière le vaisseau
+        }
     }
 
     fillNeuronPanel(halo) {
@@ -525,8 +795,18 @@ export default class extends Controller {
 }
 
 /** Texte comparable : sans accents ni majuscules (« Médecine » → « medecine »). */
+/** Même seuil que le CSS mobile (_cerveau.css) */
+function petitEcran() {
+    return window.matchMedia('(max-width: 576px)').matches;
+}
+
 function normalize(text) {
     return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+}
+
+/** Pilotage (souris, doigt) : valeur de -1 à 1 sans la zone morte du centre, puis remise de 0 à 1. */
+function deadZone(v) {
+    return Math.sign(v) * Math.max(Math.abs(v) - SHIP.deadZone, 0) / (1 - SHIP.deadZone);
 }
 
 /** Petit utilitaire DOM : element('a', { href, textContent }, ...enfants). */

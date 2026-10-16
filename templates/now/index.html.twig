@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'En ce moment'|trans }} · {{ 'Univers de Nico'|trans }}{% endblock %}
+
+{% block description %}{{ 'Ce que je fais en ce moment : ce que je construis, ce que j’apprends.'|trans }}{% endblock %}
+
+{% block body %}
+<article class="projet container py-5">
+  <header class="projet-entete">
+    <p class="projet-groupe">{{ 'Mis à jour le'|trans }} <time datetime="{{ maintenant.majLe|date('Y-m-d') }}">{{ maintenant.majLe|format_date('long', locale: app.request.locale) }}</time></p>
+    <h1 class="gradient fw-bold">{{ 'En ce moment'|trans }}</h1>
+    <p class="projet-chapo">{{ 'Ce que je fais en ce moment : ce que je construis, ce que j’apprends.'|trans }}</p>
+  </header>
+
+  <div class="projet-texte article-texte">
+    {{ maintenant|loc('contenu')|markdown }}
+  </div>
+</article>
+{% endblock %}

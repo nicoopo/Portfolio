@@ -1,0 +1,56 @@
+{# Lettre de motivation d'une candidature (CandidatureCrudController::lettre), en PDF (Dompdf). Le texte se modifie ici. #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Lettre de motivation — {{ candidature.entreprise }}</title>
+    <style>
+        @page { margin: 2.2cm 2.4cm; }
+        body { font-family: 'DejaVu Sans', sans-serif; font-size: 10.5pt; line-height: 1.55; color: #1a1a1a; }
+        .expediteur { margin-bottom: 1.4cm; }
+        .expediteur strong { font-size: 12pt; }
+        .date { text-align: right; margin-bottom: 1cm; }
+        .objet { font-weight: bold; margin-bottom: 0.8cm; }
+        p { margin: 0 0 0.45cm; text-align: justify; }
+        a { color: #2563eb; }
+        .signature { margin-top: 0.8cm; }
+    </style>
+</head>
+<body>
+    {# « d'Acme », « de Google » (h exclu : aspiré ou non, impossible à deviner) #}
+    {% set de = candidature.entreprise matches '/^[AEIOUYÀÂÉÈÊÎÔaeiouyàâéèêîô]/u' ? 'd’' : 'de ' %}
+    <div class="expediteur">
+        <strong>Nicolas CATALUNA</strong><br>
+        {{ profil.telephone }}<br>
+        {{ profil.email }}<br>
+        Paris
+    </div>
+
+    <p class="date">Paris, le {{ 'now'|format_date('long', locale: 'fr') }}</p>
+
+    <p class="objet">Objet : Candidature — {{ candidature.poste }} (alternance)</p>
+
+    <p>Madame, Monsieur,</p>
+
+    <p>Actuellement à la recherche d'une alternance pour mon Bachelor 2025/2026 dans le domaine du développement web,
+    je souhaite vous proposer ma candidature pour le poste de {{ candidature.poste }} au sein {{ de }}{{ candidature.entreprise }}.</p>
+
+    <p>Passionné par le développement et plus particulièrement par l'écosystème PHP / Symfony, j'ai eu l'opportunité de
+    participer à plusieurs projets concrets, notamment la migration de sites web d'un noyau PHP vers Symfony dans le domaine
+    de l'encaissement. Ces expériences m'ont permis de renforcer mes compétences en conception, développement et optimisation
+    d'applications web, tout en respectant les bonnes pratiques et les besoins métiers.</p>
+
+    <p>Autonome, rigoureux et curieux, je m'adapte facilement aux environnements techniques et humains. Intégrer l'équipe
+    {{ de }}{{ candidature.entreprise }} serait pour moi l'occasion de mettre mes compétences au service de vos projets tout en
+    poursuivant mon apprentissage dans un cadre professionnel stimulant.</p>
+
+    {% if lien %}
+    <p>J'ai préparé une page de mon portfolio à votre intention : <a href="{{ lien }}">{{ lien }}</a></p>
+    {% endif %}
+
+    <p>Je reste à votre disposition pour un entretien, afin d'échanger sur la manière dont je pourrais contribuer à vos
+    projets et à vos objectifs.</p>
+
+    <p class="signature">Cordialement,<br>Nicolas CATALUNA</p>
+</body>
+</html>

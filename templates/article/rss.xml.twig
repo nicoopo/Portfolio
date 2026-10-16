@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+    <title>{{ 'Articles'|trans }} · {{ 'Univers de Nico'|trans }}</title>
+    <link>{{ url('app_articles') }}</link>
+    <description>{{ 'Articles techniques : retours d’expérience, ce que j’apprends en cours, coulisses du portfolio.'|trans }}</description>
+    <language>{{ app.request.locale }}</language>
+    <atom:link href="{{ url('app_articles_rss') }}" rel="self" type="application/rss+xml"/>
+{% for article in articles %}
+    <item>
+        <title>{{ article|loc('titre') }}</title>
+        <link>{{ url('app_article', {slug: article.slug}) }}</link>
+        <guid>{{ url('app_article', {slug: article.slug}) }}</guid>
+        <pubDate>{{ article.publieLe|date('r') }}</pubDate>
+        <description>{{ article|loc('resume') }}</description>
+    </item>
+{% endfor %}
+</channel>
+</rss>

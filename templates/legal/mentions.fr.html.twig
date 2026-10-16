@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mentions légales - Nicolas Cataluna{% endblock %}
+
+{% block description %}Mentions légales du site nicolascataluna.fr : éditeur, directeur de la publication et hébergement.{% endblock %}
+
+{% block body %}
+<section class="legal-section">
+    <article class="legal-container">
+        <h1>Mentions légales</h1>
+        <p class="legal-maj">Dernière mise à jour : 4 octobre 2026</p>
+
+        <h2>Éditeur du site</h2>
+        <p>
+            Le site <strong>nicolascataluna.fr</strong> est édité par <strong>Nicolas Cataluna</strong>, à titre personnel et non professionnel.<br>
+            Contact : <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>
+        </p>
+
+        <h2>Directeur de la publication</h2>
+        <p>Nicolas Cataluna.</p>
+
+        <h2>Hébergement</h2>
+        <p>
+            Le site est <strong>auto-hébergé</strong> par son éditeur, sur un serveur personnel situé en France.<br>
+            Accès à Internet fourni par Free SAS, 16 rue de la Ville-l’Évêque, 75008 Paris (<a href="https://www.free.fr">www.free.fr</a>).
+        </p>
+
+        <h2>Propriété intellectuelle</h2>
+        <p>
+            Les textes, images et le code propres à ce site appartiennent à Nicolas Cataluna, sauf mention contraire.
+            Le code source est publié sur <a href="https://github.com/nicoopo/Portfolio">GitHub</a>, sous la licence indiquée dans le dépôt.
+        </p>
+
+        <h2>Données personnelles</h2>
+        <p>
+            Les données envoyées par le formulaire de contact et les traces techniques du site sont décrites dans la
+            <a href="{{ path('app_confidentialite') }}">politique de confidentialité</a>.
+        </p>
+    </article>
+</section>
+{% endblock %}

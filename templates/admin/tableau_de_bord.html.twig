@@ -2,6 +2,9 @@
 
 {% block content_title %}Tableau de bord{% endblock %}
 
+{# Chart.js chargé sur cette page seulement, jamais sur le site public #}
+{% block importmap %}{{ importmap('admin_graphiques', {nonce: csp_nonce('script')}) }}{% endblock %}
+
 {% block page_actions %}
     <a class="btn btn-secondary" href="{{ path('app_cerveau') }}" target="_blank"><i class="fa fa-arrow-up-right-from-square"></i> Voir le site</a>
     <a class="btn btn-secondary" href="{{ path('admin_projet_new') }}"><i class="fa fa-plus"></i> Ajouter un projet</a>
@@ -15,6 +18,7 @@
             {valeur: demandes_mois, libelle: 'demande(s) de contact ce mois-ci', detail: demandes_total ~ ' au total', lien: path('admin_demande_contact_index'), alerte: false},
             {valeur: demandes_echec, libelle: 'e-mail(s) de contact en échec', detail: 'message conservé, à lire dans l’admin', lien: path('admin_demande_contact_index', {filters: {statut: {comparison: '=', value: 'echec'}}}), alerte: demandes_echec > 0},
             {valeur: connexions_refusees, libelle: 'connexion(s) refusée(s) en 7 jours', detail: 'mauvais mot de passe ou tentatives répétées', lien: path('admin_journal_index', {filters: {type: {comparison: '=', value: 'connexion_refusee'}}}), alerte: connexions_refusees > 0},
+            {valeur: a_relancer, libelle: 'candidature(s) à relancer', detail: 'sans réponse depuis plus d’une semaine', lien: path('admin_candidature_index'), alerte: a_relancer > 0},
             {valeur: nb_competences ~ ' / ' ~ nb_projets, libelle: 'compétences / projets', detail: 'contenu du cerveau', lien: path('admin_competence_index'), alerte: false},
         ] %}
         {% for chiffre in chiffres %}
@@ -26,6 +30,84 @@
                     <small class="text-muted">{{ chiffre.detail }}</small>
                 </div>
             </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {# Candidatures d'alternance : taux en % du total (ou des candidatures avec lien recruteur) #}
+    {% if candidatures.total > 0 %}
+    {% import _self as outils %}
+    <h2 class="h5">Candidatures</h2>
+    <div class="row g-3 mb-4">
+        {% for chiffre in [
+            {valeur: candidatures.total, libelle: 'candidature(s) envoyée(s)'},
+            {valeur: outils.pourcent(candidatures.reponses, candidatures.total), libelle: 'de réponses', detail: candidatures.reponses ~ ' réponse(s)'},
+            {valeur: outils.pourcent(candidatures.entretiens, candidatures.total), libelle: 'd’entretiens', detail: candidatures.entretiens ~ ' entretien(s)'},
+            {valeur: candidatures.delai is null ? '—' : candidatures.delai ~ ' j', libelle: 'délai moyen de réponse', detail: 'depuis l’envoi'},
+            {valeur: outils.pourcent(candidatures.liens_ouverts, candidatures.avec_lien), libelle: 'liens recruteur ouverts', detail: candidatures.liens_ouverts ~ ' sur ' ~ candidatures.avec_lien ~ ' envoyé(s)'},
+        ] %}
+        <div class="col-sm-6 col-xl">
+            <div class="card h-100"><div class="card-body">
+                <div class="fs-3 fw-bold">{{ chiffre.valeur }}</div>
+                <div>{{ chiffre.libelle }}</div>
+                {% if chiffre.detail is defined %}<small class="text-muted">{{ chiffre.detail }}</small>{% endif %}
+            </div></div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# Graphiques (assets/admin_graphiques.js) ; les chiffres exacts dans un tableau, pour les lecteurs d'écran et les couleurs peu contrastées #}
+    <div class="row g-4 mb-4">
+        {% for graphique in [
+            {titre: 'Activité des 30 derniers jours', colonne: 'Jour', donnees: activite},
+            {titre: 'Demandes de contact sur 12 mois', colonne: 'Mois', donnees: contacts_par_mois},
+            {titre: 'Pages vues sur 30 jours (sans robots ni administrateur)', colonne: 'Jour', donnees: visites},
+        ] %}
+        <div class="col-lg-6">
+            <h2 class="h5">{{ graphique.titre }}</h2>
+            <canvas data-graphique="{{ graphique.donnees|json_encode }}" role="img" aria-label="{{ graphique.titre }} (chiffres dans le tableau ci-dessous)"></canvas>
+            <details class="mt-2">
+                <summary class="text-muted">Voir les chiffres</summary>
+                <table class="table table-sm datagrid">
+                    <thead>
+                        <tr>
+                            <th scope="col">{{ graphique.colonne }}</th>
+                            {% for serie in graphique.donnees.series %}<th scope="col">{{ serie.label }}</th>{% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for label in graphique.donnees.labels %}
+                        {% set i = loop.index0 %}
+                        <tr>
+                            <th scope="row">{{ label }}</th>
+                            {% for serie in graphique.donnees.series %}<td>{{ serie.data[i] }}</td>{% endfor %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </details>
+        </div>
+        {% endfor %}
+    </div>
+
+    {# Statistiques de visite : sans cookie ni IP, des totaux par page, provenance et langue #}
+    <div class="row g-4 mb-4">
+        {% for titre, classement in visites_classements %}
+        <div class="col-lg-4">
+            <h2 class="h5">{{ titre }} (30 jours)</h2>
+            {% if classement is empty %}
+                <p class="text-muted">Pas encore de visite comptée.</p>
+            {% else %}
+            <table class="table table-sm datagrid">
+                <thead class="visually-hidden"><tr><th scope="col">{{ titre }}</th><th scope="col">Pages vues</th></tr></thead>
+                <tbody>
+                {% for valeur, total in classement %}
+                    <tr><td>{{ valeur }}</td><td class="text-end">{{ total }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
@@ -78,3 +160,5 @@
         </div>
     </div>
 {% endblock %}
+
+{% macro pourcent(n, sur) %}{{ sur > 0 ? (100 * n / sur)|round ~ ' %' : '—' }}{% endmacro %}

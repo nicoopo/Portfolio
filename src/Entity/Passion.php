@@ -15,6 +15,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity('nom')]
 class Passion
 {
+    use Traduisible;
+
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
     private ?int $id = null;
 
@@ -35,14 +37,6 @@ class Passion
     #[ORM\Column]
     private int $position;
 
-    // Traductions anglaises (facultatives : vides, le français s'affiche ; voir App\Twig\Traduction)
-    #[Assert\Length(max: 50)]
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $nomEn = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $descriptionEn = null;
-
     public function getId(): ?int { return $this->id; }
     public function getNom(): string { return $this->nom; }
     public function getCouleur(): string { return $this->couleur; }
@@ -53,11 +47,6 @@ class Passion
     public function setCouleur(?string $couleur): static { $this->couleur = $couleur ?? ''; return $this; }
     public function setDescription(?string $description): static { $this->description = $description ?? ''; return $this; }
     public function setPosition(?int $position): static { $this->position = $position ?? 0; return $this; }
-
-    public function getNomEn(): ?string { return $this->nomEn; }
-    public function setNomEn(?string $nomEn): static { $this->nomEn = $nomEn ?: null; return $this; }
-    public function getDescriptionEn(): ?string { return $this->descriptionEn; }
-    public function setDescriptionEn(?string $descriptionEn): static { $this->descriptionEn = $descriptionEn ?: null; return $this; }
 
     public function __toString(): string { return $this->nom; }
 }

@@ -8,10 +8,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libicu-dev \
         libpq-dev \
         libzip-dev \
+        libjpeg62-turbo-dev \
+        libpng-dev \
+        libwebp-dev \
+        libfreetype-dev \
         zip \
         unzip \
         git \
+    && docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype \
     && docker-php-ext-install \
+        gd \
         intl \
         pdo_pgsql \
         zip \
