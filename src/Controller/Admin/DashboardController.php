@@ -2,15 +2,14 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Competence;
 use App\Entity\DemandeContact;
 use App\Entity\Journal;
 use App\Repository\CandidatureRepository;
+use App\Repository\CompetenceRepository;
 use App\Repository\DemandeContactRepository;
 use App\Repository\JournalRepository;
 use App\Repository\ProjetRepository;
 use App\Repository\VisiteJourRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -24,7 +23,7 @@ final class DashboardController extends AbstractDashboardController
     public function __construct(
         private readonly DemandeContactRepository $demandes,
         private readonly JournalRepository $journal,
-        private readonly EntityManagerInterface $entityManager,
+        private readonly CompetenceRepository $competences,
         private readonly ProjetRepository $projets,
         private readonly CandidatureRepository $candidatures,
         private readonly VisiteJourRepository $visites,
@@ -41,7 +40,7 @@ final class DashboardController extends AbstractDashboardController
             'demandes_mois' => $this->demandes->compterDepuis($debutDuMois),
             'demandes_echec' => $this->demandes->count(['statut' => DemandeContact::STATUT_ECHEC]),
             'connexions_refusees' => $this->journal->compterDepuis(Journal::CONNEXION_REFUSEE, new \DateTimeImmutable('-7 days')),
-            'nb_competences' => $this->entityManager->getRepository(Competence::class)->count([]),
+            'nb_competences' => $this->competences->count([]),
             'nb_projets' => $this->projets->count([]),
             'a_relancer' => $this->candidatures->compterARelancer(),
             'candidatures' => $this->candidatures->resume(),

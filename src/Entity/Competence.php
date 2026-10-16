@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Repository\CompetenceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -11,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Compétence : une carte sur la page Compétences, un neurone dans le cerveau 3D.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: CompetenceRepository::class)]
 #[UniqueEntity('nom')]
 class Competence
 {

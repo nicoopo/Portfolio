@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Journal;
 use App\Entity\MessageLivreOr;
 use App\Form\LivreOrType;
+use App\Repository\MessageLivreOrRepository;
 use App\Security\BlocIp;
 use App\Service\Journaliste;
 use App\Service\Notificateur;
@@ -28,6 +29,7 @@ final class LivreOrController extends AbstractController
     public function __invoke(
         Request $request,
         EntityManagerInterface $entityManager,
+        MessageLivreOrRepository $messages,
         TranslatorInterface $translator,
         Journaliste $journaliste,
         RateLimiterFactoryInterface $livreOrLimiter,
@@ -61,7 +63,7 @@ final class LivreOrController extends AbstractController
 
         return $this->render('livre_or/index.html.twig', [
             'form' => $form,
-            'messages' => $entityManager->getRepository(MessageLivreOr::class)->findBy(['approuve' => true], ['creeLe' => 'DESC']),
+            'messages' => $messages->findBy(['approuve' => true], ['creeLe' => 'DESC']),
         ]);
     }
 

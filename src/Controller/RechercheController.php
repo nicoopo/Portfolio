@@ -2,11 +2,10 @@
 
 namespace App\Controller;
 
-use App\Entity\Competence;
 use App\Repository\ArticleRepository;
+use App\Repository\CompetenceRepository;
 use App\Repository\ProjetRepository;
 use App\Twig\Traduction;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
@@ -26,13 +25,13 @@ final class RechercheController extends AbstractController
     ];
 
     #[Route('/recherche.json', name: 'app_recherche')]
-    public function __invoke(TranslatorInterface $translator, Traduction $traduction, EntityManagerInterface $entityManager, ProjetRepository $projets, ArticleRepository $articles): JsonResponse
+    public function __invoke(TranslatorInterface $translator, Traduction $traduction, CompetenceRepository $competences, ProjetRepository $projets, ArticleRepository $articles): JsonResponse
     {
         $entrees = [];
         foreach (self::PAGES as $route => $libelle) {
             $entrees[] = ['type' => 'page', 'titre' => $translator->trans($libelle), 'url' => $this->generateUrl($route)];
         }
-        foreach ($entityManager->getRepository(Competence::class)->findBy([], ['position' => 'ASC']) as $competence) {
+        foreach ($competences->findBy([], ['position' => 'ASC']) as $competence) {
             $nom = $traduction->loc($competence, 'nom');
             $entrees[] = ['type' => 'competence', 'titre' => $nom, 'detail' => $traduction->loc($competence->getCategorie(), 'nom'),
                 'url' => $this->generateUrl('app_cerveau').'#'.rawurlencode($nom)];
