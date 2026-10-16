@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Repository\OutilsRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -10,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Page /uses : matériel, logiciels et stack (une seule ligne, modifiée dans l'administration, comme Maintenant).
  * La date affichée suit chaque enregistrement.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: OutilsRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 class Outils
 {
