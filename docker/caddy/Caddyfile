@@ -14,6 +14,11 @@ nicolascataluna.fr {
 		-X-Powered-By
 	}
 
+	# PHP2Shell (CVE-2026-109618/109619, 21/10/2026) : PHP < 8.5.12 exécutable à distance via une requête
+	# multipart/form-data, exploité dans la nature. À RETIRER dès la prod en 8.5.12 (bloque aussi les uploads admin).
+	@multipart header Content-Type multipart/form-data*
+	respond @multipart 403
+
 	reverse_proxy 127.0.0.1:8081
 }
 
