@@ -7,7 +7,7 @@ import { Controller } from '@hotwired/stimulus';
  * Recherche sans casse ni accents, sur des mots entiers ; les mots-clés de deux lettres (« Go », « JS ») respectent
  * la casse (telle qu'écrite ou tout en majuscules), sinon « go » ou « ts » se trouveraient partout. Tout reste dans le navigateur.
  */
-export default class extends Controller {
+export default class ComparateurController extends Controller {
     static targets = ['offre', 'resume', 'surligne', 'resultats'];
     static values = { competences: Array, textes: Object };
 

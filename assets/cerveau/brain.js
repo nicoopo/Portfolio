@@ -113,7 +113,7 @@ function hemisphereRadius(dx, dy, dz) {
     // Dessous du lobe frontal aplati (il repose sur les orbites)
     const down = 0.55 * (dz > 0 ? 1 - 0.35 * dz : 1);
     const rx = width, ry = dy < 0 ? down : 0.78, rz = LENGTH;
-    return 1 / Math.sqrt((dx / rx) ** 2 + (dy / ry) ** 2 + (dz / rz) ** 2);
+    return 1 / Math.hypot(dx / rx, dy / ry, dz / rz);
 }
 
 /** Distance, depuis o dans la direction u, de la sortie de l'ellipsoïde (center, radius) ; 0 si raté. */

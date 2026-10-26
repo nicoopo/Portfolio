@@ -29,7 +29,7 @@ const CLICK_TOLERANCE_PX = 5; // au-delà, c'est un glisser (rotation de la vue)
  * le vide pour revenir) ; clic sur une lune : page du projet. Survoler une compétence de la liste allume sa planète.
  * Sans WebGL, la section reste cachée : la liste en dessous dit tout.
  */
-export default class extends Controller {
+export default class SystemeController extends Controller {
     static targets = ['scene', 'label', 'card', 'category', 'name', 'projects', 'brain'];
     static values = { categories: Array, texts: Object };
 

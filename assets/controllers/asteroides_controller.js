@@ -10,7 +10,7 @@ const RAYON_VAISSEAU = 12;
  * sur le terrain) ; les astéroïdes tombent de plus en plus vite ; le score est le temps tenu, en dixièmes de seconde.
  * Meilleur score gardé dans le navigateur. Lancé seulement par le bouton (rien ne bouge tout seul).
  */
-export default class extends Controller {
+export default class AsteroidesController extends Controller {
     static targets = ['canvas', 'jouer', 'score', 'record'];
     static values = { textes: Object };
 

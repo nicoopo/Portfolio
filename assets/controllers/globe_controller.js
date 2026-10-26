@@ -25,7 +25,7 @@ function surface(lat, lon, r = 1) {
  * arrivée allume une onde. Un point bleu par lieu d'après l'IP, quand le serveur l'a trouvé (plus précis, mais
  * souvent la ville de l'opérateur). Survol : ville du fuseau et nombre d'arrivées. Décor : la liste sous le globe dit tout.
  */
-export default class extends Controller {
+export default class GlobeController extends Controller {
     static targets = ['scene', 'label', 'total'];
     static values = { url: String };
 

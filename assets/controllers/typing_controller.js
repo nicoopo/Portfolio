@@ -4,7 +4,7 @@ import { Controller } from '@hotwired/stimulus';
  * Effet machine à écrire qui fait défiler des mots.
  * <span data-controller="typing" data-typing-words-value='["A", "B"]'></span>
  */
-export default class extends Controller {
+export default class TypingController extends Controller {
     static values = { words: Array };
 
     connect() {

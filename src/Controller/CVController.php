@@ -63,9 +63,10 @@ final class CVController extends AbstractController
         $dompdf->render();
 
         // Ex. CV_Nicolas_Cataluna_clair.pdf, CV_Nicolas_Cataluna_en_light.pdf, CV_Nicolas_Cataluna_es_dark.pdf
-        $filename = 'fr' === $request->getLocale()
-            ? 'CV_Nicolas_Cataluna_'.('dark' === $theme ? 'sombre' : 'clair').'.pdf'
-            : 'CV_Nicolas_Cataluna_'.$request->getLocale().'_'.$theme.'.pdf';
+        $filename = 'CV_Nicolas_Cataluna_'.$request->getLocale().'_'.$theme.'.pdf';
+        if ('fr' === $request->getLocale()) {
+            $filename = 'CV_Nicolas_Cataluna_'.('dark' === $theme ? 'sombre' : 'clair').'.pdf';
+        }
 
         return new Response($dompdf->output(), Response::HTTP_OK, [
             'Content-Type' => 'application/pdf',

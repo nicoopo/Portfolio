@@ -47,7 +47,7 @@ const SHIP_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'K
  * La 3D elle-même est dans assets/cerveau/ (cerveau, neurones, synapses, nébuleuses, souvenirs).
  * Chargé uniquement sur les pages qui l'utilisent (lazy).
  */
-export default class extends Controller {
+export default class BrainController extends Controller {
     static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search', 'legendMenu', 'shareButton', 'soundButton', 'diveButton', 'exploreButton', 'hint'];
     // texts : libellés traduits par le template (home/cerveau.html.twig)
     static values = { neurons: Array, passions: Array, souvenirs: Array, texts: Object };
