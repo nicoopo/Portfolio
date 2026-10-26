@@ -35,6 +35,7 @@
 }
 
 .pdf-content iframe {
+    border: 0; /* remplace l'attribut HTML frameborder, obsolète */
     border-radius: 8px;
     background: white;
     width: 100%;
