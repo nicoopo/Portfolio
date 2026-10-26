@@ -258,7 +258,8 @@ export default class BrainController extends Controller {
     }
 
     listen(el, type, fn) {
-        (this.listeners ??= []).push([el, type, fn]);
+        this.listeners ??= [];
+        this.listeners.push([el, type, fn]);
         el.addEventListener(type, fn);
     }
 
@@ -289,6 +290,22 @@ export default class BrainController extends Controller {
         // Le corps sombre masquerait tout l'intérieur
         this.brain.userData.bodyMaterial.opacity = BODY_OPACITY * (1 - inside);
 
+        this.updateNeurons(time, selected, neighbors, inside);
+        this.updatePulses(time, selected);
+
+        this.synapses.update(time);
+        this.nebulae.update(time);
+        this.souvenirs.update(time);
+
+        // Vol de caméra vers l'élément sélectionné (ou retour à la vue d'ensemble)
+        if (this.ship) {
+            this.updateShip(delta);
+        } else if (this.flight) {
+            this.updateFlight(delta);
+        }
+    }
+
+    updateNeurons(time, selected, neighbors, inside) {
         for (const halo of this.neurons) {
             const active = halo === selected || halo === this.hovered;
             const pulse = 1 + 0.2 * Math.sin(time * 2.5 + halo.userData.phase);
@@ -301,7 +318,10 @@ export default class BrainController extends Controller {
             // Noyau plein : même transparent, il cacherait les souvenirs derrière lui (profondeur)
             halo.userData.anchor.material.visible = active || inside < 0.5;
         }
+    }
 
+    /** Pulsation des nébuleuses et des souvenirs, plus gros quand ils sont actifs. */
+    updatePulses(time, selected) {
         for (const core of this.nebulae.targets) {
             const active = core === selected || core === this.hovered;
             core.scale.setScalar((active ? 2.2 : 1.6) * (1 + 0.1 * Math.sin(time + core.userData.phase)));
@@ -311,15 +331,10 @@ export default class BrainController extends Controller {
             const active = halo === selected || halo === this.hovered;
             halo.scale.setScalar((active ? 0.32 : 0.2) * (1 + 0.15 * Math.sin(time * 1.5 + halo.userData.phase)));
         }
+    }
 
-        this.synapses.update(time);
-        this.nebulae.update(time);
-        this.souvenirs.update(time);
-
-        // Vol de caméra vers l'élément sélectionné (ou retour à la vue d'ensemble)
-        if (this.ship) {
-            this.updateShip(delta);
-        } else if (this.flight?.duration && !this.reducedMotion) {
+    updateFlight(delta) {
+        if (this.flight.duration && !this.reducedMotion) {
             // Vol de la visite : durée fixe, départ et arrivée en douceur, en arc par l'extérieur du cerveau
             const f = this.flight;
             f.t = Math.min(f.t + delta / f.duration, 1);
@@ -328,7 +343,7 @@ export default class BrainController extends Controller {
             this.camera.position.lerpVectors(f.from.camera, f.camera, e);
             this.camera.position.setLength(this.camera.position.length() + f.lift * Math.sin(Math.PI * e));
             if (f.t === 1) this.flight = null;
-        } else if (this.flight) {
+        } else {
             // Rapprochement selon le temps écoulé, pas par image : même durée à 30 ou 144 images/s
             const k = this.reducedMotion ? 1 : 1 - Math.exp(-FLIGHT_SPEED * delta);
             this.controls.target.lerp(this.flight.target, k);

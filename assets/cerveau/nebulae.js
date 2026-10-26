@@ -89,18 +89,7 @@ function createCloud(color, seed, texture) {
             * Math.exp(-((Math.max(r - 1, 0) / 0.5) ** 2)) // s'éteint au-delà de la coquille
             * (0.35 + 0.65 * smoothstep(0.2, 0.8, r)));      // cavité plus sombre
 
-    // Gaz : grain fin, et gaz lisse (points plus grands, très transparents, qui se fondent)
-    const grain = { positions: [], colors: [] };
-    const smooth = { positions: [], colors: [] };
-    while (grain.positions.length < GAS_POINTS * 3 || smooth.positions.length < SMOOTH_POINTS * 3) {
-        const p = sample();
-        if (Math.random() > p.filament) continue;
-        const layer = smooth.positions.length < SMOOTH_POINTS * 3 && Math.random() < 0.3 ? smooth : grain;
-        if (layer === grain && grain.positions.length >= GAS_POINTS * 3) continue;
-        gasColor(p);
-        layer.positions.push(p.x, p.y, p.z);
-        layer.colors.push(c.r, c.g, c.b);
-    }
+    const { grain, smooth } = sampleGas(sample, gasColor);
     cloud.add(
         new THREE.Points(pointsGeometry(smooth), fadingPointsMaterial(texture, 0.55, { opacity: 0.12 })),
         new THREE.Points(pointsGeometry(grain), fadingPointsMaterial(texture, 0.08, { opacity: 0.6 })),
@@ -136,6 +125,22 @@ function createCloud(color, seed, texture) {
     cloud.add(new THREE.Points(pointsGeometry(faint), fadingPointsMaterial(texture, 0.06)), brightStars);
 
     return cloud;
+}
+
+/** Gaz : grain fin, et gaz lisse (points plus grands, très transparents, qui se fondent). */
+function sampleGas(sample, gasColor) {
+    const grain = { positions: [], colors: [] };
+    const smooth = { positions: [], colors: [] };
+    while (grain.positions.length < GAS_POINTS * 3 || smooth.positions.length < SMOOTH_POINTS * 3) {
+        const p = sample();
+        if (Math.random() > p.filament) continue;
+        const layer = smooth.positions.length < SMOOTH_POINTS * 3 && Math.random() < 0.3 ? smooth : grain;
+        if (layer === grain && grain.positions.length >= GAS_POINTS * 3) continue;
+        const color = gasColor(p);
+        layer.positions.push(p.x, p.y, p.z);
+        layer.colors.push(color.r, color.g, color.b);
+    }
+    return { grain, smooth };
 }
 
 function pointsGeometry({ positions, colors }) {
