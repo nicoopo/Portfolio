@@ -4,7 +4,7 @@ import { Controller } from '@hotwired/stimulus';
  * CV en ligne : étoiles, bascule thème clair/sombre, téléchargement du PDF
  * généré par Symfony (CVController::download) dans le thème affiché.
  */
-export default class extends Controller {
+export default class CvController extends Controller {
     static targets = ['stars', 'download', 'iconSun', 'iconMoon', 'themeText'];
     // texts : libellés traduits par le template (cv/index.html.twig)
     static values = { downloadUrl: String, texts: Object };

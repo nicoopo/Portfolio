@@ -47,7 +47,7 @@ const SHIP_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'K
  * La 3D elle-même est dans assets/cerveau/ (cerveau, neurones, synapses, nébuleuses, souvenirs).
  * Chargé uniquement sur les pages qui l'utilisent (lazy).
  */
-export default class extends Controller {
+export default class BrainController extends Controller {
     static targets = ['canvas', 'fallback', 'tooltip', 'panel', 'panelCategory', 'panelTitle', 'panelBody', 'tourButton', 'fullscreenButton', 'search', 'legendMenu', 'shareButton', 'soundButton', 'diveButton', 'exploreButton', 'hint'];
     // texts : libellés traduits par le template (home/cerveau.html.twig)
     static values = { neurons: Array, passions: Array, souvenirs: Array, texts: Object };
@@ -513,11 +513,10 @@ export default class extends Controller {
         const position = target.userData.anchor.getWorldPosition(new THREE.Vector3());
         const fromInside = this.inside && target.userData.kind === 'souvenir';
         // Visite : on regarde chaque neurone depuis l'extérieur du cerveau (centre → neurone)
-        const direction = fromInside
-            ? position.clone().negate().normalize()
-            : duration
-                ? position.clone().normalize()
-                : this.camera.position.clone().sub(this.controls.target).normalize();
+        let direction;
+        if (fromInside) direction = position.clone().negate().normalize();
+        else if (duration) direction = position.clone().normalize();
+        else direction = this.camera.position.clone().sub(this.controls.target).normalize();
         this.flight = {
             target: position,
             camera: position.clone().addScaledVector(direction, fromInside ? DIVE.souvenirDistance : FOCUS_DISTANCE[target.userData.kind]),
@@ -669,7 +668,8 @@ export default class extends Controller {
     // un deuxième doigt posé = boost
 
     touchDown(event) {
-        (this.touches ??= new Map()).set(event.pointerId, [event.clientX, event.clientY]);
+        this.touches ??= new Map();
+        this.touches.set(event.pointerId, [event.clientX, event.clientY]);
         this.boosting = this.touches.size > 1;
     }
 
@@ -701,8 +701,16 @@ export default class extends Controller {
         const cruise = THREE.MathUtils.lerp(SHIP.slow, SHIP.fast, THREE.MathUtils.smoothstep(this.ship.position.length(), SHIP.near, SHIP.far));
         const max = this.boosting ? cruise * SHIP.boost : cruise;
         // Inertie courte : on part et on s'arrête vite ; freiner (↓) est encore plus franc, la marche arrière lente
-        const wanted = thrust > 0 ? max : thrust < 0 ? -0.4 * max : 0;
-        f.speed += (wanted - f.speed) * smooth(thrust < 0 ? 6 : thrust > 0 ? 2 : 3);
+        let wanted = 0;
+        let reactivite = 3;
+        if (thrust > 0) {
+            wanted = max;
+            reactivite = 2;
+        } else if (thrust < 0) {
+            wanted = -0.4 * max;
+            reactivite = 6;
+        }
+        f.speed += (wanted - f.speed) * smooth(reactivite);
         f.turn += (turn - f.turn) * smooth(4);
         f.climb += (climb - f.climb) * smooth(4);
         f.yaw += SHIP.turn * f.turn * delta;

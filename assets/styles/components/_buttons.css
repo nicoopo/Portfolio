@@ -6,7 +6,8 @@
   letter-spacing: 1px;
   text-transform: uppercase;
   padding: 0.8rem 2.2rem;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease;
+  position: relative; /* ancre de la lueur ::before et de l'onde ::after */
   border-radius: 50px;
   box-shadow: 0 0 15px rgb(var(--voile-rgb) / 0.15);
 }
@@ -54,11 +55,6 @@
 .btn-galactic-primary:hover {
   background: linear-gradient(90deg, #a2c2ff, #ffffff);
   color: #000 !important;
-}
-
-.btn-galactic {
-    transition: all 0.3s ease;
-    position: relative;
 }
 
 /* Onde au survol : un halo qui part du centre, sans dépasser du bouton (la lueur, elle, doit dépasser) */

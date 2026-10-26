@@ -7,7 +7,7 @@ import { Controller } from '@hotwired/stimulus';
  * Recherche sans casse ni accents, sur des mots entiers ; les mots-clés de deux lettres (« Go », « JS ») respectent
  * la casse (telle qu'écrite ou tout en majuscules), sinon « go » ou « ts » se trouveraient partout. Tout reste dans le navigateur.
  */
-export default class extends Controller {
+export default class ComparateurController extends Controller {
     static targets = ['offre', 'resume', 'surligne', 'resultats'];
     static values = { competences: Array, textes: Object };
 
@@ -17,11 +17,11 @@ export default class extends Controller {
         this.normaliser = (texte) => texte.split('').map((c) => c.normalize('NFD')[0].toLowerCase()).join('');
         this.motifs = this.competencesValue.map((competence) => competence.mots.map((mot) => {
             const court = mot.length <= 2;
-            const echapper = (m) => m.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const echapper = (m) => m.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
             // Court : tel qu'écrit ou tout en majuscules (« Go » / « GO », « js » / « JS »)
             const echappe = court ? `(?:${echapper(mot)}|${echapper(mot.toUpperCase())})` : echapper(this.normaliser(mot));
             // Pas derrière un point : le « js » de « Vue.js » n'est pas du JavaScript
-            return { court, regex: new RegExp(`(?<![\\p{L}\\p{N}.])${echappe}(?![\\p{L}\\p{N}])`, 'gu') };
+            return { court, regex: new RegExp(String.raw`(?<![\p{L}\p{N}.])${echappe}(?![\p{L}\p{N}])`, 'gu') };
         }));
     }
 
@@ -42,8 +42,10 @@ export default class extends Controller {
 
         this.surligneTarget.hidden = !texte.trim();
         this.surligneTarget.replaceChildren(...this.surligner(texte, zones));
-        this.resumeTarget.textContent = !texte.trim() ? ''
-            : trouvees.length ? this.textesValue.resume.replace('%trouvees%', trouvees.length) : this.textesValue.aucune;
+        let resume = this.textesValue.aucune;
+        if (!texte.trim()) resume = '';
+        else if (trouvees.length) resume = this.textesValue.resume.replace('%trouvees%', trouvees.length);
+        this.resumeTarget.textContent = resume;
         this.resultatsTarget.replaceChildren(...trouvees.map((competence) => this.resultat(competence)));
     }
 
@@ -55,8 +57,10 @@ export default class extends Controller {
         for (const [debut, fin] of zones) {
             if (fin <= pos) continue;
             const depart = Math.max(debut, pos);
-            morceaux.push(document.createTextNode(texte.slice(pos, depart)));
-            morceaux.push(Object.assign(document.createElement('mark'), { textContent: texte.slice(depart, fin) }));
+            morceaux.push(
+                document.createTextNode(texte.slice(pos, depart)),
+                Object.assign(document.createElement('mark'), { textContent: texte.slice(depart, fin) }),
+            );
             pos = fin;
         }
         morceaux.push(document.createTextNode(texte.slice(pos)));

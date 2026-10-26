@@ -80,7 +80,7 @@ final class ProjetCrudController extends AbstractCrudController
     {
         is_dir($dossier) || mkdir($dossier, 0775, true); // public/uploads/articles n'existe pas encore dans le volume de prod
         $image = imagecreatefromstring(file_get_contents($fichier->getPathname()))
-            ?: throw new \RuntimeException('Image illisible : '.$fichier->getClientOriginalName());
+            ?: throw new \InvalidArgumentException('Image illisible : '.$fichier->getClientOriginalName());
         imagepalettetotruecolor($image); // PNG à palette : imagewebp n'accepte que les vraies couleurs
         if (imagesx($image) > self::LARGEUR_MAX) {
             $image = imagescale($image, self::LARGEUR_MAX);

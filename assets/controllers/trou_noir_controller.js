@@ -10,7 +10,7 @@ const DEBRIS_COUNT = 14;
  * Page 404 : le « 0 » est un trou noir qui aspire les morceaux de la page.
  * <span data-controller="trou-noir"><canvas data-trou-noir-target="canvas"></canvas></span>
  */
-export default class extends Controller {
+export default class TrouNoirController extends Controller {
     static targets = ['canvas'];
 
     connect() {

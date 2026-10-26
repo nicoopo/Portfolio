@@ -132,8 +132,11 @@ function creer({ nom, largeur, hauteur, etoiles, parcours }, trouvee) {
         const prochaine = reliees > 0 ? parcours[reliees] : -1; // l'étoile suivante scintille un peu plus
         etoiles.forEach(([x, y], i) => {
             const allumee = allumees.has(i);
-            const pulse = calme ? 0.5 : 0.5 + 0.5 * Math.sin(temps * (i === prochaine ? 5 : 1.6) + i * 1.3);
-            const r = (allumee ? 2.6 : 1.7 + (i === prochaine ? 0.6 : 0.3) * pulse) * (victoire !== null ? 1.3 : 1);
+            const vitesse = i === prochaine ? 5 : 1.6;
+            const eclat = i === prochaine ? 0.6 : 0.3;
+            const pulse = calme ? 0.5 : 0.5 + 0.5 * Math.sin(temps * vitesse + i * 1.3);
+            const base = allumee ? 2.6 : 1.7 + eclat * pulse;
+            const r = base * (victoire !== null ? 1.3 : 1);
             const halo = ctx.createRadialGradient(x, y, 0, x, y, r * 4);
             halo.addColorStop(0, `rgba(255, 255, 255, ${(allumee ? 1 : 0.65 + 0.3 * pulse) * eclat})`);
             halo.addColorStop(0.3, `rgba(170, 170, 255, ${(allumee ? 0.6 : 0.25) * eclat})`);

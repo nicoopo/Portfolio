@@ -30,7 +30,7 @@ async function ouvrir() {
     dialog.showModal();
     filtrer();
     entrees ??= await fetch(dialog.dataset.url)
-        .then((reponse) => (reponse.ok ? reponse.json() : Promise.reject()))
+        .then((reponse) => (reponse.ok ? reponse.json() : Promise.reject(new Error(`Palette : HTTP ${reponse.status}`))))
         .then((donnees) => COMMANDES.concat(donnees), () => null);
     filtrer();
 }
@@ -38,12 +38,16 @@ async function ouvrir() {
 function filtrer() {
     const q = normaliser(champ.value.trim());
     const tous = entrees ?? COMMANDES;
-    if (q === 'sudo') decouvrir('terminal');
-    resultats = q === 'sudo' ? [] : (q
-        ? tous.filter((e) => normaliser(`${e.titre} ${e.detail ?? ''}`).includes(q))
+    if (q === 'sudo') {
+        decouvrir('terminal');
+        resultats = [];
+    } else if (q) {
+        resultats = tous.filter((e) => normaliser(`${e.titre} ${e.detail ?? ''}`).includes(q))
             .sort((a, b) => normaliser(b.titre).startsWith(q) - normaliser(a.titre).startsWith(q)) // le titre qui commence par la recherche d'abord
-        : tous.filter((e) => e.type === 'page' || e.type === 'commande')
-    ).slice(0, MAX);
+            .slice(0, MAX);
+    } else {
+        resultats = tous.filter((e) => e.type === 'page' || e.type === 'commande').slice(0, MAX);
+    }
 
     liste.replaceChildren(...resultats.map((entree, i) => {
         const option = Object.assign(document.createElement('li'), { id: `palette-${i}`, className: 'palette-option' });

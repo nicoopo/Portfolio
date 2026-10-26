@@ -7,7 +7,7 @@ import { naviguer } from '../scripts/naviguer.js';
  * /terminal : faux terminal. Les données (profil, projets, compétences, contact) viennent de TerminalController ;
  * tout est affiché en texte (textContent), jamais en HTML. Historique aux flèches, complétion à Tab.
  */
-export default class extends Controller {
+export default class TerminalController extends Controller {
     static targets = ['sortie', 'champ'];
     static values = { donnees: Object, textes: Object };
 

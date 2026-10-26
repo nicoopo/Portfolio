@@ -29,7 +29,7 @@ const CLICK_TOLERANCE_PX = 5; // au-delà, c'est un glisser (rotation de la vue)
  * le vide pour revenir) ; clic sur une lune : page du projet. Survoler une compétence de la liste allume sa planète.
  * Sans WebGL, la section reste cachée : la liste en dessous dit tout.
  */
-export default class extends Controller {
+export default class SystemeController extends Controller {
     static targets = ['scene', 'label', 'card', 'category', 'name', 'projects', 'brain'];
     static values = { categories: Array, texts: Object };
 
@@ -153,7 +153,9 @@ export default class extends Controller {
                 const rand = random(competence.id * 97 + 13);
                 const projects = competence.projets.length;
                 const size = 0.32 + 0.14 * Math.min(projects, 6);
-                const kind = projects >= 4 ? 'gaz' : rand() < 0.5 ? 'roche' : 'glace';
+                // rand() seulement sous 4 projets : le tirage suivant (donc tout le système) reste le même
+                let kind = 'gaz';
+                if (projects < 4) kind = rand() < 0.5 ? 'roche' : 'glace';
 
                 const pivot = new THREE.Group(); // tourne autour du soleil
                 pivot.rotation.y = (j / categorie.competences.length) * Math.PI * 2 + i * 0.9;
@@ -257,7 +259,7 @@ export default class extends Controller {
             this.lastSample = now;
             this.trails.forEach((trail) => {
                 trail.samples.unshift({ at: trail.holder.getWorldPosition(new THREE.Vector3()), t: now });
-                while (trail.samples.length && now - trail.samples[trail.samples.length - 1].t > TRAIL_S) trail.samples.pop();
+                while (trail.samples.length && now - trail.samples.at(-1).t > TRAIL_S) trail.samples.pop();
             });
         }
         this.trails.forEach(({ line, holder, colour, samples }) => {
