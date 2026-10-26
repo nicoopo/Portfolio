@@ -88,7 +88,12 @@ export function planetTexture(colour, kind, seed, width = 256) {
                 const d = Math.hypot(dx, (y - spot.y) * (kind === 'gaz' ? 1.8 : 1)) / spot.r;
                 if (d > 1.2) continue;
                 if (kind === 'gaz') c = mixColour(c, light.clone().lerp(new THREE.Color(0xfff3e0), 0.4), (1 - d) * 0.9);
-                else c = c.clone().multiplyScalar(d < 0.85 ? 0.75 : d < 1.05 ? 1.25 : 1); // fond sombre, bord clair
+                else {
+                    let teinte = 1;
+                    if (d < 0.85) teinte = 0.75; // fond sombre
+                    else if (d < 1.05) teinte = 1.25; // bord clair
+                    c = c.clone().multiplyScalar(teinte);
+                }
             }
             const i = (y * width + x) * 4;
             image.data[i] = c.r * 255;

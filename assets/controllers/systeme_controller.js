@@ -153,7 +153,9 @@ export default class SystemeController extends Controller {
                 const rand = random(competence.id * 97 + 13);
                 const projects = competence.projets.length;
                 const size = 0.32 + 0.14 * Math.min(projects, 6);
-                const kind = projects >= 4 ? 'gaz' : rand() < 0.5 ? 'roche' : 'glace';
+                // rand() seulement sous 4 projets : le tirage suivant (donc tout le système) reste le même
+                let kind = 'gaz';
+                if (projects < 4) kind = rand() < 0.5 ? 'roche' : 'glace';
 
                 const pivot = new THREE.Group(); // tourne autour du soleil
                 pivot.rotation.y = (j / categorie.competences.length) * Math.PI * 2 + i * 0.9;

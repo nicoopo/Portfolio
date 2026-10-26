@@ -15,6 +15,7 @@
   margin: 2.25rem 0 1rem;
   font-weight: 700;
   color: var(--color-text);
+  scroll-margin-top: calc(var(--navbar-height) + 1rem); /* lien vers un titre (#id) : pas caché sous la barre fixe */
 }
 
 .article-texte :is(ul, ol) {
@@ -57,11 +58,6 @@
 .article-texte img {
   max-width: 100%;
   border-radius: 12px;
-}
-
-/* Lien vers un titre (#id) : pas caché sous la barre de navigation fixe */
-.article-texte :is(h2, h3, h4) {
-  scroll-margin-top: calc(var(--navbar-height) + 1rem);
 }
 
 /* Sommaire (3 titres et plus) */

@@ -38,8 +38,13 @@ final class BilanHebdoCommand
         $livreOr = $this->livreOr->count(['approuve' => false]);
         $relances = $this->candidatures->compterARelancer();
 
+        $evolution = '';
+        if ($avant) {
+            $evolution = ' ('.($vues >= $avant ? '+' : '').round(100 * ($vues - $avant) / $avant).' %)';
+        }
+
         $lignes = array_filter([
-            "👀 $vues pages vues".($avant ? ' ('.($vues >= $avant ? '+' : '').round(100 * ($vues - $avant) / $avant).' %)' : ''),
+            "👀 $vues pages vues".$evolution,
             $pages ? '📄 '.$pages : null,
             $sources ? '🔗 '.$sources : null,
             $liens ? '💼 Liens recruteur ouverts : '.implode(', ', $liens) : null,

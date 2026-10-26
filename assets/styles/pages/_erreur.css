@@ -13,6 +13,8 @@
 
 .erreur-container {
   max-width: 640px;
+  position: relative;
+  isolation: isolate; /* le canvas (z-index -1) reste derrière le texte, devant le fond */
 }
 
 .erreur-container .erreur-code { /* plus précis que span.gradient (3rem) */
@@ -63,11 +65,6 @@
   height: min(520px, 100vw);
   transform: translate(-50%, -50%);
   pointer-events: none;
-}
-
-.erreur-container {
-  position: relative;
-  isolation: isolate; /* le canvas (z-index -1) reste derrière le texte, devant le fond */
 }
 
 /* 404 : mini-jeu des astéroïdes (asteroides_controller.js) */

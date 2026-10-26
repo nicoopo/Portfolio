@@ -171,13 +171,23 @@ final class CandidatureCrudController extends AbstractCrudController
         yield DateTimeField::new('entretienLe', 'Entretien le')
             ->setHelp('Heure de Paris : rappel sur le téléphone la veille, et bouton « Agenda (.ics) »');
         yield DateField::new('relancerLe', 'À relancer le')->hideOnForm()
-            ->formatValue(fn ($date, Candidature $candidature) => $date
-                ? ($candidature->aRelancer() ? '⚠ ' : '').$date->format('d/m/Y')
-                : '—');
+            ->formatValue(function ($date, Candidature $candidature) {
+                if (!$date) {
+                    return '—';
+                }
+
+                return ($candidature->aRelancer() ? '⚠ ' : '').$date->format('d/m/Y');
+            });
         yield AssociationField::new('lien', 'Lien recruteur')->hideOnIndex()
             ->setHelp('Le lien envoyé avec cette candidature (Visiteurs → Liens recruteur)');
         yield TextField::new('lien', 'Site ouvert')->onlyOnIndex()
-            ->formatValue(fn ($lien) => $lien ? ($lien->getVisites() > 0 ? 'oui ('.$lien->getVisites().')' : 'pas encore') : '—');
+            ->formatValue(function ($lien) {
+                if (!$lien) {
+                    return '—';
+                }
+
+                return $lien->getVisites() > 0 ? 'oui ('.$lien->getVisites().')' : 'pas encore';
+            });
         yield UrlField::new('annonce')->hideOnIndex();
         yield TextareaField::new('notes')->hideOnIndex();
     }

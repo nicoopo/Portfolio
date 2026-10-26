@@ -60,7 +60,13 @@ function geste(fin, glissement) {
     const dx = fin[0] - depart[0], dy = fin[1] - depart[1];
     depart = null;
     if (!glissement && Math.hypot(dx, dy) < 30) saisir(tapees.at(-1) === 'b' ? 'a' : 'b');
-    else if (dx || dy) saisir(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'arrowright' : 'arrowleft') : (dy > 0 ? 'arrowdown' : 'arrowup'));
+    else if (dx || dy) saisir(direction(dx, dy));
+}
+
+// Glissement : la direction dominante devient une flèche
+function direction(dx, dy) {
+    if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? 'arrowright' : 'arrowleft';
+    return dy > 0 ? 'arrowdown' : 'arrowup';
 }
 
 // Récompense du carnet de découvertes : tout est trouvé

@@ -42,8 +42,10 @@ export default class ComparateurController extends Controller {
 
         this.surligneTarget.hidden = !texte.trim();
         this.surligneTarget.replaceChildren(...this.surligner(texte, zones));
-        this.resumeTarget.textContent = !texte.trim() ? ''
-            : trouvees.length ? this.textesValue.resume.replace('%trouvees%', trouvees.length) : this.textesValue.aucune;
+        let resume = this.textesValue.aucune;
+        if (!texte.trim()) resume = '';
+        else if (trouvees.length) resume = this.textesValue.resume.replace('%trouvees%', trouvees.length);
+        this.resumeTarget.textContent = resume;
         this.resultatsTarget.replaceChildren(...trouvees.map((competence) => this.resultat(competence)));
     }
 
