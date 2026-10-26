@@ -77,7 +77,7 @@ jobs:
         with:
           php-version: "8.5"
           extensions: ctype, iconv, mbstring, xml, zip, intl, pdo_pgsql, gd
-          coverage: none
+          coverage: pcov # couverture pour SonarQube (~/outils/sonarqube/scan-portfolio.sh)
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
@@ -92,7 +92,15 @@ jobs:
           php bin/console doctrine:schema:validate
 
       - name: Run tests
-        run: vendor/bin/phpunit
+        run: vendor/bin/phpunit --coverage-clover var/coverage/clover.xml
+
+      # Récupéré par ~/outils/sonarqube/scan-portfolio.sh (SonarQube local, injoignable depuis GitHub Actions)
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: var/coverage/clover.xml
+          retention-days: 30
 
   # Audit axe-core de chaque page publique (FR + EN) sur le site démarré en mode prod : échoue en cas de violation
   accessibilite:
