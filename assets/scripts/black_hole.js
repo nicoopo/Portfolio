@@ -128,6 +128,6 @@ function dot(ctx, grain, x, y, scale, alpha) {
 function mix(t) {
     const i = Math.min(Math.floor(t * (PALETTE.length - 1)), PALETTE.length - 2);
     const f = t * (PALETTE.length - 1) - i;
-    const [a, b] = [PALETTE[i], PALETTE[i + 1]].map((hex) => [1, 3, 5].map((k) => parseInt(hex.slice(k, k + 2), 16)));
+    const [a, b] = [PALETTE[i], PALETTE[i + 1]].map((hex) => [1, 3, 5].map((k) => Number.parseInt(hex.slice(k, k + 2), 16)));
     return `rgb(${a.map((v, k) => Math.round(v + (b[k] - v) * f)).join(',')})`;
 }

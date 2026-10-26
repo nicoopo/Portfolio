@@ -17,11 +17,11 @@ export default class ComparateurController extends Controller {
         this.normaliser = (texte) => texte.split('').map((c) => c.normalize('NFD')[0].toLowerCase()).join('');
         this.motifs = this.competencesValue.map((competence) => competence.mots.map((mot) => {
             const court = mot.length <= 2;
-            const echapper = (m) => m.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const echapper = (m) => m.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
             // Court : tel qu'écrit ou tout en majuscules (« Go » / « GO », « js » / « JS »)
             const echappe = court ? `(?:${echapper(mot)}|${echapper(mot.toUpperCase())})` : echapper(this.normaliser(mot));
             // Pas derrière un point : le « js » de « Vue.js » n'est pas du JavaScript
-            return { court, regex: new RegExp(`(?<![\\p{L}\\p{N}.])${echappe}(?![\\p{L}\\p{N}])`, 'gu') };
+            return { court, regex: new RegExp(String.raw`(?<![\p{L}\p{N}.])${echappe}(?![\p{L}\p{N}])`, 'gu') };
         }));
     }
 
@@ -57,8 +57,10 @@ export default class ComparateurController extends Controller {
         for (const [debut, fin] of zones) {
             if (fin <= pos) continue;
             const depart = Math.max(debut, pos);
-            morceaux.push(document.createTextNode(texte.slice(pos, depart)));
-            morceaux.push(Object.assign(document.createElement('mark'), { textContent: texte.slice(depart, fin) }));
+            morceaux.push(
+                document.createTextNode(texte.slice(pos, depart)),
+                Object.assign(document.createElement('mark'), { textContent: texte.slice(depart, fin) }),
+            );
             pos = fin;
         }
         morceaux.push(document.createTextNode(texte.slice(pos)));

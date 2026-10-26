@@ -259,7 +259,7 @@ export default class SystemeController extends Controller {
             this.lastSample = now;
             this.trails.forEach((trail) => {
                 trail.samples.unshift({ at: trail.holder.getWorldPosition(new THREE.Vector3()), t: now });
-                while (trail.samples.length && now - trail.samples[trail.samples.length - 1].t > TRAIL_S) trail.samples.pop();
+                while (trail.samples.length && now - trail.samples.at(-1).t > TRAIL_S) trail.samples.pop();
             });
         }
         this.trails.forEach(({ line, holder, colour, samples }) => {

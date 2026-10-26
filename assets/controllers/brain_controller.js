@@ -668,7 +668,8 @@ export default class BrainController extends Controller {
     // un deuxième doigt posé = boost
 
     touchDown(event) {
-        (this.touches ??= new Map()).set(event.pointerId, [event.clientX, event.clientY]);
+        this.touches ??= new Map();
+        this.touches.set(event.pointerId, [event.clientX, event.clientY]);
         this.boosting = this.touches.size > 1;
     }
 

@@ -45,7 +45,7 @@
   font: inherit;
   color: inherit;
   white-space: pre-wrap;
-  word-break: break-word;
+  overflow-wrap: anywhere; /* équivalent standard de word-break: break-word (obsolète) */
 }
 
 .terminal-sortie .terminal-commande {

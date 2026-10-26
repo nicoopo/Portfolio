@@ -30,7 +30,7 @@ async function ouvrir() {
     dialog.showModal();
     filtrer();
     entrees ??= await fetch(dialog.dataset.url)
-        .then((reponse) => (reponse.ok ? reponse.json() : Promise.reject()))
+        .then((reponse) => (reponse.ok ? reponse.json() : Promise.reject(new Error(`Palette : HTTP ${reponse.status}`))))
         .then((donnees) => COMMANDES.concat(donnees), () => null);
     filtrer();
 }
