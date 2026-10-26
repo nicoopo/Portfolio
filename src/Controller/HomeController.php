@@ -24,10 +24,11 @@ final class HomeController extends AbstractController
     public function index(Request $request, LienRecruteurRepository $liens, CreneauRepository $creneaux, Notificateur $notificateur): Response
     {
         $recruteur = $liens->parCode($request->query->getString('pour'));
-        if ($recruteur && !$this->isGranted('ROLE_ADMIN') && !preg_match(StatistiquesListener::ROBOTS, $request->headers->get('User-Agent', ''))) {
-            if (1 === $liens->compterVisite($recruteur)) { // la première ouverture seulement (une seule alerte) : de quoi relancer au bon moment
-                $notificateur->prevenir('Lien recruteur ouvert', $recruteur->getEntreprise().' vient d’ouvrir ton portfolio'.($recruteur->getPoste() ? ' ('.$recruteur->getPoste().')' : ''), 'eyes');
-            }
+        // compterVisite() n'est appelé (et ne compte) que pour un vrai visiteur ; la première ouverture seulement
+        // déclenche l'alerte (une seule) : de quoi relancer au bon moment
+        if ($recruteur && !$this->isGranted('ROLE_ADMIN') && !preg_match(StatistiquesListener::ROBOTS, $request->headers->get('User-Agent', ''))
+            && 1 === $liens->compterVisite($recruteur)) {
+            $notificateur->prevenir('Lien recruteur ouvert', $recruteur->getEntreprise().' vient d’ouvrir ton portfolio'.($recruteur->getPoste() ? ' ('.$recruteur->getPoste().')' : ''), 'eyes');
         }
 
         return $this->render('home/index.html.twig', [

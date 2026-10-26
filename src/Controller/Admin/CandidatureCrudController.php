@@ -31,6 +31,8 @@ use Symfony\Component\String\Slugger\AsciiSlugger;
 /** Candidatures d'alternance : triées par prochaine relance ; « Site ouvert » vient du lien recruteur associé. */
 final class CandidatureCrudController extends AbstractCrudController
 {
+    private const FORMAT_DATE = 'd/m/Y';
+
     public static function getEntityFqcn(): string
     {
         return Candidature::class;
@@ -88,7 +90,7 @@ final class CandidatureCrudController extends AbstractCrudController
         $lien = $candidature->getLien()
             ? "\n\nVous pouvez retrouver mon portfolio et mon CV ici : ".$this->generateUrl('app_home', ['pour' => $candidature->getLien()->getCode(), '_locale' => 'fr'], UrlGeneratorInterface::ABSOLUTE_URL)
             : '';
-        $corps = "Bonjour,\n\nLe ".$candidature->getEnvoyeeLe()->format('d/m/Y').', je vous ai adressé ma candidature pour le poste de '
+        $corps = "Bonjour,\n\nLe ".$candidature->getEnvoyeeLe()->format(self::FORMAT_DATE).', je vous ai adressé ma candidature pour le poste de '
             .$candidature->getPoste()." en alternance. Je me permets de revenir vers vous : ce poste m'intéresse toujours beaucoup, "
             .'et je serais ravi d’échanger avec vous à ce sujet.'.$lien."\n\nCordialement,\nNicolas Cataluna";
 
@@ -106,7 +108,7 @@ final class CandidatureCrudController extends AbstractCrudController
         $csv = fopen('php://temp', 'r+');
         fwrite($csv, "\u{FEFF}");
         fputcsv($csv, ['Entreprise', 'Poste', 'Statut', 'Envoyée le', 'Réponse le', 'À relancer le', 'Site ouvert', 'Annonce', 'Notes'], ';', escape: '');
-        $date = fn (?\DateTimeImmutable $d) => $d?->format('d/m/Y') ?? '';
+        $date = fn (?\DateTimeImmutable $d) => $d?->format(self::FORMAT_DATE) ?? '';
         foreach ($candidatures->findBy([], ['envoyeeLe' => 'DESC']) as $c) {
             fputcsv($csv, [
                 $c->getEntreprise(), $c->getPoste(), $c->getStatut()->libelle(), $date($c->getEnvoyeeLe()), $date($c->getReponseLe()),
@@ -176,7 +178,7 @@ final class CandidatureCrudController extends AbstractCrudController
                     return '—';
                 }
 
-                return ($candidature->aRelancer() ? '⚠ ' : '').$date->format('d/m/Y');
+                return ($candidature->aRelancer() ? '⚠ ' : '').$date->format(self::FORMAT_DATE);
             });
         yield AssociationField::new('lien', 'Lien recruteur')->hideOnIndex()
             ->setHelp('Le lien envoyé avec cette candidature (Visiteurs → Liens recruteur)');

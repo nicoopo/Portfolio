@@ -70,7 +70,7 @@ class Candidature
     public function __construct()
     {
         $this->envoyeeLe = new \DateTimeImmutable('today');
-        $this->relancerLe = $this->envoyeeLe->modify('+'.self::RELANCE_JOURS.' days');
+        $this->relancerLe = self::dateDeRelance($this->envoyeeLe);
     }
 
     public function getId(): ?int { return $this->id; }
@@ -98,7 +98,7 @@ class Candidature
     {
         $this->envoyeeLe = $envoyeeLe ?? new \DateTimeImmutable('today');
         if (StatutCandidature::Envoyee === $this->statut) {
-            $this->relancerLe = $this->envoyeeLe->modify('+'.self::RELANCE_JOURS.' days');
+            $this->relancerLe = self::dateDeRelance($this->envoyeeLe);
         }
 
         return $this;
@@ -109,8 +109,8 @@ class Candidature
     {
         if ($statut !== $this->statut) {
             $this->relancerLe = match ($statut) {
-                StatutCandidature::Envoyee => $this->envoyeeLe->modify('+'.self::RELANCE_JOURS.' days'),
-                StatutCandidature::Relancee => new \DateTimeImmutable('today +'.self::RELANCE_JOURS.' days'),
+                StatutCandidature::Envoyee => self::dateDeRelance($this->envoyeeLe),
+                StatutCandidature::Relancee => self::dateDeRelance(new \DateTimeImmutable('today')),
                 default => null,
             };
             if ($statut->enAttente()) {
@@ -130,4 +130,10 @@ class Candidature
     }
 
     public function __toString(): string { return $this->entreprise.' — '.$this->poste; }
+
+    /** Date de relance : RELANCE_JOURS jours après $depuis */
+    private static function dateDeRelance(\DateTimeImmutable $depuis): \DateTimeImmutable
+    {
+        return $depuis->modify('+'.self::RELANCE_JOURS.' days');
+    }
 }

@@ -284,7 +284,7 @@ export function createBlackHoleGL(canvas) {
                 fx = { ...REST.hole, ...scenario.at(sequence.s) };
                 events = scenario.events.filter(([at]) => before < at && sequence.s >= at).map(([, name]) => name);
                 if (sequence.s >= scenario.end) {
-                    state = scenario.then;
+                    state = scenario.suivant;
                     sequence = null;
                 }
             }
@@ -321,7 +321,7 @@ const smooth = (a, b, x) => { const t = Math.min(Math.max((x - a) / (b - a), 0),
 
 const SUPERNOVA = {
     end: BOOM + 5.5,
-    then: 'sun',
+    suivant: 'sun',
     events: [[BOOM, 'boom'], [BOOM + 1, 'birth']],
     at(s) {
         if (s < SUCK) {
@@ -344,7 +344,7 @@ const SUPERNOVA = {
 const SHRINK = 1.4; // le soleil s'effondre
 const COLLAPSE = {
     end: SHRINK + 2.4,
-    then: 'hole',
+    suivant: 'hole',
     events: [[SHRINK, 'reborn']],
     at(s) {
         if (s < SHRINK) {
