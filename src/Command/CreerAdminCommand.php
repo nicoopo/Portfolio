@@ -31,7 +31,7 @@ final class CreerAdminCommand
     {
         $motDePasse = $io->askHidden('Mot de passe ('.self::LONGUEUR_MIN.' caractères minimum)', function (?string $valeur): string {
             if (mb_strlen((string) $valeur) < self::LONGUEUR_MIN) {
-                throw new \RuntimeException('Trop court : '.self::LONGUEUR_MIN.' caractères minimum.');
+                throw new \InvalidArgumentException('Trop court : '.self::LONGUEUR_MIN.' caractères minimum.');
             }
 
             return $valeur;

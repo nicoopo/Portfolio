@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
 /** Visionneuse PDF de la page Univers : affiche un document dans l'iframe, sous les boutons. */
-export default class extends Controller {
+export default class PdfController extends Controller {
     static targets = ['viewer', 'frame', 'title'];
 
     show({ params: { url, title } }) {

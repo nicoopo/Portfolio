@@ -16,7 +16,7 @@ const TILT = 0.2;  // inclinaison de la vue sur le disque du trou noir (shader),
  * le refait trou noir. Pendant ces séquences, le canvas couvre tout l'écran.
  * En qualité basse ou sans WebGL, sa version 2D.
  */
-export default class extends Controller {
+export default class OrbiteController extends Controller {
     static targets = ['canvas', 'projet'];
     static values = { pieces: String };
 

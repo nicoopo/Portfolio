@@ -2,7 +2,7 @@
 import { Controller } from '@hotwired/stimulus';
 
 /** Frise des projets : n'affiche que les projets d'une techno (bouton « Toutes » : tout), et cache les années vides. */
-export default class extends Controller {
+export default class FiltreTechnoController extends Controller {
     static targets = ['projet', 'annee'];
 
     filtrer(e) {

@@ -51,7 +51,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
-        return $this->identifiant;
+        return $this->getIdentifiant();
     }
 
     public function getPassword(): string

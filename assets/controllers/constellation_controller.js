@@ -5,7 +5,7 @@ import { Controller } from '@hotwired/stimulus';
  * Page Compétences : survoler (ou parcourir au clavier) une compétence de la liste éclaire son étoile
  * dans la constellation, et inversement.
  */
-export default class extends Controller {
+export default class ConstellationController extends Controller {
     connect() {
         const eclairer = (e) => {
             const id = e.type.endsWith('out') ? null : e.target.closest('[data-competence]')?.dataset.competence;
