@@ -47,7 +47,11 @@ jobs:
         run: php bin/console lint:container
 
   tests:
-    runs-on: ubuntu-latest
+    # Pas ubuntu-latest : passé à ubuntu-26.04 le 2026-10-21, où le même PHP 8.5.12 refuse
+    # les fuseaux (SmokeTest::testLesArriveesSontPlaceesSurLeGlobe en 400 ; données de fuseaux
+    # lues dans le système, cause exacte non isolée). La prod (image Docker Debian) n'est pas
+    # concernée. À revoir avant la fin de vie de 24.04 (2029).
+    runs-on: ubuntu-24.04
     timeout-minutes: 15 # un job bloqué (téléchargement qui ne répond plus) s'arrête au lieu de tourner 6 h
     services:
       database:
