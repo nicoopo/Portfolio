@@ -34,17 +34,29 @@ final class MonitoringController
         if ('' === $this->dsn) {
             return new Response(null, Response::HTTP_NO_CONTENT); // dev, tests : pas de GlitchTip
         }
-        if ('same-origin' !== $request->headers->get('Sec-Fetch-Site', 'same-origin')) {
-            return new Response(null, Response::HTTP_FORBIDDEN);
-        }
-        $enveloppe = $request->getContent();
-        if ('' === $enveloppe || \strlen($enveloppe) > self::TAILLE_MAX) {
-            return new Response(null, Response::HTTP_BAD_REQUEST);
-        }
-        if (!$this->erreursJsLimiter->create('tous')->consume()->isAccepted()) {
-            return new Response(null, Response::HTTP_TOO_MANY_REQUESTS);
+        $refus = $this->refus($request);
+        if (null === $refus) {
+            $this->relayer($request->getContent());
         }
 
+        return new Response(null, $refus ?? Response::HTTP_NO_CONTENT);
+    }
+
+    /** Code d'erreur si l'envoi est refusé ; la limite n'est consommée que par un envoi valable. */
+    private function refus(Request $request): ?int
+    {
+        $taille = \strlen($request->getContent());
+
+        return match (true) {
+            'same-origin' !== $request->headers->get('Sec-Fetch-Site', 'same-origin') => Response::HTTP_FORBIDDEN,
+            0 === $taille || $taille > self::TAILLE_MAX => Response::HTTP_BAD_REQUEST,
+            !$this->erreursJsLimiter->create('tous')->consume()->isAccepted() => Response::HTTP_TOO_MANY_REQUESTS,
+            default => null,
+        };
+    }
+
+    private function relayer(string $enveloppe): void
+    {
         $dsn = Dsn::createFromString($this->dsn);
         try {
             $this->httpClient->request('POST', $dsn->getEnvelopeApiEndpointUrl(), [
@@ -58,7 +70,5 @@ final class MonitoringController
         } catch (ExceptionInterface) {
             // GlitchTip arrêté : l'erreur JS est perdue, le visiteur n'en sait rien
         }
-
-        return new Response(null, Response::HTTP_NO_CONTENT);
     }
 }
