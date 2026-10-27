@@ -31,6 +31,12 @@ framework:
             policy: sliding_window
             limit: 60
             interval: '1 minute'
+        # Erreurs JavaScript relayées à GlitchTip (MonitoringController) : une limite pour tout le monde, contre un
+        # flot d'envois (boucle d'erreurs, script), pas contre une personne
+        erreurs_js:
+            policy: sliding_window
+            limit: 30
+            interval: '1 minute'
 
 when@test:
     framework:

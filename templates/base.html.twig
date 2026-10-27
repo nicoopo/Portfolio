@@ -54,7 +54,7 @@
     {% block stylesheets %}{% endblock %}
 </head>
 
-<body data-page="{{ canonical_route }}">
+<body data-page="{{ canonical_route }}"{% if sentry_dsn is defined and sentry_dsn %} data-sentry-dsn="{{ sentry_dsn }}"{% endif %}>
     <nav class="navbar-galactic" aria-label="{{ 'Navigation principale'|trans }}">
         <div class="navbar-container">
             <a href="{{ path('app_home') }}" class="logo gradient" aria-label="{{ 'Accueil'|trans }}">
