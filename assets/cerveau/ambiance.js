@@ -63,7 +63,7 @@ export class Ambiance {
     toggle() {
         this.on = !this.on;
         if (this.on) {
-            this.context.resume();
+            this.reprendre();
             this.scheduleStar();
         } else {
             clearTimeout(this.starTimeout);
@@ -78,7 +78,18 @@ export class Ambiance {
     /** Onglet caché : on suspend (plus de calcul audio) ; visible : on reprend si le son est actif */
     setVisible(visible) {
         if (!visible) this.context.suspend();
-        else if (this.on) this.context.resume();
+        else if (this.on) this.reprendre();
+    }
+
+    /**
+     * Relance le son. iOS (WebKit) peut refuser hors d'un geste, par exemple au retour sur l'onglet
+     * (« Failed to start the audio device ») : on réessaie au prochain toucher ou à la prochaine touche.
+     */
+    reprendre() {
+        this.context.resume().catch(() => {
+            const reessayer = () => { if (this.on) this.reprendre(); };
+            ['pointerdown', 'keydown'].forEach((type) => document.addEventListener(type, reessayer, { once: true, capture: true }));
+        });
     }
 
     /** Note à la sélection d'un élément (kind : neuron, nebula, souvenir) */

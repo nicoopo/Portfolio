@@ -22,7 +22,7 @@ function audio() {
         souffle = context.createBuffer(1, context.sampleRate / 2, context.sampleRate);
         souffle.getChannelData(0).forEach((_, i, data) => { data[i] = Math.random() * 2 - 1; });
     }
-    context.resume();
+    context.resume().catch(() => {}); // refus d'iOS hors geste : le prochain son réessaiera
     return context;
 }
 
