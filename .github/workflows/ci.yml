@@ -147,7 +147,8 @@ jobs:
       # variables_order=EGPCS : sans « E », le serveur intégré ne passe pas l'environnement du job (DATABASE_URL)
       # à l'application, qui retombe sur la base du poste de dev (.env) : toute page lisant la base répondait 500
       - name: Démarrer le site
-        run: php -d variables_order=EGPCS -S 127.0.0.1:8000 -t public > /tmp/serveur.log 2>&1 &
+        # 4 processus et OPcache : sinon chaque fichier de chaque page attend son tour, et Symfony est recompilé à chaque requête
+        run: PHP_CLI_SERVER_WORKERS=4 php -d variables_order=EGPCS -d opcache.enable_cli=1 -S 127.0.0.1:8000 -t public > /tmp/serveur.log 2>&1 &
 
       - name: Installer Playwright et axe-core
         run: |
