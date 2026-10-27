@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/app.css';
 
 // 3. Scripts globaux (présents sur toutes les pages)
+import './scripts/erreurs.js'; // en premier : écoute les erreurs des scripts suivants
 import './scripts/stars.js';
 import './scripts/navbar.js';
 import './scripts/page_transition.js';

@@ -29,3 +29,9 @@ app_csp_report:
     path: /csp-report
     controller: App\Controller\CspReportController
     methods: [POST]
+
+# Erreurs JavaScript du SDK Sentry (assets/scripts/erreurs.js), relayées à GlitchTip
+app_monitoring:
+    path: /monitoring
+    controller: App\Controller\MonitoringController
+    methods: [POST]
