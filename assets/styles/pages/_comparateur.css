@@ -18,7 +18,7 @@
   padding: 1rem;
   color: var(--color-text);
   background: rgb(var(--surface-rgb) / 0.85);
-  border: 1px solid rgba(127, 90, 240, 0.5);
+  border: 1px solid rgb(var(--primary-rgb) / 0.5);
   border-radius: 14px;
   resize: vertical;
 }
@@ -54,7 +54,7 @@
 .comparateur-surligne mark {
   padding: 0 0.15em;
   color: inherit;
-  background: rgba(127, 90, 240, 0.45);
+  background: rgb(var(--primary-rgb) / 0.45);
   border-radius: 4px;
 }
 
@@ -69,7 +69,7 @@
 .comparateur-resultats li {
   padding: 0.7rem 1rem;
   background: rgb(var(--voile-rgb) / 0.06);
-  border: 1px solid rgba(127, 90, 240, 0.35);
+  border: 1px solid rgb(var(--primary-rgb) / 0.35);
   border-radius: 12px;
 }
 

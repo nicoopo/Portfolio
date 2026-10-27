@@ -17,8 +17,8 @@
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--color-text-light);
-  background: rgba(127, 90, 240, 0.15);
-  border: 1px solid rgba(127, 90, 240, 0.4);
+  background: rgb(var(--primary-rgb) / 0.15);
+  border: 1px solid rgb(var(--primary-rgb) / 0.4);
   border-radius: 999px;
 }
 
@@ -51,7 +51,7 @@
   content: "";
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, rgba(127, 90, 240, 0.6), transparent);
+  background: linear-gradient(90deg, rgb(var(--primary-rgb) / 0.6), transparent);
 }
 
 .projets-groupe-nombre {
@@ -78,7 +78,7 @@
   overflow: hidden;
   background: rgb(var(--surface-rgb) / 0.65);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(127, 90, 240, 0.3);
+  border: 1px solid rgb(var(--primary-rgb) / 0.3);
   border-radius: 16px;
   scroll-margin-top: calc(var(--navbar-height) + 1rem);
   transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
@@ -101,7 +101,7 @@
   aspect-ratio: 16 / 10;
   overflow: hidden;
   background: var(--fond-image);
-  border-bottom: 1px solid rgba(127, 90, 240, 0.2);
+  border-bottom: 1px solid rgb(var(--primary-rgb) / 0.2);
 }
 
 .projet-carte-image img {
@@ -226,7 +226,7 @@
 .projet-image {
   margin: 0 0 2rem;
   overflow: hidden;
-  border: 1px solid rgba(127, 90, 240, 0.35);
+  border: 1px solid rgb(var(--primary-rgb) / 0.35);
   border-radius: 16px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
@@ -250,7 +250,7 @@
   padding: 1.5rem;
   background: rgb(var(--surface-rgb) / 0.65);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(127, 90, 240, 0.3);
+  border: 1px solid rgb(var(--primary-rgb) / 0.3);
   border-radius: 16px;
 }
 
@@ -323,7 +323,7 @@
   gap: 1rem;
   margin-top: 4rem;
   padding-top: 2rem;
-  border-top: 1px solid rgba(127, 90, 240, 0.25);
+  border-top: 1px solid rgb(var(--primary-rgb) / 0.25);
 }
 
 .projet-voisin {
@@ -334,7 +334,7 @@
   color: var(--color-text);
   font-weight: 600;
   text-decoration: none;
-  border: 1px solid rgba(127, 90, 240, 0.3);
+  border: 1px solid rgb(var(--primary-rgb) / 0.3);
   border-radius: 12px;
   transition: border-color 0.2s, background 0.2s;
 }
@@ -422,9 +422,9 @@
   color: var(--color-text);
   text-decoration: none;
   background: rgb(var(--surface-rgb) / 0.75);
-  border: 1px solid rgba(127, 90, 240, 0.45);
+  border: 1px solid rgb(var(--primary-rgb) / 0.45);
   border-radius: 10px;
-  box-shadow: 0 0 18px rgba(127, 90, 240, 0.25);
+  box-shadow: 0 0 18px rgb(var(--primary-rgb) / 0.25);
   will-change: transform;
 }
 
@@ -432,6 +432,15 @@
   color: var(--color-secondary);
   border-color: var(--color-secondary);
   box-shadow: 0 0 25px rgba(0, 212, 255, 0.45);
+}
+
+/* Titre sur 2 lignes au plus : une carte plus haute que les autres chevauche ses voisines */
+.orbite-projet span {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
 }
 
 .orbite-projet img {
