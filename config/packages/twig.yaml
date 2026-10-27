@@ -6,3 +6,8 @@ twig:
 when@test:
     twig:
         strict_variables: true
+
+when@prod:
+    twig:
+        globals:
+            sentry_dsn: '%env(SENTRY_DSN)%' # erreurs JS (assets/scripts/erreurs.js) ; vide = pas d'envoi
