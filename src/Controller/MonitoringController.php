@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use Sentry\Dsn;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -24,7 +25,7 @@ final class MonitoringController
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
-        private readonly RateLimiterFactoryInterface $erreursJsLimiter,
+        #[Target('erreurs_js.limiter')] private readonly RateLimiterFactoryInterface $erreursJsLimiter,
         #[Autowire(env: 'SENTRY_DSN')] private readonly string $dsn,
     ) {
     }

@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\RateLimiter\AbstractRequestRateLimiter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\RateLimiter\LimiterInterface;
@@ -17,8 +18,8 @@ use Symfony\Component\Security\Http\SecurityRequestAttributes;
 final class LimiteurConnexion extends AbstractRequestRateLimiter
 {
     public function __construct(
-        private readonly RateLimiterFactoryInterface $connexionIpLimiter,
-        private readonly RateLimiterFactoryInterface $connexionCompteLimiter,
+        #[Target('connexion_ip.limiter')] private readonly RateLimiterFactoryInterface $connexionIpLimiter,
+        #[Target('connexion_compte.limiter')] private readonly RateLimiterFactoryInterface $connexionCompteLimiter,
         #[Autowire('%kernel.secret%')] #[\SensitiveParameter] private readonly string $secret,
     ) {
     }
