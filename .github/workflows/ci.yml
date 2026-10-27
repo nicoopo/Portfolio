@@ -125,6 +125,7 @@ jobs:
       APP_DEBUG: "0"
       APP_SECRET: ci-accessibilite
       DATABASE_URL: postgresql://app:app@127.0.0.1:5432/app?serverVersion=16&charset=utf8
+      PLAYWRIGHT: 1.64.1 # version de l'image Docker et du paquet npm (doivent être identiques)
     steps:
       - uses: actions/checkout@v7
 
@@ -149,17 +150,21 @@ jobs:
       - name: Démarrer le site
         run: php -d variables_order=EGPCS -S 127.0.0.1:8000 -t public > /tmp/serveur.log 2>&1 &
 
+      # Image officielle de Playwright : Chromium et ses dépendances système déjà dedans. Avant, `playwright install
+      # --with-deps` passait par apt, et un miroir Ubuntu lent faisait durer l'installation 10 min au lieu de 20 s.
+      # Le paquet npm doit avoir la même version que l'image. Réseau de la machine : le site (8000) et la base y sont.
       - name: Installer Playwright et axe-core
         run: |
-          npm install --no-save --no-audit --no-fund playwright @axe-core/playwright
-          npx playwright install --with-deps chromium
+          docker pull -q mcr.microsoft.com/playwright:v${PLAYWRIGHT}-noble
+          docker run --rm -v "$PWD":/w -w /w mcr.microsoft.com/playwright:v${PLAYWRIGHT}-noble \
+            npm install --no-save --no-audit --no-fund playwright@${PLAYWRIGHT} @axe-core/playwright
 
       - name: Audit d'accessibilité
-        run: node tests/accessibilite.mjs
+        run: docker run --rm --network host -v "$PWD":/w -w /w mcr.microsoft.com/playwright:v${PLAYWRIGHT}-noble node tests/accessibilite.mjs
 
       # Palette, terminal, comparateur, contact, langue ; échoue aussi sur une erreur JavaScript
       - name: Parcours dans le navigateur
-        run: node tests/parcours.mjs
+        run: docker run --rm --network host -v "$PWD":/w -w /w mcr.microsoft.com/playwright:v${PLAYWRIGHT}-noble node tests/parcours.mjs
 
       - name: Logs du serveur (en cas d'échec)
         if: failure()
