@@ -41,7 +41,9 @@ function fbm(noise, x, y, period, octaves = 4) {
     return sum / total;
 }
 
-const mixColour = (a, b, t) => a.clone().lerp(b, Math.min(Math.max(t, 0), 1));
+// out : couleur réutilisée dans les boucles de pixels (sinon un objet par pixel)
+const mixColour = (a, b, t, out = a.clone()) => out.copy(a).lerp(b, Math.min(Math.max(t, 0), 1));
+const BLANC = new THREE.Color(0xffffff);
 
 /**
  * Texture d'une planète (équirectangulaire), teintée par colour (couleur de sa catégorie).
@@ -55,7 +57,9 @@ export function planetTexture(colour, kind, seed, width = 256) {
     const noise = noise2(seed);
     const rand = random(seed);
     const base = new THREE.Color(colour);
-    const dark = base.clone().multiplyScalar(0.35), light = mixColour(base, new THREE.Color(0xffffff), 0.55);
+    const dark = base.clone().multiplyScalar(0.35), light = mixColour(base, BLANC, 0.55);
+    const tempete = light.clone().lerp(new THREE.Color(0xfff3e0), 0.4);
+    const c = new THREE.Color();
     const period = 8; // cellules de bruit sur le tour de la planète
 
     // Tempêtes (gaz) ou cratères (roche) : quelques taches placées au hasard
@@ -67,32 +71,31 @@ export function planetTexture(colour, kind, seed, width = 256) {
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             const nx = (x / width) * period, ny = (y / height) * period / 2;
-            let c;
             if (kind === 'gaz') {
                 // Bandes horizontales tordues par la turbulence
                 const warp = fbm(noise, nx * 2, ny * 2, period * 2) * 2.5;
                 const band = 0.5 + 0.5 * Math.sin((y / height) * Math.PI * bands * 2 + warp);
-                c = mixColour(dark, light, band * 0.85 + fbm(noise, nx * 4, ny * 8, period * 4, 3) * 0.3);
+                mixColour(dark, light, band * 0.85 + fbm(noise, nx * 4, ny * 8, period * 4, 3) * 0.3, c);
             } else if (kind === 'roche') {
                 const relief = fbm(noise, nx, ny, period, 5);
-                c = mixColour(dark, light, relief * 1.4 - 0.2);
+                mixColour(dark, light, relief * 1.4 - 0.2, c);
             } else {
                 // Glace : pâle, veinée de fines fissures
                 const relief = fbm(noise, nx * 1.5, ny * 1.5, period * 1.5, 4);
                 const crack = Math.abs(fbm(noise, nx * 3 + 11, ny * 3, period * 3, 3) - 0.5) < 0.02 ? 0.5 : 0;
-                c = mixColour(light, new THREE.Color(0xffffff), relief * 0.6).multiplyScalar(1 - crack * 0.5);
+                mixColour(light, BLANC, relief * 0.6, c).multiplyScalar(1 - crack * 0.5);
             }
             for (const spot of spots) {
                 let dx = Math.abs(x - spot.x);
                 dx = Math.min(dx, width - dx); // la tache fait le tour sans couture
                 const d = Math.hypot(dx, (y - spot.y) * (kind === 'gaz' ? 1.8 : 1)) / spot.r;
                 if (d > 1.2) continue;
-                if (kind === 'gaz') c = mixColour(c, light.clone().lerp(new THREE.Color(0xfff3e0), 0.4), (1 - d) * 0.9);
+                if (kind === 'gaz') mixColour(c, tempete, (1 - d) * 0.9, c);
                 else {
                     let teinte = 1;
                     if (d < 0.85) teinte = 0.75; // fond sombre
                     else if (d < 1.05) teinte = 1.25; // bord clair
-                    c = c.clone().multiplyScalar(teinte);
+                    c.multiplyScalar(teinte);
                 }
             }
             const i = (y * width + x) * 4;
