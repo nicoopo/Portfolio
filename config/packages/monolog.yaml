@@ -54,6 +54,10 @@ when@prod:
                 channels: [deprecation]
                 path: php://stderr
                 formatter: monolog.formatter.json
+            sentry: # erreurs envoyées à GlitchTip (service défini dans sentry.yaml)
+                type: service
+                id: Sentry\Monolog\Handler
+                channels: ["!deprecation", "!csp"]
             # Écrit tout de suite (pas d'attente d'une erreur comme « main ») : docker logs … | grep '"channel":"csp"'
             csp:
                 type: stream

@@ -2,9 +2,20 @@ when@prod:
     sentry:
         # DSN vide = aucun envoi (voir .env)
         dsn: '%env(SENTRY_DSN)%'
+        # Les exceptions non attrapées passent par Monolog (niveau critical, handler « sentry ») :
+        # sans ça, elles arriveraient deux fois dans GlitchTip
+        register_error_listener: false
         options:
             # Pages inexistantes, mauvaise méthode HTTP, accès refusé : du bruit (robots, scanners), pas des pannes
             ignore_exceptions:
                 - Symfony\Component\HttpKernel\Exception\NotFoundHttpException
                 - Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException
                 - Symfony\Component\Security\Core\Exception\AccessDeniedException
+
+    # Logs « error » et plus (e-mail de contact non envoyé, exceptions…) → GlitchTip
+    services:
+        Sentry\Monolog\Handler:
+            arguments:
+                $hub: '@Sentry\State\HubInterface'
+                $level: !php/const Monolog\Level::Error
+                $fillExtraContext: true
