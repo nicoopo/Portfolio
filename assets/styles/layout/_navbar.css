@@ -9,7 +9,7 @@
   background: rgb(var(--surface-rgb) / 0.55);
   backdrop-filter: blur(14px) saturate(180%);
   border-bottom: 1px solid rgba(0, 212, 255, 0.15);
-  box-shadow: 0 0 25px rgba(127, 90, 240, 0.25), 0 0 40px rgba(0, 212, 255, 0.15);
+  box-shadow: 0 0 25px rgb(var(--primary-rgb) / 0.25), 0 0 40px rgba(0, 212, 255, 0.15);
   transition: all 0.4s ease;
   animation: float-nav 6s ease-in-out infinite alternate;
   /* Le doigt ne fait pas défiler la page depuis la barre : le code Konami au doigt s'y fait d'un trait
@@ -25,7 +25,7 @@
 }
 
 .navbar-galactic:hover {
-  box-shadow: 0 0 30px rgba(127, 90, 240, 0.45), 0 0 60px rgba(0, 212, 255, 0.35);
+  box-shadow: 0 0 30px rgb(var(--primary-rgb) / 0.45), 0 0 60px rgba(0, 212, 255, 0.35);
 }
 
 .navbar-container {
@@ -91,7 +91,7 @@
   padding: 0.4rem;
   list-style: none;
   background: rgb(var(--surface-rgb) / 0.92);
-  border: 1px solid rgba(127, 90, 240, 0.5);
+  border: 1px solid rgb(var(--primary-rgb) / 0.5);
   border-radius: 16px;
   backdrop-filter: blur(14px) saturate(160%);
 }
@@ -126,7 +126,6 @@
   justify-content: center;
   vertical-align: middle;
   line-height: 1;
-  outline: none;
 }
 
 .menu-button svg,
@@ -151,9 +150,15 @@
   opacity: 1 !important;
 }
 
-.menu-button:hover {
+.menu-button:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 3px;
+}
+
+.menu-button:hover,
+.menu-button:focus-visible {
   transform: scale(1.05);
-  box-shadow: 0 0 18px rgba(127, 90, 240, 0.45), 0 0 36px rgba(0, 212, 255, 0.25);
+  box-shadow: 0 0 18px rgb(var(--primary-rgb) / 0.45), 0 0 36px rgba(0, 212, 255, 0.25);
 }
 
 /* Menu plein écran (popover) : les liens arrivent un par un */
@@ -174,7 +179,7 @@
     radial-gradient(1.5px 1.5px at 85% 70%, #fff, transparent),
     radial-gradient(1px 1px at 35% 80%, #cfe9ff, transparent),
     radial-gradient(1px 1px at 55% 50%, #fff, transparent),
-    radial-gradient(ellipse at center, rgba(127, 90, 240, 0.25), rgb(var(--surface-rgb) / 0.92) 70%);
+    radial-gradient(ellipse at center, rgb(var(--primary-rgb) / 0.25), rgb(var(--surface-rgb) / 0.92) 70%);
   backdrop-filter: blur(16px) saturate(160%);
   opacity: 0;
   transition: opacity 0.35s ease, overlay 0.35s allow-discrete, display 0.35s allow-discrete;
@@ -274,10 +279,10 @@ html:has(.menu-galactic:popover-open) {
   padding: 1rem;
   color: var(--color-text-light);
   background: rgb(var(--surface-rgb) / 0.92);
-  border: 1px solid rgba(127, 90, 240, 0.5);
+  border: 1px solid rgb(var(--primary-rgb) / 0.5);
   border-radius: 16px;
   backdrop-filter: blur(14px) saturate(160%);
-  box-shadow: 0 0 25px rgba(127, 90, 240, 0.4);
+  box-shadow: 0 0 25px rgb(var(--primary-rgb) / 0.4);
 }
 
 .reglages-titre {
@@ -298,7 +303,7 @@ html:has(.menu-galactic:popover-open) {
 }
 
 .interrupteur + .interrupteur {
-  border-top: 1px solid rgba(127, 90, 240, 0.25);
+  border-top: 1px solid rgb(var(--primary-rgb) / 0.25);
 }
 
 .interrupteur small {
@@ -360,7 +365,7 @@ html:has(.menu-galactic:popover-open) {
   margin: 0;
   padding: 0.6rem 0 0;
   border: 0;
-  border-top: 1px solid rgba(127, 90, 240, 0.25);
+  border-top: 1px solid rgb(var(--primary-rgb) / 0.25);
 }
 
 .choix-curseur legend {
@@ -373,7 +378,7 @@ html:has(.menu-galactic:popover-open) {
 .choix-curseur label {
   padding: 0.3rem 0.7rem;
   font-size: 0.85rem;
-  border: 1px solid rgba(127, 90, 240, 0.5);
+  border: 1px solid rgb(var(--primary-rgb) / 0.5);
   border-radius: 999px;
   transition: background 0.2s, border-color 0.2s;
 }
@@ -412,10 +417,10 @@ html:has(.menu-galactic:popover-open) {
   padding: 1rem;
   color: var(--color-text-light);
   background: rgb(var(--surface-rgb) / 0.92);
-  border: 1px solid rgba(127, 90, 240, 0.5);
+  border: 1px solid rgb(var(--primary-rgb) / 0.5);
   border-radius: 16px;
   backdrop-filter: blur(14px) saturate(160%);
-  box-shadow: 0 0 25px rgba(127, 90, 240, 0.4);
+  box-shadow: 0 0 25px rgb(var(--primary-rgb) / 0.4);
   animation: qualite-auto-entree 0.4s ease-out;
 }
 
@@ -446,13 +451,13 @@ html:has(.menu-galactic:popover-open) {
   font-weight: 600;
   color: var(--color-text);
   background: transparent;
-  border: 1px solid rgba(127, 90, 240, 0.6);
+  border: 1px solid rgb(var(--primary-rgb) / 0.6);
   border-radius: 999px;
   transition: background 0.2s;
 }
 
 .qualite-auto-actions button:hover {
-  background: rgba(127, 90, 240, 0.25);
+  background: rgb(var(--primary-rgb) / 0.25);
 }
 
 .qualite-auto-actions [data-qualite="basse"] {
@@ -478,7 +483,7 @@ html:has(.menu-galactic:popover-open) {
 /* Carnet des easter eggs (decouvertes.js) */
 .decouvertes {
   padding-top: 0.6rem;
-  border-top: 1px solid rgba(127, 90, 240, 0.25);
+  border-top: 1px solid rgb(var(--primary-rgb) / 0.25);
 }
 
 .decouvertes-titre {

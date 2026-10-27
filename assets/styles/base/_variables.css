@@ -1,5 +1,14 @@
 /* Variables (couleurs, espacements, hauteur de navbar) */
 
+/* Inter auto-hébergée (la CSP n'autorise que 'self') : variable, sous-ensemble latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../../fonts/inter-latin-wght.woff2') format('woff2');
+}
+
 :root {
   --navbar-height: 75px;
   --spacing-xl: 6rem;
@@ -14,6 +23,7 @@
 .theme-sombre {
   color-scheme: dark;
   --color-primary: #7f5af0;
+  --primary-rgb: 127 90 240; /* = --color-primary, pour rgb(var(--primary-rgb) / alpha) */
   --color-secondary: #00d4ff;
   --color-text: #f5f5f5;
   --color-text-light: #e0f7ff;
@@ -30,6 +40,7 @@
 :root[data-theme="light"] {
   color-scheme: light;
   --color-primary: #5634c4;
+  --primary-rgb: 86 52 196;
   --color-secondary: #064a69;
   --color-text: #1d1840;
   --color-text-light: #322c5c;
