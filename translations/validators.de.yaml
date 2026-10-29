@@ -1,0 +1,5 @@
+# Messages d'erreur des formulaires (contraintes de ContactType et LivreOrType). Clé = le message français.
+"Indiquez votre nom.": "Bitte geben Sie Ihren Namen an."
+"Indiquez votre adresse e-mail.": "Bitte geben Sie Ihre E-Mail-Adresse an."
+"Écrivez votre message.": "Bitte schreiben Sie Ihre Nachricht."
+"Indiquez un prénom ou un pseudo.": "Bitte geben Sie einen Vornamen oder ein Pseudonym an."

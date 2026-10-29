@@ -68,6 +68,21 @@ final class ContactTest extends WebTestCase
         self::assertSelectorExists('.contact-form ul li');
     }
 
+    /** Champs vides : un message par champ, qui dit quoi remplir, traduit dans la langue de la page */
+    public function testLesChampsVidesDisentQuoiRemplir(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/contact');
+        $client->submitForm('Envoyer', ['contact[nom]' => '', 'contact[email]' => '', 'contact[message]' => '']);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['Indiquez votre nom.', 'Indiquez votre adresse e-mail.', 'Écrivez votre message.'], $client->getCrawler()->filter('.contact-form ul li')->each(fn ($li) => $li->text()));
+
+        $client->request('GET', '/de/contact');
+        $client->submitForm('Senden', ['contact[nom]' => '', 'contact[email]' => '', 'contact[message]' => '']);
+        self::assertSelectorTextContains('.contact-form ul li', 'Bitte geben Sie Ihren Namen an.');
+    }
+
     /** app:contact:purge : seules les demandes de plus de 12 mois disparaissent */
     public function testLaPurgeSupprimeLesDemandesAnciennes(): void
     {

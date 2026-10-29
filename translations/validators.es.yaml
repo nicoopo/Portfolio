@@ -1,0 +1,5 @@
+# Messages d'erreur des formulaires (contraintes de ContactType et LivreOrType). Clé = le message français.
+"Indiquez votre nom.": "Indique su nombre."
+"Indiquez votre adresse e-mail.": "Indique su dirección de correo electrónico."
+"Écrivez votre message.": "Escriba su mensaje."
+"Indiquez un prénom ou un pseudo.": "Indique un nombre o un seudónimo."
