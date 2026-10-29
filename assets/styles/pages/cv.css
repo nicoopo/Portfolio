@@ -205,6 +205,8 @@ h1 {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
+    overflow-wrap: anywhere; /* l'adresse e-mail passe à la ligne sur un écran de 320px */
     color: var(--text-secondary);
     text-decoration: none;
     transition: all 0.3s;
