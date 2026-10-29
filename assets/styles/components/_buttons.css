@@ -48,7 +48,7 @@
 
 .btn-galactic-primary {
   background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
-  border: none;
+  border: 2px solid transparent; /* même hauteur que les boutons à contour posés à côté */
   color: #fff; /* sur le dégradé d'accent, dans les deux thèmes */
 }
 

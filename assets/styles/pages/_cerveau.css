@@ -188,6 +188,7 @@
   background: none;
   border: 0;
   padding: 0.15rem 0;
+  min-width: 24px; /* noms très courts (« Go ») : zone de clic d'au moins 24px */
   color: inherit;
   text-align: left;
   opacity: 0.8;

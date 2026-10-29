@@ -298,7 +298,7 @@ h1 {
 /* Lien vers le site auquel j'ai contribué (sous l'entreprise) */
 .experience-site {
     display: inline-block;
-    margin-top: 3px;
+    padding-block: 0.3rem; /* lien seul sur sa ligne : au moins 24px de haut au doigt */
     color: var(--accent-primary);
     font-size: 0.85em;
 }

@@ -7,14 +7,18 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.4rem 1.5rem;
-  padding: 1.2rem 1rem;
+  align-items: center; /* le copyright reste aligné sur les liens, plus hauts */
+  gap: 0 1.5rem;
+  padding: 0.6rem 1rem;
   font-size: 0.85rem;
   color: var(--color-text-light);
   border-top: 1px solid rgb(var(--voile-rgb) / 0.1);
 }
 
+/* Zone de clic de 44px de haut au doigt, sans changer la taille du texte */
 .site-footer a {
+  display: inline-block;
+  padding-block: 0.75rem;
   color: var(--color-text-light);
 }
 
