@@ -48,6 +48,11 @@
   border-color: var(--bordure-forte);
 }
 
+/* Pastille choisie des réglages : le dégradé est foncé en thème clair */
+:root[data-theme="light"] .choix-curseur label:has(:checked) {
+  color: #fff;
+}
+
 /* Logo dessiné pour un fond noir : posé sur une pastille sombre */
 :root[data-theme="light"] .logo-sm {
   padding: 4px;

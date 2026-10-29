@@ -357,7 +357,7 @@ html:has(.menu-galactic:popover-open) {
   }
 }
 
-/* Choix du curseur : pastilles */
+/* Choix en pastilles (transition, thème, curseur) */
 .choix-curseur {
   display: flex;
   flex-wrap: wrap;
@@ -384,7 +384,7 @@ html:has(.menu-galactic:popover-open) {
 }
 
 .choix-curseur label:has(:checked) {
-  color: var(--color-text);
+  color: #05050f; /* texte foncé sur le dégradé clair (violet → cyan) ; blanc en thème clair (_theme-clair.css) */
   background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
   border-color: transparent;
 }
@@ -400,9 +400,9 @@ html:has(.menu-galactic:popover-open) {
   pointer-events: none;
 }
 
-/* Pas de souris : pas de curseur à choisir */
+/* Pas de souris : pas de curseur à choisir (le thème et les transitions restent) */
 @media not ((hover: hover) and (pointer: fine)) {
-  .choix-curseur {
+  .choix-souris {
     display: none;
   }
 }
