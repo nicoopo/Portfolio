@@ -10,7 +10,7 @@
 
 {% block body %}
 <div class="cv-page" data-controller="cv" data-cv-download-url-value="{{ path('app_cv_download', recruteur ? {pour: recruteur.code} : {}) }}"
-     data-cv-texts-value="{{ {light: 'Mode Clair'|trans, dark: 'Mode Sombre'|trans, generating: 'Génération…'|trans}|json_encode }}">
+     data-cv-texts-value="{{ {light: 'Mode clair'|trans, dark: 'Mode sombre'|trans, generating: 'Génération…'|trans}|json_encode }}">
     {# Au-dessus du CV, dans la page : fixés à l'écran, ils recouvraient le texte au défilement #}
     <div class="cv-actions">
         <!-- Download Button -->
@@ -25,7 +25,7 @@
                 <span data-cv-target="iconSun" hidden>{{ ux_icon('bi:sun-fill', {'height': '20px', 'width': '20px'}) }}</span>
                 <span data-cv-target="iconMoon">{{ ux_icon('bi:moon-fill', {'height': '20px', 'width': '20px'}) }}</span>
             </span>
-            <span class="theme-toggle-text" id="themeText" data-cv-target="themeText">{{ 'Mode Clair'|trans }}</span>
+            <span class="theme-toggle-text" id="themeText" data-cv-target="themeText">{{ 'Mode clair'|trans }}</span>
         </button>
     </div>
 

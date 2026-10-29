@@ -99,8 +99,8 @@
 # CV (le contenu vient de la base : profil, expériences… ; ici seulement les intitulés)
 "CV en ligne de Nicolas Cataluna, développeur fullstack, téléchargeable en PDF (thème clair ou sombre).": "Online CV of Nicolas Cataluna, full-stack developer, downloadable as a PDF (light or dark theme)."
 "Télécharger le CV": "Download the CV"
-"Mode Clair": "Light mode"
-"Mode Sombre": "Dark mode"
+"Mode clair": "Light mode"
+"Mode sombre": "Dark mode"
 "Génération…": "Generating…"
 "Profil": "Profile"
 "Expériences Professionnelles": "Work Experience"
