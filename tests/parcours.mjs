@@ -61,9 +61,12 @@ const parcours = {
         await onglet.waitForURL(/\/CV$/);
         assert.ok(await onglet.getAttribute('html', 'data-arrivee'), 'effet de la page précédente');
         await onglet.waitForTimeout(800); // fin de l'animation d'arrivée
+        // La planète du CV est fixée à l'écran, dans <main> : un transform resté sur <main> la ferait défiler
+        const planete = () => onglet.locator('.planet').evaluate((p) => Math.round(p.getBoundingClientRect().top));
+        const avant = await planete();
         await onglet.evaluate(() => scrollTo(0, 800));
         assert.equal(await onglet.locator('main').evaluate((m) => getComputedStyle(m).transform), 'none');
-        assert.equal(await onglet.locator('.theme-toggle').evaluate((t) => Math.round(t.getBoundingClientRect().top)), 90);
+        assert.equal(await planete(), avant);
     },
 
     'Code Konami au doigt : glisser ↑ ↑ ↓ ↓ ← → ← →, toucher deux fois, et les météores tombent': async (onglet) => {
