@@ -34,8 +34,7 @@
   color: var(--color-text-light);
   min-height: 2rem;
   margin-bottom: 1rem;
-  font-family: 'Courier New', Courier, monospace;
-  /* Tech vibe */
+  font-family: var(--font-mono);
 }
 
 .typing-text {

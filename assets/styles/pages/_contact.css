@@ -121,8 +121,9 @@
 
 .contact-form input:focus,
 .contact-form textarea:focus {
-  outline: none;
-  border-color: rgba(107, 225, 255, 0.7);
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 1px;
+  border-color: transparent;
 }
 
 .contact-form ul { /* erreurs de validation */
