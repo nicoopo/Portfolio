@@ -48,6 +48,18 @@ final class CvTest extends WebTestCase
         self::assertStringStartsWith('inline;', $client->getResponse()->headers->get('Content-Disposition'));
     }
 
+    /** Le PDF garde des coordonnées cliquables : un recruteur le lit souvent à l'écran */
+    public function testLesCoordonneesDuPdfSontCliquables(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/univers/cv-preview');
+
+        $pdf = $client->getResponse()->getContent();
+        foreach (['mailto:', 'tel:', 'https://github.com/nicoopo', 'https://nicolascataluna.fr', 'https://www.linkedin.com/in/'] as $lien) {
+            self::assertMatchesRegularExpression('#/URI \('.preg_quote($lien, '#').'#', $pdf, $lien);
+        }
+    }
+
     public function testLaPageUniversMeneALApercu(): void
     {
         $client = static::createClient();
