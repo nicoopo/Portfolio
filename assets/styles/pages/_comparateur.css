@@ -100,4 +100,9 @@
   .comparateur-grille {
     grid-template-columns: 1fr;
   }
+
+  /* Les résultats passent sous le champ : à 14 lignes, il les cachait sous l'écran */
+  .comparateur-offre {
+    height: 10rem;
+  }
 }
