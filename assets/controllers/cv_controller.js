@@ -1,49 +1,21 @@
 import { Controller } from '@hotwired/stimulus';
 
 /**
- * CV en ligne : étoiles, bascule thème clair/sombre, téléchargement du PDF
+ * CV en ligne : bascule thème clair/sombre, téléchargement du PDF
  * généré par Symfony (CVController::download) dans le thème affiché.
  */
 export default class CvController extends Controller {
-    static targets = ['stars', 'download', 'iconSun', 'iconMoon', 'themeText'];
+    static targets = ['download', 'iconSun', 'iconMoon', 'themeText'];
     // texts : libellés traduits par le template (cv/index.html.twig)
     static values = { downloadUrl: String, texts: Object };
 
     connect() {
-        this.createStars(100);
         // Le thème est déjà posé sur <html> par le script en tête de page
         this.updateThemeButton(this.theme);
-
-        this.onScroll = () => this.parallax();
-        window.addEventListener('scroll', this.onScroll);
-    }
-
-    disconnect() {
-        window.removeEventListener('scroll', this.onScroll);
     }
 
     get theme() {
         return document.documentElement.dataset.theme;
-    }
-
-    createStars(count) {
-        for (let i = 0; i < count; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            star.style.left = Math.random() * 100 + '%';
-            star.style.top = Math.random() * 100 + '%';
-            star.style.animationDelay = Math.random() * 3 + 's';
-            star.style.opacity = Math.random() * 0.7 + 0.3;
-            this.starsTarget.appendChild(star);
-        }
-    }
-
-    parallax() {
-        const scrolled = window.scrollY;
-        this.starsTarget.querySelectorAll('.star').forEach((star, index) => {
-            const speed = (index % 3 + 1) * 0.1;
-            star.style.transform = `translateY(${scrolled * speed}px)`;
-        });
     }
 
     toggleTheme() {
