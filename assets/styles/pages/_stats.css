@@ -70,6 +70,7 @@
 }
 
 .stats-globe-aide {
+  max-width: 75ch; /* sur toute la largeur, la ligne faisait 140 caractères */
   color: var(--color-text-light);
 }
 
