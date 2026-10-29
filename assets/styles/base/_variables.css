@@ -71,3 +71,10 @@
     --navbar-height: 64px;
   }
 }
+
+/* Téléphone en paysage : à 75px, la barre fixe prenait un cinquième de l'écran */
+@media (max-height: 500px) {
+  :root {
+    --navbar-height: 56px;
+  }
+}
