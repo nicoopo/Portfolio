@@ -137,7 +137,7 @@
 }
 
 .ciel-competences text {
-  font-size: 11px;
+  font-size: 12px;
   text-anchor: middle;
   fill: var(--color-text);
   opacity: 0;

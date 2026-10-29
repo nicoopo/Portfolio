@@ -15,6 +15,7 @@
   --spacing-lg: 4rem;
   --spacing-md: 2.5rem;
   --spacing-sm: 1.5rem;
+  --font-mono: ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
 }
 
 /* Thème (data-theme sur <html>, posé en tête de base.html.twig) : couleurs, fond, panneaux en verre et leur voile.
