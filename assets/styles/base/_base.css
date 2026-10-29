@@ -1,10 +1,11 @@
 /* Base : html/body/main, fond étoilé, dégradé de texte, retouches Bootstrap */
 
+/* min-height et pas height : avec height: 100vh, c'est body qui défilait, pas la fenêtre (window.scrollY restait à 0) */
 html,
 body {
   margin: 0;
   padding: 0;
-  height: 100vh;
+  min-height: 100vh;
   overflow-x: hidden;
   color: var(--color-text);
   font-family: 'Inter', system-ui, sans-serif;
@@ -72,12 +73,6 @@ h2.gradient {
 }
 
 @media (max-width: 576px) {
-  html,
-  body {
-    height: auto;
-    min-height: 100vh;
-  }
-
   main {
     padding-top: var(--navbar-height);
   }
