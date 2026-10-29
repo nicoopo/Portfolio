@@ -35,7 +35,7 @@
             </a>
             <a href="mailto:{{ profil.email }}" class="contact-item">
                 <span class="contact-icon">{{ ux_icon('bi:envelope-fill', {height: '20px', width: '20px'}) }}</span>
-                {{ profil.email }}
+                {{ profil.email|e|replace({'@': '@<wbr>'})|raw }}{# coupure après @ plutôt qu'au milieu du domaine #}
             </a>
             <a href="https://github.com/nicoopo" target="_blank" class="contact-item">
                 <span class="contact-icon">{{ ux_icon('iconoir:github', {height: '20px', width: '20px'}) }}</span>
