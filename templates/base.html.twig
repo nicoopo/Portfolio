@@ -155,7 +155,7 @@
                         app_univers: 'Mon Univers',
                         app_competences: 'Compétences',
                         app_contact: 'Contact',
-                    } %}
+                    }|filter((label, route) => not page_vide(route)) %}
                         <li style="--i: {{ loop.index0 }}">
                             <a href="{{ path(route) }}" {% if canonical_route == route %}aria-current="page"{% endif %}>{{ label|trans }}</a>
                         </li>

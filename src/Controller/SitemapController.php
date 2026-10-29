@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Repository\ArticleRepository;
 use App\Repository\ProjetRepository;
+use App\Twig\PagesVides;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -15,10 +16,10 @@ final class SitemapController extends AbstractController
 {
     private const PAGES = ['app_home', 'app_cerveau', 'app_competences', 'app_comparateur', 'app_projects', 'app_projects_frise', 'app_articles', 'app_univers', 'app_cv', 'app_contact', 'app_now', 'app_uses', 'app_stats', 'app_livre_or', 'app_terminal', 'app_mentions_legales', 'app_confidentialite'];
 
-    public function __invoke(ProjetRepository $projets, ArticleRepository $articles): Response
+    public function __invoke(ProjetRepository $projets, ArticleRepository $articles, PagesVides $pagesVides): Response
     {
         // [route, paramètres] : les pages fixes, puis une page par projet et par article publié
-        $pages = array_map(fn (string $route) => [$route, []], self::PAGES);
+        $pages = array_map(fn (string $route) => [$route, []], array_filter(self::PAGES, fn (string $route) => !$pagesVides->estVide($route)));
         foreach ($projets->findBy([], ['position' => 'ASC']) as $projet) {
             $pages[] = ['app_project', ['slug' => $projet->getSlug()]];
         }

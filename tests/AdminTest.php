@@ -240,6 +240,7 @@ final class AdminTest extends WebTestCase
 
         $client->request('GET', '/admin/projet/'.$id.'/edit');
         $client->submitForm('Sauvegarder les modifications', ['Projet[annee]' => '2001']);
+        self::assertCount(1, $client->request('GET', '/projects')->filter('.projets-intro a[href="/projects/frise"]')); // frise non vide : lien affiché
         $crawler = $client->request('GET', '/projects/frise');
         self::assertSame('2001', $crawler->filter('.frise-projets-annee h2')->first()->text()); // le plus ancien d'abord
         $carte = $crawler->filter('.frise-projet a[href="/projects/pendu"]')->closest('.frise-projet');
