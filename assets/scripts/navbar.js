@@ -30,6 +30,13 @@ document.querySelectorAll('input[name="theme"]').forEach((radio) => {
 });
 systeme.addEventListener('change', appliquerTheme);
 
+// Barre du navigateur sur téléphone (meta theme-color) : de la couleur de la navbar, quel que soit le bouton
+// qui change le thème (réglages, bouton du CV)
+const barre = document.querySelector('meta[name="theme-color"]');
+const colorerBarre = () => { barre.content = document.documentElement.dataset.theme === 'light' ? '#f0ecfa' : '#0a0a19'; };
+colorerBarre();
+new MutationObserver(colorerBarre).observe(document.documentElement, { attributeFilter: ['data-theme'] });
+
 // Transition entre les pages (page_transition.js la relit à chaque clic)
 document.querySelectorAll('input[name="effet"]').forEach((radio) => {
     radio.checked = radio.value === preferences.effet;
