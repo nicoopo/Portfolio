@@ -136,6 +136,19 @@
   transform: translateY(30px);
 }
 
+/* Mouvements réduits (réglage du système) : curseur fixe, cartes déjà en place */
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation: none;
+  }
+
+  .fade-in-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (max-width: 768px) {
   .hero-cards {
     gap: 1rem;

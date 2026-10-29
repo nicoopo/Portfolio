@@ -144,6 +144,12 @@
     animation: rotate 20s linear infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .header::before {
+        animation: none;
+    }
+}
+
 @keyframes rotate {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -546,10 +552,19 @@ h1 {
 }
 
 @media print {
-    .theme-toggle,
-    .download-button,
-    .planet {
+    /* Le CV seul : ni la navigation du site, ni le pied de page, ni le décor */
+    .cv-actions,
+    .planet,
+    .navbar-galactic,
+    .site-footer,
+    #stars,
+    .constellation,
+    .curseur {
         display: none;
+    }
+
+    main {
+        padding-top: 0;
     }
 
     body {
