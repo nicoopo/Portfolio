@@ -513,21 +513,28 @@ h1 {
         flex-direction: column;
     }
 
+    /* La date et le contrat passent à la ligne : sur une seule ligne, ils sortaient de l'écran */
+    .experience-period {
+        white-space: normal;
+    }
+
     .skills-grid {
         grid-template-columns: 1fr;
     }
 
-    .theme-toggle {
-        top: 80px;
-        right: 10px;
-        padding: 10px 15px;
-    }
-
+    /* Fixés à l'écran, les deux boutons recouvraient le CV au défilement : ici ils restent en haut de la page */
+    .theme-toggle,
     .download-button {
-        top: 150px;
-        right: 10px;
+        position: static;
+        display: inline-flex;
+        margin: 1rem 0 0 0.75rem;
         padding: 10px 15px;
         font-size: 0.85em;
+    }
+
+    /* La marge du haut laissait la place aux boutons fixés : inutile quand ils sont dans la page */
+    .header {
+        margin-top: 0;
     }
 }
 

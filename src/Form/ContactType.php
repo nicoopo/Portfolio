@@ -20,15 +20,15 @@ final class ContactType extends AbstractType
         $builder
             ->add('nom', TextType::class, [
                 'label' => 'Nom',
-                'constraints' => [new Assert\NotBlank(), new Assert\Length(max: 100)],
+                'constraints' => [new Assert\NotBlank(message: 'Indiquez votre nom.'), new Assert\Length(max: 100)],
             ])
             ->add('email', EmailType::class, [
                 'label' => 'E-mail',
-                'constraints' => [new Assert\NotBlank(), new Assert\Email(), new Assert\Length(max: 180)],
+                'constraints' => [new Assert\NotBlank(message: 'Indiquez votre adresse e-mail.'), new Assert\Email(), new Assert\Length(max: 180)],
             ])
             ->add('message', TextareaType::class, [
                 'label' => 'Message',
-                'constraints' => [new Assert\NotBlank(), new Assert\Length(min: 10, max: 5000)],
+                'constraints' => [new Assert\NotBlank(message: 'Écrivez votre message.'), new Assert\Length(min: 10, max: 5000)],
                 'attr' => ['rows' => 6],
             ])
             ->add('website', TextType::class, [
