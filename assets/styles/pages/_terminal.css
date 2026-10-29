@@ -4,7 +4,7 @@
   max-width: 900px;
   margin: 2rem auto 0;
   overflow: hidden;
-  font-family: ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.95rem;
   color: #d8f5e6;
   background: #07070f;

@@ -1,4 +1,4 @@
-import { createBlackHole } from './black_hole.js';
+import { createBlackHole, reducedMotion } from './black_hole.js';
 import { basseQualite, preferences } from './preferences.js';
 import { decouvrir } from './decouvertes.js';
 import { sons } from './sons.js';
@@ -36,10 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const animate = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const clair = document.documentElement.dataset.theme === 'light'; // étoiles foncées sur le ciel clair
+        const calme = reducedMotion(); // « Réduire les animations » : ciel fixe, sans parallaxe
         stars.forEach(star => {
             // effet de profondeur dynamique
-            const offsetX = (mouseX - centreX) * 0.002 * star.depth;
-            const offsetY = (mouseY - centreY) * 0.002 * star.depth;
+            const offsetX = calme ? 0 : (mouseX - centreX) * 0.002 * star.depth;
+            const offsetY = calme ? 0 : (mouseY - centreY) * 0.002 * star.depth;
 
             if (hole.strength > 0) pull(star, offsetX, offsetY);
 
@@ -50,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.shadowColor = clair ? 'transparent' : '#aaf';
             ctx.fill();
 
-            star.y += star.s;
+            if (!calme) star.y += star.s;
             if (star.y > canvas.height) star.y = 0;
         });
         requestAnimationFrame(animate);
@@ -62,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const onScroll = () => {
-        const scrollOffset = window.scrollY * 0.3;
+        const scrollOffset = reducedMotion() ? 0 : window.scrollY * 0.3;
         canvas.style.transform = `translateY(${scrollOffset}px)`;
     };
 

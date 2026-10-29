@@ -145,8 +145,9 @@
 }
 
 .brain-search-input:focus {
-  outline: none;
-  border-color: rgba(0, 212, 255, 0.7);
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 1px;
+  border-color: transparent;
 }
 
 .brain-search-input[aria-invalid="true"] {
