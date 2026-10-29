@@ -479,6 +479,7 @@ export default class BrainController extends Controller {
         if (!found) return;
 
         this.stopTour();
+        this.ouvreur = { cible: found, bouton: this.searchTarget };
         this.select(found);
         this.searchTarget.value = found.userData.data.nom;
         if (petitEcran()) {
@@ -506,9 +507,10 @@ export default class BrainController extends Controller {
         this.searchTarget.removeAttribute('aria-invalid');
     }
 
-    selectByName({ params: { name } }) {
+    selectByName({ params: { name }, currentTarget }) {
         const found = this.clickables?.find((t) => t.userData.data.nom === name);
         if (!found) return;
+        this.ouvreur = { cible: found, bouton: currentTarget }; // le focus y revient à la fermeture du panneau (deselect)
         this.stopTour();
         this.select(found);
         this.panelTarget.focus();
@@ -569,8 +571,13 @@ export default class BrainController extends Controller {
     }
 
     deselect() {
+        // Panneau fermé avec le focus dedans (Échap, ×) : retour au nom de la légende ou au champ de recherche
+        // qui l'avait ouvert, pas en haut de la page (ouvert depuis le cerveau 3D : pas d'élément où revenir)
+        const retour = this.panelTarget.contains(document.activeElement) && this.ouvreur?.cible === this.selected
+            ? this.ouvreur.bouton : null;
         this.selected = null;
         this.panelTarget.hidden = true;
+        retour?.focus();
         this.controls.autoRotate = !this.reducedMotion;
         this.synapses.highlight(null);
         history.replaceState(null, '', location.pathname);
