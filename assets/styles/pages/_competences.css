@@ -12,6 +12,7 @@
   text-align: center;
   margin-top: var(--spacing-xl);
   margin-bottom: var(--spacing-lg);
+  padding-inline: 1rem; /* sur petit écran, le titre et le bouton touchaient les bords */
 }
 
 .skills-header h1 {
@@ -31,7 +32,7 @@
 
 .skills-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); /* min() : sur un écran de 320px, la carte débordait */
   gap: 3rem;
   width: 80%;
   margin: 0 auto;

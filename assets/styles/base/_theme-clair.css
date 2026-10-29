@@ -72,6 +72,12 @@
   text-shadow: none;
 }
 
+/* Bouton principal au survol : le dégradé bleu pâle → blanc du thème sombre se fondait dans le lavande */
+:root[data-theme="light"] .btn-galactic-primary:hover {
+  background: linear-gradient(90deg, #3d1fa3, #043a54);
+  color: #fff !important; /* !important : comme la règle de survol du thème sombre qu'il remplace */
+}
+
 /* Boutons contour : fond léger pour qu'ils existent même sans survol */
 :root[data-theme="light"] .btn-galactic-outline-light {
   background: rgb(var(--surface-rgb));
