@@ -11,20 +11,23 @@
 {% block body %}
 <div class="cv-page" data-controller="cv" data-cv-download-url-value="{{ path('app_cv_download', recruteur ? {pour: recruteur.code} : {}) }}"
      data-cv-texts-value="{{ {light: 'Mode Clair'|trans, dark: 'Mode Sombre'|trans, generating: 'Génération…'|trans}|json_encode }}">
-    <!-- Download Button -->
-    <button class="download-button" id="downloadButton" data-action="cv#download" data-cv-target="download" aria-label="{{ 'Télécharger le CV'|trans }}">
-        <span class="download-icon">{{ ux_icon('bi:download', {'height': '20px', 'width': '20px'}) }}</span>
-        <span>{{ 'Télécharger le CV'|trans }}</span>
-    </button>
+    {# Au-dessus du CV, dans la page : fixés à l'écran, ils recouvraient le texte au défilement #}
+    <div class="cv-actions">
+        <!-- Download Button -->
+        <button class="download-button" id="downloadButton" data-action="cv#download" data-cv-target="download" aria-label="{{ 'Télécharger le CV'|trans }}">
+            <span class="download-icon">{{ ux_icon('bi:download', {'height': '20px', 'width': '20px'}) }}</span>
+            <span>{{ 'Télécharger le CV'|trans }}</span>
+        </button>
 
-    <!-- Toggle Theme Button -->
-    <button class="theme-toggle" id="themeToggle" data-action="cv#toggleTheme">
-        <span class="theme-toggle-icon" id="themeIcon">
-            <span data-cv-target="iconSun" hidden>{{ ux_icon('bi:sun-fill', {'height': '20px', 'width': '20px'}) }}</span>
-            <span data-cv-target="iconMoon">{{ ux_icon('bi:moon-fill', {'height': '20px', 'width': '20px'}) }}</span>
-        </span>
-        <span class="theme-toggle-text" id="themeText" data-cv-target="themeText">{{ 'Mode Clair'|trans }}</span>
-    </button>
+        <!-- Toggle Theme Button -->
+        <button class="theme-toggle" id="themeToggle" data-action="cv#toggleTheme">
+            <span class="theme-toggle-icon" id="themeIcon">
+                <span data-cv-target="iconSun" hidden>{{ ux_icon('bi:sun-fill', {'height': '20px', 'width': '20px'}) }}</span>
+                <span data-cv-target="iconMoon">{{ ux_icon('bi:moon-fill', {'height': '20px', 'width': '20px'}) }}</span>
+            </span>
+            <span class="theme-toggle-text" id="themeText" data-cv-target="themeText">{{ 'Mode Clair'|trans }}</span>
+        </button>
+    </div>
 
     <div class="planet"></div>
 

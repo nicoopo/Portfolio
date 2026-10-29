@@ -40,11 +40,19 @@
 }
 
 /* Toggle Theme Button */
+.cv-actions {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 12px;
+    max-width: 1200px;
+    margin: 1.5rem auto 0;
+    padding: 0 20px;
+}
+
 .theme-toggle {
-    position: fixed;
-    top: 90px;
-    right: 20px;
-    z-index: 1001;
     background: var(--bg-card);
     border: 2px solid var(--border-color);
     border-radius: 50px;
@@ -74,10 +82,6 @@
 
 /* Download Button */
 .download-button {
-    position: fixed;
-    top: 90px;
-    right: 200px;
-    z-index: 1001;
     background: var(--bg-card);
     border: 2px solid var(--border-color);
     border-radius: 50px;
@@ -124,7 +128,6 @@
     border: 2px solid var(--border-color);
     box-shadow: 0 0 40px var(--shadow-color);
     margin-bottom: 40px;
-    margin-top: 60px;
     position: relative;
     overflow: hidden;
     transition: all 0.3s ease;
@@ -529,19 +532,14 @@ h1 {
         grid-template-columns: 1fr;
     }
 
-    /* Fixés à l'écran, les deux boutons recouvraient le CV au défilement : ici ils restent en haut de la page */
-    .theme-toggle,
-    .download-button {
-        position: static;
-        display: inline-flex;
-        margin: 1rem 0 0 0.75rem;
-        padding: 10px 15px;
-        font-size: 0.85em;
+    .cv-actions {
+        justify-content: center;
     }
 
-    /* La marge du haut laissait la place aux boutons fixés : inutile quand ils sont dans la page */
-    .header {
-        margin-top: 0;
+    .theme-toggle,
+    .download-button {
+        padding: 10px 15px;
+        font-size: 0.85em;
     }
 }
 
