@@ -62,11 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
         mouseY = e.clientY;
     };
 
-    const onScroll = () => {
-        const scrollOffset = reducedMotion() ? 0 : window.scrollY * 0.3;
-        canvas.style.transform = `translateY(${scrollOffset}px)`;
-    };
-
     // ------------------------------------------------
     // Easter egg : un clic long dans le vide fait apparaître un mini trou noir sous le
     // curseur, qui attire et avale les étoiles ; il se referme quand on relâche.
@@ -74,13 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const HOLD_MS = 700;
     const hole = { x: 0, y: 0, strength: 0, target: 0, timer: null, canvas: null, ctx: null, disk: null, frame: null };
 
-    // Le canvas des étoiles est étiré à la hauteur de l'écran et décalé au défilement :
-    // on passe en coordonnées écran pour que l'attraction soit ronde
+    // Le canvas des étoiles est étiré à la hauteur de l'écran : on passe en coordonnées écran pour que l'attraction soit ronde
     const pull = (star, offsetX, offsetY) => {
         const sy = canvas.height / window.innerHeight;
-        const shift = window.scrollY * 0.3;
         const dx = hole.x - (star.x + offsetX);
-        const dy = hole.y - ((star.y + offsetY) / sy + shift);
+        const dy = hole.y - (star.y + offsetY) / sy;
         const d = Math.hypot(dx, dy);
         if (d > 320 * hole.strength) return;
         if (d < 14 * hole.strength) { // avalée : renaît en haut
@@ -163,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
     animate();
     window.addEventListener('resize', resize);
     window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('scroll', onScroll);
 });
 
 
