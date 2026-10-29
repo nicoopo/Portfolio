@@ -106,7 +106,7 @@
                             <label><input type="radio" name="theme" value="{{ valeur }}"> {{ label|trans }}</label>
                         {% endfor %}
                     </fieldset>
-                    <fieldset class="choix-curseur">
+                    <fieldset class="choix-curseur choix-souris">
                         <legend>{{ 'Curseur'|trans }}</legend>
                         {% for valeur, label in {comete: 'Comète', orbite: 'Orbite', 'trou-noir': 'Trou noir', systeme: 'Classique'} %}
                             <label><input type="radio" name="curseur" value="{{ valeur }}"> {{ label|trans }}</label>
