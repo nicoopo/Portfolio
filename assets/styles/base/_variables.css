@@ -29,6 +29,8 @@
   --color-primary: #7f5af0;
   --primary-rgb: 127 90 240; /* = --color-primary, pour rgb(var(--primary-rgb) / alpha) */
   --color-secondary: #00d4ff;
+  --bs-link-color-rgb: 0, 212, 255; /* liens sans classe : couleur secondaire au lieu du bleu de Bootstrap */
+  --bs-link-hover-color-rgb: 0, 212, 255;
   --color-text: #f5f5f5;
   --color-text-light: #e0f7ff;
   --texte-doux: #aaa;
@@ -46,6 +48,8 @@
   --color-primary: #5634c4;
   --primary-rgb: 86 52 196;
   --color-secondary: #064a69;
+  --bs-link-color-rgb: 6, 74, 105;
+  --bs-link-hover-color-rgb: 6, 74, 105;
   --color-text: #1d1840;
   --color-text-light: #322c5c;
   --texte-doux: #4a4570;

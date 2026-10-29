@@ -9,8 +9,8 @@
 
     <h1 class="text-center mb-5 gradient fw-bold display-5">{{ 'Mon Univers'|trans }}</h1>
 
-    <section class="cv-section text-center py-5">
-    <h2 class="gradient mb-4">{{ 'Mon CV'|trans }}</h2>
+    <section class="cv-section text-center pb-5">
+    <h2 class="gradient fw-bold mb-4">{{ 'Mon CV'|trans }}</h2>
 
     <div class="d-flex justify-content-center gap-3 flex-wrap mb-5">
         {# CV généré depuis la base, dans la langue de la page (page /CV et PDF) #}
@@ -32,7 +32,7 @@
         </a>
     </div>
 
-    <h2 class="gradient mb-4">{{ 'Ma lettre de motivation'|trans }}</h2>
+    <h2 class="gradient fw-bold mb-4">{{ 'Ma lettre de motivation'|trans }}</h2>
     {# Lettre dans la langue de la page (assets/docs) ; une langue sans lettre aurait la version anglaise #}
     {% set lettres = {
         fr: {pdf: 'docs/lettre de motivation.pdf', nom: 'Lettre_Motivation_Nicolas_Cataluna.pdf'},
