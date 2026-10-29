@@ -45,13 +45,19 @@ html[data-arrivee="lumiere"] main { animation-name: arrivee-lumiere; }
 span.gradient,
 h1.gradient,
 h2.gradient {
-  font-size: 3rem;
+  font-size: var(--titre-page);
   background: linear-gradient(90deg, #6d5dfc, #b66dff);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: 2px;
   text-shadow: 0 0 18px #9a66ff; /* lueur fixe : animer text-shadow redessine le titre à chaque image */
+}
+
+/* Titre de section : un cran sous le titre de la page */
+h2.gradient {
+  font-size: var(--titre-section);
+  text-shadow: 0 0 10px #9a66ff;
 }
 
 #stars {
