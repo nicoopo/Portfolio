@@ -48,6 +48,11 @@
   border-color: var(--bordure-forte);
 }
 
+/* Erreurs des formulaires (contact, livre d'or) : le rose du thème sombre tombait à 1,7:1 sur le lavande */
+:root[data-theme="light"] .contact-form ul {
+  color: #9b1239;
+}
+
 /* Pastille choisie des réglages : le dégradé est foncé en thème clair */
 :root[data-theme="light"] .choix-curseur label:has(:checked) {
   color: #fff;

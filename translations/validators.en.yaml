@@ -1,0 +1,5 @@
+# Messages d'erreur des formulaires (contraintes de ContactType et LivreOrType). Clé = le message français.
+"Indiquez votre nom.": "Please enter your name."
+"Indiquez votre adresse e-mail.": "Please enter your email address."
+"Écrivez votre message.": "Please write your message."
+"Indiquez un prénom ou un pseudo.": "Please enter a first name or a nickname."

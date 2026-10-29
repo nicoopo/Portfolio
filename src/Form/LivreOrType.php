@@ -16,11 +16,11 @@ final class LivreOrType extends AbstractType
         $builder
             ->add('prenom', TextType::class, [
                 'label' => 'Prénom ou pseudo',
-                'constraints' => [new Assert\NotBlank(), new Assert\Length(max: 40)],
+                'constraints' => [new Assert\NotBlank(message: 'Indiquez un prénom ou un pseudo.'), new Assert\Length(max: 40)],
             ])
             ->add('message', TextareaType::class, [
                 'label' => 'Votre message (280 caractères)',
-                'constraints' => [new Assert\NotBlank(), new Assert\Length(min: 3, max: 280)],
+                'constraints' => [new Assert\NotBlank(message: 'Écrivez votre message.'), new Assert\Length(min: 3, max: 280)],
                 'attr' => ['rows' => 3, 'maxlength' => 280],
             ])
             ->add('website', TextType::class, [
