@@ -232,6 +232,13 @@ h1 {
     line-height: 1.8;
 }
 
+/* Lignes de 75 caractères au plus : sur grand écran, la carte en faisait près de 140 */
+.profile-text,
+.profile-highlight,
+.experience-description {
+    max-width: 75ch;
+}
+
 .profile-highlight {
     margin-top: 15px;
     color: var(--accent-secondary);

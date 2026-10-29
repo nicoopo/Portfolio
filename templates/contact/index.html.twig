@@ -17,39 +17,26 @@
             <!-- Mail -->
             <a href="mailto:{{ contact_email }}?subject=Contact%20depuis%20le%20portfolio"
                 class="contact-item" title="{{ 'Envoyer un mail'|trans }}">
-                <i class="fa-solid fa-envelope"></i>
+                {{ ux_icon('fluent:mail-add-24-filled', {'height': '28px', 'width': '28px', 'aria-hidden': 'true'}) }}
                 <span>{{ 'Mail'|trans }}</span>
-                <span class="menu-button" aria-hidden="true"> 
-                    {{ ux_icon('fluent:mail-add-24-filled', {'height': '32px', 'width': '32px', 'color': '#cfe9ff'}) }}
-                </span>
             </a>
 
             <!-- CV numérique -->
             <a href="{{ path('app_cv') }}" target="_blank" class="contact-item" title="{{ 'Voir mon CV numérique'|trans }}">
-                <i class="fa-solid fa-file-lines"></i>
+                {{ ux_icon('pepicons-pop:cv-circle', {'height': '28px', 'width': '28px', 'aria-hidden': 'true'}) }}
                 <span>{{ 'Mon CV numérique'|trans }}</span>
-                <span class="menu-button" aria-hidden="true"> 
-                    {{ ux_icon('pepicons-pop:cv-circle', {'height': '32px', 'width': '32px', 'color': '#cfe9ff'}) }}
-                </span>
             </a>
 
             <!-- GitHub -->
             <a href="https://github.com/nicoopo" target="_blank" class="contact-item" title="GitHub">
-                <i class="fa-brands fa-github"></i>
+                {{ ux_icon('iconoir:github', {'height': '28px', 'width': '28px', 'aria-hidden': 'true'}) }}
                 <span>GitHub</span>
-                <span class="menu-button" aria-hidden="true"> 
-                    {{ ux_icon('iconoir:github', {'height': '32px', 'width': '32px', 'color': '#cfe9ff'}) }}
-                </span>
             </a>
 
             <!-- LinkedIn -->
             <a href="https://www.linkedin.com/in/nicolas-cataluna-737182224/" target="_blank" class="contact-item" title="LinkedIn">
-                <i class="fa-brands fa-linkedin"></i>
+                {{ ux_icon('streamline-pixel:logo-linkedin', {'height': '28px', 'width': '28px', 'aria-hidden': 'true'}) }}
                 <span>LinkedIn</span>
-                <span class="menu-button" aria-hidden="true"> 
-                    {{ ux_icon('streamline-pixel:logo-linkedin', {'height': '32px', 'width': '32px', 'color': '#cfe9ff'}) }}
-                </span>
-                
             </a>
 
             </div>

@@ -63,11 +63,11 @@
   border: 1px solid rgb(var(--voile-rgb) / 0.08);
 }
 
-.contact-item i {
-  font-size: 1.4rem;
-  color: #ff8800;
-  text-shadow: 0 0 10px rgba(255, 136, 0, 0.6);
-  transition: 0.3s ease;
+/* Pictogramme à gauche du libellé : un repère, pas un deuxième bouton */
+.contact-item svg {
+  flex-shrink: 0;
+  color: var(--color-secondary);
+  transition: color 0.3s ease;
 }
 
 .contact-item span {
@@ -80,12 +80,11 @@
 .contact-item:hover {
   transform: translateY(-3px) scale(1.03);
   background: rgb(var(--voile-rgb) / 0.12);
-  box-shadow: 0 0 15px rgba(255, 136, 0, 0.3);
+  box-shadow: 0 0 15px rgb(var(--primary-rgb) / 0.3);
 }
 
-.contact-item:hover i {
-  color: #ffd27f;
-  text-shadow: 0 0 15px rgba(255, 200, 100, 0.8);
+.contact-item:hover svg {
+  color: var(--color-text);
 }
 
 /* Formulaire de contact */
