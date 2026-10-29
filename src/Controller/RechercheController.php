@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Repository\ArticleRepository;
 use App\Repository\CompetenceRepository;
 use App\Repository\ProjetRepository;
+use App\Twig\PagesVides;
 use App\Twig\Traduction;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,10 +26,10 @@ final class RechercheController extends AbstractController
     ];
 
     #[Route('/recherche.json', name: 'app_recherche')]
-    public function __invoke(TranslatorInterface $translator, Traduction $traduction, CompetenceRepository $competences, ProjetRepository $projets, ArticleRepository $articles): JsonResponse
+    public function __invoke(TranslatorInterface $translator, Traduction $traduction, CompetenceRepository $competences, ProjetRepository $projets, ArticleRepository $articles, PagesVides $pagesVides): JsonResponse
     {
         $entrees = [];
-        foreach (self::PAGES as $route => $libelle) {
+        foreach (array_filter(self::PAGES, fn (string $route) => !$pagesVides->estVide($route), ARRAY_FILTER_USE_KEY) as $route => $libelle) {
             $entrees[] = ['type' => 'page', 'titre' => $translator->trans($libelle), 'url' => $this->generateUrl($route)];
         }
         foreach ($competences->findBy([], ['position' => 'ASC']) as $competence) {
