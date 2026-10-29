@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use App\Entity\Article;
+use App\Twig\PagesVides;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -124,7 +125,7 @@ final class SmokeTest extends WebTestCase
         self::assertStringStartsWith('http', $crawler->filter('meta[property="og:image"]')->attr('content'));
     }
 
-    /** Le sitemap liste toutes les pages publiques, dans les deux langues */
+    /** Le sitemap liste toutes les pages publiques, dans toutes les langues, sauf celles encore vides (PagesVides) */
     public function testLeSitemapListeToutesLesPages(): void
     {
         $client = static::createClient();
@@ -133,8 +134,10 @@ final class SmokeTest extends WebTestCase
         self::assertResponseHeaderSame('Content-Type', 'application/xml; charset=UTF-8');
         $sitemap = simplexml_load_string($client->getResponse()->getContent());
         $urls = array_map('strval', $sitemap->xpath('//*[local-name()="loc"]'));
+        $vides = array_keys(array_filter(['/projects/frise' => 'app_projects_frise', '/articles' => 'app_articles'], self::getContainer()->get(PagesVides::class)->estVide(...)));
         foreach (self::pages() as [$url]) {
-            self::assertContains('http://localhost'.$url, $urls);
+            $vide = in_array(preg_replace('#^/(en|es|de|it|pt)(?=/)#', '', $url), $vides, true);
+            $vide ? self::assertNotContains('http://localhost'.$url, $urls) : self::assertContains('http://localhost'.$url, $urls);
         }
     }
 
@@ -146,11 +149,17 @@ final class SmokeTest extends WebTestCase
         $article = fn (string $slug, ?string $publieLe) => (new Article())->setSlug($slug)->setTitre("Titre $slug")->setResume('Résumé')
             ->setContenu("# Partie\n\nDu **gras**, <script>alert(1)</script> et [un lien](javascript:alert(1)).")
             ->setPublieLe($publieLe ? new \DateTimeImmutable($publieLe) : null);
+        // Aucun article publié : pas de lien vers une page vide dans le menu
+        if ([] === $entityManager->getRepository(Article::class)->findPublies()) {
+            self::assertCount(0, $client->request('GET', '/')->filter('#menu a[href="/articles"]'));
+        }
         $articles = [$article('test-publie', '-1 day')->setTraductions(['en' => ['titre' => 'Published test']]), $article('test-brouillon', null), $article('test-programme', '+1 day')];
         array_map($entityManager->persist(...), $articles);
         $entityManager->flush();
 
         try {
+            self::assertCount(1, $client->request('GET', '/')->filter('#menu a[href="/articles"]'));
+
             $liste = $client->request('GET', '/articles')->filter('.projet-carte-titre a')->extract(['href']);
             self::assertContains('/articles/test-publie', $liste);
             self::assertNotContains('/articles/test-brouillon', $liste);
