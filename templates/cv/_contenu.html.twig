@@ -18,11 +18,16 @@
 
         <div class="contact-info">
             {% if pdf %}
-            <span class="contact-item">{{ profil.telephone }}</span>
-            <span class="contact-item">{{ profil.email }}</span>
-            <span class="contact-item">GitHub: nicoopo</span>
-            <span class="contact-item">Portfolio: nicolascataluna.fr</span>
-            <span class="contact-item">LinkedIn</span>
+            {# PDF : liens cliquables, adresse en clair pour le papier ; dompdf ignore le gap du flex, d'où les « · » #}
+            {% for lien in [
+                [profil.telephone, 'tel:' ~ profil.telephone|replace({' ': ''})],
+                [profil.email, 'mailto:' ~ profil.email],
+                ['github.com/nicoopo', 'https://github.com/nicoopo'],
+                ['nicolascataluna.fr', 'https://nicolascataluna.fr'],
+                ['linkedin.com/in/nicolas-cataluna-737182224', 'https://www.linkedin.com/in/nicolas-cataluna-737182224/'],
+            ] %}
+            <a href="{{ lien[1] }}" class="contact-item">{{ lien[0] }}</a>{% if not loop.last %} · {% endif %}
+            {% endfor %}
             {% else %}
             <a href="tel:{{ profil.telephone|replace({' ': ''}) }}" class="contact-item">
                 <span class="contact-icon">{{ ux_icon('bi:telephone-fill', {height: '20px', width: '20px'}) }}</span>
