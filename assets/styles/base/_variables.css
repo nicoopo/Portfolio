@@ -16,6 +16,9 @@
   --spacing-md: 2.5rem;
   --spacing-sm: 1.5rem;
   --font-mono: ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
+  /* Titres en dégradé : 32px sur téléphone → 48px sur grand écran */
+  --titre-page: clamp(2rem, 1.4rem + 2.5vw, 3rem);
+  --titre-section: clamp(1.6rem, 1.2rem + 1.5vw, 2.25rem);
 }
 
 /* Thème (data-theme sur <html>, posé en tête de base.html.twig) : couleurs, fond, panneaux en verre et leur voile.
