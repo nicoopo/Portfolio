@@ -124,9 +124,16 @@
   font-size: 0.9rem;
 }
 
-/* Titre de la légende : sert de bouton d'ouverture sur mobile seulement */
+/* Titre de la légende : sert de bouton d'ouverture sur mobile seulement (et téléphone en paysage, petitEcran() du contrôleur) */
 .brain-legend-titre {
   display: none;
+}
+
+@media (max-width: 576px), (max-height: 500px) {
+  .brain-legend-titre {
+    display: list-item;
+    font-weight: 600;
+  }
 }
 
 /* Recherche, en tête de la légende */
@@ -336,11 +343,6 @@
 
   .brain-legend:has(.brain-legend-menu[open]) {
     right: 1rem;
-  }
-
-  .brain-legend-titre {
-    display: list-item;
-    font-weight: 600;
   }
 
   /* Mobile : panneau compact en bas de l'écran (le haut reste libre pour l'élément choisi) */

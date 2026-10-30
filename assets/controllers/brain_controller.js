@@ -825,9 +825,9 @@ export default class BrainController extends Controller {
 }
 
 /** Texte comparable : sans accents ni majuscules (« Médecine » → « medecine »). */
-/** Même seuil que le CSS mobile (_cerveau.css) */
+/** Même seuil que le CSS mobile (_cerveau.css), plus le téléphone en paysage : la liste y cachait le cerveau */
 function petitEcran() {
-    return window.matchMedia('(max-width: 576px)').matches;
+    return window.matchMedia('(max-width: 576px), (max-height: 500px)').matches;
 }
 
 function normalize(text) {
