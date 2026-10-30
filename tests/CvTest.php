@@ -2,7 +2,9 @@
 
 namespace App\Tests;
 
+use App\Entity\Langue;
 use App\Twig\SansEmoji;
+use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class CvTest extends WebTestCase
@@ -36,6 +38,20 @@ final class CvTest extends WebTestCase
 
         $client->request('GET', '/es/CV/download?theme=dark');
         self::assertStringContainsString('CV_Nicolas_Cataluna_es_dark.pdf', $client->getResponse()->headers->get('Content-Disposition'));
+    }
+
+    /** Le PDF (2 secondes à fabriquer) est gardé en cache, et une modification dans l'admin le fait refaire */
+    public function testLePdfEstEnCacheJusquAUneModificationDansLAdmin(): void
+    {
+        $client = static::createClient();
+        $client->disableReboot(); // même container d'une requête à l'autre : le cache (en mémoire en test) survit
+        $cache = self::getContainer()->get('cv_pdf.cache');
+
+        $client->request('GET', '/en/CV/download?theme=light');
+        self::assertTrue($cache->hasItem('cv_en_light_0'));
+
+        self::getContainer()->get('event_dispatcher')->dispatch(new AfterEntityUpdatedEvent(new Langue()));
+        self::assertFalse($cache->hasItem('cv_en_light_0'));
     }
 
     public function testLApercuAfficheLePdfSansLeTelecharger(): void

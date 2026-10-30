@@ -15,6 +15,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\DependencyInjection\Attribute\Target;
+use Symfony\Contracts\Cache\CacheInterface;
 
 /** CV en ligne et en PDF : le même contenu, lu en base (templates/cv/_contenu.html.twig). */
 final class CVController extends AbstractController
@@ -27,6 +29,7 @@ final class CVController extends AbstractController
         private readonly LangueRepository $langues,
         private readonly CentreInteretRepository $interets,
         private readonly LienRecruteurRepository $liens,
+        #[Target('cv_pdf.cache')] private readonly CacheInterface $cvPdfCache,
     ) {
     }
 
@@ -53,14 +56,22 @@ final class CVController extends AbstractController
     {
         $theme = 'light' === $request->query->get('theme') ? 'light' : 'dark';
 
-        $options = new Options();
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('defaultFont', 'DejaVu Sans');
+        $contenu = $this->contenu($request);
+        // Un PDF par langue, thème et lien recruteur (code inconnu : le CV de tout le monde), gardé jusqu'à la prochaine
+        // modification dans l'admin (App\EventListener\CvPdfListener)
+        $cle = 'cv_'.$request->getLocale().'_'.$theme.'_'.($contenu['recruteur']?->getId() ?? 0);
+        $pdf = $this->cvPdfCache->get($cle, function () use ($theme, $contenu): string {
+            $options = new Options();
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('defaultFont', 'DejaVu Sans');
 
-        $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($this->renderView('cv/pdf.html.twig', ['theme' => $theme] + $this->contenu($request)));
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
+            $dompdf = new Dompdf($options);
+            $dompdf->loadHtml($this->renderView('cv/pdf.html.twig', ['theme' => $theme] + $contenu));
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+
+            return $dompdf->output();
+        });
 
         // Ex. CV_Nicolas_Cataluna_clair.pdf, CV_Nicolas_Cataluna_en_light.pdf, CV_Nicolas_Cataluna_es_dark.pdf
         $filename = 'CV_Nicolas_Cataluna_'.$request->getLocale().'_'.$theme.'.pdf';
@@ -68,7 +79,7 @@ final class CVController extends AbstractController
             $filename = 'CV_Nicolas_Cataluna_'.('dark' === $theme ? 'sombre' : 'clair').'.pdf';
         }
 
-        return new Response($dompdf->output(), Response::HTTP_OK, [
+        return new Response($pdf, Response::HTTP_OK, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => $disposition.'; filename="'.$filename.'"',
         ]);
