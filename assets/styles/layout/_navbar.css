@@ -548,3 +548,36 @@ html:has(.menu-galactic:popover-open) {
   font-weight: 700;
   color: #ffd16a;
 }
+
+/* Contraste élevé (Windows) : les fonds et dégradés sont retirés. Interrupteurs et pastilles cochées
+   n'étaient marqués que par eux : bordure et couleur système à la place. Icônes : couleur du texte des boutons. */
+@media (forced-colors: active) {
+  .interrupteur input {
+    border: 1px solid ButtonText;
+  }
+
+  .interrupteur input::before {
+    forced-color-adjust: none;
+    background: ButtonText;
+  }
+
+  .interrupteur input:checked {
+    forced-color-adjust: none;
+    background: Highlight;
+    border-color: Highlight;
+  }
+
+  .interrupteur input:checked::before {
+    background: HighlightText;
+  }
+
+  .choix-curseur label:has(:checked) {
+    forced-color-adjust: none;
+    color: HighlightText;
+    background: Highlight;
+  }
+
+  .menu-button svg {
+    color: ButtonText !important; /* !important : comme la couleur des icônes qu'il remplace */
+  }
+}
