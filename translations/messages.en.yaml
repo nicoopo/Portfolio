@@ -28,19 +28,16 @@
 "Entrer dans mon cerveau": "Step into my brain"
 
 # Compétences
-"Compétences – Nicolas Cataluna": "Skills – Nicolas Cataluna"
 "Mes compétences techniques et humaines : front-end, back-end, réseaux, outils et soft skills.": "My technical and people skills: front-end, back-end, networking, tools and soft skills."
 "Mes Compétences": "My Skills"
 "Un aperçu de mes connaissances techniques et humaines": "An overview of my technical and people skills"
 "Voir ce neurone dans mon cerveau": "See this neuron in my brain"
 
 # Projets
-"Mes Projets - Portfolio": "My Projects - Portfolio"
 "Mes projets en Java, PHP / Symfony et réseau : descriptions, captures et compétences utilisées.": "My Java, PHP / Symfony and networking projects: descriptions, screenshots and the skills they use."
 "Mes Projets": "My Projects"
 
 # Univers (CV et lettre : documents en français)
-"Mon Univers - Portfolio": "My Universe - Portfolio"
 "Mon CV, ma lettre de motivation et mon parcours scolaire, du brevet au BTS SIO.": "My CV, cover letter and education, from secondary school to my BTS SIO and Bachelor."
 "Mon CV": "My CV"
 "Voir le CV": "View the CV"
@@ -54,7 +51,6 @@
 "En cours": "In progress"
 
 # Contact
-"Contact - Nicolas Cataluna": "Contact - Nicolas Cataluna"
 "Me contacter : e-mail, GitHub, LinkedIn ou CV numérique.": "Get in touch: e-mail, GitHub, LinkedIn or online CV."
 "Pour toute prise de contact, opportunité d’alternance ou échange professionnel,": "For any enquiry, work-study opportunity or professional exchange,"
 "vous pouvez me joindre directement par mail ou via mes profils ci-dessous.": "you can reach me directly by e-mail or through my profiles below."
@@ -71,7 +67,6 @@
 "Merci, votre message est bien parti ! Je vous réponds au plus vite.": "Thank you, your message is on its way! I'll get back to you as soon as possible."
 
 # Cerveau
-"Mon Cerveau · Univers de Nico": "My Brain · Nico's Universe"
 "Explore mon cerveau en 3D : chaque neurone est une compétence, reliée aux projets qui l'utilisent, entourée de mes passions et de mon parcours.": "Explore my brain in 3D: each neuron is a skill, linked to the projects that use it, surrounded by my passions and my education."
 "Mon cerveau en 3D : compétences, projets, parcours et passions": "My brain in 3D: skills, projects, education and passions"
 "Cerveau holographique en 3D : chaque point lumineux est une compétence, reliée aux autres par des synapses ; au centre, un fil de souvenirs retrace mon parcours ; autour, des nébuleuses représentent mes passions": "Holographic 3D brain: each glowing point is a skill, linked to the others by synapses; in the centre, a thread of memories traces my education; around it, nebulae stand for my passions"
@@ -173,7 +168,6 @@
 
 # Articles
 "Articles": "Articles"
-"Articles - Portfolio": "Articles - Portfolio"
 "Articles techniques : retours d’expérience, ce que j’apprends en cours, coulisses du portfolio.": "Technical articles: lessons learned, what I'm studying, and behind the scenes of this portfolio."
 "Retours d’expérience, ce que j’apprends, et les coulisses de ce site.": "Lessons learned, what I'm studying, and behind the scenes of this site."
 "Lire l’article": "Read the article"
@@ -336,3 +330,4 @@
 "Chaque colonne est un fuseau horaire : celui du navigateur des visiteurs arrivés ces 30 derniers jours. Une onde s’allume à chaque nouvelle arrivée.": "Each column is a time zone: that of the browser of visitors who arrived in the last 30 days. A wave lights up with each new arrival."
 "Les points bleus : le lieu approché d’après l’adresse IP, souvent la ville de l’opérateur.": "The blue dots: the approximate place according to the IP address, often the provider's city."
 "D’où l’on arrive": "Where people arrive from"
+"Développeur PHP / Symfony": "PHP / Symfony Developer"
