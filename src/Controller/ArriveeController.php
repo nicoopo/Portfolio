@@ -34,8 +34,12 @@ final class ArriveeController extends AbstractController
             return new Response(null, Response::HTTP_FORBIDDEN);
         }
         $fuseau = self::actuel($request->getPayload()->getString('fuseau'));
-        if (null === $fuseau || null === self::position($fuseau)) {
+        if (null === $fuseau) {
             return new Response(null, Response::HTTP_BAD_REQUEST);
+        }
+        // Fuseau réel mais sans lieu (« UTC » : Tor, Firefox anti-pistage) : ignoré sans erreur dans la console
+        if (null === self::position($fuseau)) {
+            return new Response(null, Response::HTTP_NO_CONTENT);
         }
         $agent = $request->headers->get('User-Agent', '');
         if ('' === $agent || preg_match(StatistiquesListener::ROBOTS, $agent) || $security->isGranted('ROLE_ADMIN')) {

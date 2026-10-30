@@ -60,10 +60,10 @@ export default class BrainController extends Controller {
             // Pas d'anticrénelage : la scène passe par le composer (cibles sans MSAA), il ne lisserait que le quad final
             this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
         } catch {
-            // Pas de WebGL : on laisse le message de repli visible
+            // Pas de WebGL : message de repli par-dessus l'image du cerveau
+            this.fallbackTarget.hidden = false;
             return;
         }
-        this.fallbackTarget.hidden = true;
         this.tourButtonTarget.hidden = false;
         // Pas de plein écran possible (ex. Safari sur iPhone) : pas de bouton
         this.fullscreenButtonTarget.hidden = !document.fullscreenEnabled;
