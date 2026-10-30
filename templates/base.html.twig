@@ -18,7 +18,7 @@
     <script nonce="{{ csp_nonce('script') }}">try { const e = sessionStorage.getItem('trou-noir'); if (e) { document.documentElement.dataset.arrivee = e; sessionStorage.removeItem('trou-noir'); } } catch {}</script>
     {# Arrivée d'un visiteur, pour le globe de /stats (assets/scripts/arrivee.js) #}
     <meta name="arrivee" content="{{ path('app_arrivee') }}">
-    <title>{% block title %}{{ 'Univers de Nico'|trans }}{% endblock %}</title>
+    <title>{% block title %}Nicolas Cataluna · {{ 'Développeur PHP / Symfony'|trans }}{% endblock %}</title>
     <meta name="description" content="{% block description %}{{ 'Portfolio de Nicolas Cataluna, développeur fullstack PHP / Symfony : compétences, projets, parcours, et un cerveau 3D interactif pour tout explorer.'|trans }}{% endblock %}">
     {# Aperçu des liens partagés (LinkedIn, Discord, Slack…) #}
     {% set page_url = app.request.schemeAndHttpHost ~ app.request.pathInfo %}
@@ -31,8 +31,8 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="{{ 'Univers de Nico'|trans }}">
     <meta property="og:locale" content="{{ {fr: 'fr_FR', en: 'en_GB', es: 'es_ES', de: 'de_DE', it: 'it_IT', pt: 'pt_PT'}[locale] }}">
-    <meta property="og:title" content="{{ block('title')|trim }}">
-    <meta property="og:description" content="{{ block('description')|trim }}">
+    <meta property="og:title" content="{{ block('title')|trim|raw }}">{# raw : le bloc sort déjà échappé ; sinon « Nico&amp;#039;s » #}
+    <meta property="og:description" content="{{ block('description')|trim|raw }}">
     <meta property="og:url" content="{{ page_url }}">
     {% block og_image %}
     <meta property="og:image" content="{{ absolute_url(asset('images/og-cerveau.jpg')) }}">
