@@ -96,4 +96,29 @@ final class RendezVousTest extends WebTestCase
             $connection->executeStatement('DELETE FROM lien_recruteur WHERE id IN (:a, :b)', ['a' => $moi->getId(), 'b' => $idAutre]);
         }
     }
+
+    /** Un lien qui a déjà un rendez-vous à venir n'en réserve pas un second (deux envois presque simultanés) */
+    public function testUnLienNeReservePasDeuxCreneaux(): void
+    {
+        self::bootKernel();
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $creneaux = $entityManager->getRepository(Creneau::class);
+        $lien = (new LienRecruteur())->setEntreprise('RDV Double SA');
+        $premier = (new Creneau())->setDebut(new \DateTimeImmutable('+5 days 10:00'));
+        $second = (new Creneau())->setDebut(new \DateTimeImmutable('+5 days 15:00'));
+        foreach ([$lien, $premier, $second] as $entite) {
+            $entityManager->persist($entite);
+        }
+        $entityManager->flush();
+        $connection = $entityManager->getConnection();
+
+        try {
+            self::assertTrue($creneaux->reserver($premier, $lien, 'Ada', 'ada@rdv.example'));
+            self::assertFalse($creneaux->reserver($second, $lien, 'Ada', 'ada@rdv.example'));
+            self::assertNull($connection->fetchOne('SELECT lien_id FROM creneau WHERE id = :id', ['id' => $second->getId()]));
+        } finally {
+            $connection->executeStatement('DELETE FROM creneau WHERE id IN (:a, :b)', ['a' => $premier->getId(), 'b' => $second->getId()]);
+            $connection->executeStatement('DELETE FROM lien_recruteur WHERE id = :id', ['id' => $lien->getId()]);
+        }
+    }
 }

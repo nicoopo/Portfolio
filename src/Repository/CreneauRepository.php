@@ -54,14 +54,20 @@ class CreneauRepository extends ServiceEntityRepository
     }
 
     /**
-     * Réserve le créneau pour ce lien s'il est encore libre ; false s'il vient d'être pris.
-     * Une seule requête, conditionnée à « encore libre » : deux recruteurs ne prennent jamais le même créneau.
+     * Réserve le créneau pour ce lien s'il est encore libre et si le lien n'en a pas déjà un ; false sinon.
+     * UPDATE conditionné : deux recruteurs ne prennent jamais le même créneau. Le lien est verrouillé d'abord :
+     * deux envois du même lien à la même seconde (double-clic, deux onglets) ne réservent jamais deux créneaux.
      */
     public function reserver(Creneau $creneau, LienRecruteur $lien, string $nom, string $email): bool
     {
-        return 1 === $this->getEntityManager()->getConnection()->executeStatement(
-            'UPDATE creneau SET lien_id = :lien, contact_nom = :nom, contact_email = :email WHERE id = :id AND lien_id IS NULL',
-            ['lien' => $lien->getId(), 'nom' => $nom, 'email' => $email, 'id' => $creneau->getId()],
-        );
+        return $this->getEntityManager()->getConnection()->transactional(function ($connection) use ($creneau, $lien, $nom, $email): bool {
+            $connection->executeStatement('SELECT 1 FROM lien_recruteur WHERE id = :lien FOR UPDATE', ['lien' => $lien->getId()]);
+
+            return 1 === $connection->executeStatement(
+                'UPDATE creneau SET lien_id = :lien, contact_nom = :nom, contact_email = :email WHERE id = :id AND lien_id IS NULL
+                 AND NOT EXISTS (SELECT 1 FROM creneau r WHERE r.lien_id = :lien AND r.debut >= :aujourdhui)',
+                ['lien' => $lien->getId(), 'nom' => $nom, 'email' => $email, 'id' => $creneau->getId(), 'aujourdhui' => (new \DateTimeImmutable('today'))->format('Y-m-d H:i:s')],
+            );
+        });
     }
 }
