@@ -7,9 +7,9 @@
 "Navigation principale": "Navigazione principale"
 "Menu": "Menu"
 "Accueil": "Home"
-"Mon Cerveau": "Il mio cervello"
+"Mon cerveau": "Il mio cervello"
 "Projets": "Progetti"
-"Mon Univers": "Il mio universo"
+"Mon univers": "Il mio universo"
 "Compétences": "Competenze"
 "Contact": "Contatti"
 "Fermer": "Chiudi"
@@ -29,13 +29,13 @@
 
 # Compétences
 "Mes compétences techniques et humaines : front-end, back-end, réseaux, outils et soft skills.": "Le mie competenze tecniche e trasversali: front-end, back-end, reti, strumenti e soft skill."
-"Mes Compétences": "Le mie competenze"
+"Mes compétences": "Le mie competenze"
 "Un aperçu de mes connaissances techniques et humaines": "Una panoramica delle mie competenze tecniche e trasversali"
 "Voir ce neurone dans mon cerveau": "Vedi questo neurone nel mio cervello"
 
 # Projets
 "Mes projets en Java, PHP / Symfony et réseau : descriptions, captures et compétences utilisées.": "I miei progetti in Java, PHP / Symfony e reti: descrizioni, screenshot e competenze utilizzate."
-"Mes Projets": "I miei progetti"
+"Mes projets": "I miei progetti"
 
 # Univers
 "Mon CV, ma lettre de motivation et mon parcours scolaire, du brevet au BTS SIO.": "Il mio CV, la mia lettera di presentazione e il mio percorso di studi, dalla scuola media al BTS SIO e alla laurea."
@@ -331,3 +331,4 @@
 "Les points bleus : le lieu approché d’après l’adresse IP, souvent la ville de l’opérateur.": "I punti blu: il luogo approssimativo secondo l’indirizzo IP, spesso la città dell’operatore."
 "D’où l’on arrive": "Da dove si arriva"
 "Développeur PHP / Symfony": "Sviluppatore PHP / Symfony"
+"Cerveau holographique en 3D, avec des points lumineux pour les compétences, dans un ciel étoilé": "Cervello olografico in 3D, con punti luminosi per le competenze, in un cielo stellato"

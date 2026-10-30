@@ -8,7 +8,7 @@
 <div class="skills-page">
 
   <section class="skills-header">
-    <h1>{{ 'Mes Compétences'|trans }}</h1>
+    <h1>{{ 'Mes compétences'|trans }}</h1>
     <p>{{ 'Un aperçu de mes connaissances techniques et humaines'|trans }}</p>
     <a href="{{ path('app_comparateur') }}" class="btn btn-galactic btn-galactic-outline-light mt-3">{{ 'Comparer avec votre offre'|trans }}</a>
   </section>
@@ -25,7 +25,7 @@
       <p class="systeme-categorie" data-systeme-target="category"></p>
       <p class="systeme-nom" data-systeme-target="name"></p>
       <ul data-systeme-target="projects"></ul>
-      <a data-systeme-target="brain" tabindex="-1"></a>
+      <a href="{{ path('app_cerveau') }}" data-systeme-target="brain" tabindex="-1"></a>
     </div>
   </section>
 
