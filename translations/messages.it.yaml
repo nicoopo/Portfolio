@@ -28,19 +28,16 @@
 "Entrer dans mon cerveau": "Entra nel mio cervello"
 
 # Compétences
-"Compétences – Nicolas Cataluna": "Competenze – Nicolas Cataluna"
 "Mes compétences techniques et humaines : front-end, back-end, réseaux, outils et soft skills.": "Le mie competenze tecniche e trasversali: front-end, back-end, reti, strumenti e soft skill."
 "Mes Compétences": "Le mie competenze"
 "Un aperçu de mes connaissances techniques et humaines": "Una panoramica delle mie competenze tecniche e trasversali"
 "Voir ce neurone dans mon cerveau": "Vedi questo neurone nel mio cervello"
 
 # Projets
-"Mes Projets - Portfolio": "I miei progetti - Portfolio"
 "Mes projets en Java, PHP / Symfony et réseau : descriptions, captures et compétences utilisées.": "I miei progetti in Java, PHP / Symfony e reti: descrizioni, screenshot e competenze utilizzate."
 "Mes Projets": "I miei progetti"
 
 # Univers
-"Mon Univers - Portfolio": "Il mio universo - Portfolio"
 "Mon CV, ma lettre de motivation et mon parcours scolaire, du brevet au BTS SIO.": "Il mio CV, la mia lettera di presentazione e il mio percorso di studi, dalla scuola media al BTS SIO e alla laurea."
 "Mon CV": "Il mio CV"
 "Voir le CV": "Vedi il CV"
@@ -54,7 +51,6 @@
 "En cours": "In corso"
 
 # Contact
-"Contact - Nicolas Cataluna": "Contatti - Nicolas Cataluna"
 "Me contacter : e-mail, GitHub, LinkedIn ou CV numérique.": "Contattami: e-mail, GitHub, LinkedIn o CV online."
 "Pour toute prise de contact, opportunité d’alternance ou échange professionnel,": "Per qualsiasi richiesta, opportunità di apprendistato o scambio professionale,"
 "vous pouvez me joindre directement par mail ou via mes profils ci-dessous.": "può scrivermi direttamente via e-mail o tramite i miei profili qui sotto."
@@ -71,7 +67,6 @@
 "Merci, votre message est bien parti ! Je vous réponds au plus vite.": "Grazie, il suo messaggio è stato inviato! Le risponderò il prima possibile."
 
 # Cerveau
-"Mon Cerveau · Univers de Nico": "Il mio cervello · L'universo di Nico"
 "Explore mon cerveau en 3D : chaque neurone est une compétence, reliée aux projets qui l'utilisent, entourée de mes passions et de mon parcours.": "Esplora il mio cervello in 3D: ogni neurone è una competenza, collegata ai progetti che la usano, circondata dalle mie passioni e dal mio percorso."
 "Mon cerveau en 3D : compétences, projets, parcours et passions": "Il mio cervello in 3D: competenze, progetti, percorso e passioni"
 "Cerveau holographique en 3D : chaque point lumineux est une compétence, reliée aux autres par des synapses ; au centre, un fil de souvenirs retrace mon parcours ; autour, des nébuleuses représentent mes passions": "Cervello olografico in 3D: ogni punto luminoso è una competenza, collegata alle altre da sinapsi; al centro, un filo di ricordi ripercorre il mio percorso; intorno, delle nebulose rappresentano le mie passioni"
@@ -173,7 +168,6 @@
 
 # Articles
 "Articles": "Articoli"
-"Articles - Portfolio": "Articoli - Portfolio"
 "Articles techniques : retours d’expérience, ce que j’apprends en cours, coulisses du portfolio.": "Articoli tecnici: esperienze, ciò che imparo a lezione e dietro le quinte del portfolio."
 "Retours d’expérience, ce que j’apprends, et les coulisses de ce site.": "Esperienze, ciò che imparo e il dietro le quinte di questo sito."
 "Lire l’article": "Leggi l'articolo"
@@ -336,3 +330,4 @@
 "Chaque colonne est un fuseau horaire : celui du navigateur des visiteurs arrivés ces 30 derniers jours. Une onde s’allume à chaque nouvelle arrivée.": "Ogni colonna è un fuso orario: quello del browser dei visitatori arrivati negli ultimi 30 giorni. Un’onda si accende a ogni nuovo arrivo."
 "Les points bleus : le lieu approché d’après l’adresse IP, souvent la ville de l’opérateur.": "I punti blu: il luogo approssimativo secondo l’indirizzo IP, spesso la città dell’operatore."
 "D’où l’on arrive": "Da dove si arriva"
+"Développeur PHP / Symfony": "Sviluppatore PHP / Symfony"
