@@ -7,9 +7,9 @@
 "Navigation principale": "Main navigation"
 "Menu": "Menu"
 "Accueil": "Home"
-"Mon Cerveau": "My Brain"
+"Mon cerveau": "My Brain"
 "Projets": "Projects"
-"Mon Univers": "My Universe"
+"Mon univers": "My Universe"
 "Compétences": "Skills"
 "Contact": "Contact"
 "Fermer": "Close"
@@ -29,13 +29,13 @@
 
 # Compétences
 "Mes compétences techniques et humaines : front-end, back-end, réseaux, outils et soft skills.": "My technical and people skills: front-end, back-end, networking, tools and soft skills."
-"Mes Compétences": "My Skills"
+"Mes compétences": "My Skills"
 "Un aperçu de mes connaissances techniques et humaines": "An overview of my technical and people skills"
 "Voir ce neurone dans mon cerveau": "See this neuron in my brain"
 
 # Projets
 "Mes projets en Java, PHP / Symfony et réseau : descriptions, captures et compétences utilisées.": "My Java, PHP / Symfony and networking projects: descriptions, screenshots and the skills they use."
-"Mes Projets": "My Projects"
+"Mes projets": "My Projects"
 
 # Univers (CV et lettre : documents en français)
 "Mon CV, ma lettre de motivation et mon parcours scolaire, du brevet au BTS SIO.": "My CV, cover letter and education, from secondary school to my BTS SIO and Bachelor."
@@ -331,3 +331,4 @@
 "Les points bleus : le lieu approché d’après l’adresse IP, souvent la ville de l’opérateur.": "The blue dots: the approximate place according to the IP address, often the provider's city."
 "D’où l’on arrive": "Where people arrive from"
 "Développeur PHP / Symfony": "PHP / Symfony Developer"
+"Cerveau holographique en 3D, avec des points lumineux pour les compétences, dans un ciel étoilé": "Holographic 3D brain, with glowing points for skills, in a starry sky"

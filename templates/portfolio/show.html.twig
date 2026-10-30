@@ -9,6 +9,7 @@
     <meta property="og:image" content="{{ url('app_partage_projet', {slug: projet.slug}) }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{{ projet|loc('titre') }} · {{ projet|loc('categorie') }} · {{ projet.tech|split(',')|map(t => t|trim)|join(', ') }}">
 {% endblock %}
 
 {% block body %}

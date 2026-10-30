@@ -170,6 +170,13 @@ h1 {
     filter: drop-shadow(0 0 20px var(--shadow-color));
 }
 
+/* Contraste élevé : le halo entourait la plaque blanche posée sous le texte */
+@media (forced-colors: active) {
+    h1 {
+        filter: none;
+    }
+}
+
 .subtitle {
     font-size: 1.5em;
     color: var(--accent-secondary);
