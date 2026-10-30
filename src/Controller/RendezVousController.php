@@ -55,7 +55,10 @@ final class RendezVousController extends AbstractController
             /** @var Creneau $creneau */
             ['creneau' => $creneau, 'nom' => $nom, 'email' => $email] = $form->getData();
             if (!$creneaux->reserver($creneau, $lien, trim($nom), $email)) {
-                $this->addFlash('error', $translator->trans('Ce créneau vient d’être pris : choisissez-en un autre.'));
+                // Refusé parce que ce lien vient de réserver (double-clic) : pas d'erreur, la page montre sa réservation
+                if (!$creneaux->reservePar($lien)) {
+                    $this->addFlash('error', $translator->trans('Ce créneau vient d’être pris : choisissez-en un autre.'));
+                }
 
                 return $this->redirectToRoute('app_rendez_vous', ['pour' => $lien->getCode()]);
             }
