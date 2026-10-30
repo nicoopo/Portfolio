@@ -27,6 +27,21 @@
   inset: 0;
 }
 
+/* Image d'attente du cerveau : la 3D met plusieurs secondes à arriver sur téléphone */
+.brain-attente {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: auto; /* cerveau entier, comme la 3D : en portrait, remplir l'écran le grossissait trois fois */
+  transform: translateY(-50%);
+  mask-image: radial-gradient(ellipse closest-side, #000 55%, transparent); /* bords fondus dans le ciel */
+}
+
+.brain-canvas:has(canvas) .brain-attente {
+  display: none;
+}
+
 .brain-stage canvas {
   display: block;
   cursor: grab;
@@ -48,6 +63,9 @@
 
 .brain-fallback {
   top: 45%;
+  padding: 0.8rem 1.2rem;
+  background: rgb(var(--surface-rgb) / 0.85); /* lisible par-dessus l'image du cerveau */
+  border-radius: 12px;
 }
 
 .brain-hint {

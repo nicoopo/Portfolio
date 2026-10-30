@@ -352,15 +352,17 @@ final class SmokeTest extends WebTestCase
         self::assertResponseStatusCodeSame(204);
         self::assertSame([51.5, -0.1], array_map('floatval', $connection->fetchNumeric('SELECT ip_lat, ip_lon FROM arrivee ORDER BY id DESC LIMIT 1')));
 
-        foreach (['Pas/Un_Fuseau', 'UTC', ''] as $fuseau) {
+        foreach (['Pas/Un_Fuseau', ''] as $fuseau) {
             $envoyer($fuseau);
             self::assertResponseStatusCodeSame(400, $fuseau);
         }
+        $envoyer('UTC'); // vrai fuseau sans lieu (Tor, Firefox anti-pistage) : ignoré, sans erreur
+        self::assertResponseStatusCodeSame(204);
         $envoyer('Europe/Paris', ['HTTP_SEC_FETCH_SITE' => 'cross-site']);
         self::assertResponseStatusCodeSame(403);
         $envoyer('Europe/Paris', ['HTTP_USER_AGENT' => 'Googlebot/2.1']);
         self::assertResponseStatusCodeSame(204);
-        self::assertCount(3, $fuseaux(), 'ni autre site, ni robot');
+        self::assertCount(3, $fuseaux(), 'ni UTC, ni autre site, ni robot');
 
         // Le globe ne reçoit que l'ordre, le fuseau, sa position et le lieu de l'IP : pas l'heure
         $client->request('GET', '/arrivees?depuis='.$depuis);
