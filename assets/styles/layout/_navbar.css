@@ -266,6 +266,12 @@ html:has(.menu-galactic:popover-open) {
   }
 }
 
+@media (max-height: 500px) {
+  .navbar-container {
+    padding-block: 0.3rem;
+  }
+}
+
 /* Panneau des réglages, sous le bouton ⚙ */
 .reglages {
   position: fixed;
