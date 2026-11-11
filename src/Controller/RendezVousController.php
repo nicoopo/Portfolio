@@ -27,8 +27,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 final class RendezVousController extends AbstractController
 {
+    private const TITRE = 'Entretien avec Nicolas Cataluna';
+
     #[Route('/rendez-vous', name: 'app_rendez_vous')]
-    public function __invoke(Request $request, LienRecruteurRepository $liens, CreneauRepository $creneaux, CandidatureRepository $candidatures, EntityManagerInterface $entityManager, Notificateur $notificateur, TranslatorInterface $translator): Response
+    public function __invoke(Request $request, LienRecruteurRepository $liens, CreneauRepository $creneaux, CandidatureRepository $candidatures, EntityManagerInterface $entityManager, Notificateur $notificateur, TranslatorInterface $translator, Agenda $agenda): Response
     {
         $lien = $this->lien($request, $liens);
         $reserve = $creneaux->reservePar($lien);
@@ -81,6 +83,8 @@ final class RendezVousController extends AbstractController
             'lien' => $lien,
             'reserve' => $reserve,
             'reserve_le' => $reserve ? $date->format($reserve->getDebut()) : null,
+            // Liens Google / Outlook / Office 365 (ux_calendar_link) ; le .ics reste servi par app_rendez_vous_ics
+            'evenement' => $reserve ? $agenda->evenement($reserve->getDebut(), self::TITRE, $this->description()) : null,
             'libres' => $libres,
             'form' => $form,
         ]);
@@ -96,10 +100,15 @@ final class RendezVousController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        return new Response($agenda->ics('creneau-'.$id, $creneau->getDebut(), 'Entretien avec Nicolas Cataluna', 'https://nicolascataluna.fr — '.$this->getParameter('app.contact_email')), Response::HTTP_OK, [
+        return new Response($agenda->ics('creneau-'.$id, $creneau->getDebut(), self::TITRE, $this->description()), Response::HTTP_OK, [
             'Content-Type' => 'text/calendar; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="entretien-nicolas-cataluna.ics"',
         ]);
+    }
+
+    private function description(): string
+    {
+        return 'https://nicolascataluna.fr — '.$this->getParameter('app.contact_email');
     }
 
     private function lien(Request $request, LienRecruteurRepository $liens): LienRecruteur

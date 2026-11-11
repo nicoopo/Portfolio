@@ -17,4 +17,5 @@ return [
     EasyCorp\Bundle\EasyAdminBundle\EasyAdminBundle::class => ['all' => true],
     Sentry\SentryBundle\SentryBundle::class => ['prod' => true], // erreurs de prod → GlitchTip
     Symfony\UX\LiveComponent\LiveComponentBundle::class => ['all' => true],
+    Symfony\UX\CalendarLink\UXCalendarLinkBundle::class => ['all' => true],
 ];

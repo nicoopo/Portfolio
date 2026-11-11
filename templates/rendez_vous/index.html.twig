@@ -15,6 +15,12 @@
             {% if reserve %}
                 <p class="contact-flash contact-flash--success" role="status">{{ 'Entretien prévu le %date%. À très vite !'|trans({'%date%': reserve_le}) }}</p>
                 <p><a class="btn btn-galactic btn-galactic-primary" href="{{ path('app_rendez_vous_ics', {id: reserve.id, pour: lien.code}) }}">{{ 'Ajouter à mon agenda'|trans }}</a></p>
+                {# noreferrer : l'adresse de la page porte le code du lien (?pour=), il ne part pas chez Google ou Microsoft #}
+                <p class="rendez-vous-agendas">{{ 'Ou directement dans :'|trans }}
+                    {% for fournisseur, nom in {google: 'Google Agenda'|trans, outlook: 'Outlook.com', office365: 'Office 365'} %}
+                        <a href="{{ ux_calendar_link(evenement, fournisseur).url }}" target="_blank" rel="noopener noreferrer">{{ nom }}</a>{{ not loop.last ? ' · ' }}
+                    {% endfor %}
+                </p>
             {% elseif libres is empty %}
                 <p>{{ 'Aucun créneau libre pour l’instant : écrivez-moi, je m’adapte.'|trans }}</p>
                 <p><a class="btn btn-galactic btn-galactic-primary" href="{{ path('app_contact') }}">{{ 'Me contacter'|trans }}</a></p>
