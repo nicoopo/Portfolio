@@ -96,7 +96,7 @@ jobs:
 
       # Récupéré par ~/outils/sonarqube/scan-portfolio.sh (SonarQube local, injoignable depuis GitHub Actions)
       - name: Upload coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage
           path: var/coverage/clover.xml
