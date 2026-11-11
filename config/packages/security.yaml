@@ -13,7 +13,7 @@ security:
 
     firewalls:
         dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            pattern: ^/(_(profiler|wdt)|css|images|js)/|^/_ux/inspector\.js$ # script de UX Inspector (dev), bloqué par le pare-feu sinon
             security: false
         main:
             lazy: true

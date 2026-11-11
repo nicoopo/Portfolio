@@ -4,6 +4,7 @@ namespace App\EventListener;
 
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Contracts\Service\ResetInterface;
 use Twig\Attribute\AsTwigFunction;
 
@@ -19,6 +20,7 @@ final class ContentSecurityPolicyListener implements ResetInterface
     // Bloquante depuis l'issue #55, après une période en « Report-Only » sans violation en prod.
     // En cas de casse, revenir temporairement à 'Content-Security-Policy-Report-Only'.
     private const EN_TETE = 'Content-Security-Policy';
+    private const INSPECTEUR = '<script type="module" src="/_ux/inspector.js"';
 
     private ?string $nonce = null;
 
@@ -53,6 +55,20 @@ final class ContentSecurityPolicyListener implements ResetInterface
             "form-action 'self'",
             'report-uri /csp-report',
         ]));
+    }
+
+    /**
+     * Dev : UX Inspector injecte son script sans nonce (InjectInspectorListener, priorité -128), donc bloqué ici.
+     * On lui donne le nonce de la requête plutôt que d'affaiblir la politique. Sans effet ailleurs : la balise n'existe qu'en dev.
+     */
+    #[AsEventListener(event: KernelEvents::RESPONSE, priority: -256)]
+    public function nonceInspecteur(ResponseEvent $event): void
+    {
+        $contenu = $event->getResponse()->getContent();
+        if (!$event->isMainRequest() || false === $contenu || !str_contains($contenu, self::INSPECTEUR)) {
+            return;
+        }
+        $event->getResponse()->setContent(str_replace(self::INSPECTEUR, '<script type="module" nonce="'.$this->nonce().'" src="/_ux/inspector.js"', $contenu));
     }
 
     public function reset(): void
