@@ -9,9 +9,12 @@ use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\UX\LiveComponent\Test\InteractsWithLiveComponents;
 
 final class ContactTest extends WebTestCase
 {
+    use InteractsWithLiveComponents;
+
     private const MESSAGE = [
         'contact[nom]' => 'Ada Lovelace',
         'contact[email]' => 'ada@example.com',
@@ -99,5 +102,23 @@ final class ContactTest extends WebTestCase
         $noms = $connexion->fetchFirstColumn("SELECT nom FROM demande_contact WHERE nom LIKE 'purge-%'");
         self::assertSame(['purge-recente'], $noms);
         $connexion->executeStatement("DELETE FROM demande_contact WHERE nom = 'purge-recente'");
+    }
+
+    /** Rendu live (ContactFormulaire) : seul le champ quitté est validé, dans la langue de la page, et l'envoi reste le POST classique */
+    public function testLeFormulaireSeValidePendantLaSaisie(): void
+    {
+        $client = static::createClient();
+        $formulaire = $this->createLiveComponent('ContactFormulaire', client: $client)->setRouteLocale('de');
+        $client->catchExceptions(true); // formulaire invalide = composant redessiné avec ses erreurs, en 422
+
+        $formulaire->set('contact.email', 'pas-un-email')->set('validatedFields', ['contact.email']);
+        self::assertSame(422, $formulaire->response()->getStatusCode());
+        $html = (string) $formulaire->render();
+        self::assertStringContainsString('keine gültige E-Mail-Adresse', $html);
+        self::assertStringNotContainsString('Namen an', $html); // nom pas encore quitté
+        self::assertStringContainsString('action="/de/contact"', $html);
+
+        $formulaire->set('contact.email', 'ada@example.com');
+        self::assertStringNotContainsString('keine gültige E-Mail-Adresse', (string) $formulaire->render());
     }
 }

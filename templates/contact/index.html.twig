@@ -49,17 +49,8 @@
                 {% endfor %}
             {% endfor %}
 
-            {{ form_start(form, {attr: {class: 'contact-form', novalidate: 'novalidate'}}) }}
-                {{ form_row(form.nom) }}
-                {{ form_row(form.email) }}
-                {{ form_row(form.message) }}
-                {{ form_row(form.website) }}
-                <button type="submit" class="btn btn-galactic btn-galactic-primary">{{ 'Envoyer'|trans }}</button>
-                <p class="contact-rgpd">
-                    {{ 'Vos nom, e-mail et message servent uniquement à vous répondre, et sont supprimés après 12 mois.'|trans }}
-                    <a href="{{ path('app_confidentialite') }}">{{ 'En savoir plus'|trans }}</a>
-                </p>
-            {{ form_end(form) }}
+            {# form : le formulaire refusé par le contrôleur, pour réafficher ses erreurs #}
+            {{ component('ContactFormulaire', {form: form}) }}
         </div>
     </section>
 {% endblock %}
