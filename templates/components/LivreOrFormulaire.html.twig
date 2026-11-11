@@ -1,0 +1,10 @@
+{# Redessiné par le serveur : à la sortie de chaque champ (erreurs), et pendant la frappe du message (compteur) #}
+<div {{ attributes }}>
+  {{ form_start(form, {attr: {class: 'contact-form', novalidate: 'novalidate'}}) }}
+    {{ form_row(form.prenom) }}
+    {{ form_row(form.message, {attr: {'data-model': 'debounce(300)|' ~ form.message.vars.full_name, 'aria-describedby': 'livre-or-compteur'}}) }}
+    <p id="livre-or-compteur" class="livre-or-compteur{{ this.longueurMessage > 280 ? ' livre-or-compteur--trop' }}">{{ this.longueurMessage }}/280</p>
+    {{ form_row(form.website) }}
+    <button type="submit" class="btn btn-galactic btn-galactic-primary">{{ 'Envoyer mon étoile'|trans }}</button>
+  {{ form_end(form) }}
+</div>
