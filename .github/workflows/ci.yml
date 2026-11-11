@@ -51,7 +51,7 @@ jobs:
     # les fuseaux (SmokeTest::testLesArriveesSontPlaceesSurLeGlobe en 400 ; données de fuseaux
     # lues dans le système, cause exacte non isolée). La prod (image Docker Debian) n'est pas
     # concernée. À revoir avant la fin de vie de 24.04 (2029).
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15 # un job bloqué (téléchargement qui ne répond plus) s'arrête au lieu de tourner 6 h
     services:
       database:
@@ -81,6 +81,12 @@ jobs:
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: DIAG fuseaux (temporaire)
+        run: |
+          php -v | head -1; php -r 'echo "tz.version=", timezone_version_get(), " ICU=", INTL_ICU_VERSION, " ICU_DATA=", INTL_ICU_DATA_VERSION, PHP_EOL;'
+          php -r '$a=DateTimeZone::listIdentifiers(); echo "listIdentifiers=", count($a), " ALL_WITH_BC=", count(DateTimeZone::listIdentifiers(DateTimeZone::ALL_WITH_BC)), PHP_EOL; var_dump(in_array("Europe/Paris",$a,true), (new DateTimeZone("Europe/Paris"))->getLocation(), in_array("Asia/Calcutta", DateTimeZone::listIdentifiers(DateTimeZone::ALL_WITH_BC), true), IntlTimeZone::getCanonicalID("Asia/Calcutta"));'
+          ls -la /usr/share/zoneinfo/*.tab /usr/share/zoneinfo/tzdata.zi 2>&1; dpkg -l 'tzdata*' | tail -3
 
       - name: Install importmap
         run: php bin/console importmap:install
