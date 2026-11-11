@@ -45,6 +45,7 @@
         "symfony/string": "8.1.*",
         "symfony/translation": "8.1.*",
         "symfony/twig-bundle": "8.1.*",
+        "symfony/ux-calendar-link": "^3.7",
         "symfony/ux-icons": "^3.5",
         "symfony/ux-live-component": "^3.5",
         "symfony/validator": "8.1.*",
