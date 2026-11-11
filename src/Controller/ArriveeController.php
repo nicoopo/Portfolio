@@ -83,7 +83,9 @@ final class ArriveeController extends AbstractController
         if (\in_array($fuseau, \DateTimeZone::listIdentifiers(), true)) {
             return $fuseau;
         }
-        if (!\in_array($fuseau, \DateTimeZone::listIdentifiers(\DateTimeZone::ALL_WITH_BC), true)) {
+        // ICU et non DateTimeZone::ALL_WITH_BC : un PHP sur les fuseaux du système (Ubuntu 26.04) ignore les anciens noms sans tzdata-legacy
+        $canonique = \IntlTimeZone::getCanonicalID($fuseau);
+        if (false === $canonique) {
             return null;
         }
         // Forme canonique (ICU) → fuseau actuel, calculé la première fois seulement
@@ -93,7 +95,7 @@ final class ArriveeController extends AbstractController
             return $carte;
         }, []);
 
-        return $actuels[\IntlTimeZone::getCanonicalID($fuseau)] ?? null;
+        return $actuels[$canonique] ?? null;
     }
 
     /** Latitude et longitude du fuseau, ou null s'il n'existe pas (ou n'a pas de lieu, comme UTC) */
