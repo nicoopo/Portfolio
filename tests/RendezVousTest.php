@@ -42,6 +42,11 @@ final class RendezVousTest extends WebTestCase
             $client->followRedirect();
             self::assertSelectorTextContains('.contact-flash--success', 'Entretien prévu le');
             self::assertSelectorNotExists('form.contact-form'); // un seul rendez-vous par lien
+            // Liens d'agenda : heure de Paris passée en UTC, sans le code du lien dans le referrer
+            $utc = (new \DateTimeImmutable($libre->getDebut()->format('Y-m-d H:i:s'), new \DateTimeZone('Europe/Paris')))->setTimezone(new \DateTimeZone('UTC'));
+            self::assertSelectorExists('.rendez-vous-agendas a[href^="https://calendar.google.com/"][href*="'.$utc->format('Ymd\THis\Z').'"][rel~="noreferrer"]');
+            self::assertSelectorExists('.rendez-vous-agendas a[href^="https://outlook.live.com/"]');
+            self::assertSelectorExists('.rendez-vous-agendas a[href^="https://outlook.office.com/"]');
 
             $entityManager = self::getContainer()->get(EntityManagerInterface::class);
             $candidature = $entityManager->find(Candidature::class, $idCandidature);
