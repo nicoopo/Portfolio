@@ -82,6 +82,14 @@ final class ProjetCrudController extends AbstractCrudController
         $image = imagecreatefromstring(file_get_contents($fichier->getPathname()))
             ?: throw new \InvalidArgumentException('Image illisible : '.$fichier->getClientOriginalName());
         imagepalettetotruecolor($image); // PNG à palette : imagewebp n'accepte que les vraies couleurs
+        // Photo de téléphone : pixels enregistrés couchés, l'EXIF dit comment la redresser (@ : PNG et WebP n'en ont pas)
+        // shortcut: les orientations miroir (2, 4, 5, 7) sont ignorées, aucun téléphone courant ne les produit
+        $image = match (@exif_read_data($fichier->getPathname())['Orientation'] ?? 1) {
+            3 => imagerotate($image, 180, 0),
+            6 => imagerotate($image, -90, 0),
+            8 => imagerotate($image, 90, 0),
+            default => $image,
+        };
         if (imagesx($image) > self::LARGEUR_MAX) {
             $image = imagescale($image, self::LARGEUR_MAX);
         }

@@ -6,6 +6,7 @@
     "require": {
         "php": ">=8.5",
         "ext-ctype": "*",
+        "ext-exif": "*",
         "ext-gd": "*",
         "ext-iconv": "*",
         "doctrine/dbal": "^4.0",

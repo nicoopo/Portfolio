@@ -2,6 +2,7 @@
 
 namespace App\Tests;
 
+use App\Controller\Admin\ProjetCrudController;
 use App\Entity\Article;
 use App\Entity\Candidature;
 use App\Entity\StatutCandidature;
@@ -16,6 +17,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 final class AdminTest extends WebTestCase
 {
@@ -450,6 +452,25 @@ final class AdminTest extends WebTestCase
         $entityManager->refresh($projet);
         $projet->setImageEnvoyee(null);
         $entityManager->flush();
+    }
+
+    /** Photo de téléphone tenue en portrait : enregistrée couchée avec l'orientation EXIF 6, redressée à l'envoi */
+    public function testUnePhotoDeTelephoneEstRedressee(): void
+    {
+        $dossier = sys_get_temp_dir().'/'.uniqid('photo-', true).'/';
+        ob_start();
+        imagejpeg(imagecreatetruecolor(40, 20));
+        $jpeg = ob_get_clean();
+        // Segment EXIF minimal (TIFF big-endian, une seule entrée : Orientation = 6) glissé juste après l'en-tête JPEG
+        $exif = "Exif\0\0MM\0\x2A\0\0\0\x08\0\x01\x01\x12\0\x03\0\0\0\x01\0\x06\0\0\0\0\0\0";
+        file_put_contents($photo = sys_get_temp_dir().'/'.uniqid('photo-', true).'.jpg', substr($jpeg, 0, 2)."\xFF\xE1".pack('n', \strlen($exif) + 2).$exif.substr($jpeg, 2));
+
+        ProjetCrudController::enregistrerEnWebp(new UploadedFile($photo, 'photo.jpg', test: true), $dossier, 'photo.webp');
+
+        self::assertSame([20, 40], \array_slice(getimagesize($dossier.'photo.webp'), 0, 2));
+        unlink($dossier.'photo.webp');
+        rmdir($dossier);
+        unlink($photo);
     }
 
     public function testUneModificationEstEnregistreeEtValidee(): void
