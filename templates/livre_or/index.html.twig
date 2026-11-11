@@ -33,12 +33,8 @@
         <p class="contact-flash contact-flash--{{ type }}" role="{{ type == 'error' ? 'alert' : 'status' }}">{{ flash }}</p>
       {% endfor %}
     {% endfor %}
-    {{ form_start(form, {attr: {class: 'contact-form', novalidate: 'novalidate'}}) }}
-      {{ form_row(form.prenom) }}
-      {{ form_row(form.message) }}
-      {{ form_row(form.website) }}
-      <button type="submit" class="btn btn-galactic btn-galactic-primary">{{ 'Envoyer mon étoile'|trans }}</button>
-    {{ form_end(form) }}
+    {# form : le formulaire refusé par le contrôleur, pour réafficher ses erreurs #}
+    {{ component('LivreOrFormulaire', {form: form}) }}
   </div>
 </section>
 {% endblock %}

@@ -79,3 +79,19 @@
   font-size: 1.4rem;
   text-align: center;
 }
+
+/* Compteur du message, collé sous le champ (LivreOrFormulaire) */
+.livre-or-compteur {
+  margin: -0.7rem 0 0;
+  color: var(--texte-doux);
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+.livre-or-compteur--trop {
+  color: #ff8fab; /* même rose que les erreurs (.contact-form ul) */
+}
+
+:root[data-theme="light"] .livre-or-compteur--trop {
+  color: #9b1239;
+}

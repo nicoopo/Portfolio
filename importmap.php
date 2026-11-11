@@ -47,4 +47,5 @@ return [
     '@sentry/core/browser' => ['version' => '11.9.0'],
     '@sentry/conventions/op' => ['version' => '0.27.0'],
     'web-vitals' => ['version' => '6.2.3'],
+    '@symfony/ux-live-component' => ['path' => './vendor/symfony/ux-live-component/assets/dist/live_controller.js'],
 ];
