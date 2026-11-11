@@ -347,7 +347,9 @@ final class SmokeTest extends WebTestCase
         self::assertResponseStatusCodeSame(204);
         $envoyer('Asia/Calcutta'); // ancien nom, encore donné par certains navigateurs
         self::assertResponseStatusCodeSame(204);
-        self::assertSame(['Europe/Paris', 'Asia/Kolkata'], $fuseaux());
+        $envoyer('America/Montreal'); // ancien nom sans équivalent canonique dans ICU : même règles, même pays
+        self::assertResponseStatusCodeSame(204);
+        self::assertSame(['Europe/Paris', 'Asia/Kolkata', 'America/Toronto'], $fuseaux());
         $envoyer('Europe/London', ['REMOTE_ADDR' => '81.2.69.142']); // Londres dans la base d'essai
         self::assertResponseStatusCodeSame(204);
         self::assertSame([51.5, -0.1], array_map('floatval', $connection->fetchNumeric('SELECT ip_lat, ip_lon FROM arrivee ORDER BY id DESC LIMIT 1')));
