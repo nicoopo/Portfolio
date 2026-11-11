@@ -79,23 +79,24 @@ final class ArriveeController extends AbstractController
      */
     public static function actuel(string $fuseau): ?string
     {
-        static $actuels = null;
-        if (\in_array($fuseau, \DateTimeZone::listIdentifiers(), true)) {
+        $actuels = \DateTimeZone::listIdentifiers();
+        if (\in_array($fuseau, $actuels, true)) {
             return $fuseau;
         }
         // ICU et non DateTimeZone::ALL_WITH_BC : un PHP sur les fuseaux du système (Ubuntu 26.04) ignore les anciens noms sans tzdata-legacy
-        $canonique = \IntlTimeZone::getCanonicalID($fuseau);
-        if (false === $canonique) {
+        $pays = \IntlTimeZone::getRegion($fuseau);
+        if (false === $pays) {
             return null;
         }
-        // Forme canonique (ICU) → fuseau actuel, calculé la première fois seulement
-        $actuels ??= array_reduce(\DateTimeZone::listIdentifiers(), function (array $carte, string $nom) {
-            $carte[\IntlTimeZone::getCanonicalID($nom)] ??= $nom;
+        // Fuseau actuel aux mêmes règles et du même pays (America/Montreal → America/Toronto, pas America/Nassau)
+        for ($i = 0, $n = \IntlTimeZone::countEquivalentIDs($fuseau); $i < $n; ++$i) {
+            $equivalent = \IntlTimeZone::getEquivalentID($fuseau, $i);
+            if (\in_array($equivalent, $actuels, true) && \IntlTimeZone::getRegion($equivalent) === $pays) {
+                return $equivalent;
+            }
+        }
 
-            return $carte;
-        }, []);
-
-        return $actuels[$canonique] ?? null;
+        return null;
     }
 
     /** Latitude et longitude du fuseau, ou null s'il n'existe pas (ou n'a pas de lieu, comme UTC) */
