@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=../../vendor/symfony/routing/Loader/schema/routing.schema.json
+# Rendus des composants live (livre d'or) : même préfixe de langue que les pages (config/routes.yaml),
+# pour que les messages d'erreur restent dans la langue de la page
+live_component:
+    resource: '@LiveComponentBundle/config/routes.php'
+    prefix:
+        fr: '/_components'
+        en: '/en/_components'
+        es: '/es/_components'
+        de: '/de/_components'
+        it: '/it/_components'
+        pt: '/pt/_components'
