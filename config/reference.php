@@ -1633,6 +1633,12 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     secret?: scalar|Param|null, // The secret used to compute fingerprints and checksums // Default: "%kernel.secret%"
  *     fetch_credentials?: "same-origin"|"include"|"omit"|Param, // The default fetch credentials mode for all Live Components ('same-origin', 'include', 'omit') // Default: "same-origin"
  * }
+ * @psalm-type UxInspectorConfig = array{
+ *     enabled?: bool|Param, // Enable the inspector. It stays off when kernel.debug is false. // Default: true
+ *     pull_tab?: bool|Param, // Display a small pull tab on the right edge of the screen to open the Inspector. // Default: true
+ *     exclude_paths?: list<scalar|Param|null>,
+ *     ignore_selectors?: list<scalar|Param|null>,
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -1666,6 +1672,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         ux_icons?: UxIconsConfig,
  *         twig_component?: TwigComponentConfig,
  *         live_component?: LiveComponentConfig,
+ *         ux_inspector?: UxInspectorConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,

@@ -2,7 +2,12 @@
 
 namespace App\Tests;
 
+use App\EventListener\ContentSecurityPolicyListener;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 final class CspTest extends WebTestCase
 {
@@ -39,5 +44,22 @@ final class CspTest extends WebTestCase
         ]]));
 
         self::assertResponseStatusCodeSame(204);
+    }
+
+    /** Dev : le script injecté par UX Inspector reçoit le nonce de l'en-tête ; une page sans lui n'est pas touchée */
+    public function testLeScriptDeLInspecteurRecoitLeNonce(): void
+    {
+        $csp = new ContentSecurityPolicyListener();
+        $evenement = fn (string $html) => new ResponseEvent(static::createKernel(), new Request(), HttpKernelInterface::MAIN_REQUEST, new Response($html));
+
+        $avec = $evenement('<body><script type="module" src="/_ux/inspector.js"></script></body>');
+        $csp($avec);
+        $csp->nonceInspecteur($avec);
+        preg_match("/'nonce-([^']+)'/", $avec->getResponse()->headers->get(self::EN_TETE), $nonce);
+        self::assertStringContainsString('<script type="module" nonce="'.$nonce[1].'" src="/_ux/inspector.js">', $avec->getResponse()->getContent());
+
+        $sans = $evenement($html = '<body><script src="/ailleurs.js"></script></body>');
+        $csp->nonceInspecteur($sans);
+        self::assertSame($html, $sans->getResponse()->getContent());
     }
 }
