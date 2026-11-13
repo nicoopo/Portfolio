@@ -26,7 +26,7 @@
       <h2 id="annee-{{ annee }}">{{ annee }}</h2>
       <ul>
         {% for projet in projets %}
-        {% set techs_projet = projet.tech|split(',')|map(t => t|trim) %}
+        {% set techs_projet = projet.techs %}
         <li class="frise-projet" data-filtre-techno-target="projet" data-technos="{{ techs_projet|json_encode }}">
           <h3><a href="{{ path('app_project', {slug: projet.slug}) }}">{{ projet|loc('titre') }}</a></h3>
           <p>{{ projet|loc('description') }}</p>

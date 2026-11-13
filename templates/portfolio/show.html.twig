@@ -9,7 +9,7 @@
     <meta property="og:image" content="{{ url('app_partage_projet', {slug: projet.slug}) }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="{{ projet|loc('titre') }} · {{ projet|loc('categorie') }} · {{ projet.tech|split(',')|map(t => t|trim)|join(', ') }}">
+    <meta property="og:image:alt" content="{{ projet|loc('titre') }} · {{ projet|loc('categorie') }} · {{ projet.techs|join(', ') }}">
 {% endblock %}
 
 {% block body %}
@@ -45,7 +45,7 @@
     <div class="projet-fiche">
       <h2>{{ 'Technologies'|trans }}</h2>
       <ul class="projet-techs">
-        {% for tech in projet.tech|split(',') %}<li>{{ tech|trim }}</li>{% endfor %}
+        {% for tech in projet.techs %}<li>{{ tech }}</li>{% endfor %}
       </ul>
 
       {% if projet.competences is not empty %}

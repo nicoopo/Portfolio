@@ -33,7 +33,7 @@ final class PortfolioController extends AbstractController
         $vues = [];
         foreach ($projets->findDates() as $projet) {
             $annees[$projet->getAnnee()][] = $projet;
-            $techs = array_map('trim', explode(',', $projet->getTech()));
+            $techs = $projet->getTechs();
             $nouvelles[$projet->getId()] = array_values(array_diff($techs, $vues));
             $vues = array_merge($vues, $techs);
         }

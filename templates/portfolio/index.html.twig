@@ -45,7 +45,7 @@
           </h3>
           <p class="projet-carte-description">{{ projet|loc('description') }}</p>
           <ul class="projet-techs" aria-label="{{ 'Technologies'|trans }}">
-            {% for tech in projet.tech|split(',') %}<li>{{ tech|trim }}</li>{% endfor %}
+            {% for tech in projet.techs %}<li>{{ tech }}</li>{% endfor %}
           </ul>
           <span class="projet-carte-suite" aria-hidden="true">{{ 'Voir le projet'|trans }} →</span>
         </div>

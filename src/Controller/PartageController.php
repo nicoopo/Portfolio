@@ -24,7 +24,7 @@ final class PartageController extends AbstractController
         return $this->png(
             $this->traduction->loc($projet, 'categorie'),
             $this->traduction->loc($projet, 'titre'),
-            array_map('trim', explode(',', $projet->getTech())),
+            $projet->getTechs(),
         );
     }
 
