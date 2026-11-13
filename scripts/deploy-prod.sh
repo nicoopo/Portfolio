@@ -17,6 +17,12 @@ $COMPOSE build --pull --build-arg DBIP_MOIS="$(date +%Y-%m)" php # --pull : touj
 
 # Avant la recréation : le nouveau code ne tourne jamais sur l'ancienne base (migrations additives :
 # l'ancien container, encore en service, s'accommode d'une table ou d'une colonne en plus)
+echo "==> Sauvegarde avant migration"
+# Une migration ratée ne coûte pas la journée depuis la sauvegarde de la nuit (premier déploiement : pas encore de base)
+if $COMPOSE ps --status running --services | grep -qx database; then
+    bash scripts/sauvegarde-base.sh
+fi
+
 echo "==> Migrations de la base"
 $COMPOSE run --rm -T php php bin/console doctrine:migrations:migrate --no-interaction
 
