@@ -8,6 +8,7 @@ use App\Repository\CvCompetenceRepository;
 use App\Repository\CvProfilRepository;
 use App\Repository\ExperienceRepository;
 use App\Repository\ProjetRepository;
+use App\Twig\Traduction;
 use Mcp\Capability\Attribute\McpTool;
 use Mcp\Capability\Attribute\Schema;
 use Mcp\Schema\ToolAnnotations;
@@ -29,6 +30,7 @@ final class Portfolio
         private readonly CategorieCompetenceRepository $categories,
         private readonly ProjetRepository $projets,
         private readonly CreneauRepository $creneaux,
+        private readonly Traduction $traduction,
         private readonly UrlGeneratorInterface $urls,
     ) {
     }
@@ -123,10 +125,10 @@ final class Portfolio
         return ['creneaux_libres' => \count($this->creneaux->libres()), 'contact' => $this->url('app_contact', $langue)];
     }
 
-    /** Comme le filtre Twig « loc » (Traduction), mais avec la langue demandée par l'outil plutôt que celle de la requête */
+    /** Le filtre Twig « loc », avec la langue demandée par l'outil ; null tant que le profil n'est pas créé */
     private function loc(?object $entite, string $champ, string $langue): ?string
     {
-        return null === $entite ? null : ($entite->getTraductions()[$langue][$champ] ?? $entite->{'get'.ucfirst($champ)}());
+        return null === $entite ? null : $this->traduction->loc($entite, $champ, $langue);
     }
 
     private function url(string $route, string $langue, array $parametres = []): string

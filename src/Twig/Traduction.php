@@ -8,7 +8,7 @@ use Twig\Attribute\AsTwigFilter;
 /**
  * Contenu de la base dans la langue de la page : la traduction de l'entité (trait Traduisible) si elle
  * existe dans cette langue, sinon le français.
- * Twig : {{ competence|loc('nom') }} ; PHP : $traduction->loc($competence, 'nom').
+ * Twig : {{ competence|loc('nom') }} ; PHP : $traduction->loc($competence, 'nom'), ou avec une langue imposée (serveur MCP).
  */
 final class Traduction
 {
@@ -17,9 +17,9 @@ final class Traduction
     }
 
     #[AsTwigFilter('loc')]
-    public function loc(object $entite, string $champ): ?string
+    public function loc(object $entite, string $champ, ?string $langue = null): ?string
     {
-        $langue = $this->requestStack->getCurrentRequest()?->getLocale();
+        $langue ??= $this->requestStack->getCurrentRequest()?->getLocale();
 
         return $entite->getTraductions()[$langue][$champ] ?? $entite->{'get'.ucfirst($champ)}();
     }
