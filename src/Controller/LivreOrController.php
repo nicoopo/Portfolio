@@ -41,12 +41,14 @@ final class LivreOrController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
-            if ($data['website']) {
-                $journaliste->noter(Journal::SPAM_BLOQUE, 'Robot bloqué par le champ piège du livre d’or');
-            } elseif (!$livreOrLimiter->create(BlocIp::de($request))->consume()->isAccepted()) {
+            // Limite d'abord, robots compris : sinon un flot sur le champ piège remplirait le journal sans fin
+            if (!$livreOrLimiter->create(BlocIp::de($request))->consume()->isAccepted()) {
                 $this->addFlash('error', $translator->trans('Beaucoup de messages d’un coup : réessayez dans une heure.'));
 
                 return $this->redirectToRoute('app_livre_or', ['_fragment' => 'signer']);
+            }
+            if ($data['website']) {
+                $journaliste->noter(Journal::SPAM_BLOQUE, 'Robot bloqué par le champ piège du livre d’or');
             } else {
                 $entityManager->persist($message = new MessageLivreOr(trim($data['prenom']), trim($data['message']), $request->getLocale()));
                 $entityManager->flush();
