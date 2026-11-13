@@ -1,0 +1,6 @@
+# Traduction automatique dans l'administration (#423) : App\Service\Traducteur.
+# Clé dans .env.local du serveur ; vide, le bouton « Traduire » échoue avec un message, le reste du site marche.
+ai:
+    platform:
+        anthropic:
+            api_key: '%env(ANTHROPIC_API_KEY)%'
