@@ -1,6 +1,6 @@
-# Traduction automatique dans l'administration (#423) : App\Service\Traducteur.
+# Traduction automatique dans l'administration (#423) : App\Service\Traducteur, avec Mistral (offre gratuite « Experiment »).
 # Clé dans .env.local du serveur ; vide, le bouton « Traduire » échoue avec un message, le reste du site marche.
 ai:
     platform:
-        anthropic:
-            api_key: '%env(ANTHROPIC_API_KEY)%'
+        mistral:
+            api_key: '%env(MISTRAL_API_KEY)%'

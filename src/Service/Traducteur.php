@@ -9,13 +9,13 @@ use Symfony\AI\Platform\PlatformInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
- * Traduit le français d'une entité (trait Traduisible) vers les autres langues du site, avec Claude (#423).
+ * Traduit le français d'une entité (trait Traduisible) vers les autres langues du site, avec Mistral (#423).
  * Ne remplit que les traductions vides : une traduction déjà saisie ou relue n'est jamais remplacée.
  * Appelé seulement depuis l'administration.
  */
 final class Traducteur
 {
-    public const MODELE = 'claude-sonnet-5-5';
+    public const MODELE = 'mistral-large-latest';
     /** Garde-fou de coût : texte français envoyé par appel, en caractères (un long article en fait ~15 000) */
     public const LONGUEUR_MAX = 30_000;
 
