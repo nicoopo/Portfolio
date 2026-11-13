@@ -19,8 +19,6 @@ use Symfony\Component\Validator\Constraints\Image;
 
 final class ArticleCrudController extends AbstractCrudController
 {
-    use ActionTraduire;
-
     public static function getEntityFqcn(): string
     {
         return Article::class;
@@ -39,7 +37,7 @@ final class ArticleCrudController extends AbstractCrudController
         $apercu = Action::new('apercu', 'Aperçu', 'fa fa-eye')->linkToCrudAction('apercu')
             ->setHtmlAttributes(['target' => '_blank']);
 
-        return $this->ajouterTraduire($actions->add(Crud::PAGE_INDEX, $apercu)->add(Crud::PAGE_EDIT, $apercu));
+        return $actions->add(Crud::PAGE_INDEX, $apercu)->add(Crud::PAGE_EDIT, $apercu);
     }
 
     /** L'article tel qu'il s'affichera sur le site, brouillon ou programmé compris (dernière version enregistrée) */
