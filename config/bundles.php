@@ -20,5 +20,4 @@ return [
     Symfony\UX\CalendarLink\UXCalendarLinkBundle::class => ['all' => true],
     Symfony\UX\Inspector\UXInspectorBundle::class => ['dev' => true],
     Symfony\AI\McpBundle\McpBundle::class => ['all' => true],
-    Symfony\AI\AiBundle\AiBundle::class => ['all' => true],
 ];

@@ -15,8 +15,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 /** Page /now : une seule ligne, qu'on modifie (ni création ni suppression). */
 final class MaintenantCrudController extends AbstractCrudController
 {
-    use ActionTraduire;
-
     public static function getEntityFqcn(): string
     {
         return Maintenant::class;
@@ -29,7 +27,7 @@ final class MaintenantCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-        return $this->ajouterTraduire($actions->disable(Action::NEW, Action::DELETE, Action::BATCH_DELETE));
+        return $actions->disable(Action::NEW, Action::DELETE, Action::BATCH_DELETE);
     }
 
     public function configureFields(string $pageName): iterable
