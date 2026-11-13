@@ -80,11 +80,12 @@ final class RendezVousTest extends WebTestCase
         $moi = (new LienRecruteur())->setEntreprise('RDV Moi SA');
         $autre = (new LienRecruteur())->setEntreprise('RDV Autre SA');
         $creneau = (new Creneau())->setDebut(new \DateTimeImmutable('+4 days 10:00'));
-        foreach ([$moi, $autre, $creneau] as $entite) {
+        $encoreLibre = (new Creneau())->setDebut(new \DateTimeImmutable('+5 days 10:00')); // le formulaire reste affiché
+        foreach ([$moi, $autre, $creneau, $encoreLibre] as $entite) {
             $entityManager->persist($entite);
         }
         $entityManager->flush();
-        [$code, $idAutre, $idCreneau] = [$moi->getCode(), $autre->getId(), $creneau->getId()];
+        [$code, $idAutre, $idCreneau, $idLibre] = [$moi->getCode(), $autre->getId(), $creneau->getId(), $encoreLibre->getId()];
         $connection = $entityManager->getConnection();
 
         try {
@@ -95,9 +96,10 @@ final class RendezVousTest extends WebTestCase
             $client->submitForm('Réserver ce créneau', ['form[creneau]' => $idCreneau, 'form[nom]' => 'Ada', 'form[email]' => 'ada@rdv.example']);
 
             self::assertResponseStatusCodeSame(422); // formulaire refusé : ce créneau n'est plus proposé
+            self::assertSelectorTextContains('body', 'Ce créneau vient d’être pris : choisissez-en un autre.');
             self::assertSame($idAutre, (int) $connection->fetchOne('SELECT lien_id FROM creneau WHERE id = :id', ['id' => $idCreneau]));
         } finally {
-            $connection->executeStatement('DELETE FROM creneau WHERE id = :id', ['id' => $idCreneau]);
+            $connection->executeStatement('DELETE FROM creneau WHERE id IN (:a, :b)', ['a' => $idCreneau, 'b' => $idLibre]);
             $connection->executeStatement('DELETE FROM lien_recruteur WHERE id IN (:a, :b)', ['a' => $moi->getId(), 'b' => $idAutre]);
         }
     }

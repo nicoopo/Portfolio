@@ -46,6 +46,8 @@ final class RendezVousController extends AbstractController
                 'choice_label' => fn (Creneau $c) => $date->format($c->getDebut()),
                 'choice_translation_domain' => false,
                 'expanded' => true,
+                // Créneau pris entre l'affichage et l'envoi : il n'est plus dans les choix (domaine validators)
+                'invalid_message' => 'Ce créneau vient d’être pris : choisissez-en un autre.',
                 'constraints' => [new Assert\NotNull()],
             ])
             ->add('nom', TextType::class, ['label' => 'Nom', 'constraints' => [new Assert\NotBlank(), new Assert\Length(max: 100)]])
