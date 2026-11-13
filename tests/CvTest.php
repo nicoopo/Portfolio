@@ -91,6 +91,13 @@ final class CvTest extends WebTestCase
         self::assertSame('Voyages : Portugal', $filtre->retirer('✈️ Voyages : Portugal'));
         self::assertSame('Musique', $filtre->retirer('🎵 Musique'));
         self::assertSame('Café — été', $filtre->retirer('Café — été')); // accents et tirets intacts
+        // Que les anciennes plages laissaient passer : emojis hors plages, touches numérotées, peau et liants
+        self::assertSame('Montre et réveil', $filtre->retirer('⌚ Montre et ⏰ réveil'));
+        self::assertSame('Note', $filtre->retirer('Note #️⃣ 1️⃣'));
+        self::assertSame('Café et dev', $filtre->retirer('Café ☕ et 🧑🏽‍💻 dev'));
+        self::assertSame('France', $filtre->retirer('France 🇫🇷'));
+        // Symboles que la police du PDF affiche : gardés
+        self::assertSame('Marque™ © ® ★ ♟ → 100 %', $filtre->retirer('Marque™ © ® ★ ♟ → 100 %'));
     }
 
     /** Lien « site auquel j'ai contribué » sous l'expérience HabitatPresto, en français et en anglais */
