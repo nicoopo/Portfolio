@@ -107,7 +107,7 @@ final class Portfolio
             $liste[] = [
                 'titre' => $this->loc($p, 'titre', $langue),
                 'description' => $this->loc($p, 'description', $langue),
-                'technologies' => array_map('trim', explode(',', $p->getTech())),
+                'technologies' => $p->getTechs(),
                 'groupe' => $this->loc($p, 'categorie', $langue),
                 'annee' => $p->getAnnee(),
                 'page' => $this->url('app_project', $langue, ['slug' => $p->getSlug()]),

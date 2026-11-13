@@ -100,6 +100,8 @@ class Projet
     public function getTitre(): string { return $this->titre; }
     public function getDescription(): string { return $this->description; }
     public function getTech(): string { return $this->tech; }
+    /** @return list<string> « Symfony, Docker » → ['Symfony', 'Docker'] */
+    public function getTechs(): array { return array_values(array_filter(array_map('trim', explode(',', $this->tech)), 'strlen')); }
     public function getImage(): ?string { return $this->image; }
     public function getImageEnvoyee(): ?string { return $this->imageEnvoyee; }
 
