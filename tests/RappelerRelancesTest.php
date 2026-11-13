@@ -4,6 +4,7 @@ namespace App\Tests;
 
 use App\Entity\Candidature;
 use App\Entity\StatutCandidature;
+use App\HeureParis;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -19,7 +20,7 @@ final class RappelerRelancesTest extends KernelTestCase
         $recente = (new Candidature())->setEntreprise('Jeune Pousse')->setPoste('Dev');
         $repondu = (new Candidature())->setEntreprise('Déjà Répondu')->setPoste('Dev')
             ->setEnvoyeeLe(new \DateTimeImmutable('-10 days'))->setStatut(StatutCandidature::Entretien);
-        $entretienDemain = (new Candidature())->setEntreprise('Entretien Demain')->setPoste('Dev')->setEntretienLe(new \DateTimeImmutable('tomorrow 14:30'));
+        $entretienDemain = (new Candidature())->setEntreprise('Entretien Demain')->setPoste('Dev')->setEntretienLe(HeureParis::at('tomorrow 14:30'));
         $entretienLoin = (new Candidature())->setEntreprise('Entretien Lointain')->setPoste('Dev')->setEntretienLe(new \DateTimeImmutable('+5 days'));
         foreach ([$enRetard, $recente, $repondu, $entretienDemain, $entretienLoin] as $candidature) {
             $entityManager->persist($candidature);

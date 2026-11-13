@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\HeureParis;
 use App\Entity\Candidature;
 use App\Repository\CandidatureRepository;
 use App\Service\Notificateur;
@@ -28,7 +29,7 @@ final class RappelerRelancesCommand
         $relances = $this->candidatures->aRelancer();
 
         $lignesEntretiens = array_map(fn (Candidature $c) => '• '.$c.' : '
-            .($c->getEntretienLe() < new \DateTimeImmutable('tomorrow') ? 'aujourd’hui' : 'demain').' à '.$c->getEntretienLe()->format('H:i'), $entretiens);
+            .($c->getEntretienLe() < HeureParis::at('tomorrow') ? 'aujourd’hui' : 'demain').' à '.$c->getEntretienLe()->format('H:i'), $entretiens);
         $lignesRelances = array_map(fn (Candidature $c) => '• '.$c.' (envoyée le '.$c->getEnvoyeeLe()->format('d/m').')', $relances);
 
         if ($entretiens) {
