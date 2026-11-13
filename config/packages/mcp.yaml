@@ -1,0 +1,11 @@
+# Serveur MCP du portfolio (#422) : outils en lecture seule de src/Mcp/, sur /mcp (config/routes/mcp.yaml).
+mcp:
+    servers:
+        default:
+            name: 'nicolascataluna.fr'
+            # Seulement nos outils, pas ceux qu'un bundle tiers déclarerait
+            registry: 'App\Mcp\'
+            http:
+                path: /mcp
+                # Protection contre le DNS rebinding : seuls ces hôtes peuvent appeler /mcp
+                allowed_hosts: ['localhost', 'nicolascataluna.fr', 'www.nicolascataluna.fr']

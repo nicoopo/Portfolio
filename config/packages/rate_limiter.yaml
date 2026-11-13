@@ -37,6 +37,11 @@ framework:
             policy: sliding_window
             limit: 30
             interval: '1 minute'
+        # Serveur MCP (/mcp, LimiteMcpListener) : un assistant enchaîne quelques appels par question, pas des centaines
+        mcp:
+            policy: sliding_window
+            limit: 60
+            interval: '1 minute'
 
 when@test:
     framework:
@@ -48,4 +53,6 @@ when@test:
             contact:
                 policy: no_limit
             arrivees:
+                policy: no_limit
+            mcp:
                 policy: no_limit
