@@ -306,8 +306,14 @@ final class AdminTest extends WebTestCase
         $client->request('GET', '/admin');
         self::assertSelectorTextContains('body', 'candidature(s) à relancer');
 
+        // Lien recruteur créé avec la candidature : la page de rendez-vous s'ouvre avec
+        $candidature = self::getContainer()->get(EntityManagerInterface::class)->getRepository(Candidature::class)->findOneBy(['entreprise' => 'Initech']);
+        self::assertSame('Développeur PHP', $candidature->getLien()?->getPoste());
+        $client->request('GET', '/rendez-vous?pour='.$candidature->getLien()->getCode());
+        self::assertResponseIsSuccessful();
+
         // Lettre de motivation à son nom, en PDF
-        $id = self::getContainer()->get(EntityManagerInterface::class)->getRepository(Candidature::class)->findOneBy(['entreprise' => 'Initech'])->getId();
+        $id = $candidature->getId();
         $client->request('GET', '/admin/candidature/'.$id.'/lettre');
         self::assertResponseHeaderSame('Content-Type', 'application/pdf');
         self::assertStringContainsString('Lettre_Nicolas_Cataluna_Initech.pdf', $client->getResponse()->headers->get('Content-Disposition'));
