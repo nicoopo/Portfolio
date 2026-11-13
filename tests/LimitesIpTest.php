@@ -3,10 +3,16 @@
 namespace App\Tests;
 
 use App\Entity\Journal;
+use App\EventListener\LimiteMcpListener;
 use App\Security\BlocIp;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\Storage\InMemoryStorage;
 
 /**
  * Limites anti-abus : en IPv6, c'est tout le bloc /64 qui compte (une box change d'adresse à volonté dans le sien).
@@ -20,6 +26,26 @@ final class LimitesIpTest extends WebTestCase
         self::assertSame($cle('2a01:e0a:c06:3b90::1'), $cle('2a01:e0a:c06:3b90:dead:beef:1:2'));
         self::assertNotSame($cle('2a01:e0a:c06:3b90::1'), $cle('2a01:e0a:c06:3b91::1'));
         self::assertNotSame($cle('203.0.113.1'), $cle('203.0.113.2'));
+    }
+
+    /** Serveur MCP : au-delà de la limite, 429 en JSON-RPC avec Retry-After ; ni le préflight CORS ni les autres pages ne comptent */
+    public function testLeServeurMcpEstLimite(): void
+    {
+        $listener = new LimiteMcpListener(new RateLimiterFactory(['id' => 'mcp', 'policy' => 'fixed_window', 'limit' => 1, 'interval' => '1 minute'], new InMemoryStorage()));
+        $appel = function (string $chemin, string $methode = 'POST') use ($listener): ?Response {
+            $event = new RequestEvent($this->createStub(HttpKernelInterface::class), Request::create($chemin, $methode), HttpKernelInterface::MAIN_REQUEST);
+            $listener($event);
+
+            return $event->getResponse();
+        };
+
+        self::assertNull($appel('/mcp'));
+        self::assertNull($appel('/mcp', 'OPTIONS'));
+        self::assertNull($appel('/contact'));
+        $refus = $appel('/mcp');
+        self::assertSame(Response::HTTP_TOO_MANY_REQUESTS, $refus?->getStatusCode());
+        self::assertGreaterThan(0, (int) $refus->headers->get('Retry-After'));
+        self::assertSame(-32000, json_decode($refus->getContent(), true)['error']['code']);
     }
 
     /** Changer d'adresse dans son /64 ne redonne pas d'essais : le 6e est refusé avant même de vérifier le mot de passe */

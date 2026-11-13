@@ -41,6 +41,10 @@
 
             </div>
 
+            {# Serveur MCP (App\Mcp\Portfolio) : adresse absolue, à copier dans les réglages de l'assistant #}
+            <p class="contact-mcp">{{ 'Votre assistant IA (Claude, ChatGPT…) peut aussi interroger mon profil : ajoutez le serveur MCP'|trans }}
+                <code>{{ url('_mcp_endpoint_default') }}</code></p>
+
             <h2 class="contact-form-title" id="formulaire">{{ 'Ou écrivez-moi ici'|trans }}</h2>
 
             {% for type, messages in app.flashes(['success', 'error']) %}

@@ -190,3 +190,16 @@
 .contact-rgpd a {
   color: var(--color-secondary);
 }
+
+/* Adresse du serveur MCP sous les liens (App\Mcp\Portfolio) */
+.contact-mcp {
+  margin: 1.5rem auto 0;
+  max-width: 60ch;
+  color: var(--color-text-light);
+  font-size: 0.9rem;
+}
+
+.contact-mcp code {
+  overflow-wrap: anywhere; /* pas de défilement horizontal à 320 px */
+  user-select: all; /* un clic sélectionne toute l'adresse */
+}

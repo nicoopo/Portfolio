@@ -19,4 +19,5 @@ return [
     Symfony\UX\LiveComponent\LiveComponentBundle::class => ['all' => true],
     Symfony\UX\CalendarLink\UXCalendarLinkBundle::class => ['all' => true],
     Symfony\UX\Inspector\UXInspectorBundle::class => ['dev' => true],
+    Symfony\AI\McpBundle\McpBundle::class => ['all' => true],
 ];
