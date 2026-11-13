@@ -70,12 +70,6 @@ final class CandidatureCrudController extends AbstractCrudController
         parent::persistEntity($entityManager, $entityInstance);
     }
 
-    public function updateEntity(EntityManagerInterface $entityManager, object $entityInstance): void
-    {
-        $this->lierAuSite($entityManager, $entityInstance);
-        parent::updateEntity($entityManager, $entityInstance);
-    }
-
     /** Sans lien choisi, la candidature reçoit le sien : la lettre et le mail mènent au site et au rendez-vous */
     private function lierAuSite(EntityManagerInterface $entityManager, Candidature $candidature): void
     {
