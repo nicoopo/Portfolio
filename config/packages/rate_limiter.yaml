@@ -31,6 +31,11 @@ framework:
             policy: sliding_window
             limit: 60
             interval: '1 minute'
+        # … et par IP (bloc /64 en IPv6) : un script seul ne remplit pas le globe ni ne bloque les vrais visiteurs
+        arrivees_ip:
+            policy: sliding_window
+            limit: 10
+            interval: '1 hour'
         # Erreurs JavaScript relayées à GlitchTip (MonitoringController) : une limite pour tout le monde, contre un
         # flot d'envois (boucle d'erreurs, script), pas contre une personne
         erreurs_js:
@@ -53,6 +58,8 @@ when@test:
             contact:
                 policy: no_limit
             arrivees:
+                policy: no_limit
+            arrivees_ip:
                 policy: no_limit
             mcp:
                 policy: no_limit
