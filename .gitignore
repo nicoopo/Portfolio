@@ -37,3 +37,6 @@
 
 # Captures et logs des tests navigateur (Playwright MCP)
 /.playwright-mcp/
+
+# Graphe de connaissances généré par le skill graphify
+/graphify-out/
