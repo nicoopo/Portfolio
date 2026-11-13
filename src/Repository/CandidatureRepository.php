@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\HeureParis;
 use App\Entity\Candidature;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -22,7 +23,7 @@ class CandidatureRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('c')
             ->where('c.relancerLe <= :aujourdhui')
             ->orderBy('c.relancerLe')
-            ->setParameter('aujourdhui', new \DateTimeImmutable('today'))
+            ->setParameter('aujourdhui', HeureParis::at('today'))
             ->getQuery()
             ->getResult();
     }
@@ -32,7 +33,7 @@ class CandidatureRepository extends ServiceEntityRepository
         return (int) $this->createQueryBuilder('c')
             ->select('COUNT(c)')
             ->where('c.relancerLe <= :aujourdhui')
-            ->setParameter('aujourdhui', new \DateTimeImmutable('today'))
+            ->setParameter('aujourdhui', HeureParis::at('today'))
             ->getQuery()
             ->getSingleScalarResult();
     }
@@ -43,8 +44,8 @@ class CandidatureRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('c')
             ->where('c.entretienLe >= :aujourdhui AND c.entretienLe < :apresDemain')
             ->orderBy('c.entretienLe')
-            ->setParameter('aujourdhui', new \DateTimeImmutable('today'))
-            ->setParameter('apresDemain', new \DateTimeImmutable('today +2 days'))
+            ->setParameter('aujourdhui', HeureParis::at('today'))
+            ->setParameter('apresDemain', HeureParis::at('today +2 days'))
             ->getQuery()
             ->getResult();
     }

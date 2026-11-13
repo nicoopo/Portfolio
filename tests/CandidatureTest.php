@@ -4,6 +4,7 @@ namespace App\Tests;
 
 use App\Entity\Candidature;
 use App\Entity\StatutCandidature;
+use App\HeureParis;
 use PHPUnit\Framework\TestCase;
 
 final class CandidatureTest extends TestCase
@@ -16,7 +17,7 @@ final class CandidatureTest extends TestCase
         self::assertTrue($candidature->aRelancer());
 
         $candidature->setStatut(StatutCandidature::Relancee);
-        self::assertSame((new \DateTimeImmutable('today +7 days'))->format('Y-m-d'), $candidature->getRelancerLe()->format('Y-m-d'));
+        self::assertSame(HeureParis::at('today +7 days')->format('Y-m-d'), $candidature->getRelancerLe()->format('Y-m-d'));
         self::assertFalse($candidature->aRelancer());
 
         self::assertNull($candidature->getReponseLe());
@@ -24,7 +25,7 @@ final class CandidatureTest extends TestCase
         $candidature->setStatut(StatutCandidature::Entretien);
         self::assertNull($candidature->getRelancerLe());
         self::assertFalse($candidature->aRelancer());
-        self::assertEquals(new \DateTimeImmutable('today'), $candidature->getReponseLe());
+        self::assertEquals(HeureParis::at('today'),$candidature->getReponseLe());
 
         // Entretien → acceptée : la réponse garde sa date (ici remise à hier pour le vérifier)
         (new \ReflectionProperty($candidature, 'reponseLe'))->setValue($candidature, new \DateTimeImmutable('yesterday'));

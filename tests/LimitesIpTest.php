@@ -48,6 +48,23 @@ final class LimitesIpTest extends WebTestCase
         self::assertSame(-32000, json_decode($refus->getContent(), true)['error']['code']);
     }
 
+    /** Arrivées du globe : un script atteint sa limite par IP sans entamer la limite commune ; une autre IP passe encore */
+    public function testLesArriveesSontLimiteesParIp(): void
+    {
+        $client = static::createClient();
+        $client->disableReboot();
+        self::getContainer()->set('limiter.arrivees_ip', new RateLimiterFactory(['id' => 'arrivees_ip', 'policy' => 'fixed_window', 'limit' => 1, 'interval' => '1 hour'], new InMemoryStorage()));
+        $envoyer = function (string $ip) use ($client): int {
+            $client->request('POST', '/arrivees', server: ['REMOTE_ADDR' => $ip, 'CONTENT_TYPE' => 'application/json'], content: json_encode(['fuseau' => 'Europe/Paris']));
+
+            return $client->getResponse()->getStatusCode();
+        };
+
+        self::assertSame(Response::HTTP_NO_CONTENT, $envoyer('2001:db8:5:6::1'));
+        self::assertSame(Response::HTTP_TOO_MANY_REQUESTS, $envoyer('2001:db8:5:6::2')); // même bloc /64
+        self::assertSame(Response::HTTP_NO_CONTENT, $envoyer('203.0.113.7'));
+    }
+
     /** Un robot (champ piège rempli) est limité comme tout le monde : un flot ne remplit pas le journal */
     public function testLeChampPiegeNEchappePasALaLimite(): void
     {

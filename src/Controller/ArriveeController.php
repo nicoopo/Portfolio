@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\EventListener\StatistiquesListener;
 use App\Repository\ArriveeRepository;
+use App\Security\BlocIp;
 use MaxMind\Db\Reader;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,11 +25,11 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ArriveeController extends AbstractController
 {
     /**
-     * Seulement depuis le site (Sec-Fetch-Site), ni robot ni administrateur. Limite commune à tous les visiteurs
-     * (config/packages/rate_limiter.yaml), sans IP : contre un flot de fausses arrivées, pas contre une personne.
+     * Seulement depuis le site (Sec-Fetch-Site), ni robot ni administrateur. Deux limites (config/packages/rate_limiter.yaml) :
+     * par IP, contre un script ; commune à tous les visiteurs, contre un flot venu de partout.
      */
     #[Route('/arrivees', name: 'app_arrivee', methods: ['POST'])]
-    public function signaler(Request $request, ArriveeRepository $arrivees,Security $security, RateLimiterFactoryInterface $arriveesLimiter, #[Autowire(param: 'app.dbip_villes')] string $dbip): Response
+    public function signaler(Request $request, ArriveeRepository $arrivees, Security $security, RateLimiterFactoryInterface $arriveesLimiter, RateLimiterFactoryInterface $arriveesIpLimiter, #[Autowire(param: 'app.dbip_villes')] string $dbip): Response
     {
         if ('same-origin' !== $request->headers->get('Sec-Fetch-Site', 'same-origin')) {
             return new Response(null, Response::HTTP_FORBIDDEN);
@@ -45,7 +46,9 @@ final class ArriveeController extends AbstractController
         if ('' === $agent || preg_match(StatistiquesListener::ROBOTS, $agent) || $security->isGranted('ROLE_ADMIN')) {
             return new Response(null, Response::HTTP_NO_CONTENT);
         }
-        if (!$arriveesLimiter->create('tous')->consume()->isAccepted()) {
+        // Par IP d'abord : un script épuise sa propre limite, pas celle de tout le monde
+        if (!$arriveesIpLimiter->create(BlocIp::de($request))->consume()->isAccepted()
+            || !$arriveesLimiter->create('tous')->consume()->isAccepted()) {
             return new Response(null, Response::HTTP_TOO_MANY_REQUESTS);
         }
 

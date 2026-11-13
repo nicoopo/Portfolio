@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\HeureParis;
 use App\Repository\CandidatureRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -69,7 +70,7 @@ class Candidature
 
     public function __construct()
     {
-        $this->envoyeeLe = new \DateTimeImmutable('today');
+        $this->envoyeeLe = HeureParis::at('today');
         $this->relancerLe = self::dateDeRelance($this->envoyeeLe);
     }
 
@@ -96,7 +97,7 @@ class Candidature
 
     public function setEnvoyeeLe(?\DateTimeImmutable $envoyeeLe): static
     {
-        $this->envoyeeLe = $envoyeeLe ?? new \DateTimeImmutable('today');
+        $this->envoyeeLe = $envoyeeLe ?? HeureParis::at('today');
         if (StatutCandidature::Envoyee === $this->statut) {
             $this->relancerLe = self::dateDeRelance($this->envoyeeLe);
         }
@@ -110,13 +111,13 @@ class Candidature
         if ($statut !== $this->statut) {
             $this->relancerLe = match ($statut) {
                 StatutCandidature::Envoyee => self::dateDeRelance($this->envoyeeLe),
-                StatutCandidature::Relancee => self::dateDeRelance(new \DateTimeImmutable('today')),
+                StatutCandidature::Relancee => self::dateDeRelance(HeureParis::at('today')),
                 default => null,
             };
             if ($statut->enAttente()) {
                 $this->reponseLe = null;
             } elseif ($this->statut->enAttente()) { // entretien → acceptée : la réponse date du premier passage
-                $this->reponseLe = new \DateTimeImmutable('today');
+                $this->reponseLe = HeureParis::at('today');
             }
         }
         $this->statut = $statut;
@@ -126,7 +127,7 @@ class Candidature
 
     public function aRelancer(): bool
     {
-        return null !== $this->relancerLe && $this->relancerLe <= new \DateTimeImmutable('today');
+        return null !== $this->relancerLe && $this->relancerLe <= HeureParis::at('today');
     }
 
     public function __toString(): string { return $this->entreprise.' — '.$this->poste; }
