@@ -77,6 +77,27 @@
     "sentry/sentry-symfony": {
         "version": "5.13.0"
     },
+    "symfony/ai-anthropic-platform": {
+        "version": "1.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "0.1",
+            "ref": "055b125ba7a6090b155b8b9dcbfabc881460863d"
+        }
+    },
+    "symfony/ai-bundle": {
+        "version": "1.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "0.1",
+            "ref": "abb8f2c86de009cbc24a3408a3ca7aedc6aaa7c8"
+        },
+        "files": [
+            "./config/packages/ai.yaml"
+        ]
+    },
     "symfony/apache-pack": {
         "version": "1.0",
         "recipe": {

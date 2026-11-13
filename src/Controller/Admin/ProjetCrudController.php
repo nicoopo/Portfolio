@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Projet;
 use App\Form\TraductionsField;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
@@ -19,6 +20,8 @@ use Symfony\Component\Validator\Constraints\Image;
 
 final class ProjetCrudController extends AbstractCrudController
 {
+    use ActionTraduire;
+
     private const LARGEUR_MAX = 1000;
     private const QUALITE_WEBP = 80;
 
@@ -33,6 +36,11 @@ final class ProjetCrudController extends AbstractCrudController
             ->setEntityLabelInSingular('Projet')
             ->setEntityLabelInPlural('Projets')
             ->setDefaultSort(['position' => 'ASC']);
+    }
+
+    public function configureActions(Actions $actions): Actions
+    {
+        return $this->ajouterTraduire($actions);
     }
 
     public function configureFields(string $pageName): iterable
