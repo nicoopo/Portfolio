@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Candidature;
+use App\Entity\LienRecruteur;
 use App\Entity\StatutCandidature;
 use App\Repository\CandidatureRepository;
 use App\Repository\CvProfilRepository;
@@ -61,6 +62,23 @@ final class CandidatureCrudController extends AbstractCrudController
         }
 
         return $actions->add(Crud::PAGE_INDEX, $export);
+    }
+
+    public function persistEntity(EntityManagerInterface $entityManager, object $entityInstance): void
+    {
+        $this->lierAuSite($entityManager, $entityInstance);
+        parent::persistEntity($entityManager, $entityInstance);
+    }
+
+    /** Sans lien choisi, la candidature reçoit le sien : la lettre et le mail mènent au site et au rendez-vous */
+    private function lierAuSite(EntityManagerInterface $entityManager, Candidature $candidature): void
+    {
+        if ($candidature->getLien()) {
+            return;
+        }
+        $lien = (new LienRecruteur())->setEntreprise($candidature->getEntreprise())->setPoste($candidature->getPoste());
+        $entityManager->persist($lien);
+        $candidature->setLien($lien);
     }
 
     /** Entretien en .ics : s'ouvre dans l'agenda (heure de Paris, une heure par défaut) */
