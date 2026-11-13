@@ -48,6 +48,23 @@ final class LimitesIpTest extends WebTestCase
         self::assertSame(-32000, json_decode($refus->getContent(), true)['error']['code']);
     }
 
+    /** Un robot (champ piège rempli) est limité comme tout le monde : un flot ne remplit pas le journal */
+    public function testLeChampPiegeNEchappePasALaLimite(): void
+    {
+        $client = static::createClient();
+        $client->disableReboot(); // garde le limiteur remplacé d'une requête à l'autre
+        self::getContainer()->set('limiter.contact', new RateLimiterFactory(['id' => 'contact', 'policy' => 'fixed_window', 'limit' => 1, 'interval' => '1 hour'], new InMemoryStorage()));
+        $journal = static::getContainer()->get(EntityManagerInterface::class)->getRepository(Journal::class);
+        $avant = $journal->count(['type' => Journal::SPAM_BLOQUE]);
+
+        for ($i = 0; $i < 3; ++$i) {
+            $client->request('GET', '/contact');
+            $client->submitForm('Envoyer', ['contact[nom]' => 'Robot', 'contact[email]' => 'robot@example.com', 'contact[message]' => 'Achetez mes pilules.', 'contact[website]' => 'spam']);
+        }
+
+        self::assertSame($avant + 1, $journal->count(['type' => Journal::SPAM_BLOQUE]));
+    }
+
     /** Changer d'adresse dans son /64 ne redonne pas d'essais : le 6e est refusé avant même de vérifier le mot de passe */
     public function testLaConnexionEstLimiteeParBloc64(): void
     {
