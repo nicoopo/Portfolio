@@ -77,15 +77,6 @@
     "sentry/sentry-symfony": {
         "version": "5.13.0"
     },
-    "symfony/ai-anthropic-platform": {
-        "version": "1.0",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "0.1",
-            "ref": "055b125ba7a6090b155b8b9dcbfabc881460863d"
-        }
-    },
     "symfony/ai-bundle": {
         "version": "1.0",
         "recipe": {
@@ -97,6 +88,27 @@
         "files": [
             "./config/packages/ai.yaml"
         ]
+    },
+    "symfony/ai-generic-platform": {
+        "version": "1.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "0.1",
+            "ref": "a3919116f59f52377b59cfffe889711f8351d472"
+        },
+        "files": [
+            "./config/packages/ai_generic_platform.yaml"
+        ]
+    },
+    "symfony/ai-mistral-platform": {
+        "version": "1.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "0.1",
+            "ref": "900e107b11b561a6cffb55d4e43c5b1e123aaa63"
+        }
     },
     "symfony/apache-pack": {
         "version": "1.0",

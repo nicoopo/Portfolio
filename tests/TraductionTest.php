@@ -12,7 +12,7 @@ use Symfony\AI\Platform\Test\MockPlatformFactory;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-/** Traduction automatique de l'admin (#423), avec une plateforme simulée : aucun appel à Anthropic */
+/** Traduction automatique de l'admin (#423), avec une plateforme simulée : aucun appel à Mistral */
 final class TraductionTest extends WebTestCase
 {
     /** @var list<array{input: mixed, options: array}> */
